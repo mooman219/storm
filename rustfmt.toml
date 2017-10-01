@@ -1,0 +1,8 @@
+# https://github.com/rust-lang-nursery/rustfmt/blob/master/Configurations.md#match_block_trailing_comma
+match_block_trailing_comma = true
+
+# https://github.com/rust-lang-nursery/rustfmt/blob/master/Configurations.md#multiline_match_arm_forces_block
+multiline_match_arm_forces_block = false
+
+# https://github.com/rust-lang-nursery/rustfmt/blob/master/Configurations.md#max_width
+max_width = 130
