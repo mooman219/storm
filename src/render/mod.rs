@@ -7,3 +7,4 @@ pub mod color;
 pub mod display;
 pub mod frame_clock;
 pub mod shader;
+pub mod time;
