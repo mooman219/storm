@@ -1,4 +1,3 @@
-use std::time::Duration;
 use std::time::Instant;
 
 use render::time::*;
@@ -19,9 +18,8 @@ impl FrameClock {
     }
 
     pub fn tick(&mut self) {
-        let tick = Instant::now();
-        let duration = tick.duration_since(self.last_tick);
-        self.last_tick = tick;
+        let duration = self.last_tick.elapsed();
+        self.last_tick = Instant::now();
         self.frames += 1;
         self.timer += as_nanoseconds(&duration);
         if self.timer > NANOS_PER_SEC {

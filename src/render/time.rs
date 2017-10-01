@@ -19,19 +19,19 @@ pub const SECS_PER_DAY: u64 = 86400;
 
 #[inline]
 pub fn as_days(duration: &Duration) -> u64 {
-    let mut secs = duration.as_secs();
+    let secs = duration.as_secs();
     secs / SECS_PER_DAY
 }
 
 #[inline]
 pub fn as_hours(duration: &Duration) -> u64 {
-    let mut secs = duration.as_secs();
+    let secs = duration.as_secs();
     secs / SECS_PER_HOUR
 }
 
 #[inline]
 pub fn as_minutes(duration: &Duration) -> u64 {
-    let mut secs = duration.as_secs();
+    let secs = duration.as_secs();
     secs / SECS_PER_MINUTE
 }
 
