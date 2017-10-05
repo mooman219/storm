@@ -1,22 +1,21 @@
-use render::enums::draw_mode::*;
 use render::shape::*;
 use render::vertex::*;
 
 #[repr(C)]
 pub struct Quad<T: Vertex> {
-    x: T,
-    y: T,
-    z: T,
-    w: T,
+    top_left: T,
+    bottom_left: T,
+    top_right: T,
+    bottom_right: T,
 }
 
 impl<T: Vertex> Quad<T> {
-    pub fn new(x: T, y: T, z: T, w: T) -> Quad<T> {
+    pub fn new(top_left: T, bottom_left: T, top_right: T, bottom_right: T) -> Quad<T> {
         Quad {
-            x: x,
-            y: y,
-            z: z,
-            w: w,
+            top_left: top_left,
+            bottom_left: bottom_left,
+            top_right: top_right,
+            bottom_right: bottom_right,
         }
     }
 }
@@ -24,6 +23,16 @@ impl<T: Vertex> Quad<T> {
 impl<T: Vertex> Shape for Quad<T> {
     type ShapeType = Quad<T>;
     type VertexType = T;
-    const DRAW_MODE: DrawMode = DrawMode::Triangles;
-    const INDICIES: &'static [u8] = &[0, 1, 2, 2, 1, 3];
+    type IndiceType = [u8; 6];
+
+    fn generate_indicies(index: u8) -> Self::IndiceType {
+        [
+            index + 0,
+            index + 1,
+            index + 2,
+            index + 2,
+            index + 1,
+            index + 3,
+        ]
+    }
 }

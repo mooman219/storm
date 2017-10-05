@@ -2,13 +2,14 @@ use gl;
 use std::mem;
 
 use render::enums::buffer_type::*;
+use render::enums::draw_mode::*;
 use render::shape::*;
 use render::vertex::*;
 
 use render::buffer::*;
 
 pub struct ShapeBuffer<T: Shape> {
-    // ebo: u32,
+    element_buffer: Buffer<T::IndiceType>,
     vertex_buffer: Buffer<T::ShapeType>,
     vao: u32,
 }
@@ -21,15 +22,7 @@ impl<T: Shape> ShapeBuffer<T> {
     pub fn new() -> ShapeBuffer<T> {
         unsafe {
             // Element Buffer Object
-            // let mut ebo = mem::uninitialized::<u32>();
-            // gl::GenBuffers(1, &mut ebo);
-            // gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, ebo);
-            // gl::BufferData(
-            //     gl::ELEMENT_ARRAY_BUFFER,
-            //     ShapeBuffer::<T>::DEFAULT_SIZE as isize,
-            //     items.as_ptr() as *const _,
-            //     gl::DYNAMIC_DRAW,
-            // );
+            let element_buffer = Buffer::new(BufferType::ElementArrayBuffer);
             // Vertex Buffer Object
             let vertex_buffer = Buffer::new(BufferType::ArrayBuffer);
             // Vertex Array Object
@@ -39,7 +32,7 @@ impl<T: Shape> ShapeBuffer<T> {
             T::VertexType::configure_vertex_attribute();
             // Return
             ShapeBuffer {
-                // ebo: ebo,
+                element_buffer: element_buffer,
                 vertex_buffer: vertex_buffer,
                 vao: vao,
             }
@@ -55,7 +48,7 @@ impl<T: Shape> ShapeBuffer<T> {
         unsafe {
             let vertices = self.vertex_buffer.len() * ShapeBuffer::<T>::VERTEX_COUNT;
             gl::BindVertexArray(self.vao);
-            gl::DrawArrays(<T>::DRAW_MODE.to_gl_enum(), 0, vertices as i32);
+            gl::DrawArrays(DrawMode::Triangles.to_gl_enum(), 0, vertices as i32);
         }
     }
 }
