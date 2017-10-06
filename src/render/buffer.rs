@@ -61,6 +61,12 @@ impl<T> Buffer<T> {
         self.items.len()
     }
 
+    pub fn bind(&self) {
+        unsafe {
+            gl::BindBuffer(self.buffer_type.to_gl_enum(), self.id);
+        }
+    }
+
     pub fn sync(&mut self) {
         unsafe {
             if self.dirty {

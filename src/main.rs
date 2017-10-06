@@ -63,13 +63,13 @@ fn main() {
         Pos2ColorVertex::new(1.0, 1.0, 1.0, 0.0, 0.0, 1.0),
         Pos2ColorVertex::new(-1.0, 1.0, 0.0, 0.0, 1.0, 1.0),
     ));
-    // let mut quad_buffer = Quad::<Pos2ColorVertex>::new_shape_buffer();
-    // quad_buffer.add(Quad::new(
-    //     Pos2ColorVertex::new(0.5, 0.5, 0.0, 1.0, 0.0, 1.0),
-    //     Pos2ColorVertex::new(0.5, -0.5, 1.0, 1.0, 1.0, 1.0),
-    //     Pos2ColorVertex::new(-0.5, 0.5, 1.0, 0.0, 0.0, 1.0),
-    //     Pos2ColorVertex::new(-0.5, -0.5, 0.0, 0.0, 1.0, 1.0),
-    // ));
+    let mut quad_buffer = Quad::<Pos2ColorVertex>::new_shape_buffer();
+    quad_buffer.add(Quad::new(
+        Pos2ColorVertex::new(-0.5, 0.5, 1.0, 0.0, 0.0, 1.0),
+        Pos2ColorVertex::new(-0.5, -0.5, 0.0, 0.0, 1.0, 1.0),
+        Pos2ColorVertex::new(0.5, 0.5, 0.0, 1.0, 0.0, 1.0),
+        Pos2ColorVertex::new(0.5, -0.5, 1.0, 1.0, 1.0, 1.0),
+    ));
 
     let mut clock = FrameClock::new();
 
@@ -90,7 +90,7 @@ fn main() {
 
         // Render
         triangle_buffer.draw();
-        // quad_buffer.draw();
+        quad_buffer.draw();
         display.swap_buffers();
         display.clear();
 

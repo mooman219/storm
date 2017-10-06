@@ -40,15 +40,22 @@ impl<T: Shape> ShapeBuffer<T> {
     }
 
     pub fn add(&mut self, element: T::ShapeType) {
+        let index = self.element_buffer.len() as u8;
+        self.element_buffer.add(T::generate_indicies(index));
         self.vertex_buffer.add(element);
+        self.element_buffer.sync();
         self.vertex_buffer.sync();
     }
 
     pub fn draw(&self) {
         unsafe {
-            let vertices = self.vertex_buffer.len() * ShapeBuffer::<T>::VERTEX_COUNT;
+            let mut vertices = self.vertex_buffer.len() * ShapeBuffer::<T>::VERTEX_COUNT;
+            if vertices == 4 {
+                vertices = 6;
+            }
             gl::BindVertexArray(self.vao);
-            gl::DrawArrays(DrawMode::Triangles.to_gl_enum(), 0, vertices as i32);
+            self.element_buffer.bind();
+            gl::DrawElements(DrawMode::Triangles.to_gl_enum(), vertices as i32, gl::UNSIGNED_BYTE, 0 as *const _);
         }
     }
 }

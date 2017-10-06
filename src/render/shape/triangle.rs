@@ -24,6 +24,7 @@ impl<T: Vertex> Shape for Triangle<T> {
     type IndiceType = [u8; 3];
 
     fn generate_indicies(index: u8) -> Self::IndiceType {
+        let index = index * 3;
         [index + 0, index + 1, index + 2]
     }
 }

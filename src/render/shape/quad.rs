@@ -26,6 +26,7 @@ impl<T: Vertex> Shape for Quad<T> {
     type IndiceType = [u8; 6];
 
     fn generate_indicies(index: u8) -> Self::IndiceType {
+        let index = index * 6;
         [
             index + 0,
             index + 1,
