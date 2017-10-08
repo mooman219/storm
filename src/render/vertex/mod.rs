@@ -1,5 +1,5 @@
-pub mod pos2_color;
-pub mod pos3_color;
+pub mod pos2;
+pub mod pos3;
 
 pub trait Vertex {
     fn configure_vertex_attribute();

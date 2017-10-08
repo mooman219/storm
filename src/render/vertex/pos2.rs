@@ -6,33 +6,33 @@ use render::vertex::*;
 use render::color::*;
 
 #[repr(C)]
-pub struct Pos3ColorVertex {
-    position: Vector3<f32>,
+pub struct Pos2Vertex {
+    position: Vector2<f32>,
     color: Color,
 }
 
-impl Pos3ColorVertex {
-    const VERTEX_SIZE: usize = mem::size_of::<Pos3ColorVertex>();
+impl Pos2Vertex {
+    const VERTEX_SIZE: usize = mem::size_of::<Pos2Vertex>();
 
-    pub fn new(x: f32, y: f32, z: f32, red: f32, green: f32, blue: f32, alpha: f32) -> Pos3ColorVertex {
-        Pos3ColorVertex {
-            position: Vector3 { x: x, y: y, z: z },
+    pub fn new(x: f32, y: f32, red: f32, green: f32, blue: f32, alpha: f32) -> Pos2Vertex {
+        Pos2Vertex {
+            position: Vector2 { x: x, y: y },
             color: Color::new(red, green, blue, alpha),
         }
     }
 }
 
-impl Vertex for Pos3ColorVertex {
+impl Vertex for Pos2Vertex {
     fn configure_vertex_attribute() {
         unsafe {
-            // Position 3D
+            // Position 2D
             gl::EnableVertexAttribArray(0);
             gl::VertexAttribPointer(
                 0,                                   // Index
-                3,                                   // Count
+                2,                                   // Count
                 gl::FLOAT,                           // Type
                 gl::FALSE,                           // Normalized
-                Pos3ColorVertex::VERTEX_SIZE as i32, // Stride
+                Pos2Vertex::VERTEX_SIZE as i32, // Stride
                 (0) as *const _,                     // Offset
             );
             // Color
@@ -42,8 +42,8 @@ impl Vertex for Pos3ColorVertex {
                 gl::BGRA as i32,                     // Count
                 gl::UNSIGNED_INT_2_10_10_10_REV,     // Type
                 gl::TRUE,                            // Normalized
-                Pos3ColorVertex::VERTEX_SIZE as i32, // Stride
-                (3 * 4) as *const _,                 // Offset
+                Pos2Vertex::VERTEX_SIZE as i32, // Stride
+                (2 * 4) as *const _,                 // Offset
             );
         }
     }

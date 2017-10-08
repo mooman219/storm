@@ -15,9 +15,7 @@ pub struct ShapeBuffer<T: Shape> {
 }
 
 impl<T: Shape> ShapeBuffer<T> {
-    const SHAPE_SIZE: usize = mem::size_of::<T::ShapeType>();
-    const VERTEX_SIZE: usize = mem::size_of::<T::VertexType>();
-    const VERTEX_COUNT: usize = ShapeBuffer::<T>::SHAPE_SIZE / ShapeBuffer::<T>::VERTEX_SIZE;
+    const VERTEX_COUNT: usize = mem::size_of::<T::IndiceType>() / mem::size_of::<u8>();
 
     pub fn new() -> ShapeBuffer<T> {
         unsafe {
@@ -43,19 +41,24 @@ impl<T: Shape> ShapeBuffer<T> {
         let index = self.element_buffer.len() as u8;
         self.element_buffer.add(T::generate_indicies(index));
         self.vertex_buffer.add(element);
+    }
+
+    pub fn sync(&mut self) {
         self.element_buffer.sync();
         self.vertex_buffer.sync();
     }
 
     pub fn draw(&self) {
         unsafe {
-            let mut vertices = self.vertex_buffer.len() * ShapeBuffer::<T>::VERTEX_COUNT;
-            if vertices == 4 {
-                vertices = 6;
-            }
+            let vertices = self.vertex_buffer.len() * ShapeBuffer::<T>::VERTEX_COUNT;
             gl::BindVertexArray(self.vao);
             self.element_buffer.bind();
-            gl::DrawElements(DrawMode::Triangles.to_gl_enum(), vertices as i32, gl::UNSIGNED_BYTE, 0 as *const _);
+            gl::DrawElements(
+                DrawMode::Triangles.to_gl_enum(),
+                vertices as i32,
+                gl::UNSIGNED_BYTE,
+                0 as *const _,
+            );
         }
     }
 }

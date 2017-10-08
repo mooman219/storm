@@ -1,4 +1,4 @@
-#![feature(asm, const_fn)]
+#![feature(asm, const_fn, const_size_of)]
 
 extern crate cgmath;
 extern crate gl;
@@ -9,7 +9,7 @@ mod render;
 use render::shape::*;
 use render::shape::quad::*;
 use render::shape::triangle::*;
-use render::vertex::pos2_color::*;
+use render::vertex::pos2::*;
 use render::display;
 use render::frame_clock::*;
 use render::shader;
@@ -49,27 +49,33 @@ fn main() {
 
     println!("OpenGL version {}", display.get_version_string());
 
+    // Initialize the shaders
     let program = shader::ShaderProgram::new(VS_SRC, FS_SRC);
     program.bind();
 
-    let mut triangle_buffer = Triangle::<Pos2ColorVertex>::new_shape_buffer();
+    // Setup shape buffers
+    let mut triangle_buffer = Triangle::new_shape_buffer();
     triangle_buffer.add(Triangle::new(
-        Pos2ColorVertex::new(0.0, 0.0, 0.0, 1.0, 0.0, 1.0),
-        Pos2ColorVertex::new(-1.0, -1.0, 1.0, 0.0, 0.0, 1.0),
-        Pos2ColorVertex::new(1.0, -1.0, 0.0, 0.0, 1.0, 1.0),
+        Pos2Vertex::new(0.0, 0.0, 0.0, 1.0, 0.0, 1.0),
+        Pos2Vertex::new(-1.0, -1.0, 1.0, 0.0, 0.0, 1.0),
+        Pos2Vertex::new(1.0, -1.0, 0.0, 0.0, 1.0, 1.0),
     ));
     triangle_buffer.add(Triangle::new(
-        Pos2ColorVertex::new(0.0, 0.0, 0.0, 1.0, 0.0, 1.0),
-        Pos2ColorVertex::new(1.0, 1.0, 1.0, 0.0, 0.0, 1.0),
-        Pos2ColorVertex::new(-1.0, 1.0, 0.0, 0.0, 1.0, 1.0),
+        Pos2Vertex::new(0.0, 0.0, 0.0, 1.0, 0.0, 1.0),
+        Pos2Vertex::new(1.0, 1.0, 1.0, 0.0, 0.0, 1.0),
+        Pos2Vertex::new(-1.0, 1.0, 0.0, 0.0, 1.0, 1.0),
     ));
-    let mut quad_buffer = Quad::<Pos2ColorVertex>::new_shape_buffer();
+    let mut quad_buffer = Quad::new_shape_buffer();
     quad_buffer.add(Quad::new(
-        Pos2ColorVertex::new(-0.5, 0.5, 1.0, 0.0, 0.0, 1.0),
-        Pos2ColorVertex::new(-0.5, -0.5, 0.0, 0.0, 1.0, 1.0),
-        Pos2ColorVertex::new(0.5, 0.5, 0.0, 1.0, 0.0, 1.0),
-        Pos2ColorVertex::new(0.5, -0.5, 1.0, 1.0, 1.0, 1.0),
+        Pos2Vertex::new(-0.5, 0.5, 1.0, 0.0, 0.0, 1.0),
+        Pos2Vertex::new(-0.5, -0.5, 0.0, 0.0, 1.0, 1.0),
+        Pos2Vertex::new(0.5, 0.5, 0.0, 1.0, 0.0, 1.0),
+        Pos2Vertex::new(0.5, -0.5, 1.0, 1.0, 1.0, 1.0),
     ));
+
+    // Sync with the gpu
+    triangle_buffer.sync();
+    quad_buffer.sync();
 
     let mut clock = FrameClock::new();
 

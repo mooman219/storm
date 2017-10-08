@@ -131,11 +131,11 @@ impl Display {
 
     // Buffer
 
-    pub fn resize(&mut self, width: u32, height: u32) {
+    pub fn resize(&self, width: u32, height: u32) {
         self.window.resize(width, height);
     }
 
-    pub fn swap_buffers(&mut self) {
+    pub fn swap_buffers(&self) {
         self.window.swap_buffers().unwrap();
     }
 }
