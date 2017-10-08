@@ -1,18 +1,23 @@
-use gl::types::*;
-use gl;
+use std::ffi::CString;
 use std::ptr;
 use std::str;
+use gl::types::*;
+use gl;
 
 pub struct ShaderProgram {
     id: u32,
 }
 
 impl ShaderProgram {
-    pub fn new(vertex_shader: &[u8], fragment_shader: &[u8]) -> ShaderProgram {
+    pub fn new(vertex_shader: &str, fragment_shader: &str) -> ShaderProgram {
         unsafe {
+            // Convert to C style strings
+            let vertex_src = CString::new(vertex_shader).unwrap();
+            let fragment_src = CString::new(fragment_shader).unwrap();
+
             // Compile the shaders
-            let vertex_shader_id = compile_shader(vertex_shader, gl::VERTEX_SHADER);
-            let fragment_shader_id = compile_shader(fragment_shader, gl::FRAGMENT_SHADER);
+            let vertex_shader_id = compile_shader(vertex_src, gl::VERTEX_SHADER);
+            let fragment_shader_id = compile_shader(fragment_src, gl::FRAGMENT_SHADER);
 
             // Attach them to a program
             let program_id = gl::CreateProgram();
@@ -49,7 +54,7 @@ impl Drop for ShaderProgram {
     }
 }
 
-fn compile_shader(src: &[u8], shader_type: GLenum) -> u32 {
+fn compile_shader(src: CString, shader_type: GLenum) -> u32 {
     unsafe {
         let shader_id = gl::CreateShader(shader_type);
 
@@ -90,7 +95,7 @@ fn check_link_status(program_id: u32) {
                 buf.as_mut_ptr() as *mut GLchar,
             );
             panic!(
-                "{}",
+                "Link Status: {}",
                 str::from_utf8(&buf)
                     .ok()
                     .expect("ProgramInfoLog not valid utf8")
@@ -118,7 +123,7 @@ fn check_compile_status(shader_id: u32) {
                 buf.as_mut_ptr() as *mut GLchar,
             );
             panic!(
-                "{}",
+                "Compile Status: {}",
                 str::from_utf8(&buf)
                     .ok()
                     .expect("ShaderInfoLog not valid utf8")

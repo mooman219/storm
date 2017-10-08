@@ -132,7 +132,10 @@ impl Display {
     // Buffer
 
     pub fn resize(&self, width: u32, height: u32) {
-        self.window.resize(width, height);
+        unsafe {
+            self.window.resize(width, height);
+            gl::Viewport(0, 0, width as i32, height as i32);
+        }
     }
 
     pub fn swap_buffers(&self) {

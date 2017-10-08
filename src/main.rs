@@ -12,29 +12,7 @@ use render::shape::triangle::*;
 use render::vertex::pos2::*;
 use render::display;
 use render::frame_clock::*;
-use render::shader;
-
-const VS_SRC: &'static [u8] = b"
-#version 330
-
-layout(location = 0) in vec2 a_pos;
-layout(location = 1) in vec4 a_color;
-out vec4 v_color;
-
-void main() {
-    gl_Position = vec4(a_pos, 0.0, 1.0);
-    v_color = a_color;
-}\0";
-
-const FS_SRC: &'static [u8] = b"
-#version 330
-
-in vec4 v_color;
-out vec4 output;
-
-void main() {
-    output = v_color;
-}\0";
+use render::shader::*;
 
 fn main() {
     // Event loop creation
@@ -50,7 +28,10 @@ fn main() {
     println!("OpenGL version {}", display.get_version_string());
 
     // Initialize the shaders
-    let program = shader::ShaderProgram::new(VS_SRC, FS_SRC);
+    let program = program::ShaderProgram::new(
+        include_str!["render/shader/shape.glslv"],
+        include_str!["render/shader/shape.glslf"],
+    );
     program.bind();
 
     // Setup shape buffers
