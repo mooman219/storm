@@ -6,7 +6,7 @@ use render::enums::draw_mode::*;
 use render::shape::*;
 use render::vertex::*;
 
-use render::buffer::*;
+use render::buffer::raw::*;
 
 pub struct ShapeBuffer<T: Shape> {
     element_buffer: Buffer<T::IndiceType>,
@@ -37,10 +37,14 @@ impl<T: Shape> ShapeBuffer<T> {
         }
     }
 
-    pub fn add(&mut self, element: T::ShapeType) {
+    pub fn add(&mut self, element: T::ShapeType) -> usize {
         let index = self.element_buffer.len() as u8;
         self.element_buffer.add(T::generate_indicies(index));
-        self.vertex_buffer.add(element);
+        self.vertex_buffer.add(element)
+    }
+
+    pub fn update(&mut self, index: usize, element: T::ShapeType) {
+        self.vertex_buffer.update(index, element);
     }
 
     pub fn sync(&mut self) {

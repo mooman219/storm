@@ -44,16 +44,26 @@ impl<T> Buffer<T> {
         }
     }
 
-    pub fn add(&mut self, item: T) {
-        let start = self.items.len();
+    pub fn add(&mut self, item: T) -> usize {
+        let index = self.items.len();
         self.items.push(item);
+        self.mark(index);
+        index
+    }
+
+    pub fn update(&mut self, index: usize, item: T) {
+        self.items[index] = item;
+        self.mark(index);
+    }
+
+    fn mark(&mut self, index: usize) {
         if self.dirty {
-            self.buffer_min = cmp::min(self.buffer_min, start);
-            self.buffer_max = cmp::max(self.buffer_max, start + 1);
+            self.buffer_min = cmp::min(self.buffer_min, index);
+            self.buffer_max = cmp::max(self.buffer_max, index + 1);
         } else {
             self.dirty = true;
-            self.buffer_min = start;
-            self.buffer_max = start + 1;
+            self.buffer_min = index;
+            self.buffer_max = index + 1;
         }
     }
 

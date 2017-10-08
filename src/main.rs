@@ -22,7 +22,7 @@ fn main() {
     let window = glutin::WindowBuilder::new()
         .with_title("Hello, world!")
         .with_dimensions(1024, 768);
-    let context = glutin::ContextBuilder::new();
+    let context = glutin::ContextBuilder::new().with_vsync(true);
     // Winow creation
     let mut display = display::Display::new(window, context, &events_loop);
 
