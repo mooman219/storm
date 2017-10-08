@@ -5,14 +5,15 @@ extern crate gl;
 extern crate glutin;
 
 mod render;
+mod time;
 
 use render::shape::*;
 use render::shape::quad::*;
 use render::shape::triangle::*;
 use render::vertex::pos2::*;
 use render::display;
-use render::frame_clock::*;
 use render::shader::*;
+use time::frame_clock::*;
 
 fn main() {
     // Event loop creation

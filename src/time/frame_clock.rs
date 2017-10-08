@@ -1,7 +1,7 @@
 use std::time::Instant;
 use std::time::Duration;
 
-use render::time::*;
+use time::convert::*;
 
 pub struct FrameClock {
     last_tick: Instant,
