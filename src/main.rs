@@ -3,7 +3,11 @@
 extern crate cgmath;
 extern crate gl;
 extern crate glutin;
+#[macro_use]
+extern crate lazy_static;
 
+mod math;
+mod physics;
 mod render;
 mod time;
 
