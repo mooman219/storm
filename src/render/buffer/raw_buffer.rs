@@ -6,7 +6,7 @@ use std::ptr;
 use render::enums::buffer_type::*;
 
 pub struct Buffer<T> {
-    id: u32,
+    vbo: u32,
     dirty: bool,
     buffer_min: usize,
     buffer_max: usize,
@@ -23,9 +23,9 @@ impl<T> Buffer<T> {
     pub fn new(buffer_type: BufferType) -> Buffer<T> {
         unsafe {
             let items: Vec<T> = Vec::<T>::with_capacity(Buffer::<T>::DEFAULT_CAPACITY);
-            let mut id = mem::uninitialized::<u32>();
-            gl::GenBuffers(1, &mut id);
-            gl::BindBuffer(buffer_type.to_gl_enum(), id);
+            let mut vbo = 0u32;
+            gl::GenBuffers(1, &mut vbo);
+            gl::BindBuffer(buffer_type.to_gl_enum(), vbo);
             gl::BufferData(
                 buffer_type.to_gl_enum(),
                 Buffer::<T>::DEFAULT_SIZE as isize,
@@ -33,7 +33,7 @@ impl<T> Buffer<T> {
                 gl::DYNAMIC_DRAW,
             );
             Buffer {
-                id: id,
+                vbo: vbo,
                 dirty: false,
                 buffer_min: 0,
                 buffer_max: 0,
@@ -73,14 +73,14 @@ impl<T> Buffer<T> {
 
     pub fn bind(&self) {
         unsafe {
-            gl::BindBuffer(self.buffer_type.to_gl_enum(), self.id);
+            gl::BindBuffer(self.buffer_type.to_gl_enum(), self.vbo);
         }
     }
 
     pub fn sync(&mut self) {
         unsafe {
             if self.dirty {
-                gl::BindBuffer(self.buffer_type.to_gl_enum(), self.id);
+                gl::BindBuffer(self.buffer_type.to_gl_enum(), self.vbo);
                 self.dirty = false;
                 if self.buffer_capacity < self.items.capacity() {
                     let length = (Buffer::<T>::ELEMENT_SIZE * self.items.capacity()) as isize;
@@ -105,11 +105,8 @@ impl<T> Buffer<T> {
 
 impl<T> Drop for Buffer<T> {
     fn drop(&mut self) {
-        println!("Dropping Buffer");
-        // unsafe {
-        //     gl::DeleteVertexArrays(1, self.vao as *const _);
-        //     gl::DeleteBuffers(1, self.vbo as *const _);
-        // }
-        println!("Dropped Buffer");
+        unsafe {
+            gl::DeleteBuffers(1, &self.vbo as *const _);
+        }
     }
 }

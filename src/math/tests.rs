@@ -1,33 +1,7 @@
 use test::Bencher;
 use test_utility::black_box;
 
-use math::fast_math::*;
-
-#[bench]
-fn bench_fast_sqrt(b: &mut Bencher) {
-    let min = black_box(1u32);
-    let max = black_box(10_001u32);
-    b.iter(|| {
-        let mut sum = black_box(0f32);
-        for n in min..max {
-            sum += sqrt(n as f32);
-        }
-        black_box(sum)
-    });
-}
-
-#[bench]
-fn bench_default_sqrt(b: &mut Bencher) {
-    let min = black_box(1u32);
-    let max = black_box(10_001u32);
-    b.iter(|| {
-        let mut sum = black_box(0f32);
-        for n in min..max {
-            sum += (n as f32).sqrt();
-        }
-        black_box(sum)
-    });
-}
+use math::*;
 
 const MIN_ATAN2: f32 = -3f32;
 const MAX_ATAN2: f32 = 3f32;
@@ -73,6 +47,7 @@ const INC_SIN: f32 = 0.01f32;
 
 #[bench]
 fn bench_fast_sin(b: &mut Bencher) {
+    SIN.init();
     b.iter(|| {
         let mut sum = black_box(0f32);
         let mut x = MIN_SIN;

@@ -31,7 +31,7 @@ impl AABB2D {
         true
     }
 
-    pub fn slide<'a>(&mut self, mov: &Vector2<f32>, others: &Vec<AABB2D>) {
+    pub fn slide(&mut self, mov: &Vector2<f32>, others: &Vec<AABB2D>) {
         if mov.x == 0f32 && mov.y == 0f32 {
             return;
         }

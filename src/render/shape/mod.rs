@@ -1,11 +1,11 @@
 pub mod quad;
-pub mod shape_buffer;
 pub mod triangle;
 
-use render::shape::shape_buffer::*;
+use render::buffer::shape_buffer::*;
 use render::vertex::*;
 
 pub trait Shape {
+    const VERTEX_COUNT: usize;
     type ShapeType: Shape;
     type VertexType: Vertex;
     type IndiceType;

@@ -19,6 +19,7 @@ impl<T: Vertex> Triangle<T> {
 }
 
 impl<T: Vertex> Shape for Triangle<T> {
+    const VERTEX_COUNT: usize = 3;
     type ShapeType = Triangle<T>;
     type VertexType = T;
     type IndiceType = [u8; 3];

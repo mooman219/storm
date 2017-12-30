@@ -46,11 +46,9 @@ impl ShaderProgram {
 
 impl Drop for ShaderProgram {
     fn drop(&mut self) {
-        println!("Dropping ShaderProgram");
         unsafe {
             gl::DeleteProgram(self.id);
         }
-        println!("Dropped ShaderProgram");
     }
 }
 

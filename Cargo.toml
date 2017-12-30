@@ -4,13 +4,7 @@ version = "0.1.0"
 authors = ["mooman219"]
 
 [dependencies]
-glium = "*"
-
-gl = "*"
-libc = "*"
+gl = "0.6"
 glutin = "0.9"
-gfx = "0.16.1"
-gfx_window_glutin = "0.17"
-cgmath = "0.15.0"
-rustc-test = "0.2"
-lazy_static = "0.2.8"
+cgmath = "0.15"
+rand = "0.4"

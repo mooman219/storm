@@ -1,12 +1,11 @@
 use gl;
-use std::mem;
 
 use render::enums::buffer_type::*;
 use render::enums::draw_mode::*;
 use render::shape::*;
 use render::vertex::*;
 
-use render::buffer::raw::*;
+use render::buffer::raw_buffer::*;
 
 pub struct ShapeBuffer<T: Shape> {
     element_buffer: Buffer<T::IndiceType>,
@@ -15,8 +14,6 @@ pub struct ShapeBuffer<T: Shape> {
 }
 
 impl<T: Shape> ShapeBuffer<T> {
-    const VERTEX_COUNT: usize = mem::size_of::<T::IndiceType>() / mem::size_of::<u8>();
-
     pub fn new() -> ShapeBuffer<T> {
         unsafe {
             // Element Buffer Object
@@ -24,7 +21,7 @@ impl<T: Shape> ShapeBuffer<T> {
             // Vertex Buffer Object
             let vertex_buffer = Buffer::new(BufferType::ArrayBuffer);
             // Vertex Array Object
-            let mut vao = mem::uninitialized::<u32>();
+            let mut vao = 0u32;
             gl::GenVertexArrays(1, &mut vao);
             gl::BindVertexArray(vao);
             T::VertexType::configure_vertex_attribute();
@@ -54,7 +51,7 @@ impl<T: Shape> ShapeBuffer<T> {
 
     pub fn draw(&self) {
         unsafe {
-            let vertices = self.vertex_buffer.len() * ShapeBuffer::<T>::VERTEX_COUNT;
+            let vertices = self.vertex_buffer.len() * T::ShapeType::VERTEX_COUNT;
             gl::BindVertexArray(self.vao);
             self.element_buffer.bind();
             gl::DrawElements(
@@ -69,11 +66,8 @@ impl<T: Shape> ShapeBuffer<T> {
 
 impl<T: Shape> Drop for ShapeBuffer<T> {
     fn drop(&mut self) {
-        println!("Dropping ShapeBuffer");
-        // unsafe {
-        //     gl::DeleteVertexArrays(1, self.vao as *const _);
-        //     gl::DeleteBuffers(1, self.vbo as *const _);
-        // }
-        println!("Dropped ShapeBuffer");
+        unsafe {
+            gl::DeleteVertexArrays(1, &self.vao as *const _);
+        }
     }
 }

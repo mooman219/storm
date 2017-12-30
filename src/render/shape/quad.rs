@@ -21,6 +21,7 @@ impl<T: Vertex> Quad<T> {
 }
 
 impl<T: Vertex> Shape for Quad<T> {
+    const VERTEX_COUNT: usize = 6;
     type ShapeType = Quad<T>;
     type VertexType = T;
     type IndiceType = [u8; 6];

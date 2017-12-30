@@ -8,7 +8,7 @@ pub enum GlString {
     Vendor,
     Renderer,
     Version,
-    Shading_language_version,
+    ShadingLanguageVersion,
     Extensions,
 }
 
@@ -18,7 +18,7 @@ impl GlString {
             GlString::Vendor => gl::VENDOR,
             GlString::Renderer => gl::RENDERER,
             GlString::Version => gl::VERSION,
-            GlString::Shading_language_version => gl::SHADING_LANGUAGE_VERSION,
+            GlString::ShadingLanguageVersion => gl::SHADING_LANGUAGE_VERSION,
             GlString::Extensions => gl::EXTENSIONS,
         }
     }
@@ -72,7 +72,7 @@ impl Display {
     }
 
     pub fn get_shading_language_version_string(&self) -> String {
-        GlString::Shading_language_version.get_string()
+        GlString::ShadingLanguageVersion.get_string()
     }
 
     pub fn get_extensions_string(&self) -> String {

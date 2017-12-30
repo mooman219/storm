@@ -1,15 +1,20 @@
-#![feature(asm, const_fn, const_size_of)]
+#![feature(raw, asm, test, const_fn, const_size_of, untagged_unions)]
+#![allow(dead_code, unions_with_drop_fields)]
 
 extern crate cgmath;
 extern crate gl;
 extern crate glutin;
-#[macro_use]
-extern crate lazy_static;
+extern crate rand;
+extern crate test;
 
+mod game;
 mod math;
 mod physics;
 mod render;
+mod test_utility;
 mod time;
+mod init;
+mod token;
 
 use render::shape::*;
 use render::shape::quad::*;
@@ -19,14 +24,21 @@ use render::display;
 use render::shader::*;
 use time::frame_clock::*;
 
+fn init() {
+    math::init();
+}
+
 fn main() {
+    // Init code.
+    init();
+
     // Event loop creation
     let mut events_loop = glutin::EventsLoop::new();
     // Window configuration
     let window = glutin::WindowBuilder::new()
         .with_title("Hello, world!")
         .with_dimensions(1024, 768);
-    let context = glutin::ContextBuilder::new().with_vsync(true);
+    let context = glutin::ContextBuilder::new();
     // Winow creation
     let mut display = display::Display::new(window, context, &events_loop);
 
@@ -64,6 +76,7 @@ fn main() {
     quad_buffer.sync();
 
     let mut clock = FrameClock::new();
+    clock.set_fps(200);
 
     display.enable_clear_color();
     display.clear_color(0.0, 0.0, 0.0, 1.0);
