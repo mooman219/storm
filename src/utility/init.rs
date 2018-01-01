@@ -1,23 +1,24 @@
 use std::ops::Deref;
 use std::cell::UnsafeCell;
 
+//
+// StaticStack
+//
+
 /// Helper union to reserve space for T without initializing it.
 union StackStore<T: Sync> {
     value: T,
     dummy: bool,
 }
 
+/// Stores T on the stack.
 pub struct StaticStack<T: Sync> {
     store: UnsafeCell<StackStore<T>>,
     initializer: fn() -> T,
 }
 
-pub struct StaticHeap<T: Sync> {
-    store: UnsafeCell<*const T>,
-    initializer: fn() -> T,
-}
+unsafe impl<T: Sync> Sync for StaticStack<T> {}
 
-/// Stores T on the stack.
 impl<T: Sync> StaticStack<T> {
     pub const fn new(initializer: fn() -> T) -> StaticStack<T> {
         StaticStack {
@@ -35,7 +36,26 @@ impl<T: Sync> StaticStack<T> {
     }
 }
 
+impl<T: Sync> Deref for StaticStack<T> {
+    type Target = T;
+
+    fn deref(&self) -> &T {
+        unsafe { &(*self.store.get()).value }
+    }
+}
+
+//
+// StaticHeap
+//
+
 /// Stores T on the heap.
+pub struct StaticHeap<T: Sync> {
+    store: UnsafeCell<*const T>,
+    initializer: fn() -> T,
+}
+
+unsafe impl<T: Sync> Sync for StaticHeap<T> {}
+
 impl<T: Sync> StaticHeap<T> {
     pub const fn new(initializer: fn() -> T) -> StaticHeap<T> {
         StaticHeap {
@@ -53,14 +73,6 @@ impl<T: Sync> StaticHeap<T> {
     }
 }
 
-impl<T: Sync> Deref for StaticStack<T> {
-    type Target = T;
-
-    fn deref(&self) -> &T {
-        unsafe { &(*self.store.get()).value }
-    }
-}
-
 impl<T: Sync> Deref for StaticHeap<T> {
     type Target = T;
 
@@ -68,6 +80,3 @@ impl<T: Sync> Deref for StaticHeap<T> {
         unsafe { &**self.store.get() }
     }
 }
-
-unsafe impl<T: Sync> Sync for StaticStack<T> {}
-unsafe impl<T: Sync> Sync for StaticHeap<T> {}

@@ -2,7 +2,7 @@
 #[cfg(test)]
 pub mod tests;
 
-use init::StaticHeap;
+use utility::init::StaticHeap;
 
 pub fn init() {
     SIN.init();

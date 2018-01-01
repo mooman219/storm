@@ -1,5 +1,5 @@
 use test::Bencher;
-use test_utility::black_box;
+use utility::benching::black_box;
 
 use math::*;
 

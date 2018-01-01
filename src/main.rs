@@ -1,4 +1,4 @@
-#![feature(raw, asm, test, const_fn, const_size_of, untagged_unions)]
+#![feature(raw, asm, test, const_fn, const_size_of, untagged_unions, optin_builtin_traits)]
 #![allow(dead_code, unions_with_drop_fields)]
 
 extern crate cgmath;
@@ -11,10 +11,8 @@ mod game;
 mod math;
 mod physics;
 mod render;
-mod test_utility;
+mod utility;
 mod time;
-mod init;
-mod token;
 
 use render::shape::*;
 use render::shape::quad::*;
