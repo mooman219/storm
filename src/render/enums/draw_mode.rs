@@ -17,8 +17,8 @@ pub enum DrawMode {
 }
 
 impl DrawMode {
-    pub fn to_gl_enum(&self) -> u32 {
-        match *self {
+    pub fn to_gl_enum(self) -> u32 {
+        match self {
             DrawMode::Points => gl::POINTS,
             DrawMode::LineStrip => gl::LINE_STRIP,
             DrawMode::LineLoop => gl::LINE_LOOP,

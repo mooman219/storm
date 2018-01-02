@@ -1,4 +1,4 @@
-#![feature(raw, asm, test, const_fn, const_size_of, untagged_unions, optin_builtin_traits)]
+#![feature(shared, asm, test, const_fn, const_size_of, untagged_unions, optin_builtin_traits)]
 #![allow(dead_code, unions_with_drop_fields)]
 
 extern crate cgmath;

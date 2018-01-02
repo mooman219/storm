@@ -1,5 +1,6 @@
 use rand;
-use std::sync::atomic;
+use std::sync::atomic::*;
+use std::ptr::*;
 
 //
 // RefKey
@@ -16,6 +17,7 @@ impl !Sync for RefKey {}
 // RefTokenFactory
 //
 
+#[derive(Copy, Clone)]
 pub struct RefTokenFactory {
     lock: u32,
 }
@@ -32,12 +34,7 @@ impl RefTokenFactory {
     }
 
     pub fn create_token<T: Copy>(&self, value: T) -> RefToken<T> {
-        let value_pointer = Box::into_raw(Box::new(value));
-        let token = RefToken {
-            lock: self.lock,
-            pointer: value_pointer,
-        };
-        token
+        RefToken::new(value, self.lock)
     }
 }
 
@@ -48,9 +45,23 @@ impl RefTokenFactory {
 pub struct RefToken<T: Copy> {
     lock: u32,
     pointer: *mut T,
+    counter: Shared<AtomicUsize>,
 }
 
+unsafe impl<T: Copy> Send for RefToken<T> {}
+impl<T: Copy> !Sync for RefToken<T> {}
+
 impl<T: Copy> RefToken<T> {
+    fn new(value: T, lock: u32) -> RefToken<T> {
+        let value_pointer = Box::into_raw(Box::new(value));
+        let counter_pointer = Box::into_raw(Box::new(AtomicUsize::new(1)));
+        RefToken {
+            lock: lock,
+            pointer: value_pointer,
+            counter: Shared::new(counter_pointer).expect("Unable to allocate reference counter."),
+        }
+    }
+
     pub fn get(&self, key: &RefKey) -> T {
         self.validate(key);
         unsafe { *self.pointer }
@@ -68,6 +79,16 @@ impl<T: Copy> RefToken<T> {
         // Ensure the key we're given matches the lock we hold.
         if key.lock != self.lock {
             panic!("Invalid key to unlock token.");
+        }
+    }
+}
+
+impl<T: Copy> Clone for RefToken<T> {
+    fn clone(&self) -> RefToken<T> {
+        RefToken {
+            lock: self.lock,
+            pointer: self.pointer,
+            counter: self.counter,
         }
     }
 }

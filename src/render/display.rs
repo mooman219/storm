@@ -13,8 +13,8 @@ pub enum GlString {
 }
 
 impl GlString {
-    pub fn to_gl_enum(&self) -> u32 {
-        match *self {
+    pub fn to_gl_enum(self) -> u32 {
+        match self {
             GlString::Vendor => gl::VENDOR,
             GlString::Renderer => gl::RENDERER,
             GlString::Version => gl::VERSION,
@@ -23,7 +23,7 @@ impl GlString {
         }
     }
 
-    pub fn get_string(&self) -> String {
+    pub fn get_string(self) -> String {
         unsafe {
             let data = CStr::from_ptr(gl::GetString(self.to_gl_enum()) as *const _)
                 .to_bytes()

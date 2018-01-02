@@ -19,8 +19,8 @@ pub enum BufferType {
 }
 
 impl BufferType {
-    pub fn to_gl_enum(&self) -> u32 {
-        match *self {
+    pub fn to_gl_enum(self) -> u32 {
+        match self {
             BufferType::ArrayBuffer => gl::ARRAY_BUFFER,
             BufferType::AtomicCounterBuffer => gl::ATOMIC_COUNTER_BUFFER,
             BufferType::CopyReadBuffer => gl::COPY_READ_BUFFER,
