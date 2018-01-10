@@ -1,6 +1,6 @@
 [package]
-name = "glplay"
-version = "0.1.0"
+name = "storm-engine"
+version = "0.0.1"
 authors = ["mooman219"]
 
 [dependencies]
@@ -8,3 +8,4 @@ gl = "0.6"
 glutin = "0.9"
 cgmath = "0.15"
 rand = "0.4"
+bounded-spsc-queue = "0.2.0"
