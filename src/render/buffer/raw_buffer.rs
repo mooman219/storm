@@ -21,9 +21,9 @@ impl<T> Buffer<T> {
     const DEFAULT_SIZE: usize = Buffer::<T>::ELEMENT_SIZE * Buffer::<T>::DEFAULT_CAPACITY;
 
     pub fn new(buffer_type: BufferType) -> Buffer<T> {
+        let items: Vec<T> = Vec::<T>::with_capacity(Buffer::<T>::DEFAULT_CAPACITY);
+        let mut vbo = 0u32;
         unsafe {
-            let items: Vec<T> = Vec::<T>::with_capacity(Buffer::<T>::DEFAULT_CAPACITY);
-            let mut vbo = 0u32;
             gl::GenBuffers(1, &mut vbo);
             gl::BindBuffer(buffer_type.to_gl_enum(), vbo);
             gl::BufferData(
@@ -32,15 +32,15 @@ impl<T> Buffer<T> {
                 ptr::null(),
                 gl::DYNAMIC_DRAW,
             );
-            Buffer {
-                vbo: vbo,
-                dirty: false,
-                buffer_min: 0,
-                buffer_max: 0,
-                buffer_capacity: Buffer::<T>::DEFAULT_CAPACITY,
-                buffer_type: buffer_type,
-                items: items,
-            }
+        }
+        Buffer {
+            vbo: vbo,
+            dirty: false,
+            buffer_min: 0,
+            buffer_max: 0,
+            buffer_capacity: Buffer::<T>::DEFAULT_CAPACITY,
+            buffer_type: buffer_type,
+            items: items,
         }
     }
 

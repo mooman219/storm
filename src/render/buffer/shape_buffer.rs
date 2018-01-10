@@ -15,22 +15,22 @@ pub struct ShapeBuffer<T: Shape> {
 
 impl<T: Shape> ShapeBuffer<T> {
     pub fn new() -> ShapeBuffer<T> {
+        // Element Buffer Object
+        let element_buffer = Buffer::new(BufferType::ElementArrayBuffer);
+        // Vertex Buffer Object
+        let vertex_buffer = Buffer::new(BufferType::ArrayBuffer);
+        // Vertex Array Object
+        let mut vao = 0u32;
         unsafe {
-            // Element Buffer Object
-            let element_buffer = Buffer::new(BufferType::ElementArrayBuffer);
-            // Vertex Buffer Object
-            let vertex_buffer = Buffer::new(BufferType::ArrayBuffer);
-            // Vertex Array Object
-            let mut vao = 0u32;
             gl::GenVertexArrays(1, &mut vao);
             gl::BindVertexArray(vao);
-            T::VertexType::configure_vertex_attribute();
-            // Return
-            ShapeBuffer {
-                element_buffer: element_buffer,
-                vertex_buffer: vertex_buffer,
-                vao: vao,
-            }
+        }
+        T::VertexType::configure_vertex_attribute();
+        // Return
+        ShapeBuffer {
+            element_buffer: element_buffer,
+            vertex_buffer: vertex_buffer,
+            vao: vao,
         }
     }
 
