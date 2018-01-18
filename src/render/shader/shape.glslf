@@ -1,8 +1,8 @@
-#version 330 core
+#version 330
 
 in vec4 v_color;
-out vec4 output;
+out vec4 a_color;
 
 void main() {
-    output = v_color;
+    a_color = v_color;
 }

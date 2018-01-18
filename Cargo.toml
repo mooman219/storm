@@ -5,7 +5,7 @@ authors = ["mooman219"]
 
 [dependencies]
 gl = "0.6"
-glutin = "0.9"
+glutin = "0.12"
 cgmath = "0.15"
 rand = "0.4"
 bounded-spsc-queue = "0.2.0"
