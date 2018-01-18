@@ -1,6 +1,6 @@
 pub mod buffer;
-pub mod comm;
 pub mod enums;
+pub mod message;
 pub mod shader;
 pub mod shape;
 pub mod vertex;
@@ -10,7 +10,7 @@ pub mod display;
 
 use bounded_spsc_queue::Consumer;
 use glutin;
-use render::comm::frame::Frame;
+use render::message::frame::Frame;
 use render::shape::*;
 use render::shape::quad::*;
 use render::shape::triangle::*;
