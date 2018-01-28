@@ -22,9 +22,9 @@ impl<T: Vertex> Shape for Triangle<T> {
     const VERTEX_COUNT: usize = 3;
     type ShapeType = Triangle<T>;
     type VertexType = T;
-    type IndiceType = [u8; 3];
+    type IndiceType = [u16; 3];
 
-    fn generate_indicies(index: u8) -> Self::IndiceType {
+    fn generate_indicies(index: u16) -> Self::IndiceType {
         let index = index * 3;
         [index + 0, index + 1, index + 2]
     }

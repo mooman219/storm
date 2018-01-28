@@ -24,9 +24,9 @@ impl<T: Vertex> Shape for Quad<T> {
     const VERTEX_COUNT: usize = 6;
     type ShapeType = Quad<T>;
     type VertexType = T;
-    type IndiceType = [u8; 6];
+    type IndiceType = [u16; 6];
 
-    fn generate_indicies(index: u8) -> Self::IndiceType {
+    fn generate_indicies(index: u16) -> Self::IndiceType {
         let index = index * 6;
         [
             index + 0,

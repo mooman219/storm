@@ -25,10 +25,13 @@ fn main() {
     // Init code.
     init();
 
+    // Render messaging. Max of 3 frames can be buffered.
     let (frame_producer, frame_consumer) = bounded_spsc_queue::make(3);
 
     thread::spawn(move || {
         game::game_loop(frame_producer);
     });
+
+    // Must be on main thread.
     render::render_loop(frame_consumer);
 }

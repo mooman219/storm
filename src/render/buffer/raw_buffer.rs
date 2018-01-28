@@ -51,6 +51,11 @@ impl<T> Buffer<T> {
         index
     }
 
+    pub fn remove(&mut self, index: usize) {
+        self.items.swap_remove(index);
+        self.mark(index);
+    }
+
     pub fn update(&mut self, index: usize, item: T) {
         self.items[index] = item;
         self.mark(index);

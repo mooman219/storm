@@ -35,9 +35,14 @@ impl<T: Shape> ShapeBuffer<T> {
     }
 
     pub fn add(&mut self, element: T::ShapeType) -> usize {
-        let index = self.element_buffer.len() as u8;
+        let index = self.element_buffer.len() as u16;
         self.element_buffer.add(T::generate_indicies(index));
         self.vertex_buffer.add(element)
+    }
+
+    pub fn remove(&mut self, index: usize) {
+        self.vertex_buffer.remove(index);
+        // No need to update the element buffer.
     }
 
     pub fn update(&mut self, index: usize, element: T::ShapeType) {
@@ -57,7 +62,7 @@ impl<T: Shape> ShapeBuffer<T> {
             gl::DrawElements(
                 DrawMode::Triangles.to_gl_enum(),
                 vertices as i32,
-                gl::UNSIGNED_BYTE,
+                gl::UNSIGNED_SHORT,
                 0 as *const _,
             );
         }

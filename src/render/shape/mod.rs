@@ -10,7 +10,7 @@ pub trait Shape {
     type VertexType: Vertex;
     type IndiceType;
 
-    fn generate_indicies(index: u8) -> Self::IndiceType;
+    fn generate_indicies(index: u16) -> Self::IndiceType;
 
     fn new_shape_buffer() -> ShapeBuffer<Self::ShapeType> {
         ShapeBuffer::new()

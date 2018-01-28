@@ -21,14 +21,14 @@ use time::frame_clock::*;
 pub fn render_loop(frame_consumer: Consumer<Frame>) {
     // Event loop creation
     let mut events_loop = glutin::EventsLoop::new();
-    // Window configuration
-    let window = glutin::WindowBuilder::new()
-        .with_title("Hello, world!")
-        .with_dimensions(1024, 768);
-    let context = glutin::ContextBuilder::new();
     // Winow creation
-    let mut display = display::Display::new(window, context, &events_loop);
-
+    let mut display = display::Display::new(
+        glutin::WindowBuilder::new()
+            .with_title("Hello, world!")
+            .with_dimensions(1024, 768),
+        glutin::ContextBuilder::new(),
+        &events_loop,
+    );
     println!("OpenGL version {}", display.get_version_string());
 
     // Initialize the shaders
@@ -63,7 +63,7 @@ pub fn render_loop(frame_consumer: Consumer<Frame>) {
     quad_buffer.sync();
 
     let mut clock = FrameClock::new();
-    clock.set_fps(200);
+    clock.set_fps(100);
 
     display.enable_clear_color();
     display.clear_color(0.0, 0.0, 0.0, 1.0);
