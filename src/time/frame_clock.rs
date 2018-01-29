@@ -25,7 +25,6 @@ impl FrameClock {
 
     pub fn set_fps(&mut self, fps: u64) {
         self.target = if fps == 0 { 0 } else { NANOS_PER_SEC / fps };
-        println!("Sleep for: {}", self.target);
     }
 
     pub fn get_last_fps(&self) -> u32 {
