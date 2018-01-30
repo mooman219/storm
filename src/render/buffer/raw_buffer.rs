@@ -5,7 +5,7 @@ use std::ptr;
 
 use render::enums::buffer_type::*;
 
-pub struct Buffer<T> {
+pub struct RawBuffer<T> {
     vbo: u32,
     dirty: bool,
     buffer_min: usize,
@@ -15,30 +15,30 @@ pub struct Buffer<T> {
     items: Vec<T>,
 }
 
-impl<T> Buffer<T> {
+impl<T> RawBuffer<T> {
     const ELEMENT_SIZE: usize = mem::size_of::<T>();
     const DEFAULT_CAPACITY: usize = 16;
-    const DEFAULT_SIZE: usize = Buffer::<T>::ELEMENT_SIZE * Buffer::<T>::DEFAULT_CAPACITY;
+    const DEFAULT_SIZE: usize = RawBuffer::<T>::ELEMENT_SIZE * RawBuffer::<T>::DEFAULT_CAPACITY;
 
-    pub fn new(buffer_type: BufferType) -> Buffer<T> {
-        let items: Vec<T> = Vec::<T>::with_capacity(Buffer::<T>::DEFAULT_CAPACITY);
+    pub fn new(buffer_type: BufferType) -> RawBuffer<T> {
+        let items: Vec<T> = Vec::<T>::with_capacity(RawBuffer::<T>::DEFAULT_CAPACITY);
         let mut vbo = 0u32;
         unsafe {
             gl::GenBuffers(1, &mut vbo);
             gl::BindBuffer(buffer_type.to_gl_enum(), vbo);
             gl::BufferData(
                 buffer_type.to_gl_enum(),
-                Buffer::<T>::DEFAULT_SIZE as isize,
+                RawBuffer::<T>::DEFAULT_SIZE as isize,
                 ptr::null(),
                 gl::DYNAMIC_DRAW,
             );
         }
-        Buffer {
+        RawBuffer {
             vbo: vbo,
             dirty: false,
             buffer_min: 0,
             buffer_max: 0,
-            buffer_capacity: Buffer::<T>::DEFAULT_CAPACITY,
+            buffer_capacity: RawBuffer::<T>::DEFAULT_CAPACITY,
             buffer_type: buffer_type,
             items: items,
         }
@@ -88,7 +88,7 @@ impl<T> Buffer<T> {
                 gl::BindBuffer(self.buffer_type.to_gl_enum(), self.vbo);
                 self.dirty = false;
                 if self.buffer_capacity < self.items.capacity() {
-                    let length = (Buffer::<T>::ELEMENT_SIZE * self.items.capacity()) as isize;
+                    let length = (RawBuffer::<T>::ELEMENT_SIZE * self.items.capacity()) as isize;
                     let offset = self.items.as_ptr() as *const _;
                     gl::BufferData(
                         self.buffer_type.to_gl_enum(),
@@ -98,8 +98,8 @@ impl<T> Buffer<T> {
                     );
                     self.buffer_capacity = self.items.capacity();
                 } else {
-                    let start = (Buffer::<T>::ELEMENT_SIZE * self.buffer_min) as isize;
-                    let length = (Buffer::<T>::ELEMENT_SIZE * (self.buffer_max - self.buffer_min)) as isize;
+                    let start = (RawBuffer::<T>::ELEMENT_SIZE * self.buffer_min) as isize;
+                    let length = (RawBuffer::<T>::ELEMENT_SIZE * (self.buffer_max - self.buffer_min)) as isize;
                     let offset = self.items.as_ptr().offset(self.buffer_min as isize) as *const _;
                     gl::BufferSubData(self.buffer_type.to_gl_enum(), start, length, offset);
                 }
@@ -108,7 +108,7 @@ impl<T> Buffer<T> {
     }
 }
 
-impl<T> Drop for Buffer<T> {
+impl<T> Drop for RawBuffer<T> {
     fn drop(&mut self) {
         unsafe {
             gl::DeleteBuffers(1, &self.vbo as *const _);

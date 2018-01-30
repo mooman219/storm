@@ -8,17 +8,17 @@ use render::vertex::*;
 use render::buffer::raw_buffer::*;
 
 pub struct ShapeBuffer<T: Shape> {
-    element_buffer: Buffer<T::IndiceType>,
-    vertex_buffer: Buffer<T::ShapeType>,
+    element_buffer: RawBuffer<T::IndiceType>,
+    vertex_buffer: RawBuffer<T>,
     vao: u32,
 }
 
 impl<T: Shape> ShapeBuffer<T> {
     pub fn new() -> ShapeBuffer<T> {
         // Element Buffer Object
-        let element_buffer = Buffer::new(BufferType::ElementArrayBuffer);
+        let element_buffer = RawBuffer::new(BufferType::ElementArrayBuffer);
         // Vertex Buffer Object
-        let vertex_buffer = Buffer::new(BufferType::ArrayBuffer);
+        let vertex_buffer = RawBuffer::new(BufferType::ArrayBuffer);
         // Vertex Array Object
         let mut vao = 0u32;
         unsafe {
@@ -34,7 +34,7 @@ impl<T: Shape> ShapeBuffer<T> {
         }
     }
 
-    pub fn add(&mut self, element: T::ShapeType) -> usize {
+    pub fn add(&mut self, element: T) -> usize {
         let index = self.element_buffer.len() as u16;
         self.element_buffer.add(T::generate_indicies(index));
         self.vertex_buffer.add(element)
@@ -45,7 +45,7 @@ impl<T: Shape> ShapeBuffer<T> {
         // No need to update the element buffer.
     }
 
-    pub fn update(&mut self, index: usize, element: T::ShapeType) {
+    pub fn update(&mut self, index: usize, element: T) {
         self.vertex_buffer.update(index, element);
     }
 
@@ -56,7 +56,7 @@ impl<T: Shape> ShapeBuffer<T> {
 
     pub fn draw(&self) {
         unsafe {
-            let vertices = self.vertex_buffer.len() * T::ShapeType::VERTEX_COUNT;
+            let vertices = self.vertex_buffer.len() * T::VERTEX_COUNT;
             gl::BindVertexArray(self.vao);
             self.element_buffer.bind();
             gl::DrawElements(

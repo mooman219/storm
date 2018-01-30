@@ -16,8 +16,16 @@ impl Pos2Vertex {
     pub fn new(x: f32, y: f32, red: f32, green: f32, blue: f32, alpha: f32) -> Pos2Vertex {
         Pos2Vertex {
             position: Vector2 { x: x, y: y },
-            rotation: 120f32,
+            rotation: 0f32,
             color: Color::new(red, green, blue, alpha),
+        }
+    }
+
+    pub fn new_by_color(x: f32, y: f32, color: Color) -> Pos2Vertex {
+        Pos2Vertex {
+            position: Vector2 { x: x, y: y },
+            rotation: 0f32,
+            color: color,
         }
     }
 }
