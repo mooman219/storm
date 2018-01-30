@@ -1,3 +1,7 @@
+const RED: Color = Color { color: 0xC000_03FF };
+const GREEN: Color = Color { color: 0xC00F_FC00 };
+const BLUE: Color = Color { color: 0xFFF0_0000 };
+
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct Color {
@@ -12,9 +16,5 @@ impl Color {
         val = val | (((green * 1023f32) as u32) << 10u32);
         val = val | (((red * 1023f32) as u32) << 0u32);
         Color { color: val }
-    }
-
-    pub fn set(&mut self, color: Color) {
-        self.color = color.color;
     }
 }
