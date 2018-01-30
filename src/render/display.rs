@@ -139,6 +139,8 @@ impl Display {
     }
 
     pub fn swap_buffers(&self) {
-        self.window.swap_buffers().unwrap();
+        self.window
+            .swap_buffers()
+            .expect("Error while swapping buffers.");
     }
 }
