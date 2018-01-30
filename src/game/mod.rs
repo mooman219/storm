@@ -4,6 +4,6 @@ pub mod universe;
 pub mod world;
 
 use bounded_spsc_queue::Producer;
-use render::message::frame::Frame;
+use render::message::frame::RenderFrame;
 
-pub fn game_loop(frame_producer: Producer<Frame>) {}
+pub fn game_loop(frame_producer: Producer<RenderFrame>) {}

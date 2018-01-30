@@ -10,7 +10,7 @@ pub mod display;
 
 use bounded_spsc_queue::Consumer;
 use glutin;
-use render::message::frame::Frame;
+use render::message::frame::RenderFrame;
 use render::shape::*;
 use render::shape::quad::*;
 use render::shape::triangle::*;
@@ -18,14 +18,14 @@ use render::shader::*;
 use render::vertex::pos2::*;
 use time::frame_clock::*;
 
-pub fn render_loop(frame_consumer: Consumer<Frame>) {
+pub fn render_loop(frame_consumer: Consumer<RenderFrame>) {
     // Event loop creation
     let mut events_loop = glutin::EventsLoop::new();
     // Winow creation
     let mut display = display::Display::new(
         glutin::WindowBuilder::new()
             .with_title("Hello, world!")
-            .with_dimensions(1024, 768),
+            .with_dimensions(100, 100),
         glutin::ContextBuilder::new(),
         &events_loop,
     );
@@ -63,7 +63,7 @@ pub fn render_loop(frame_consumer: Consumer<Frame>) {
     quad_buffer.sync();
 
     let mut clock = FrameClock::new();
-    clock.set_fps(100);
+    clock.set_fps(10000);
 
     display.enable_clear_color();
     display.clear_color(0.0, 0.0, 0.0, 1.0);
@@ -81,8 +81,8 @@ pub fn render_loop(frame_consumer: Consumer<Frame>) {
         });
 
         // Render
-        triangle_buffer.draw();
         quad_buffer.draw();
+        triangle_buffer.draw();
         display.swap_buffers();
         display.clear();
 
