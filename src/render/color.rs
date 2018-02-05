@@ -1,6 +1,6 @@
-const RED: Color = Color { color: 0xC000_03FF };
-const GREEN: Color = Color { color: 0xC00F_FC00 };
-const BLUE: Color = Color { color: 0xFFF0_0000 };
+pub const RED: Color = Color { color: 0xC000_03FF };
+pub const GREEN: Color = Color { color: 0xC00F_FC00 };
+pub const BLUE: Color = Color { color: 0xFFF0_0000 };
 
 #[repr(C)]
 #[derive(Copy, Clone)]

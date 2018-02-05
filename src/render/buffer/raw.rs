@@ -26,6 +26,7 @@ impl<T> RawBuffer<T> {
         unsafe {
             gl::GenBuffers(1, &mut vbo);
             gl::BindBuffer(buffer_type.to_gl_enum(), vbo);
+            // TODO: BufferStorage
             gl::BufferData(
                 buffer_type.to_gl_enum(),
                 RawBuffer::<T>::DEFAULT_SIZE as isize,
@@ -89,11 +90,11 @@ impl<T> RawBuffer<T> {
                 self.dirty = false;
                 if self.buffer_capacity < self.items.capacity() {
                     let length = (RawBuffer::<T>::ELEMENT_SIZE * self.items.capacity()) as isize;
-                    let offset = self.items.as_ptr() as *const _;
+                    let data = self.items.as_ptr() as *const _;
                     gl::BufferData(
                         self.buffer_type.to_gl_enum(),
                         length,
-                        offset,
+                        data,
                         gl::DYNAMIC_DRAW,
                     );
                     self.buffer_capacity = self.items.capacity();

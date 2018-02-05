@@ -1,28 +1,18 @@
 use cgmath::*;
 use gl;
-use std::mem;
-
-use render::vertex::*;
 use render::color::*;
+use render::vertex::*;
 
 #[repr(C)]
-pub struct Pos2Vertex {
+pub struct ShapeVertex {
     position: Vector2<f32>,
     rotation: f32,
     color: Color,
 }
 
-impl Pos2Vertex {
-    pub fn new(x: f32, y: f32, red: f32, green: f32, blue: f32, alpha: f32) -> Pos2Vertex {
-        Pos2Vertex {
-            position: Vector2 { x: x, y: y },
-            rotation: 0f32,
-            color: Color::new(red, green, blue, alpha),
-        }
-    }
-
-    pub fn new_by_color(x: f32, y: f32, color: Color) -> Pos2Vertex {
-        Pos2Vertex {
+impl ShapeVertex {
+    pub fn new(x: f32, y: f32, color: Color) -> ShapeVertex {
+        ShapeVertex {
             position: Vector2 { x: x, y: y },
             rotation: 0f32,
             color: color,
@@ -30,8 +20,8 @@ impl Pos2Vertex {
     }
 }
 
-impl Vertex for Pos2Vertex {
-    const VERTEX_SIZE: usize = mem::size_of::<Pos2Vertex>();
+impl Vertex for ShapeVertex {
+    const VERTEX_SIZE: usize = mem::size_of::<Self>();
 
     fn configure_vertex_attribute() {
         unsafe {

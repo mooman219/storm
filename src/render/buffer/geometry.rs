@@ -2,19 +2,19 @@ use gl;
 
 use render::enums::buffer_type::*;
 use render::enums::draw_mode::*;
-use render::shape::*;
+use render::geometry::*;
 use render::vertex::*;
 
-use render::buffer::raw_buffer::*;
+use render::buffer::raw::*;
 
-pub struct ShapeBuffer<T: Shape> {
+pub struct GeometryBuffer<T: Geometry> {
     element_buffer: RawBuffer<T::IndiceType>,
     vertex_buffer: RawBuffer<T>,
     vao: u32,
 }
 
-impl<T: Shape> ShapeBuffer<T> {
-    pub fn new() -> ShapeBuffer<T> {
+impl<T: Geometry> GeometryBuffer<T> {
+    pub fn new() -> GeometryBuffer<T> {
         // Element Buffer Object
         let element_buffer = RawBuffer::new(BufferType::ElementArrayBuffer);
         // Vertex Buffer Object
@@ -27,7 +27,7 @@ impl<T: Shape> ShapeBuffer<T> {
         }
         T::VertexType::configure_vertex_attribute();
         // Return
-        ShapeBuffer {
+        GeometryBuffer {
             element_buffer: element_buffer,
             vertex_buffer: vertex_buffer,
             vao: vao,
@@ -69,7 +69,7 @@ impl<T: Shape> ShapeBuffer<T> {
     }
 }
 
-impl<T: Shape> Drop for ShapeBuffer<T> {
+impl<T: Geometry> Drop for GeometryBuffer<T> {
     fn drop(&mut self) {
         unsafe {
             gl::DeleteVertexArrays(1, &self.vao as *const _);

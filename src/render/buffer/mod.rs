@@ -1,2 +1,2 @@
-pub mod raw_buffer;
-pub mod shape_buffer;
+pub mod raw;
+pub mod geometry;

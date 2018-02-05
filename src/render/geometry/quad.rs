@@ -1,4 +1,4 @@
-use render::shape::*;
+use render::geometry::*;
 use render::vertex::*;
 
 #[repr(C)]
@@ -20,9 +20,9 @@ impl<T: Vertex> Quad<T> {
     }
 }
 
-impl<T: Vertex> Shape for Quad<T> {
+impl<T: Vertex> Geometry for Quad<T> {
     const VERTEX_COUNT: usize = 6;
-    type ShapeType = Quad<T>;
+    type ShapeType = Self;
     type VertexType = T;
     type IndiceType = [u16; 6];
 

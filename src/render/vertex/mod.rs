@@ -1,4 +1,6 @@
-pub mod pos2;
+pub mod shape;
+
+use std::mem;
 
 pub trait Vertex {
     const VERTEX_SIZE: usize;
