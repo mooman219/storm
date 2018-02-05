@@ -24,12 +24,16 @@ impl RenderProducer {
         }
     }
 
-    pub fn create_quad(&mut self, message: CreateQuadMessage) {
-        self.frame.create_quad.push(message);
+    pub fn create_quad(&mut self, quad: Quad<ShapeVertex>) {
+        self.frame
+            .create_quad
+            .push(CreateQuadMessage { quad: quad });
     }
 
-    pub fn create_triangle(&mut self, message: CreateTriangleMessage) {
-        self.frame.create_triangle.push(message);
+    pub fn create_triangle(&mut self, triangle: Triangle<ShapeVertex>) {
+        self.frame
+            .create_triangle
+            .push(CreateTriangleMessage { triangle: triangle });
     }
 
     pub fn send(&mut self) {
@@ -82,19 +86,20 @@ impl RenderConsumer {
         // Frame processing
         match self.frame_consumer.try_pop().as_mut() {
             Some(f) => {
+                // Message processing
                 self.handle_create_quad(&mut f.create_quad);
                 self.handle_create_triangle(&mut f.create_triangle);
+
+                // Shapes
+                self.shape_shader.bind();
+                self.quad_buffer.draw();
+                self.triangle_buffer.draw();
+
+                // Finish
+                self.display.swap_buffers();
+                self.display.clear();
             },
             None => {},
         }
-
-        // Shapes
-        self.shape_shader.bind();
-        self.quad_buffer.draw();
-        self.triangle_buffer.draw();
-
-        // Finish
-        self.display.swap_buffers();
-        self.display.clear();
     }
 }

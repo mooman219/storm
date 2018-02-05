@@ -13,27 +13,21 @@ use render::color;
 
 pub fn game_loop(frame_producer: Producer<RenderFrame>) {
     let mut render_producer = RenderProducer::new(frame_producer);
-    render_producer.create_quad(CreateQuadMessage {
-        quad: Quad::new(
-            ShapeVertex::new(-0.5, 0.5, color::RED),
-            ShapeVertex::new(-0.5, -0.5, color::BLUE),
-            ShapeVertex::new(0.5, 0.5, color::RED),
-            ShapeVertex::new(0.5, -0.5, color::GREEN),
-        ),
-    });
-    render_producer.create_triangle(CreateTriangleMessage {
-        triangle: Triangle::new(
-            ShapeVertex::new(0.0, -0.5, color::RED),
-            ShapeVertex::new(-1.0, -1.0, color::BLUE),
-            ShapeVertex::new(1.0, -1.0, color::GREEN),
-        ),
-    });
-    render_producer.create_triangle(CreateTriangleMessage {
-        triangle: Triangle::new(
-            ShapeVertex::new(0.0, 0.5, color::RED),
-            ShapeVertex::new(1.0, 1.0, color::BLUE),
-            ShapeVertex::new(-1.0, 1.0, color::GREEN),
-        ),
-    });
+    render_producer.create_quad(Quad::new(
+        ShapeVertex::new(-0.5, 0.5, color::RED),
+        ShapeVertex::new(-0.5, -0.5, color::BLUE),
+        ShapeVertex::new(0.5, 0.5, color::RED),
+        ShapeVertex::new(0.5, -0.5, color::GREEN),
+    ));
+    render_producer.create_triangle(Triangle::new(
+        ShapeVertex::new(0.0, -0.5, color::RED),
+        ShapeVertex::new(-1.0, -1.0, color::BLUE),
+        ShapeVertex::new(1.0, -1.0, color::GREEN),
+    ));
+    render_producer.create_triangle(Triangle::new(
+        ShapeVertex::new(0.0, 0.5, color::RED),
+        ShapeVertex::new(1.0, 1.0, color::BLUE),
+        ShapeVertex::new(-1.0, 1.0, color::GREEN),
+    ));
     render_producer.send();
 }
