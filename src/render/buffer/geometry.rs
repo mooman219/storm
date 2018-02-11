@@ -60,10 +60,10 @@ impl<T: Geometry> GeometryBuffer<T> {
             gl::BindVertexArray(self.vao);
             self.element_buffer.bind();
             gl::DrawElements(
-                draw_mode::TRIANGLES,
-                vertices as i32,
-                gl::UNSIGNED_SHORT,
-                0 as *const _,
+                draw_mode::TRIANGLES, // Draw mode
+                vertices as i32,      // Number of vertices
+                gl::UNSIGNED_SHORT,   // Size of indices
+                0 as *const _,        // Offset of indices
             );
         }
     }
