@@ -1,7 +1,5 @@
 use bounded_spsc_queue::Consumer;
-use bounded_spsc_queue::Producer;
 use render::message::RenderFrame;
-use std::mem;
 use render::buffer::geometry::*;
 use render::display::*;
 use render::geometry::*;
@@ -10,38 +8,7 @@ use render::geometry::triangle::*;
 use render::message::*;
 use render::vertex::shape::*;
 use render::shader::shape::*;
-
-pub struct RenderProducer {
-    frame_producer: Producer<RenderFrame>,
-    frame: RenderFrame,
-}
-
-impl RenderProducer {
-    pub fn new(frame_producer: Producer<RenderFrame>) -> RenderProducer {
-        RenderProducer {
-            frame_producer: frame_producer,
-            frame: RenderFrame::new(),
-        }
-    }
-
-    pub fn create_quad(&mut self, quad: Quad<ShapeVertex>) {
-        self.frame
-            .create_quad
-            .push(CreateQuadMessage { quad: quad });
-    }
-
-    pub fn create_triangle(&mut self, triangle: Triangle<ShapeVertex>) {
-        self.frame
-            .create_triangle
-            .push(CreateTriangleMessage { triangle: triangle });
-    }
-
-    pub fn send(&mut self) {
-        let mut frame = RenderFrame::new();
-        mem::swap(&mut frame, &mut self.frame);
-        self.frame_producer.push(frame);
-    }
-}
+use cgmath::*;
 
 pub struct RenderConsumer {
     display: Display,
@@ -52,20 +19,31 @@ pub struct RenderConsumer {
 }
 
 impl RenderConsumer {
-    pub fn new(mut display: Display, frame_consumer: Consumer<RenderFrame>) -> RenderConsumer {
-        // Initialization
-        display.enable_clear_color();
-        display.clear_color(0.0, 0.0, 0.0, 1.0);
-        println!("Info: OpenGL version {}", display.get_version_string());
-
-        // Return the composed consumer
-        RenderConsumer {
+    pub fn new(display: Display, frame_consumer: Consumer<RenderFrame>) -> RenderConsumer {
+        // Get the composed consumer
+        let mut consumer = RenderConsumer {
             display: display,
             frame_consumer: frame_consumer,
             shape_shader: ShapeShader::new(),
             triangle_buffer: Triangle::new_geometry_buffer(),
             quad_buffer: Quad::new_geometry_buffer(),
-        }
+        };
+        // Initialize it
+        consumer.initialize();
+        // Return
+        consumer
+    }
+
+    fn initialize(&mut self) {
+        self.display.enable_clear_color();
+        self.display.clear_color(0.0, 0.0, 0.0, 1.0);
+        self.shape_shader.bind();
+        self.shape_shader
+            .set_translation(Vector3::new(0f32, 0.1f32, 0f32));
+        println!(
+            "Render: OpenGL version {}",
+            self.display.get_version_string()
+        );
     }
 
     pub fn handle_create_quad(&mut self, messages: &mut Vec<CreateQuadMessage>) {
@@ -89,17 +67,17 @@ impl RenderConsumer {
                 // Message processing
                 self.handle_create_quad(&mut f.create_quad);
                 self.handle_create_triangle(&mut f.create_triangle);
-
-                // Shapes
-                self.shape_shader.bind();
-                self.quad_buffer.draw();
-                self.triangle_buffer.draw();
-
-                // Finish
-                self.display.swap_buffers();
-                self.display.clear();
             },
             None => {},
         }
+
+        // Shapes
+        self.shape_shader.bind();
+        self.quad_buffer.draw();
+        self.triangle_buffer.draw();
+
+        // Finish
+        self.display.swap_buffers();
+        self.display.clear();
     }
 }

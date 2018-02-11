@@ -3,15 +3,13 @@ use std::mem;
 use std::cmp;
 use std::ptr;
 
-use render::enums::buffer_type::*;
-
 pub struct RawBuffer<T> {
     vbo: u32,
     dirty: bool,
     buffer_min: usize,
     buffer_max: usize,
     buffer_capacity: usize,
-    buffer_type: BufferType,
+    buffer_type: u32,
     items: Vec<T>,
 }
 
@@ -20,15 +18,15 @@ impl<T> RawBuffer<T> {
     const DEFAULT_CAPACITY: usize = 16;
     const DEFAULT_SIZE: usize = RawBuffer::<T>::ELEMENT_SIZE * RawBuffer::<T>::DEFAULT_CAPACITY;
 
-    pub fn new(buffer_type: BufferType) -> RawBuffer<T> {
+    pub fn new(buffer_type: u32) -> RawBuffer<T> {
         let items: Vec<T> = Vec::<T>::with_capacity(RawBuffer::<T>::DEFAULT_CAPACITY);
         let mut vbo = 0u32;
         unsafe {
             gl::GenBuffers(1, &mut vbo);
-            gl::BindBuffer(buffer_type.to_gl_enum(), vbo);
+            gl::BindBuffer(buffer_type, vbo);
             // TODO: BufferStorage
             gl::BufferData(
-                buffer_type.to_gl_enum(),
+                buffer_type,
                 RawBuffer::<T>::DEFAULT_SIZE as isize,
                 ptr::null(),
                 gl::DYNAMIC_DRAW,
@@ -79,30 +77,25 @@ impl<T> RawBuffer<T> {
 
     pub fn bind(&self) {
         unsafe {
-            gl::BindBuffer(self.buffer_type.to_gl_enum(), self.vbo);
+            gl::BindBuffer(self.buffer_type, self.vbo);
         }
     }
 
     pub fn sync(&mut self) {
         unsafe {
             if self.dirty {
-                gl::BindBuffer(self.buffer_type.to_gl_enum(), self.vbo);
+                gl::BindBuffer(self.buffer_type, self.vbo);
                 self.dirty = false;
                 if self.buffer_capacity < self.items.capacity() {
                     let length = (RawBuffer::<T>::ELEMENT_SIZE * self.items.capacity()) as isize;
                     let data = self.items.as_ptr() as *const _;
-                    gl::BufferData(
-                        self.buffer_type.to_gl_enum(),
-                        length,
-                        data,
-                        gl::DYNAMIC_DRAW,
-                    );
+                    gl::BufferData(self.buffer_type, length, data, gl::DYNAMIC_DRAW);
                     self.buffer_capacity = self.items.capacity();
                 } else {
                     let start = (RawBuffer::<T>::ELEMENT_SIZE * self.buffer_min) as isize;
                     let length = (RawBuffer::<T>::ELEMENT_SIZE * (self.buffer_max - self.buffer_min)) as isize;
                     let offset = self.items.as_ptr().offset(self.buffer_min as isize) as *const _;
-                    gl::BufferSubData(self.buffer_type.to_gl_enum(), start, length, offset);
+                    gl::BufferSubData(self.buffer_type, start, length, offset);
                 }
             }
         }

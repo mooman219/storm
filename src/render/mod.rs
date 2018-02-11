@@ -11,7 +11,7 @@ use bounded_spsc_queue::Consumer;
 use glutin;
 use time::frame_clock::*;
 use render::message::*;
-use render::message::comm::*;
+use render::message::consumer::*;
 
 pub fn render_loop(frame_consumer: Consumer<RenderFrame>) {
     // Event loop creation
@@ -36,9 +36,9 @@ pub fn render_loop(frame_consumer: Consumer<RenderFrame>) {
         events_loop.poll_events(|event| match event {
             glutin::Event::WindowEvent { event, .. } => match event {
                 glutin::WindowEvent::Closed => running = false,
-                glutin::WindowEvent::Resized(w, h) => {
-                    // display.resize(w, h)
-                },
+                // glutin::WindowEvent::Resized(w, h) => {
+                //     display.resize(w, h)
+                // },
                 _ => (),
             },
             _ => (),

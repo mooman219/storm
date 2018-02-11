@@ -1,4 +1,5 @@
-pub mod comm;
+pub mod consumer;
+pub mod producer;
 
 use render::geometry::quad::*;
 use render::geometry::triangle::*;

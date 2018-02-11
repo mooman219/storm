@@ -1,7 +1,6 @@
 use gl;
 
-use render::enums::buffer_type::*;
-use render::enums::draw_mode::*;
+use render::enums::*;
 use render::geometry::*;
 use render::vertex::*;
 
@@ -13,12 +12,13 @@ pub struct GeometryBuffer<T: Geometry> {
     vao: u32,
 }
 
+// TODO: This can be a shape buffer since we're only drawing triangles.
 impl<T: Geometry> GeometryBuffer<T> {
     pub fn new() -> GeometryBuffer<T> {
         // Element Buffer Object
-        let element_buffer = RawBuffer::new(BufferType::ElementArrayBuffer);
+        let element_buffer = RawBuffer::new(buffer_type::ELEMENT_ARRAY_BUFFER);
         // Vertex Buffer Object
-        let vertex_buffer = RawBuffer::new(BufferType::ArrayBuffer);
+        let vertex_buffer = RawBuffer::new(buffer_type::ARRAY_BUFFER);
         // Vertex Array Object
         let mut vao = 0u32;
         unsafe {
@@ -60,7 +60,7 @@ impl<T: Geometry> GeometryBuffer<T> {
             gl::BindVertexArray(self.vao);
             self.element_buffer.bind();
             gl::DrawElements(
-                DrawMode::Triangles.to_gl_enum(),
+                draw_mode::TRIANGLES,
                 vertices as i32,
                 gl::UNSIGNED_SHORT,
                 0 as *const _,
