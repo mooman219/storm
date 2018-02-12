@@ -1,8 +1,6 @@
 use render::shader::*;
 use cgmath::*;
 use gl;
-use render::color::*;
-use render::vertex::shape::*;
 
 static VERTEX: &str = r#"
     #version 400

@@ -4,11 +4,11 @@ use render::enums::*;
 use render::geometry::*;
 use render::vertex::*;
 
-use render::buffer::raw::*;
+use render::buffer::dynamic::*;
 
 pub struct GeometryBuffer<T: Geometry> {
-    element_buffer: RawBuffer<T::IndiceType>,
-    vertex_buffer: RawBuffer<T>,
+    element_buffer: DynamicBuffer<T::IndiceType>,
+    vertex_buffer: DynamicBuffer<T>,
     vao: u32,
 }
 
@@ -16,9 +16,9 @@ pub struct GeometryBuffer<T: Geometry> {
 impl<T: Geometry> GeometryBuffer<T> {
     pub fn new() -> GeometryBuffer<T> {
         // Element Buffer Object
-        let element_buffer = RawBuffer::new(buffer_type::ELEMENT_ARRAY_BUFFER);
+        let element_buffer = DynamicBuffer::new(buffer_type::ELEMENT_ARRAY_BUFFER);
         // Vertex Buffer Object
-        let vertex_buffer = RawBuffer::new(buffer_type::ARRAY_BUFFER);
+        let vertex_buffer = DynamicBuffer::new(buffer_type::ARRAY_BUFFER);
         // Vertex Array Object
         let mut vao = 0u32;
         unsafe {
