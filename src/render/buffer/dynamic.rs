@@ -2,6 +2,7 @@ use gl;
 use std::mem;
 use std::cmp;
 use std::ptr;
+use render::buffer::*;
 
 pub struct DynamicBuffer<T> {
     vbo: u32,
@@ -17,10 +18,10 @@ impl<T> DynamicBuffer<T> {
     const DEFAULT_CAPACITY: usize = 16;
 
     pub fn new(buffer_type: u32) -> DynamicBuffer<T> {
-        let default_size = (mem::size_of::<T>() * DynamicBuffer::<T>::DEFAULT_CAPACITY) as isize;
         let items: Vec<T> = Vec::<T>::with_capacity(DynamicBuffer::<T>::DEFAULT_CAPACITY);
         let mut vbo = 0u32;
         unsafe {
+            let default_size = (mem::size_of::<T>() * DynamicBuffer::<T>::DEFAULT_CAPACITY) as isize;
             gl::GenBuffers(1, &mut vbo);
             gl::BindBuffer(buffer_type, vbo);
             gl::BufferData(
@@ -41,23 +42,6 @@ impl<T> DynamicBuffer<T> {
         }
     }
 
-    pub fn add(&mut self, item: T) -> usize {
-        let index = self.items.len();
-        self.items.push(item);
-        self.mark(index);
-        index
-    }
-
-    pub fn remove(&mut self, index: usize) {
-        self.items.swap_remove(index);
-        self.mark(index);
-    }
-
-    pub fn update(&mut self, index: usize, item: T) {
-        self.items[index] = item;
-        self.mark(index);
-    }
-
     fn mark(&mut self, index: usize) {
         if self.dirty {
             self.buffer_min = cmp::min(self.buffer_min, index);
@@ -68,18 +52,41 @@ impl<T> DynamicBuffer<T> {
             self.buffer_max = index + 1;
         }
     }
+}
 
-    pub fn len(&self) -> usize {
+impl<T> RawBuffer<T> for DynamicBuffer<T> {
+    fn add(&mut self, item: T) -> usize {
+        let index = self.items.len();
+        self.items.push(item);
+        self.mark(index);
+        index
+    }
+
+    fn remove(&mut self, index: usize) {
+        self.items.swap_remove(index);
+        self.mark(index);
+    }
+
+    fn update(&mut self, index: usize, item: T) {
+        self.items[index] = item;
+        self.mark(index);
+    }
+
+    fn offset(&self) -> usize {
+        0
+    }
+
+    fn len(&self) -> usize {
         self.items.len()
     }
 
-    pub fn bind(&self) {
+    fn bind(&self) {
         unsafe {
             gl::BindBuffer(self.buffer_type, self.vbo);
         }
     }
 
-    pub fn sync(&mut self) {
+    fn sync(&mut self) {
         unsafe {
             if self.dirty {
                 gl::BindBuffer(self.buffer_type, self.vbo);

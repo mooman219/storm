@@ -3,7 +3,7 @@ use gl;
 use render::enums::*;
 use render::geometry::*;
 use render::vertex::*;
-
+use render::buffer::*;
 use render::buffer::dynamic::*;
 
 pub struct GeometryBuffer<T: Geometry> {

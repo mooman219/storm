@@ -1,6 +1,7 @@
 use gl;
 use std::mem;
 use std::ptr;
+use render::buffer::*;
 
 pub struct ChunkedBuffer<T> {
     vbo: u32,
@@ -15,12 +16,12 @@ pub struct ChunkedBuffer<T> {
 impl<T> ChunkedBuffer<T> {
     pub fn new(buffer_type: u32, chunk_count: usize, chunk_length: usize) -> ChunkedBuffer<T> {
         let items = Vec::with_capacity(chunk_length);
-        let capacity = chunk_count * chunk_length;
-        let max_size = (capacity * mem::size_of::<T>()) as isize;
         let flags = gl::MAP_WRITE_BIT | gl::MAP_PERSISTENT_BIT | gl::MAP_COHERENT_BIT;
         let mut vbo = 0u32;
         let mut map = 0 as *mut T;
         unsafe {
+            let capacity = chunk_count * chunk_length;
+            let max_size = (capacity * mem::size_of::<T>()) as isize;
             gl::GenBuffers(1, &mut vbo);
             gl::BindBuffer(buffer_type, vbo);
             gl::BufferStorage(
@@ -46,8 +47,10 @@ impl<T> ChunkedBuffer<T> {
             map: map,
         }
     }
+}
 
-    pub fn add(&mut self, item: T) -> usize {
+impl<T> RawBuffer<T> for ChunkedBuffer<T> {
+    fn add(&mut self, item: T) -> usize {
         let index = self.items.len();
         if index == self.chunk_length {
             panic!("Attempting to add element to full buffer.");
@@ -57,27 +60,31 @@ impl<T> ChunkedBuffer<T> {
         index
     }
 
-    pub fn remove(&mut self, index: usize) {
+    fn remove(&mut self, index: usize) {
         self.items.swap_remove(index);
         self.dirty = true;
     }
 
-    pub fn update(&mut self, index: usize, item: T) {
+    fn update(&mut self, index: usize, item: T) {
         self.items[index] = item;
         self.dirty = true;
     }
 
-    pub fn len(&self) -> usize {
+    fn offset(&self) -> usize {
+        0
+    }
+
+    fn len(&self) -> usize {
         self.items.len()
     }
 
-    pub fn bind(&self) {
+    fn bind(&self) {
         unsafe {
             gl::BindBuffer(self.buffer_type, self.vbo);
         }
     }
 
-    pub fn sync(&mut self) {
+    fn sync(&mut self) {
         unsafe {
             if self.dirty {
                 gl::BindBuffer(self.buffer_type, self.vbo);
