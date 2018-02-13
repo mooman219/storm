@@ -9,7 +9,6 @@ pub mod display;
 
 use bounded_spsc_queue::Consumer;
 use glutin;
-use time::frame_clock::*;
 use render::message::*;
 use render::message::consumer::*;
 
@@ -19,16 +18,13 @@ pub fn render_loop(frame_consumer: Consumer<RenderFrame>) {
     // Winow creation
     let display = display::Display::new(
         glutin::WindowBuilder::new()
-            .with_title("Hello, world!")
-            .with_dimensions(900, 900),
+            .with_title("Hello, World!")
+            .with_dimensions(700, 700),
         glutin::ContextBuilder::new(),
         &events_loop,
     );
 
     let mut render_consumer = RenderConsumer::new(display, frame_consumer);
-
-    let mut clock = FrameClock::new();
-    clock.set_fps(145);
 
     let mut running = true;
     while running {
@@ -36,18 +32,13 @@ pub fn render_loop(frame_consumer: Consumer<RenderFrame>) {
         events_loop.poll_events(|event| match event {
             glutin::Event::WindowEvent { event, .. } => match event {
                 glutin::WindowEvent::Closed => running = false,
-                // glutin::WindowEvent::Resized(w, h) => {
-                //     display.resize(w, h)
-                // },
+                // glutin::WindowEvent::Resized(w, h) => display.resize(w, h),
                 _ => (),
             },
             _ => (),
         });
 
-        // Rendering
+        // Render
         render_consumer.tick();
-
-        // Timing
-        clock.tick();
     }
 }

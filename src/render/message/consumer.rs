@@ -1,17 +1,19 @@
 use bounded_spsc_queue::Consumer;
-use render::message::RenderFrame;
+use cgmath::*;
 use render::buffer::geometry::*;
 use render::display::*;
 use render::geometry::*;
 use render::geometry::quad::*;
 use render::geometry::triangle::*;
 use render::message::*;
-use render::vertex::shape::*;
+use render::message::RenderFrame;
 use render::shader::shape::*;
-use cgmath::*;
+use render::vertex::shape::*;
+use time::frame_clock::*;
 
 pub struct RenderConsumer {
     display: Display,
+    clock: FrameClock,
     frame_consumer: Consumer<RenderFrame>,
     shape_shader: ShapeShader,
     triangle_buffer: GeometryBuffer<Triangle<ShapeVertex>>,
@@ -23,6 +25,7 @@ impl RenderConsumer {
         // Get the composed consumer
         let mut consumer = RenderConsumer {
             display: display,
+            clock: FrameClock::new(),
             frame_consumer: frame_consumer,
             shape_shader: ShapeShader::new(),
             triangle_buffer: Triangle::new_geometry_buffer(),
@@ -37,6 +40,7 @@ impl RenderConsumer {
     fn initialize(&mut self) {
         self.display.enable_clear_color();
         self.display.clear_color(0.0, 0.0, 0.0, 1.0);
+        self.clock.set_fps(144);
         self.shape_shader.bind();
         self.shape_shader
             .set_translation(Vector3::new(0f32, 0.1f32, 0f32));
@@ -50,14 +54,12 @@ impl RenderConsumer {
         for message in messages.drain(..) {
             self.quad_buffer.add(message.quad);
         }
-        self.quad_buffer.sync();
     }
 
     pub fn handle_create_triangle(&mut self, messages: &mut Vec<CreateTriangleMessage>) {
         for message in messages.drain(..) {
             self.triangle_buffer.add(message.triangle);
         }
-        self.triangle_buffer.sync();
     }
 
     pub fn tick(&mut self) {
@@ -67,6 +69,10 @@ impl RenderConsumer {
                 // Message processing
                 self.handle_create_quad(&mut f.create_quad);
                 self.handle_create_triangle(&mut f.create_triangle);
+
+                // Sync buffers
+                self.quad_buffer.sync();
+                self.triangle_buffer.sync();
             },
             None => {},
         }
@@ -79,5 +85,8 @@ impl RenderConsumer {
         // Finish
         self.display.swap_buffers();
         self.display.clear();
+
+        // Timing
+        self.clock.tick();
     }
 }
