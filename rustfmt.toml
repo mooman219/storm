@@ -1,8 +1,11 @@
 # https://github.com/rust-lang-nursery/rustfmt/blob/master/Configurations.md#match_block_trailing_comma
 match_block_trailing_comma = true
 
-# https://github.com/rust-lang-nursery/rustfmt/blob/master/Configurations.md#multiline_match_arm_forces_block
-multiline_match_arm_forces_block = false
-
 # https://github.com/rust-lang-nursery/rustfmt/blob/master/Configurations.md#max_width
-max_width = 130
+max_width = 100
+
+# https://github.com/rust-lang-nursery/rustfmt/blob/master/Configurations.md#reorder_imports
+reorder_imports = true
+
+# https://github.com/rust-lang-nursery/rustfmt/blob/master/Configurations.md#use_small_heuristics
+use_small_heuristics = true
