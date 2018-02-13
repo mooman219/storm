@@ -1,8 +1,8 @@
 use gl;
-use std::mem;
-use std::cmp;
-use std::ptr;
 use render::buffer::*;
+use std::cmp;
+use std::mem;
+use std::ptr;
 
 pub struct DynamicBuffer<T> {
     vbo: u32,
@@ -87,10 +87,10 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
     }
 
     fn sync(&mut self) {
-        unsafe {
-            if self.dirty {
+        if self.dirty {
+            self.dirty = false;
+            unsafe {
                 gl::BindBuffer(self.buffer_type, self.vbo);
-                self.dirty = false;
                 if self.buffer_capacity < self.items.capacity() {
                     let length = (mem::size_of::<T>() * self.items.capacity()) as isize;
                     let data = self.items.as_ptr() as *const _;

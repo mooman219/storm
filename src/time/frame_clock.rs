@@ -1,7 +1,6 @@
-use std::time::Instant;
-use std::time::Duration;
 use std::thread::sleep;
-
+use std::time::Duration;
+use std::time::Instant;
 use time::convert::*;
 
 pub struct FrameClock {
