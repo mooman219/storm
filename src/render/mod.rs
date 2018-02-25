@@ -9,6 +9,7 @@ pub mod display;
 
 use bounded_spsc_queue::Consumer;
 use glutin;
+use glutin::VirtualKeyCode;
 use render::message::*;
 use render::message::consumer::*;
 
@@ -18,8 +19,8 @@ pub fn render_loop(frame_consumer: Consumer<RenderFrame>) {
     // Winow creation
     let display = display::Display::new(
         glutin::WindowBuilder::new()
-            .with_title("Hello, World!")
-            .with_dimensions(700, 700),
+            .with_title("Test Window")
+            .with_dimensions(400, 400),
         glutin::ContextBuilder::new(),
         &events_loop,
     );
@@ -31,8 +32,16 @@ pub fn render_loop(frame_consumer: Consumer<RenderFrame>) {
         // Input
         events_loop.poll_events(|event| match event {
             glutin::Event::WindowEvent { event, .. } => match event {
-                glutin::WindowEvent::Closed => running = false,
                 // glutin::WindowEvent::Resized(w, h) => display.resize(w, h),
+                glutin::WindowEvent::Closed => running = false,
+                glutin::WindowEvent::KeyboardInput { input, .. } => match input.virtual_keycode {
+                    Some(key) => {
+                        if key == VirtualKeyCode::Escape {
+                            running = false;
+                        }
+                    },
+                    _ => (),
+                },
                 _ => (),
             },
             _ => (),

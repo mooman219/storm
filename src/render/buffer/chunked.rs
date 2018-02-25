@@ -52,7 +52,7 @@ impl<T> ChunkedBuffer<T> {
             vbo: vbo,
             dirty: false,
             buffer_type: buffer_type,
-            current_chunk: 0,
+            current_chunk: chunk_count - 1,
             chunk_count: chunk_count,
             chunk_length: chunk_length,
             items: items,
@@ -86,10 +86,6 @@ impl<T> RawBuffer<T> for ChunkedBuffer<T> {
         self.current_chunk * self.chunk_length
     }
 
-    fn offset_size(&self) -> usize {
-        self.current_chunk * self.chunk_length * mem::size_of::<T>()
-    }
-
     fn len(&self) -> usize {
         self.items.len()
     }
@@ -103,12 +99,12 @@ impl<T> RawBuffer<T> for ChunkedBuffer<T> {
     fn sync(&mut self) {
         if self.dirty {
             self.dirty = false;
+            self.current_chunk = (self.current_chunk + 1) % self.chunk_count;
             unsafe {
-                let pointer = self.map.offset(self.offset_size() as isize);
+                let pointer = self.map.offset(self.offset_index() as isize);
                 ptr::copy_nonoverlapping(self.items.as_ptr(), pointer, self.len());
                 // TODO: Proper sync logic
             }
-            self.current_chunk = (self.current_chunk + 1) % self.chunk_count;
         }
     }
 }

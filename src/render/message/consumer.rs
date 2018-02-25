@@ -28,8 +28,8 @@ impl RenderConsumer {
             clock: FrameClock::new(),
             frame_consumer: frame_consumer,
             shape_shader: ShapeShader::new(),
-            triangle_buffer: Triangle::new_geometry_buffer(),
-            quad_buffer: Quad::new_geometry_buffer(),
+            triangle_buffer: Triangle::new_geometry_buffer(3),
+            quad_buffer: Quad::new_geometry_buffer(100),
         };
         // Initialize it
         consumer.initialize();
@@ -44,6 +44,7 @@ impl RenderConsumer {
         self.shape_shader.bind();
         self.shape_shader
             .set_translation(Vector3::new(0f32, 0f32, 0f32));
+        self.shape_shader.set_scale(0.5f32);
         println!(
             "Render: OpenGL version {}",
             self.display.get_version_string()
@@ -62,31 +63,39 @@ impl RenderConsumer {
         }
     }
 
+    pub fn handle_set_translation(&mut self, message: &SetTranslationMessage) {
+        if message.set {
+            self.shape_shader.set_translation(message.translation);
+        }
+    }
+
     pub fn tick(&mut self) {
         // Frame processing
         match self.frame_consumer.try_pop().as_mut() {
             Some(f) => {
-                // Message processing
+                // Quads
                 self.handle_create_quad(&mut f.create_quad);
-                self.handle_create_triangle(&mut f.create_triangle);
-
-                // Sync buffers
                 self.quad_buffer.sync();
+                // Triangles
+                self.handle_create_triangle(&mut f.create_triangle);
                 self.triangle_buffer.sync();
+                // Shader
+                self.shape_shader.bind();
+                self.handle_set_translation(&f.translation);
+
+                // Shapes
+                self.shape_shader.bind();
+                self.quad_buffer.draw();
+                self.triangle_buffer.draw();
+
+                // Finish
+                self.display.swap_buffers();
+                // self.display.clear();
+
+                // Timing
+                self.clock.tick_fps();
             },
             None => {},
         }
-
-        // Shapes
-        self.shape_shader.bind();
-        self.quad_buffer.draw();
-        self.triangle_buffer.draw();
-
-        // Finish
-        self.display.swap_buffers();
-        self.display.clear();
-
-        // Timing
-        self.clock.tick();
     }
 }

@@ -12,8 +12,6 @@ pub trait RawBuffer<T> {
 
     fn offset_index(&self) -> usize;
 
-    fn offset_size(&self) -> usize;
-
     fn len(&self) -> usize;
 
     fn bind(&self);

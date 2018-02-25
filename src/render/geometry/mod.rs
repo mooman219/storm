@@ -20,7 +20,7 @@ pub trait Geometry {
         items
     }
 
-    fn new_geometry_buffer() -> GeometryBuffer<Self::ShapeType> {
-        GeometryBuffer::new()
+    fn new_geometry_buffer(capacity: usize) -> GeometryBuffer<Self::ShapeType> {
+        GeometryBuffer::new(capacity)
     }
 }

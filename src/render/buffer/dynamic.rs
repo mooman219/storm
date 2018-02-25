@@ -77,10 +77,6 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
         0
     }
 
-    fn offset_size(&self) -> usize {
-        0
-    }
-
     fn len(&self) -> usize {
         self.items.len()
     }

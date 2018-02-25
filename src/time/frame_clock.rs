@@ -30,15 +30,18 @@ impl FrameClock {
         return self.last_fps;
     }
 
-    pub fn tick(&mut self) {
+    pub fn tick_fps(&mut self) {
         // FPS tracking.
         self.frames += 1;
         if as_nanoseconds(&self.last_fps_tick.elapsed()) > NANOS_PER_SEC {
-            println!("FPS: {}", self.frames);
+            println!("FPS: {}", self.last_fps);
             self.last_fps = self.frames;
             self.last_fps_tick = Instant::now();
             self.frames = 0;
         }
+    }
+
+    pub fn tick(&mut self) {
         // Sleep logic.
         let duration = as_nanoseconds(&self.last_tick.elapsed());
         if duration < self.target {

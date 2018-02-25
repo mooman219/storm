@@ -14,14 +14,14 @@ pub struct GeometryBuffer<T: Geometry> {
 
 // TODO: This can be a shape buffer since we're only drawing triangles.
 impl<T: Geometry> GeometryBuffer<T> {
-    pub fn new() -> GeometryBuffer<T> {
+    pub fn new(capacity: usize) -> GeometryBuffer<T> {
         // Element Buffer Object
         let element_buffer = ImmutableBuffer::new(
             buffer_type::ELEMENT_ARRAY_BUFFER,
-            T::generate_indice_list(30),
+            T::generate_indice_list(capacity as u16),
         );
         // Vertex Buffer Object
-        let vertex_buffer = ChunkedBuffer::new(buffer_type::ARRAY_BUFFER, 3, 30);
+        let vertex_buffer = ChunkedBuffer::new(buffer_type::ARRAY_BUFFER, 3, capacity);
         // Vertex Array Object
         let mut vao = 0u32;
         unsafe {
@@ -56,7 +56,7 @@ impl<T: Geometry> GeometryBuffer<T> {
     pub fn draw(&self) {
         unsafe {
             let vertices = self.vertex_buffer.len() * T::VERTEX_COUNT;
-            let offset_index = self.vertex_buffer.offset_index() as i32;
+            let offset_index = (self.vertex_buffer.offset_index() * T::VERTEX_COUNT) as i32;
             gl::BindVertexArray(self.vao);
             self.element_buffer.bind();
             gl::DrawElementsBaseVertex(
@@ -64,7 +64,7 @@ impl<T: Geometry> GeometryBuffer<T> {
                 vertices as i32,      // Number of vertices
                 gl::UNSIGNED_SHORT,   // Size of indices
                 0 as *const _,        // Offset of indices
-                0,                    // Base vertex offset
+                offset_index,         // Base vertex offset
             );
         }
     }

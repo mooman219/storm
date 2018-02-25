@@ -1,6 +1,6 @@
-use render::shader::*;
 use cgmath::*;
 use gl;
+use render::shader::*;
 
 static VERTEX: &str = r#"
     #version 400
@@ -28,6 +28,8 @@ static FRAGMENT: &str = r#"
 pub struct ShapeShader {
     program: ShaderProgram,
     uniform_ortho: i32,
+    ortho_translation: Matrix4<f32>,
+    ortho_scale: Matrix4<f32>,
 }
 
 impl ShapeShader {
@@ -38,6 +40,8 @@ impl ShapeShader {
         ShapeShader {
             program: program,
             uniform_ortho: uniform_ortho,
+            ortho_translation: Matrix4::zero(),
+            ortho_scale: Matrix4::from_scale(1f32),
         }
     }
 
@@ -46,7 +50,17 @@ impl ShapeShader {
     }
 
     pub fn set_translation(&mut self, translation: Vector3<f32>) {
-        let matrix = Matrix4::from_translation(translation);
+        self.ortho_translation = Matrix4::from_translation(translation);
+        self.sync();
+    }
+
+    pub fn set_scale(&mut self, scale: f32) {
+        self.ortho_scale = Matrix4::from_scale(scale);
+        self.sync();
+    }
+
+    fn sync(&self) {
+        let matrix = self.ortho_translation * self.ortho_scale;
         unsafe {
             gl::UniformMatrix4fv(
                 self.uniform_ortho,          // Program location
