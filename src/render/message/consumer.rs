@@ -40,10 +40,10 @@ impl RenderConsumer {
     fn initialize(&mut self) {
         self.display.enable_clear_color();
         self.display.clear_color(0.0, 0.0, 0.0, 1.0);
-        self.clock.set_fps(144);
+        self.clock.set_fps(20000);
         self.shape_shader.bind();
         self.shape_shader
-            .set_translation(Vector3::new(0f32, 0.1f32, 0f32));
+            .set_translation(Vector3::new(0f32, 0f32, 0f32));
         println!(
             "Render: OpenGL version {}",
             self.display.get_version_string()

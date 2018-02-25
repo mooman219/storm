@@ -21,7 +21,8 @@ impl<T> DynamicBuffer<T> {
         let items: Vec<T> = Vec::<T>::with_capacity(DynamicBuffer::<T>::DEFAULT_CAPACITY);
         let mut vbo = 0u32;
         unsafe {
-            let default_size = (mem::size_of::<T>() * DynamicBuffer::<T>::DEFAULT_CAPACITY) as isize;
+            let default_size =
+                (mem::size_of::<T>() * DynamicBuffer::<T>::DEFAULT_CAPACITY) as isize;
             gl::GenBuffers(1, &mut vbo);
             gl::BindBuffer(buffer_type, vbo);
             gl::BufferData(
@@ -72,7 +73,11 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
         self.mark(index);
     }
 
-    fn offset(&self) -> usize {
+    fn offset_index(&self) -> usize {
+        0
+    }
+
+    fn offset_size(&self) -> usize {
         0
     }
 
@@ -98,7 +103,8 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
                     self.buffer_capacity = self.items.capacity();
                 } else {
                     let start = (mem::size_of::<T>() * self.buffer_min) as isize;
-                    let length = (mem::size_of::<T>() * (self.buffer_max - self.buffer_min)) as isize;
+                    let length =
+                        (mem::size_of::<T>() * (self.buffer_max - self.buffer_min)) as isize;
                     let offset = self.items.as_ptr().offset(self.buffer_min as isize) as *const _;
                     gl::BufferSubData(self.buffer_type, start, length, offset);
                 }

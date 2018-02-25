@@ -1,12 +1,13 @@
 use gl;
+use render::buffer::*;
 use std::mem;
 use std::ptr;
-use render::buffer::*;
 
 pub struct ChunkedBuffer<T> {
     vbo: u32,
     dirty: bool,
     buffer_type: u32,
+    current_chunk: usize,
     chunk_count: usize,
     chunk_length: usize,
     items: Vec<T>,
@@ -15,10 +16,19 @@ pub struct ChunkedBuffer<T> {
 
 impl<T> ChunkedBuffer<T> {
     pub fn new(buffer_type: u32, chunk_count: usize, chunk_length: usize) -> ChunkedBuffer<T> {
+        // Validate input
+        if chunk_count == 0 {
+            panic!("Chunk count must be greater than 0.");
+        }
+        if chunk_length == 0 {
+            panic!("Chunk length must be greater than 0.");
+        }
+        // Prepare data
         let items = Vec::with_capacity(chunk_length);
         let flags = gl::MAP_WRITE_BIT | gl::MAP_PERSISTENT_BIT | gl::MAP_COHERENT_BIT;
         let mut vbo = 0u32;
-        let mut map = 0 as *mut T;
+        let map;
+        // Call into opengl
         unsafe {
             let capacity = chunk_count * chunk_length;
             let max_size = (capacity * mem::size_of::<T>()) as isize;
@@ -37,12 +47,14 @@ impl<T> ChunkedBuffer<T> {
                 flags,       // Flags
             ) as *mut _;
         }
+        // Finish
         ChunkedBuffer {
             vbo: vbo,
             dirty: false,
+            buffer_type: buffer_type,
+            current_chunk: 0,
             chunk_count: chunk_count,
             chunk_length: chunk_length,
-            buffer_type: buffer_type,
             items: items,
             map: map,
         }
@@ -70,8 +82,12 @@ impl<T> RawBuffer<T> for ChunkedBuffer<T> {
         self.dirty = true;
     }
 
-    fn offset(&self) -> usize {
-        0
+    fn offset_index(&self) -> usize {
+        self.current_chunk * self.chunk_length
+    }
+
+    fn offset_size(&self) -> usize {
+        self.current_chunk * self.chunk_length * mem::size_of::<T>()
     }
 
     fn len(&self) -> usize {
@@ -85,11 +101,14 @@ impl<T> RawBuffer<T> for ChunkedBuffer<T> {
     }
 
     fn sync(&mut self) {
-        unsafe {
-            if self.dirty {
-                gl::BindBuffer(self.buffer_type, self.vbo);
+        if self.dirty {
+            self.dirty = false;
+            unsafe {
+                let pointer = self.map.offset(self.offset_size() as isize);
+                ptr::copy_nonoverlapping(self.items.as_ptr(), pointer, self.len());
                 // TODO: Proper sync logic
             }
+            self.current_chunk = (self.current_chunk + 1) % self.chunk_count;
         }
     }
 }
@@ -97,7 +116,12 @@ impl<T> RawBuffer<T> for ChunkedBuffer<T> {
 impl<T> Drop for ChunkedBuffer<T> {
     fn drop(&mut self) {
         unsafe {
+            gl::BindBuffer(self.buffer_type, self.vbo);
+            gl::UnmapBuffer(self.buffer_type);
             gl::DeleteBuffers(1, &self.vbo as *const _);
         }
     }
 }
+// https://github.com/nvMcJohn/apitest/blob/a3f38b1c15ca160c883cddaa141c5376db56a5e6/src/framework/bufferlock.cpp
+// https://github.com/nvMcJohn/apitest/blob/master/src/solutions/dynamicstreaming/gl/mappersistent.cpp
+// https://github.com/nvMcJohn/apitest/blob/master/src/solutions/untexturedobjects/gl/mappersistent.cpp

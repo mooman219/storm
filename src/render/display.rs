@@ -1,7 +1,7 @@
 use gl;
-use std::ffi::CStr;
-use glutin::GlContext;
 use glutin;
+use glutin::GlContext;
+use std::ffi::CStr;
 
 #[derive(Copy, Clone)]
 pub enum GlString {
@@ -44,7 +44,8 @@ impl Display {
         context_builder: glutin::ContextBuilder,
         events_loop: &glutin::EventsLoop,
     ) -> Display {
-        let gl_window = glutin::GlWindow::new(window_builder, context_builder, &events_loop).unwrap();
+        let gl_window =
+            glutin::GlWindow::new(window_builder, context_builder, &events_loop).unwrap();
         unsafe {
             gl_window.make_current().unwrap();
             gl::load_with(|symbol| gl_window.get_proc_address(symbol) as *const _);

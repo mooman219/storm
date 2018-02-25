@@ -26,8 +26,8 @@ impl<T: Vertex> Geometry for Quad<T> {
     type VertexType = T;
     type IndiceType = [u16; 6];
 
-    fn generate_indicies(index: u16) -> Self::IndiceType {
-        let index = index * 6;
+    fn generate_indice(index: u16) -> Self::IndiceType {
+        let index = index * 4;
         [
             index + 0,
             index + 1,

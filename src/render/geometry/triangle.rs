@@ -24,7 +24,7 @@ impl<T: Vertex> Geometry for Triangle<T> {
     type VertexType = T;
     type IndiceType = [u16; 3];
 
-    fn generate_indicies(index: u16) -> Self::IndiceType {
+    fn generate_indice(index: u16) -> Self::IndiceType {
         let index = index * 3;
         [index + 0, index + 1, index + 2]
     }

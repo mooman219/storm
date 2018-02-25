@@ -1,6 +1,7 @@
 pub mod chunked;
 pub mod dynamic;
 pub mod geometry;
+pub mod immutable;
 
 pub trait RawBuffer<T> {
     fn add(&mut self, item: T) -> usize;
@@ -9,7 +10,9 @@ pub trait RawBuffer<T> {
 
     fn update(&mut self, index: usize, item: T);
 
-    fn offset(&self) -> usize;
+    fn offset_index(&self) -> usize;
+
+    fn offset_size(&self) -> usize;
 
     fn len(&self) -> usize;
 
