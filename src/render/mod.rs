@@ -12,6 +12,8 @@ use glutin;
 use glutin::VirtualKeyCode;
 use render::message::*;
 use render::message::consumer::*;
+use std::thread::sleep;
+use std::time::Duration;
 
 pub fn render_loop(frame_consumer: Consumer<RenderFrame>) {
     // Event loop creation
@@ -49,5 +51,8 @@ pub fn render_loop(frame_consumer: Consumer<RenderFrame>) {
 
         // Render
         render_consumer.tick();
+
+        // Sleep
+        sleep(Duration::new(0, 100));
     }
 }

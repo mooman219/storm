@@ -22,6 +22,7 @@ impl<T: Vertex> Quad<T> {
 
 impl<T: Vertex> Geometry for Quad<T> {
     const VERTEX_COUNT: usize = 6;
+    const VERTEX_OFFSET: usize = 4;
     type ShapeType = Self;
     type VertexType = T;
     type IndiceType = [u16; 6];

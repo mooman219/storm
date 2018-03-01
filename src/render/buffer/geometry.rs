@@ -9,31 +9,26 @@ use render::vertex::*;
 pub struct GeometryBuffer<T: Geometry> {
     element_buffer: ImmutableBuffer<T::IndiceType>,
     vertex_buffer: ChunkedBuffer<T>,
-    vao: u32,
+    vertex_array: VertexArray<T::VertexType>,
 }
 
 // TODO: This can be a shape buffer since we're only drawing triangles.
 impl<T: Geometry> GeometryBuffer<T> {
     pub fn new(capacity: usize) -> GeometryBuffer<T> {
+        // Vertex Buffer Object
+        let vertex_buffer = ChunkedBuffer::new(buffer_type::ARRAY_BUFFER, 3, capacity);
+        // Vertex Array Object
+        let vertex_array = VertexArray::new();
         // Element Buffer Object
         let element_buffer = ImmutableBuffer::new(
             buffer_type::ELEMENT_ARRAY_BUFFER,
             T::generate_indice_list(capacity as u16),
         );
-        // Vertex Buffer Object
-        let vertex_buffer = ChunkedBuffer::new(buffer_type::ARRAY_BUFFER, 3, capacity);
-        // Vertex Array Object
-        let mut vao = 0u32;
-        unsafe {
-            gl::GenVertexArrays(1, &mut vao);
-            gl::BindVertexArray(vao);
-        }
-        T::VertexType::configure_vertex_attribute();
         // Return
         GeometryBuffer {
             element_buffer: element_buffer,
             vertex_buffer: vertex_buffer,
-            vao: vao,
+            vertex_array: vertex_array,
         }
     }
 
@@ -53,12 +48,11 @@ impl<T: Geometry> GeometryBuffer<T> {
         self.vertex_buffer.sync();
     }
 
-    pub fn draw(&self) {
+    pub fn draw(&mut self) {
         unsafe {
             let vertices = self.vertex_buffer.len() * T::VERTEX_COUNT;
-            let offset_index = (self.vertex_buffer.offset_index() * T::VERTEX_COUNT) as i32;
-            gl::BindVertexArray(self.vao);
-            self.element_buffer.bind();
+            let offset_index = (self.vertex_buffer.offset_index() * T::VERTEX_OFFSET) as i32;
+            self.vertex_array.bind();
             gl::DrawElementsBaseVertex(
                 draw_mode::TRIANGLES, // Draw mode
                 vertices as i32,      // Number of vertices
@@ -66,14 +60,6 @@ impl<T: Geometry> GeometryBuffer<T> {
                 0 as *const _,        // Offset of indices
                 offset_index,         // Base vertex offset
             );
-        }
-    }
-}
-
-impl<T: Geometry> Drop for GeometryBuffer<T> {
-    fn drop(&mut self) {
-        unsafe {
-            gl::DeleteVertexArrays(1, &self.vao as *const _);
         }
     }
 }

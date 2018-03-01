@@ -20,6 +20,7 @@ impl<T: Vertex> Triangle<T> {
 
 impl<T: Vertex> Geometry for Triangle<T> {
     const VERTEX_COUNT: usize = 3;
+    const VERTEX_OFFSET: usize = 3;
     type ShapeType = Self;
     type VertexType = T;
     type IndiceType = [u16; 3];

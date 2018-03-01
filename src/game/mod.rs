@@ -1,8 +1,3 @@
-pub mod entity;
-pub mod state;
-pub mod universe;
-pub mod world;
-
 use bounded_spsc_queue::Producer;
 use cgmath::*;
 use render::color;
@@ -50,12 +45,23 @@ pub fn game_loop(frame_producer: Producer<RenderFrame>) {
     ));
     let mut translation = Vector3::new(0f32, 0f32, 0f32);
     let mut clock = FrameClock::new();
-    clock.set_fps(146);
+    clock.set_fps(45);
     loop {
-        if translation.x > 8f32 {
+        if translation.x > 7f32 {
             translation.x = 0f32;
+            render_producer.create_triangle(Triangle::new(
+                ShapeVertex::new(-3.0, -1.0, color::RED),
+                ShapeVertex::new(-4.0, -1.5, color::BLUE),
+                ShapeVertex::new(-2.0, -1.5, color::YELLOW),
+            ));
+            render_producer.create_rect(
+                Vector2::new(-1f32, -1f32),
+                Vector2::new(1f32, 1f32),
+                color::GREEN,
+            );
+            render_producer.send();
         }
-        translation.x += 0.004f32;
+        translation.x += 0.03f32;
         render_producer.set_translation(translation);
         render_producer.send();
         clock.tick();

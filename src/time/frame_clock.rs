@@ -46,8 +46,8 @@ impl FrameClock {
         let duration = as_nanoseconds(&self.last_tick.elapsed());
         if duration < self.target {
             let diff = (self.target - duration) as u32;
-            if self.target < 10000000 {
-                // Spin instead of sleeping above 100FPS.
+            if self.target < 16666667 {
+                // Spin instead of sleeping above 60FPS.
                 let spin_start = Instant::now();
                 while as_nanoseconds(&spin_start.elapsed()) < diff as u64 {}
             } else {

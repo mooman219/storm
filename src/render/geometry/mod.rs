@@ -5,7 +5,8 @@ use render::buffer::geometry::*;
 use render::vertex::*;
 
 pub trait Geometry {
-    const VERTEX_COUNT: usize;
+    const VERTEX_COUNT: usize; // Number of verticies for the geometry
+    const VERTEX_OFFSET: usize; // Number of unique verticies for the geometry
     type ShapeType: Geometry;
     type VertexType: Vertex;
     type IndiceType;

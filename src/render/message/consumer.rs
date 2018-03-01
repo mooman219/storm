@@ -28,7 +28,7 @@ impl RenderConsumer {
             clock: FrameClock::new(),
             frame_consumer: frame_consumer,
             shape_shader: ShapeShader::new(),
-            triangle_buffer: Triangle::new_geometry_buffer(3),
+            triangle_buffer: Triangle::new_geometry_buffer(100),
             quad_buffer: Quad::new_geometry_buffer(100),
         };
         // Initialize it
@@ -73,25 +73,22 @@ impl RenderConsumer {
         // Frame processing
         match self.frame_consumer.try_pop().as_mut() {
             Some(f) => {
-                // Quads
+                // Message Quads
                 self.handle_create_quad(&mut f.create_quad);
                 self.quad_buffer.sync();
-                // Triangles
+                // Message Triangles
                 self.handle_create_triangle(&mut f.create_triangle);
                 self.triangle_buffer.sync();
-                // Shader
+                // Message Shader
                 self.shape_shader.bind();
                 self.handle_set_translation(&f.translation);
-
-                // Shapes
+                // Draw Shapes
                 self.shape_shader.bind();
                 self.quad_buffer.draw();
                 self.triangle_buffer.draw();
-
                 // Finish
                 self.display.swap_buffers();
-                // self.display.clear();
-
+                self.display.clear();
                 // Timing
                 self.clock.tick_fps();
             },

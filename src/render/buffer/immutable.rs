@@ -18,18 +18,11 @@ impl<T> ImmutableBuffer<T> {
         unsafe {
             gl::GenBuffers(1, &mut vbo);
             gl::BindBuffer(buffer_type, vbo);
-            // gl::BufferData(
-            //     buffer_type,     // Buffer type
-            //     size,            // Size
-            //     data,            // Initial data
-            //     gl::STATIC_DRAW, // Usage
-            // );
-            // Testing using BufferStorage vs BufferData
-            gl::BufferStorage(
-                buffer_type, // Buffer type
-                size,        // Buffer size
-                data,        // Initial data
-                0,           // Flags
+            gl::BufferData(
+                buffer_type,     // Buffer type
+                size,            // Size
+                data,            // Initial data
+                gl::STATIC_DRAW, // Usage
             );
         }
         ImmutableBuffer {

@@ -118,6 +118,7 @@ impl<T> Drop for ChunkedBuffer<T> {
         }
     }
 }
+
 // https://github.com/nvMcJohn/apitest/blob/a3f38b1c15ca160c883cddaa141c5376db56a5e6/src/framework/bufferlock.cpp
 // https://github.com/nvMcJohn/apitest/blob/master/src/solutions/dynamicstreaming/gl/mappersistent.cpp
 // https://github.com/nvMcJohn/apitest/blob/master/src/solutions/untexturedobjects/gl/mappersistent.cpp

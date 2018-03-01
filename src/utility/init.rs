@@ -1,5 +1,5 @@
-use std::ops::Deref;
 use std::cell::UnsafeCell;
+use std::ops::Deref;
 
 //
 // StaticStack
