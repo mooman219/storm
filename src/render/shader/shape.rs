@@ -40,7 +40,7 @@ impl ShapeShader {
         ShapeShader {
             program: program,
             uniform_ortho: uniform_ortho,
-            ortho_translation: Matrix4::zero(),
+            ortho_translation: Matrix4::from_translation(Vector3::new(0f32, 0f32, 0f32)),
             ortho_scale: Matrix4::from_scale(1f32),
         }
     }

@@ -1,6 +1,7 @@
 pub mod chunked;
 pub mod dynamic;
 pub mod geometry;
+pub mod fixed;
 pub mod immutable;
 
 pub trait RawBuffer<T> {

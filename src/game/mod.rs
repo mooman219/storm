@@ -45,7 +45,7 @@ pub fn game_loop(frame_producer: Producer<RenderFrame>) {
     ));
     let mut translation = Vector3::new(0f32, 0f32, 0f32);
     let mut clock = FrameClock::new();
-    clock.set_fps(45);
+    clock.set_fps(60);
     loop {
         if translation.x > 7f32 {
             translation.x = 0f32;
@@ -61,7 +61,7 @@ pub fn game_loop(frame_producer: Producer<RenderFrame>) {
             );
             render_producer.send();
         }
-        translation.x += 0.03f32;
+        translation.x += 0.02f32;
         render_producer.set_translation(translation);
         render_producer.send();
         clock.tick();

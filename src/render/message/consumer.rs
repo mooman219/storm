@@ -1,5 +1,4 @@
 use bounded_spsc_queue::Consumer;
-use cgmath::*;
 use render::buffer::geometry::*;
 use render::display::*;
 use render::geometry::*;
@@ -9,15 +8,15 @@ use render::message::*;
 use render::message::RenderFrame;
 use render::shader::shape::*;
 use render::vertex::shape::*;
-use time::frame_clock::*;
+use time::timer::*;
 
 pub struct RenderConsumer {
     display: Display,
-    clock: FrameClock,
     frame_consumer: Consumer<RenderFrame>,
     shape_shader: ShapeShader,
     triangle_buffer: GeometryBuffer<Triangle<ShapeVertex>>,
     quad_buffer: GeometryBuffer<Quad<ShapeVertex>>,
+    timer_render: Timer,
 }
 
 impl RenderConsumer {
@@ -25,11 +24,11 @@ impl RenderConsumer {
         // Get the composed consumer
         let mut consumer = RenderConsumer {
             display: display,
-            clock: FrameClock::new(),
             frame_consumer: frame_consumer,
             shape_shader: ShapeShader::new(),
-            triangle_buffer: Triangle::new_geometry_buffer(100),
+            triangle_buffer: Triangle::new_geometry_buffer(50),
             quad_buffer: Quad::new_geometry_buffer(100),
+            timer_render: Timer::new("Frame"),
         };
         // Initialize it
         consumer.initialize();
@@ -40,10 +39,7 @@ impl RenderConsumer {
     fn initialize(&mut self) {
         self.display.enable_clear_color();
         self.display.clear_color(0.0, 0.0, 0.0, 1.0);
-        self.clock.set_fps(20000);
         self.shape_shader.bind();
-        self.shape_shader
-            .set_translation(Vector3::new(0f32, 0f32, 0f32));
         self.shape_shader.set_scale(0.5f32);
         println!(
             "Render: OpenGL version {}",
@@ -73,6 +69,8 @@ impl RenderConsumer {
         // Frame processing
         match self.frame_consumer.try_pop().as_mut() {
             Some(f) => {
+                self.timer_render.start();
+
                 // Message Quads
                 self.handle_create_quad(&mut f.create_quad);
                 self.quad_buffer.sync();
@@ -89,8 +87,8 @@ impl RenderConsumer {
                 // Finish
                 self.display.swap_buffers();
                 self.display.clear();
-                // Timing
-                self.clock.tick_fps();
+
+                self.timer_render.stop();
             },
             None => {},
         }

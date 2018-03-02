@@ -1,6 +1,6 @@
 use gl;
 use render::buffer::*;
-use render::buffer::chunked::*;
+use render::buffer::fixed::*;
 use render::buffer::immutable::*;
 use render::enums::*;
 use render::geometry::*;
@@ -8,7 +8,7 @@ use render::vertex::*;
 
 pub struct GeometryBuffer<T: Geometry> {
     element_buffer: ImmutableBuffer<T::IndiceType>,
-    vertex_buffer: ChunkedBuffer<T>,
+    vertex_buffer: FixedBuffer<T>,
     vertex_array: VertexArray<T::VertexType>,
 }
 
@@ -16,7 +16,7 @@ pub struct GeometryBuffer<T: Geometry> {
 impl<T: Geometry> GeometryBuffer<T> {
     pub fn new(capacity: usize) -> GeometryBuffer<T> {
         // Vertex Buffer Object
-        let vertex_buffer = ChunkedBuffer::new(buffer_type::ARRAY_BUFFER, 3, capacity);
+        let vertex_buffer = FixedBuffer::new(buffer_type::ARRAY_BUFFER, capacity);
         // Vertex Array Object
         let vertex_array = VertexArray::new();
         // Element Buffer Object

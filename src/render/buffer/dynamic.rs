@@ -3,6 +3,7 @@ use render::buffer::*;
 use std::cmp;
 use std::mem;
 use std::ptr;
+use time::timer::*;
 
 pub struct DynamicBuffer<T> {
     vbo: u32,
@@ -12,6 +13,7 @@ pub struct DynamicBuffer<T> {
     buffer_capacity: usize,
     buffer_type: u32,
     items: Vec<T>,
+    timer_sync: Timer,
 }
 
 impl<T> DynamicBuffer<T> {
@@ -40,6 +42,7 @@ impl<T> DynamicBuffer<T> {
             buffer_capacity: DynamicBuffer::<T>::DEFAULT_CAPACITY,
             buffer_type: buffer_type,
             items: items,
+            timer_sync: Timer::new("Dynamic - Sync"),
         }
     }
 
@@ -89,6 +92,7 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
 
     fn sync(&mut self) {
         if self.dirty {
+            self.timer_sync.start();
             self.dirty = false;
             unsafe {
                 gl::BindBuffer(self.buffer_type, self.vbo);
@@ -105,6 +109,7 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
                     gl::BufferSubData(self.buffer_type, start, length, offset);
                 }
             }
+            self.timer_sync.stop();
         }
     }
 }

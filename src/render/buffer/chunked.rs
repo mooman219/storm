@@ -2,6 +2,7 @@ use gl;
 use render::buffer::*;
 use std::mem;
 use std::ptr;
+use time::timer::*;
 
 pub struct ChunkedBuffer<T> {
     vbo: u32,
@@ -12,6 +13,7 @@ pub struct ChunkedBuffer<T> {
     chunk_length: usize,
     items: Vec<T>,
     map: *mut T,
+    timer_sync: Timer,
 }
 
 impl<T> ChunkedBuffer<T> {
@@ -57,6 +59,7 @@ impl<T> ChunkedBuffer<T> {
             chunk_length: chunk_length,
             items: items,
             map: map,
+            timer_sync: Timer::new("Chunked - Sync"),
         }
     }
 }
@@ -98,6 +101,7 @@ impl<T> RawBuffer<T> for ChunkedBuffer<T> {
 
     fn sync(&mut self) {
         if self.dirty {
+            self.timer_sync.start();
             self.dirty = false;
             self.current_chunk = (self.current_chunk + 1) % self.chunk_count;
             unsafe {
@@ -105,6 +109,7 @@ impl<T> RawBuffer<T> for ChunkedBuffer<T> {
                 ptr::copy_nonoverlapping(self.items.as_ptr(), pointer, self.len());
                 // TODO: Proper sync logic
             }
+            self.timer_sync.stop();
         }
     }
 }
