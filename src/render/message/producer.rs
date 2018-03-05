@@ -7,10 +7,13 @@ use render::message::*;
 use render::message::RenderFrame;
 use render::vertex::shape::*;
 use std::mem;
+use utility::slotmap::*;
 
 pub struct RenderProducer {
     frame_producer: Producer<RenderFrame>,
     frame: RenderFrame,
+    map_rect: IndexMap,
+    map_triangle: IndexMap,
 }
 
 impl RenderProducer {
@@ -18,10 +21,12 @@ impl RenderProducer {
         RenderProducer {
             frame_producer: frame_producer,
             frame: RenderFrame::new(),
+            map_rect: IndexMap::new(),
+            map_triangle: IndexMap::new(),
         }
     }
 
-    pub fn create_rect(&mut self, pos: Vector2<f32>, size: Vector2<f32>, color: Color) {
+    pub fn create_rect(&mut self, pos: Vector2<f32>, size: Vector2<f32>, color: Color) -> IndexToken {
         self.frame
             .create_quad
             .push(CreateQuadMessage::new(Quad::new(
@@ -30,12 +35,14 @@ impl RenderProducer {
                 ShapeVertex::new(pos.x + size.x, pos.y + size.y, color),
                 ShapeVertex::new(pos.x + size.x, pos.y, color),
             )));
+        self.map_rect.add()
     }
 
-    pub fn create_triangle(&mut self, triangle: Triangle<ShapeVertex>) {
+    pub fn create_triangle(&mut self, triangle: Triangle<ShapeVertex>) -> IndexToken {
         self.frame
             .create_triangle
             .push(CreateTriangleMessage::new(triangle));
+        self.map_triangle.add()
     }
 
     pub fn set_translation(&mut self, translation: Vector3<f32>) {
