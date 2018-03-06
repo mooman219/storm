@@ -36,12 +36,11 @@ impl IndexMap {
                 index
             },
             None => {
-                let index = self.data_len;
                 self.table.push(Slot {
-                    to_data: index,
-                    to_map: index,
+                    to_data: self.data_len,
+                    to_map: self.data_len,
                 });
-                index
+                self.data_len
             },
         };
         self.data_len += 1;
@@ -60,10 +59,7 @@ impl IndexMap {
     }
 
     pub fn get(&self, token: &IndexToken) -> usize {
-        // Safe
-        self.table[token.index].to_data
-        // Unsafe
-        // unsafe { self.table.get_unchecked(token.index).to_data }
+        unsafe { self.table.get_unchecked(token.index).to_data as usize }
     }
 }
 
@@ -96,12 +92,11 @@ impl<T> SlotMap<T> {
                 index
             },
             None => {
-                let index = self.data.len();
                 self.table.push(Slot {
-                    to_data: index,
-                    to_map: index,
+                    to_data: self.data.len(),
+                    to_map: self.data.len(),
                 });
-                index
+                self.data.len()
             },
         };
         self.data.push(value);
@@ -121,12 +116,9 @@ impl<T> SlotMap<T> {
     }
 
     pub fn get(&self, token: &IndexToken) -> &T {
-        // Safe
-        &self.data[self.table[token.index].to_data]
-        // Unsafe
-        // unsafe {
-        //     &self.data
-        //         .get_unchecked(self.table.get_unchecked(token.index).to_data)
-        // }
+        unsafe {
+            &self.data
+                .get_unchecked(self.table.get_unchecked(token.index).to_data)
+        }
     }
 }
