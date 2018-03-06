@@ -4,7 +4,6 @@ use render::color::*;
 use render::geometry::quad::*;
 use render::geometry::triangle::*;
 use render::message::*;
-use render::message::RenderFrame;
 use render::vertex::shape::*;
 use std::mem;
 use utility::slotmap::*;
@@ -27,26 +26,30 @@ impl RenderProducer {
     }
 
     pub fn create_rect(&mut self, pos: Vector2<f32>, size: Vector2<f32>, color: Color) -> IndexToken {
-        self.frame
-            .create_quad
-            .push(CreateQuadMessage::new(Quad::new(
+        let message = CreateQuadMessage {
+            quad: Quad::new(
                 ShapeVertex::new(pos.x, pos.y + size.y, color),
                 ShapeVertex::new(pos.x, pos.y, color),
                 ShapeVertex::new(pos.x + size.x, pos.y + size.y, color),
                 ShapeVertex::new(pos.x + size.x, pos.y, color),
-            )));
+            ),
+        };
+        self.frame.create_quad.push(message);
         self.map_rect.add()
     }
 
     pub fn create_triangle(&mut self, triangle: Triangle<ShapeVertex>) -> IndexToken {
-        self.frame
-            .create_triangle
-            .push(CreateTriangleMessage::new(triangle));
+        let message = CreateTriangleMessage { triangle: triangle };
+        self.frame.create_triangle.push(message);
         self.map_triangle.add()
     }
 
     pub fn set_translation(&mut self, translation: Vector3<f32>) {
-        self.frame.translation = SetTranslationMessage::new(true, translation);
+        let message = SetTranslationMessage {
+            set: true,
+            translation: translation,
+        };
+        self.frame.translation = message;
     }
 
     pub fn send(&mut self) {

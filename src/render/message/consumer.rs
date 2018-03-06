@@ -5,7 +5,6 @@ use render::geometry::*;
 use render::geometry::quad::*;
 use render::geometry::triangle::*;
 use render::message::*;
-use render::message::RenderFrame;
 use render::shader::shape::*;
 use render::vertex::shape::*;
 use time::timer::*;

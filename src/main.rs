@@ -9,6 +9,7 @@ extern crate rand;
 extern crate test;
 
 mod game;
+mod input;
 mod math;
 mod physics;
 mod render;
