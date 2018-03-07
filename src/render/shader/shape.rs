@@ -28,6 +28,7 @@ static FRAGMENT: &str = r#"
 pub struct ShapeShader {
     program: ShaderProgram,
     uniform_ortho: i32,
+    ortho: Matrix4<f32>,
     ortho_translation: Matrix4<f32>,
     ortho_scale: Matrix4<f32>,
 }
@@ -40,6 +41,7 @@ impl ShapeShader {
         ShapeShader {
             program: program,
             uniform_ortho: uniform_ortho,
+            ortho: ortho(0f32, 1f32, 0f32, 1f32, -1f32, 1f32),
             ortho_translation: Matrix4::from_translation(Vector3::new(0f32, 0f32, 0f32)),
             ortho_scale: Matrix4::from_scale(1f32),
         }
@@ -47,6 +49,12 @@ impl ShapeShader {
 
     pub fn bind(&self) {
         self.program.bind();
+    }
+
+    pub fn set_bounds(&mut self, width: f32, height: f32) {
+        let aspect_ratio = width / height;
+        self.ortho = ortho(0f32, aspect_ratio, 0f32, 1f32, -1f32, 1f32);
+        self.sync();
     }
 
     pub fn set_translation(&mut self, translation: Vector3<f32>) {
@@ -60,7 +68,7 @@ impl ShapeShader {
     }
 
     fn sync(&self) {
-        let matrix = self.ortho_translation * self.ortho_scale;
+        let matrix = self.ortho * self.ortho_translation * self.ortho_scale;
         unsafe {
             gl::UniformMatrix4fv(
                 self.uniform_ortho,          // Program location

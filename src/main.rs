@@ -45,6 +45,7 @@ fn main() {
         // Input
         input.tick();
         // Render
+        render.handle_resize(input.next_resize());
         render.tick();
         // Sleep
         sleep(Duration::new(0, 100));

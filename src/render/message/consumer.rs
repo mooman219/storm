@@ -1,4 +1,6 @@
 use bounded_spsc_queue::Consumer;
+use gl;
+use input::*;
 use render::buffer::geometry::*;
 use render::display::*;
 use render::geometry::*;
@@ -61,6 +63,18 @@ impl RenderConsumer {
             },
             None => {},
         };
+    }
+
+    pub fn handle_resize(&mut self, message: Option<ResizeMessage>) {
+        match message {
+            Some(msg) => unsafe {
+                gl::Viewport(0, 0, msg.width as i32, msg.height as i32);
+                self.shape_shader.bind();
+                self.shape_shader
+                    .set_bounds(msg.width as f32, msg.height as f32);
+            },
+            None => {},
+        }
     }
 
     pub fn tick(&mut self) {

@@ -44,8 +44,7 @@ impl Display {
         context_builder: glutin::ContextBuilder,
         events_loop: &glutin::EventsLoop,
     ) -> Display {
-        let gl_window =
-            glutin::GlWindow::new(window_builder, context_builder, &events_loop).unwrap();
+        let gl_window = glutin::GlWindow::new(window_builder, context_builder, &events_loop).unwrap();
         unsafe {
             gl_window.make_current().unwrap();
             gl::load_with(|symbol| gl_window.get_proc_address(symbol) as *const _);
@@ -131,13 +130,6 @@ impl Display {
     }
 
     // Buffer
-
-    pub fn resize(&self, width: u32, height: u32) {
-        unsafe {
-            self.window.resize(width, height);
-            gl::Viewport(0, 0, width as i32, height as i32);
-        }
-    }
 
     pub fn swap_buffers(&self) {
         self.window

@@ -14,30 +14,30 @@ pub fn game_loop(render_producer: Producer<RenderFrame>, _: Consumer<InputFrame>
     for x in -16..4 {
         let offset = x as f32;
         render_producer.create_rect(
-            Vector2::new(-1f32 + offset, -1f32),
+            Vector2::new(-1f32 + offset, 0f32),
             Vector2::new(0.5f32, 0.5f32),
             color::ORANGE,
         );
         render_producer.create_rect(
-            Vector2::new(-0.5f32 + offset, -0.5f32),
+            Vector2::new(-0.5f32 + offset, 0.5f32),
             Vector2::new(0.5f32, 0.5f32),
             color::RED,
         );
         render_producer.create_rect(
-            Vector2::new(0f32 + offset, 0f32),
+            Vector2::new(0f32 + offset, 1f32),
             Vector2::new(0.5f32, 0.5f32),
             color::PURPLE,
         );
         render_producer.create_rect(
-            Vector2::new(0.5f32 + offset, 0.5f32),
+            Vector2::new(0.5f32 + offset, 1.5f32),
             Vector2::new(0.5f32, 0.5f32),
             color::BLUE,
         );
     }
     render_producer.create_triangle(Triangle::new(
-        ShapeVertex::new(0.0, -1.0, color::RED),
-        ShapeVertex::new(-1.0, -1.5, color::BLUE),
-        ShapeVertex::new(1.0, -1.5, color::YELLOW),
+        ShapeVertex::new(0.0, 1.0, color::RED),
+        ShapeVertex::new(-1.0, 0.5, color::BLUE),
+        ShapeVertex::new(1.0, 0.5, color::YELLOW),
     ));
     render_producer.send();
     render_producer.create_triangle(Triangle::new(
@@ -49,21 +49,10 @@ pub fn game_loop(render_producer: Producer<RenderFrame>, _: Consumer<InputFrame>
     let mut clock = FrameClock::new();
     clock.set_fps(60);
     loop {
-        if translation.x > 7f32 {
+        if translation.x > 6f32 {
             translation.x = 0f32;
-            render_producer.create_triangle(Triangle::new(
-                ShapeVertex::new(-3.0, -1.0, color::RED),
-                ShapeVertex::new(-4.0, -1.5, color::BLUE),
-                ShapeVertex::new(-2.0, -1.5, color::YELLOW),
-            ));
-            render_producer.create_rect(
-                Vector2::new(-1f32, -1f32),
-                Vector2::new(1f32, 1f32),
-                color::GREEN,
-            );
-            render_producer.send();
         }
-        translation.x += 0.02f32;
+        translation.x += 0.01f32;
         render_producer.set_translation(translation);
         render_producer.send();
         clock.tick();
