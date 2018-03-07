@@ -11,7 +11,7 @@ use time::timer::*;
 
 pub struct RenderConsumer {
     display: Display,
-    frame_consumer: Consumer<RenderFrame>,
+    render_consumer: Consumer<RenderFrame>,
     shape_shader: ShapeShader,
     triangle_buffer: GeometryBuffer<Triangle<ShapeVertex>>,
     quad_buffer: GeometryBuffer<Quad<ShapeVertex>>,
@@ -19,31 +19,27 @@ pub struct RenderConsumer {
 }
 
 impl RenderConsumer {
-    pub fn new(display: Display, frame_consumer: Consumer<RenderFrame>) -> RenderConsumer {
+    pub fn new(display: Display, render_consumer: Consumer<RenderFrame>) -> RenderConsumer {
         // Get the composed consumer
         let mut consumer = RenderConsumer {
             display: display,
-            frame_consumer: frame_consumer,
+            render_consumer: render_consumer,
             shape_shader: ShapeShader::new(),
             triangle_buffer: Triangle::new_geometry_buffer(50),
             quad_buffer: Quad::new_geometry_buffer(100),
             timer_render: Timer::new("Frame"),
         };
         // Initialize it
-        consumer.initialize();
-        // Return
-        consumer
-    }
-
-    fn initialize(&mut self) {
-        self.display.enable_clear_color();
-        self.display.clear_color(0.0, 0.0, 0.0, 1.0);
-        self.shape_shader.bind();
-        self.shape_shader.set_scale(0.5f32);
+        consumer.display.enable_clear_color();
+        consumer.display.clear_color(0.0, 0.0, 0.0, 1.0);
+        consumer.shape_shader.bind();
+        consumer.shape_shader.set_scale(0.5f32);
         println!(
             "Render: OpenGL version {}",
-            self.display.get_version_string()
+            consumer.display.get_version_string()
         );
+        // Return
+        consumer
     }
 
     pub fn handle_create_quad(&mut self, messages: &mut Vec<CreateQuadMessage>) {
@@ -58,15 +54,18 @@ impl RenderConsumer {
         }
     }
 
-    pub fn handle_set_translation(&mut self, message: &SetTranslationMessage) {
-        if message.set {
-            self.shape_shader.set_translation(message.translation);
-        }
+    pub fn handle_set_translation(&mut self, message: Option<SetTranslationMessage>) {
+        match message {
+            Some(msg) => {
+                self.shape_shader.set_translation(msg.translation);
+            },
+            None => {},
+        };
     }
 
     pub fn tick(&mut self) {
         // Frame processing
-        match self.frame_consumer.try_pop().as_mut() {
+        match self.render_consumer.try_pop().as_mut() {
             Some(f) => {
                 self.timer_render.start();
 
@@ -78,7 +77,7 @@ impl RenderConsumer {
                 self.triangle_buffer.sync();
                 // Message Shader
                 self.shape_shader.bind();
-                self.handle_set_translation(&f.translation);
+                self.handle_set_translation(f.translation);
                 // Draw Shapes
                 self.shape_shader.bind();
                 self.quad_buffer.draw();

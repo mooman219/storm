@@ -9,16 +9,16 @@ use std::mem;
 use utility::slotmap::*;
 
 pub struct RenderProducer {
-    frame_producer: Producer<RenderFrame>,
+    render_producer: Producer<RenderFrame>,
     frame: RenderFrame,
     map_rect: IndexMap,
     map_triangle: IndexMap,
 }
 
 impl RenderProducer {
-    pub fn new(frame_producer: Producer<RenderFrame>) -> RenderProducer {
+    pub fn new(render_producer: Producer<RenderFrame>) -> RenderProducer {
         RenderProducer {
-            frame_producer: frame_producer,
+            render_producer: render_producer,
             frame: RenderFrame::new(),
             map_rect: IndexMap::new(),
             map_triangle: IndexMap::new(),
@@ -46,15 +46,14 @@ impl RenderProducer {
 
     pub fn set_translation(&mut self, translation: Vector3<f32>) {
         let message = SetTranslationMessage {
-            set: true,
             translation: translation,
         };
-        self.frame.translation = message;
+        self.frame.translation = Some(message);
     }
 
     pub fn send(&mut self) {
         let mut frame = RenderFrame::new();
         mem::swap(&mut frame, &mut self.frame);
-        self.frame_producer.push(frame);
+        self.render_producer.push(frame);
     }
 }

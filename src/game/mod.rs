@@ -1,5 +1,7 @@
+use bounded_spsc_queue::Consumer;
 use bounded_spsc_queue::Producer;
 use cgmath::*;
+use input::*;
 use render::color;
 use render::geometry::triangle::*;
 use render::message::*;
@@ -7,8 +9,8 @@ use render::message::producer::*;
 use render::vertex::shape::*;
 use time::frame_clock::*;
 
-pub fn game_loop(frame_producer: Producer<RenderFrame>) {
-    let mut render_producer = RenderProducer::new(frame_producer);
+pub fn game_loop(render_producer: Producer<RenderFrame>, _: Consumer<InputFrame>) {
+    let mut render_producer = RenderProducer::new(render_producer);
     for x in -16..4 {
         let offset = x as f32;
         render_producer.create_rect(

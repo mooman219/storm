@@ -17,6 +17,8 @@ mod time;
 mod utility;
 
 use std::thread;
+use std::thread::sleep;
+use std::time::Duration;
 
 fn init() {
     math::init();
@@ -27,12 +29,24 @@ fn main() {
     init();
 
     // Render messaging. Max of 3 frames can be buffered.
-    let (frame_producer, frame_consumer) = bounded_spsc_queue::make(3);
+    let (render_producer, render_consumer) = bounded_spsc_queue::make(3);
+    let (input_producer, input_consumer) = bounded_spsc_queue::make(3);
 
     thread::spawn(move || {
-        game::game_loop(frame_producer);
+        game::game_loop(render_producer, input_consumer);
     });
 
-    // Must be on main thread.
-    render::render_loop(frame_consumer);
+    // Render and input loops follow.
+
+    // Setup communication
+    let (mut input, mut render) = render::create_target(input_producer, render_consumer);
+    // Loop
+    while input.is_active() {
+        // Input
+        input.tick();
+        // Render
+        render.tick();
+        // Sleep
+        sleep(Duration::new(0, 100));
+    }
 }

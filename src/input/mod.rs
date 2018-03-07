@@ -8,3 +8,9 @@ impl InputFrame {
         InputFrame {}
     }
 }
+
+#[derive(Copy, Clone)]
+pub struct ResizeMessage {
+    pub width: u32,
+    pub height: u32,
+}

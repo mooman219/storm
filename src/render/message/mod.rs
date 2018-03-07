@@ -9,7 +9,7 @@ use render::vertex::shape::*;
 pub struct RenderFrame {
     pub create_quad: Vec<CreateQuadMessage>,
     pub create_triangle: Vec<CreateTriangleMessage>,
-    pub translation: SetTranslationMessage,
+    pub translation: Option<SetTranslationMessage>,
 }
 
 impl RenderFrame {
@@ -17,10 +17,7 @@ impl RenderFrame {
         RenderFrame {
             create_quad: Vec::new(),
             create_triangle: Vec::new(),
-            translation: SetTranslationMessage {
-                set: true,
-                translation: Vector3::new(0f32, 0f32, 0f32),
-            },
+            translation: None,
         }
     }
 }
@@ -33,7 +30,7 @@ pub struct CreateTriangleMessage {
     pub triangle: Triangle<ShapeVertex>,
 }
 
+#[derive(Copy, Clone)]
 pub struct SetTranslationMessage {
-    pub set: bool,
     pub translation: Vector3<f32>,
 }
