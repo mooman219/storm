@@ -36,10 +36,6 @@ impl RenderConsumer {
         consumer.display.clear_color(0.0, 0.0, 0.0, 1.0);
         consumer.shape_shader.bind();
         consumer.shape_shader.set_scale(0.5f32);
-        println!(
-            "Render: OpenGL version {}",
-            consumer.display.get_version_string()
-        );
         // Return
         consumer
     }

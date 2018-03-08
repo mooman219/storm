@@ -3,10 +3,8 @@ use bounded_spsc_queue::Producer;
 use cgmath::*;
 use input::*;
 use render::color;
-use render::geometry::triangle::*;
 use render::message::*;
 use render::message::producer::*;
-use render::vertex::shape::*;
 use time::frame_clock::*;
 
 pub fn game_loop(render_producer: Producer<RenderFrame>, _: Consumer<InputFrame>) {

@@ -4,7 +4,6 @@ use render::color::*;
 use render::geometry::quad::*;
 use render::geometry::triangle::*;
 use render::message::*;
-use render::vertex::shape::*;
 use std::mem;
 use utility::slotmap::*;
 
@@ -35,7 +34,7 @@ impl RenderProducer {
 
     pub fn create_triangle(&mut self, pos: Vector2<f32>, height: f32, color: Color) -> IndexToken {
         let message = CreateTriangleMessage {
-            triangle: Triangle::new_equilateral(pos, height, color),
+            triangle: Triangle::new_iso(pos, height, color),
         };
         self.frame.create_triangle.push(message);
         self.map_triangle.add()

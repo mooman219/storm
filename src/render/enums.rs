@@ -1,4 +1,5 @@
 use gl;
+use std::ffi::CStr;
 
 #[repr(u32)]
 #[derive(Copy, Clone)]
@@ -34,4 +35,25 @@ pub enum BufferType {
     TextureBuffer = gl::TEXTURE_BUFFER,
     TransformFeedbackBuffer = gl::TRANSFORM_FEEDBACK_BUFFER,
     UniformBuffer = gl::UNIFORM_BUFFER,
+}
+
+#[repr(u32)]
+#[derive(Copy, Clone)]
+pub enum GlString {
+    Vendor = gl::VENDOR,
+    Renderer = gl::RENDERER,
+    Version = gl::VERSION,
+    ShadingLanguageVersion = gl::SHADING_LANGUAGE_VERSION,
+    Extensions = gl::EXTENSIONS,
+}
+
+impl GlString {
+    pub fn get_string(self) -> String {
+        unsafe {
+            let data = CStr::from_ptr(gl::GetString(self as u32) as *const _)
+                .to_bytes()
+                .to_vec();
+            String::from_utf8(data).unwrap()
+        }
+    }
 }

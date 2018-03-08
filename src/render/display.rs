@@ -1,37 +1,6 @@
 use gl;
 use glutin;
 use glutin::GlContext;
-use std::ffi::CStr;
-
-#[derive(Copy, Clone)]
-pub enum GlString {
-    Vendor,
-    Renderer,
-    Version,
-    ShadingLanguageVersion,
-    Extensions,
-}
-
-impl GlString {
-    pub fn to_gl_enum(self) -> u32 {
-        match self {
-            GlString::Vendor => gl::VENDOR,
-            GlString::Renderer => gl::RENDERER,
-            GlString::Version => gl::VERSION,
-            GlString::ShadingLanguageVersion => gl::SHADING_LANGUAGE_VERSION,
-            GlString::Extensions => gl::EXTENSIONS,
-        }
-    }
-
-    pub fn get_string(self) -> String {
-        unsafe {
-            let data = CStr::from_ptr(gl::GetString(self.to_gl_enum()) as *const _)
-                .to_bytes()
-                .to_vec();
-            String::from_utf8(data).unwrap()
-        }
-    }
-}
 
 pub struct Display {
     window: glutin::GlWindow,
@@ -55,28 +24,6 @@ impl Display {
             window: gl_window,
             clear_mode: 0,
         }
-    }
-
-    // Strings
-
-    pub fn get_vender_string(&self) -> String {
-        GlString::Vendor.get_string()
-    }
-
-    pub fn get_renderer_string(&self) -> String {
-        GlString::Renderer.get_string()
-    }
-
-    pub fn get_version_string(&self) -> String {
-        GlString::Version.get_string()
-    }
-
-    pub fn get_shading_language_version_string(&self) -> String {
-        GlString::ShadingLanguageVersion.get_string()
-    }
-
-    pub fn get_extensions_string(&self) -> String {
-        GlString::Extensions.get_string()
     }
 
     // Clear
