@@ -1,5 +1,8 @@
+use cgmath::*;
+use render::color::*;
 use render::geometry::*;
 use render::vertex::*;
+use render::vertex::shape::*;
 
 #[repr(C)]
 pub struct Quad<T: Vertex> {
@@ -37,5 +40,20 @@ impl<T: Vertex> Geometry for Quad<T> {
             index + 1,
             index + 3,
         ]
+    }
+}
+
+// --------------------------------------------------------
+// Default implementations
+// --------------------------------------------------------
+
+impl Quad<ShapeVertex> {
+    pub fn new_rect(pos: Vector2<f32>, size: Vector2<f32>, color: Color) -> Quad<ShapeVertex> {
+        Self::new(
+            ShapeVertex::new(pos.x, pos.y + size.y, color),
+            ShapeVertex::new(pos.x, pos.y, color),
+            ShapeVertex::new(pos.x + size.x, pos.y + size.y, color),
+            ShapeVertex::new(pos.x + size.x, pos.y, color),
+        )
     }
 }

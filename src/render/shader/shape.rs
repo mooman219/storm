@@ -37,7 +37,6 @@ impl ShapeShader {
     pub fn new() -> ShapeShader {
         let program = ShaderProgram::new(VERTEX, FRAGMENT);
         let uniform_ortho = program.get_uniform_location("ortho");
-        println!("Render: Shape ortho [{}]", uniform_ortho);
         ShapeShader {
             program: program,
             uniform_ortho: uniform_ortho,

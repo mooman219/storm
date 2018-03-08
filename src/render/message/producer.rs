@@ -27,19 +27,16 @@ impl RenderProducer {
 
     pub fn create_rect(&mut self, pos: Vector2<f32>, size: Vector2<f32>, color: Color) -> IndexToken {
         let message = CreateQuadMessage {
-            quad: Quad::new(
-                ShapeVertex::new(pos.x, pos.y + size.y, color),
-                ShapeVertex::new(pos.x, pos.y, color),
-                ShapeVertex::new(pos.x + size.x, pos.y + size.y, color),
-                ShapeVertex::new(pos.x + size.x, pos.y, color),
-            ),
+            quad: Quad::new_rect(pos, size, color),
         };
         self.frame.create_quad.push(message);
         self.map_rect.add()
     }
 
-    pub fn create_triangle(&mut self, triangle: Triangle<ShapeVertex>) -> IndexToken {
-        let message = CreateTriangleMessage { triangle: triangle };
+    pub fn create_triangle(&mut self, pos: Vector2<f32>, height: f32, color: Color) -> IndexToken {
+        let message = CreateTriangleMessage {
+            triangle: Triangle::new_equilateral(pos, height, color),
+        };
         self.frame.create_triangle.push(message);
         self.map_triangle.add()
     }
