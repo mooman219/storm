@@ -1,5 +1,6 @@
 use gl;
 use render::buffer::*;
+use render::enums::*;
 use std::cmp;
 use std::mem;
 use std::ptr;
@@ -11,7 +12,7 @@ pub struct DynamicBuffer<T> {
     buffer_min: usize,
     buffer_max: usize,
     buffer_capacity: usize,
-    buffer_type: u32,
+    buffer_type: BufferType,
     items: Vec<T>,
     timer_sync: Timer,
 }
@@ -19,19 +20,18 @@ pub struct DynamicBuffer<T> {
 impl<T> DynamicBuffer<T> {
     const DEFAULT_CAPACITY: usize = 16;
 
-    pub fn new(buffer_type: u32) -> DynamicBuffer<T> {
+    pub fn new(buffer_type: BufferType) -> DynamicBuffer<T> {
         let items: Vec<T> = Vec::<T>::with_capacity(DynamicBuffer::<T>::DEFAULT_CAPACITY);
         let mut vbo = 0u32;
         unsafe {
-            let default_size =
-                (mem::size_of::<T>() * DynamicBuffer::<T>::DEFAULT_CAPACITY) as isize;
+            let default_size = (mem::size_of::<T>() * DynamicBuffer::<T>::DEFAULT_CAPACITY) as isize;
             gl::GenBuffers(1, &mut vbo);
-            gl::BindBuffer(buffer_type, vbo);
+            gl::BindBuffer(buffer_type as u32, vbo);
             gl::BufferData(
-                buffer_type,      // Buffer type
-                default_size,     // Size
-                ptr::null(),      // Initial data
-                gl::DYNAMIC_DRAW, // Usage
+                buffer_type as u32, // Buffer type
+                default_size,       // Size
+                ptr::null(),        // Initial data
+                gl::DYNAMIC_DRAW,   // Usage
             );
         }
         DynamicBuffer {
@@ -86,7 +86,7 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
 
     fn bind(&self) {
         unsafe {
-            gl::BindBuffer(self.buffer_type, self.vbo);
+            gl::BindBuffer(self.buffer_type as u32, self.vbo);
         }
     }
 
@@ -95,18 +95,17 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
             self.timer_sync.start();
             self.dirty = false;
             unsafe {
-                gl::BindBuffer(self.buffer_type, self.vbo);
+                gl::BindBuffer(self.buffer_type as u32, self.vbo);
                 if self.buffer_capacity < self.items.capacity() {
                     let length = (mem::size_of::<T>() * self.items.capacity()) as isize;
                     let data = self.items.as_ptr() as *const _;
-                    gl::BufferData(self.buffer_type, length, data, gl::DYNAMIC_DRAW);
+                    gl::BufferData(self.buffer_type as u32, length, data, gl::DYNAMIC_DRAW);
                     self.buffer_capacity = self.items.capacity();
                 } else {
                     let start = (mem::size_of::<T>() * self.buffer_min) as isize;
-                    let length =
-                        (mem::size_of::<T>() * (self.buffer_max - self.buffer_min)) as isize;
+                    let length = (mem::size_of::<T>() * (self.buffer_max - self.buffer_min)) as isize;
                     let offset = self.items.as_ptr().offset(self.buffer_min as isize) as *const _;
-                    gl::BufferSubData(self.buffer_type, start, length, offset);
+                    gl::BufferSubData(self.buffer_type as u32, start, length, offset);
                 }
             }
             self.timer_sync.stop();

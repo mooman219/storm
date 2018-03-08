@@ -1,5 +1,6 @@
 use gl;
 use render::buffer::*;
+use render::enums::*;
 use std::marker::PhantomData;
 use std::mem;
 
@@ -11,24 +12,24 @@ pub struct ImmutableBuffer<T> {
 }
 
 impl<T> ImmutableBuffer<T> {
-    pub fn new(buffer_type: u32, items: Vec<T>) -> ImmutableBuffer<T> {
+    pub fn new(buffer_type: BufferType, items: Vec<T>) -> ImmutableBuffer<T> {
         let mut vbo = 0u32;
         let size = (mem::size_of::<T>() * items.len()) as isize;
         let data = items.as_ptr() as *const _;
         unsafe {
             gl::GenBuffers(1, &mut vbo);
-            gl::BindBuffer(buffer_type, vbo);
+            gl::BindBuffer(buffer_type as u32, vbo);
             gl::BufferData(
-                buffer_type,     // Buffer type
-                size,            // Size
-                data,            // Initial data
-                gl::STATIC_DRAW, // Usage
+                buffer_type as u32, // Buffer type
+                size,               // Size
+                data,               // Initial data
+                gl::STATIC_DRAW,    // Usage
             );
         }
         ImmutableBuffer {
             vbo: vbo,
             length: items.len(),
-            buffer_type: buffer_type,
+            buffer_type: buffer_type as u32,
             phantom: PhantomData,
         }
     }

@@ -16,12 +16,12 @@ pub struct GeometryBuffer<T: Geometry> {
 impl<T: Geometry> GeometryBuffer<T> {
     pub fn new(capacity: usize) -> GeometryBuffer<T> {
         // Vertex Buffer Object
-        let vertex_buffer = FixedBuffer::new(buffer_type::ARRAY_BUFFER, capacity);
+        let vertex_buffer = FixedBuffer::new(BufferType::ArrayBuffer, capacity);
         // Vertex Array Object
         let vertex_array = VertexArray::new();
         // Element Buffer Object
         let element_buffer = ImmutableBuffer::new(
-            buffer_type::ELEMENT_ARRAY_BUFFER,
+            BufferType::ElementArrayBuffer,
             T::generate_indice_list(capacity as u16),
         );
         // Return
@@ -54,11 +54,11 @@ impl<T: Geometry> GeometryBuffer<T> {
             let offset_index = (self.vertex_buffer.offset_index() * T::VERTEX_OFFSET) as i32;
             self.vertex_array.bind();
             gl::DrawElementsBaseVertex(
-                draw_mode::TRIANGLES, // Draw mode
-                vertices as i32,      // Number of vertices
-                gl::UNSIGNED_SHORT,   // Size of indices
-                0 as *const _,        // Offset of indices
-                offset_index,         // Base vertex offset
+                DrawMode::Triangles as u32, // Draw mode
+                vertices as i32,            // Number of vertices
+                gl::UNSIGNED_SHORT,         // Size of indices
+                0 as *const _,              // Offset of indices
+                offset_index,               // Base vertex offset
             );
         }
     }

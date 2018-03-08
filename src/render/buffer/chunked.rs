@@ -1,5 +1,6 @@
 use gl;
 use render::buffer::*;
+use render::enums::*;
 use std::mem;
 use std::ptr;
 use time::timer::*;
@@ -7,7 +8,7 @@ use time::timer::*;
 pub struct ChunkedBuffer<T> {
     vbo: u32,
     dirty: bool,
-    buffer_type: u32,
+    buffer_type: BufferType,
     current_chunk: usize,
     chunk_count: usize,
     chunk_length: usize,
@@ -17,7 +18,7 @@ pub struct ChunkedBuffer<T> {
 }
 
 impl<T> ChunkedBuffer<T> {
-    pub fn new(buffer_type: u32, chunk_count: usize, chunk_length: usize) -> ChunkedBuffer<T> {
+    pub fn new(buffer_type: BufferType, chunk_count: usize, chunk_length: usize) -> ChunkedBuffer<T> {
         // Validate input
         if chunk_count == 0 {
             panic!("Chunk count must be greater than 0.");
@@ -35,18 +36,18 @@ impl<T> ChunkedBuffer<T> {
             let capacity = chunk_count * chunk_length;
             let max_size = (capacity * mem::size_of::<T>()) as isize;
             gl::GenBuffers(1, &mut vbo);
-            gl::BindBuffer(buffer_type, vbo);
+            gl::BindBuffer(buffer_type as u32, vbo);
             gl::BufferStorage(
-                buffer_type, // Buffer type
-                max_size,    // Buffer size
-                ptr::null(), // Initial data
-                flags,       // Flags
+                buffer_type as u32, // Buffer type
+                max_size,           // Buffer size
+                ptr::null(),        // Initial data
+                flags,              // Flags
             );
             map = gl::MapBufferRange(
-                buffer_type, // Buffer type
-                0,           // Offset
-                max_size,    // Length
-                flags,       // Flags
+                buffer_type as u32, // Buffer type
+                0,                  // Offset
+                max_size,           // Length
+                flags,              // Flags
             ) as *mut _;
         }
         // Finish
@@ -95,7 +96,7 @@ impl<T> RawBuffer<T> for ChunkedBuffer<T> {
 
     fn bind(&self) {
         unsafe {
-            gl::BindBuffer(self.buffer_type, self.vbo);
+            gl::BindBuffer(self.buffer_type as u32, self.vbo);
         }
     }
 
@@ -117,8 +118,8 @@ impl<T> RawBuffer<T> for ChunkedBuffer<T> {
 impl<T> Drop for ChunkedBuffer<T> {
     fn drop(&mut self) {
         unsafe {
-            gl::BindBuffer(self.buffer_type, self.vbo);
-            gl::UnmapBuffer(self.buffer_type);
+            gl::BindBuffer(self.buffer_type as u32, self.vbo);
+            gl::UnmapBuffer(self.buffer_type as u32);
             gl::DeleteBuffers(1, &self.vbo as *const _);
         }
     }
