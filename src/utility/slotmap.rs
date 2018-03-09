@@ -47,7 +47,7 @@ impl IndexMap {
         IndexToken { index: index }
     }
 
-    pub fn remove(&mut self, token: IndexToken) {
+    pub fn remove(&mut self, token: IndexToken) -> usize {
         self.free.push(token.index);
         let data_index = self.table[token.index].to_data;
         self.data_len -= 1;
@@ -56,6 +56,7 @@ impl IndexMap {
             self.table[data_index].to_map = map_index;
             self.table[map_index].to_data = data_index;
         }
+        data_index
     }
 
     pub fn get(&self, token: &IndexToken) -> usize {
@@ -112,7 +113,7 @@ impl<T> SlotMap<T> {
             self.table[data_index].to_map = map_index;
             self.table[map_index].to_data = data_index;
         }
-        self.data.swap_remove(token.index)
+        self.data.swap_remove(data_index)
     }
 
     pub fn get(&self, token: &IndexToken) -> &T {

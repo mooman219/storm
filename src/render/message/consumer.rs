@@ -40,15 +40,39 @@ impl RenderConsumer {
         consumer
     }
 
-    pub fn handle_create_quad(&mut self, messages: &mut Vec<CreateQuadMessage>) {
+    pub fn handle_quads(&mut self, messages: &mut Vec<QuadMessage>) {
         for message in messages.drain(..) {
-            self.quad_buffer.add(message.quad);
+            match message {
+                QuadMessage::Create { pos, size, color } => {
+                    let quad = Quad::new_rect(pos, size, color);
+                    self.quad_buffer.add(quad);
+                },
+                QuadMessage::Update { id, pos } => {
+                    println!("Render: Unimplemented quad update {}, {}", id, pos.x);
+                },
+                QuadMessage::Remove { id } => {
+                    self.quad_buffer.remove(id);
+                },
+                QuadMessage::None => {},
+            }
         }
     }
 
-    pub fn handle_create_triangle(&mut self, messages: &mut Vec<CreateTriangleMessage>) {
+    pub fn handle_triangles(&mut self, messages: &mut Vec<TriangleMessage>) {
         for message in messages.drain(..) {
-            self.triangle_buffer.add(message.triangle);
+            match message {
+                TriangleMessage::Create { pos, height, color } => {
+                    let triangle = Triangle::new_iso(pos, height, color);
+                    self.triangle_buffer.add(triangle);
+                },
+                TriangleMessage::Update { id, pos } => {
+                    println!("Render: Unimplemented triangle update {}, {}", id, pos.x);
+                },
+                TriangleMessage::Remove { id } => {
+                    self.triangle_buffer.remove(id);
+                },
+                TriangleMessage::None => {},
+            }
         }
     }
 
@@ -80,10 +104,10 @@ impl RenderConsumer {
                 self.timer_render.start();
 
                 // Message Quads
-                self.handle_create_quad(&mut f.create_quad);
+                self.handle_quads(&mut f.quads);
                 self.quad_buffer.sync();
                 // Message Triangles
-                self.handle_create_triangle(&mut f.create_triangle);
+                self.handle_triangles(&mut f.triangles);
                 self.triangle_buffer.sync();
                 // Message Shader
                 self.shape_shader.bind();

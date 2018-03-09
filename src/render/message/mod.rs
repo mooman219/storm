@@ -2,32 +2,58 @@ pub mod consumer;
 pub mod producer;
 
 use cgmath::*;
-use render::geometry::quad::*;
-use render::geometry::triangle::*;
-use render::vertex::shape::*;
+use render::color::*;
 
 pub struct RenderFrame {
-    pub create_quad: Vec<CreateQuadMessage>,
-    pub create_triangle: Vec<CreateTriangleMessage>,
+    pub quads: Vec<QuadMessage>,
+    pub triangles: Vec<TriangleMessage>,
     pub translation: Option<SetTranslationMessage>,
 }
 
 impl RenderFrame {
     pub fn new() -> RenderFrame {
         RenderFrame {
-            create_quad: Vec::new(),
-            create_triangle: Vec::new(),
+            quads: Vec::new(),
+            triangles: Vec::new(),
             translation: None,
         }
     }
 }
 
-pub struct CreateQuadMessage {
-    pub quad: Quad<ShapeVertex>,
+#[repr(u8)]
+#[derive(Copy, Clone)]
+pub enum QuadMessage {
+    Create {
+        pos: Vector2<f32>,
+        size: Vector2<f32>,
+        color: Color,
+    },
+    Update {
+        id: usize,
+        pos: Vector2<f32>,
+    },
+    Remove {
+        id: usize,
+    },
+    None,
 }
 
-pub struct CreateTriangleMessage {
-    pub triangle: Triangle<ShapeVertex>,
+#[repr(u8)]
+#[derive(Copy, Clone)]
+pub enum TriangleMessage {
+    Create {
+        pos: Vector2<f32>,
+        height: f32,
+        color: Color,
+    },
+    Update {
+        id: usize,
+        pos: Vector2<f32>,
+    },
+    Remove {
+        id: usize,
+    },
+    None,
 }
 
 #[derive(Copy, Clone)]

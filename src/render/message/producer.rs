@@ -1,8 +1,6 @@
 use bounded_spsc_queue::Producer;
 use cgmath::*;
 use render::color::*;
-use render::geometry::quad::*;
-use render::geometry::triangle::*;
 use render::message::*;
 use std::mem;
 use utility::slotmap::*;
@@ -25,18 +23,22 @@ impl RenderProducer {
     }
 
     pub fn create_rect(&mut self, pos: Vector2<f32>, size: Vector2<f32>, color: Color) -> IndexToken {
-        let message = CreateQuadMessage {
-            quad: Quad::new_rect(pos, size, color),
+        let message = QuadMessage::Create {
+            pos: pos,
+            size: size,
+            color: color,
         };
-        self.frame.create_quad.push(message);
+        self.frame.quads.push(message);
         self.map_rect.add()
     }
 
     pub fn create_triangle(&mut self, pos: Vector2<f32>, height: f32, color: Color) -> IndexToken {
-        let message = CreateTriangleMessage {
-            triangle: Triangle::new_iso(pos, height, color),
+        let message = TriangleMessage::Create {
+            pos: pos,
+            height: height,
+            color: color,
         };
-        self.frame.create_triangle.push(message);
+        self.frame.triangles.push(message);
         self.map_triangle.add()
     }
 

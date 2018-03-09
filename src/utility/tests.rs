@@ -13,7 +13,7 @@ fn test_indexmap() {
     assert_eq!(map.get(&c), 2);
     assert_eq!(map.len(), 3);
 
-    map.remove(a);
+    assert_eq!(map.remove(a), 0);
     assert_eq!(map.get(&b), 1);
     assert_eq!(map.get(&c), 0);
     assert_eq!(map.len(), 2);
@@ -28,15 +28,15 @@ fn test_indexmap() {
 #[test]
 fn test_slotmap() {
     let mut map = SlotMap::new();
-    let a = map.add(0);
+    let a = map.add(9);
     let b = map.add(1);
     let c = map.add(2);
-    assert_eq!(*map.get(&a), 0);
+    assert_eq!(*map.get(&a), 9);
     assert_eq!(*map.get(&b), 1);
     assert_eq!(*map.get(&c), 2);
     assert_eq!(map.len(), 3);
 
-    map.remove(a);
+    assert_eq!(map.remove(a), 9);
     assert_eq!(*map.get(&b), 1);
     assert_eq!(*map.get(&c), 2);
     assert_eq!(map.len(), 2);
