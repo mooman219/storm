@@ -35,7 +35,7 @@ impl RenderConsumer {
         consumer.display.enable_clear_color();
         consumer.display.clear_color(0.0, 0.0, 0.0, 1.0);
         consumer.shape_shader.bind();
-        consumer.shape_shader.set_scale(0.5f32);
+        consumer.shape_shader.set_scale(0.25f32);
         // Return
         consumer
     }
@@ -47,8 +47,14 @@ impl RenderConsumer {
                     let quad = Quad::new_rect(pos, size, color);
                     self.quad_buffer.add(quad);
                 },
-                QuadMessage::Update { id, pos } => {
-                    println!("Render: Unimplemented quad update {}, {}", id, pos.x);
+                QuadMessage::Update {
+                    id,
+                    pos,
+                    size,
+                    color,
+                } => {
+                    let quad = Quad::new_rect(pos, size, color);
+                    self.quad_buffer.update(id, quad);
                 },
                 QuadMessage::Remove { id } => {
                     self.quad_buffer.remove(id);
@@ -65,8 +71,14 @@ impl RenderConsumer {
                     let triangle = Triangle::new_iso(pos, height, color);
                     self.triangle_buffer.add(triangle);
                 },
-                TriangleMessage::Update { id, pos } => {
-                    println!("Render: Unimplemented triangle update {}, {}", id, pos.x);
+                TriangleMessage::Update {
+                    id,
+                    pos,
+                    height,
+                    color,
+                } => {
+                    let triangle = Triangle::new_iso(pos, height, color);
+                    self.triangle_buffer.update(id, triangle);
                 },
                 TriangleMessage::Remove { id } => {
                     self.triangle_buffer.remove(id);

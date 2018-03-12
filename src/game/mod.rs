@@ -32,9 +32,8 @@ pub fn game_loop(render_producer: Producer<RenderFrame>, _: Consumer<InputFrame>
             color::BLUE,
         );
     }
-    render_producer.create_triangle(Vector2::new(0.0, 1.0), -1f32, color::GREEN);
     render_producer.send();
-    render_producer.create_triangle(Vector2::new(0.0, 1.0), 1f32, color::YELLOW);
+    let token = render_producer.create_triangle(Vector2::new(0.0, 1.0), 1f32, color::YELLOW);
     let mut translation = Vector3::new(0f32, 0f32, 0f32);
     let mut clock = FrameClock::new();
     clock.set_fps(60);
@@ -43,6 +42,12 @@ pub fn game_loop(render_producer: Producer<RenderFrame>, _: Consumer<InputFrame>
             translation.x = 0f32;
         }
         translation.x += 0.01f32;
+        render_producer.update_triangle(
+            &token,
+            Vector2::new(translation.x - 6f32, 1.0),
+            -1f32,
+            color::GREEN,
+        );
         render_producer.set_translation(translation);
         render_producer.send();
         clock.tick();

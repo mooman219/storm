@@ -31,6 +31,8 @@ pub enum QuadMessage {
     Update {
         id: usize,
         pos: Vector2<f32>,
+        size: Vector2<f32>,
+        color: Color,
     },
     Remove {
         id: usize,
@@ -49,6 +51,8 @@ pub enum TriangleMessage {
     Update {
         id: usize,
         pos: Vector2<f32>,
+        height: f32,
+        color: Color,
     },
     Remove {
         id: usize,
