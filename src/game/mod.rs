@@ -5,7 +5,7 @@ use input::*;
 use render::color;
 use render::message::*;
 use render::message::producer::*;
-use time::frame_clock::*;
+use time::clock::*;
 
 pub fn game_loop(render_producer: Producer<RenderFrame>, _: Consumer<InputFrame>) {
     let mut render_producer = RenderProducer::new(render_producer);
@@ -35,8 +35,7 @@ pub fn game_loop(render_producer: Producer<RenderFrame>, _: Consumer<InputFrame>
     render_producer.send();
     let token = render_producer.create_triangle(Vector2::new(0.0, 1.0), 1f32, color::YELLOW);
     let mut translation = Vector3::new(0f32, 0f32, 0f32);
-    let mut clock = FrameClock::new();
-    clock.set_fps(60);
+    let mut clock = Clock::new(60);
     loop {
         if translation.x > 6f32 {
             translation.x = 0f32;
