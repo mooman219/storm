@@ -24,7 +24,8 @@ fn init() {
 }
 
 fn main() {
-    // Init code.
+    // Init code. This must run first, before the rest of the program,
+    // otherwise there'll be undefined behavior.
     init();
 
     // Render messaging. Max of 3 frames.
@@ -36,7 +37,8 @@ fn main() {
         game::game_loop(render_producer, input_consumer);
     });
 
-    // Render and input loops follow.
+    // Render and input loops follow. They must exist on the same thread as
+    // they're coupled together by the window.
 
     // Setup communication
     let (mut input, mut render) = render::create_target(input_producer, render_consumer);

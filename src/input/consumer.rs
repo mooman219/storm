@@ -12,7 +12,9 @@ impl InputConsumer {
         }
     }
 
-    pub fn get_state() {}
+    pub fn consume_keyboard() {}
+
+    pub fn consume_cursor() {}
 
     pub fn tick(&mut self) {
         // Frame processing

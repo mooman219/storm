@@ -1,6 +1,8 @@
 use bounded_spsc_queue::Producer;
 use glutin;
+use glutin::ElementState;
 use glutin::EventsLoop;
+use glutin::MouseButton;
 use glutin::VirtualKeyCode;
 use input::*;
 use std::mem;
@@ -22,6 +24,41 @@ impl InputProducer {
             is_active: true,
             resize_message: None,
         }
+    }
+
+    fn key_input(&mut self, key: VirtualKeyCode, state: ElementState) {
+        let message = match state {
+            ElementState::Pressed => KeyMessage::Pressed(key),
+            ElementState::Released => KeyMessage::Released(key),
+        };
+        self.frame.key.push(message);
+    }
+
+    fn cursor_moved(&mut self, x: f64, y: f64) {
+        let message = CursorMessage::Moved(Vector2::new(x as f32, y as f32));
+        self.frame.cursor.push(message);
+    }
+
+    fn cursor_input(&mut self, button: MouseButton, state: ElementState) {
+        let button = match button {
+            MouseButton::Left => CursorButton::Left,
+            MouseButton::Right => CursorButton::Right,
+            MouseButton::Middle => CursorButton::Middle,
+            MouseButton::Other(value) => CursorButton::Other(value),
+        };
+        let message = match state {
+            ElementState::Pressed => CursorMessage::Pressed(button),
+            ElementState::Released => CursorMessage::Released(button),
+        };
+        self.frame.cursor.push(message);
+    }
+
+    fn cursor_left(&mut self) {
+        self.frame.cursor.push(CursorMessage::Left);
+    }
+
+    fn cursor_entered(&mut self) {
+        self.frame.cursor.push(CursorMessage::Entered);
     }
 
     pub fn is_active(&self) -> bool {
@@ -50,11 +87,21 @@ impl InputProducer {
                 glutin::WindowEvent::Closed => *is_active = false,
                 glutin::WindowEvent::KeyboardInput { input, .. } => match input.virtual_keycode {
                     Some(key) => {
-                        if key == VirtualKeyCode::Escape {
-                            *is_active = false;
-                        }
+                        // TODO: key_input
                     },
-                    _ => (),
+                    None => {},
+                },
+                glutin::WindowEvent::CursorMoved { position, .. } => {
+                    // TODO: cursor_moved
+                },
+                glutin::WindowEvent::CursorEntered { .. } => {
+                    // TODO: cursor_entered
+                },
+                glutin::WindowEvent::CursorLeft { .. } => {
+                    // TODO: cursor_left
+                },
+                glutin::WindowEvent::MouseInput { state, button, .. } => {
+                    // TODO: cursor_input
                 },
                 _ => (),
             },
