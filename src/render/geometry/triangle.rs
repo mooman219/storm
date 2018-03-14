@@ -34,13 +34,15 @@ impl<T: Vertex> Geometry for Triangle<T> {
     }
 }
 
-// --------------------------------------------------------
+// ////////////////////////////////////////////////////////
 // Default implementations
-// --------------------------------------------------------
+// ////////////////////////////////////////////////////////
 
 impl Triangle<ShapeVertex> {
     pub fn new_iso(pos: Vector2<f32>, height: f32, color: Color) -> Triangle<ShapeVertex> {
         let half = height.abs() / 2f32;
+        // Points must be in the correct order for culling. Arrange the points
+        // differently depending on the height.
         if height < 0f32 {
             Self::new(
                 ShapeVertex::new(pos.x - half, pos.y, color),

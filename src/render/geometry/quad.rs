@@ -43,9 +43,9 @@ impl<T: Vertex> Geometry for Quad<T> {
     }
 }
 
-// --------------------------------------------------------
+// ////////////////////////////////////////////////////////
 // Default implementations
-// --------------------------------------------------------
+// ////////////////////////////////////////////////////////
 
 impl Quad<ShapeVertex> {
     pub fn new_rect(pos: Vector2<f32>, size: Vector2<f32>, color: Color) -> Quad<ShapeVertex> {
