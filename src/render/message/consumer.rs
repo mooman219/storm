@@ -33,14 +33,14 @@ impl RenderConsumer {
         };
         // Initialize it
         consumer.display.enable_clear_color();
-        consumer.display.clear_color(0.0, 0.0, 0.0, 1.0);
+        consumer.display.clear_color(0.0, 0.0, 0.2, 1.0);
         consumer.shape_shader.bind();
         consumer.shape_shader.set_scale(0.25f32);
         // Return
         consumer
     }
 
-    pub fn handle_quads(&mut self, messages: &mut Vec<QuadMessage>) {
+    fn handle_quads(&mut self, messages: &mut Vec<QuadMessage>) {
         for message in messages.drain(..) {
             match message {
                 QuadMessage::Create { pos, size, color } => {
@@ -59,12 +59,11 @@ impl RenderConsumer {
                 QuadMessage::Remove { id } => {
                     self.quad_buffer.remove(id);
                 },
-                QuadMessage::None => {},
             }
         }
     }
 
-    pub fn handle_triangles(&mut self, messages: &mut Vec<TriangleMessage>) {
+    fn handle_triangles(&mut self, messages: &mut Vec<TriangleMessage>) {
         for message in messages.drain(..) {
             match message {
                 TriangleMessage::Create { pos, height, color } => {
@@ -83,12 +82,11 @@ impl RenderConsumer {
                 TriangleMessage::Remove { id } => {
                     self.triangle_buffer.remove(id);
                 },
-                TriangleMessage::None => {},
             }
         }
     }
 
-    pub fn handle_set_translation(&mut self, message: Option<SetTranslationMessage>) {
+    fn handle_set_translation(&mut self, message: Option<SetTranslationMessage>) {
         match message {
             Some(msg) => {
                 self.shape_shader.set_translation(msg.translation);
@@ -97,7 +95,7 @@ impl RenderConsumer {
         };
     }
 
-    pub fn handle_resize(&mut self, message: Option<ResizeMessage>) {
+    pub fn resize(&mut self, message: Option<ResizeMessage>) {
         match message {
             Some(msg) => unsafe {
                 gl::Viewport(0, 0, msg.width as i32, msg.height as i32);

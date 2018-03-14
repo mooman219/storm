@@ -27,9 +27,10 @@ fn main() {
     // Init code.
     init();
 
-    // Render messaging. Max of 3 frames can be buffered.
+    // Render messaging. Max of 3 frames.
     let (render_producer, render_consumer) = bounded_spsc_queue::make(3);
-    let (input_producer, input_consumer) = bounded_spsc_queue::make(3);
+    // Input messaging. Max of 100 frames.
+    let (input_producer, input_consumer) = bounded_spsc_queue::make(100);
 
     thread::spawn(move || {
         game::game_loop(render_producer, input_consumer);
@@ -44,7 +45,7 @@ fn main() {
         // Input
         input.tick();
         // Render
-        render.handle_resize(input.next_resize());
+        render.resize(input.next_resize());
         render.tick();
         // Sleep
         sleep(Duration::new(0, 100));

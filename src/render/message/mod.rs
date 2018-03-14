@@ -37,7 +37,6 @@ pub enum QuadMessage {
     Remove {
         id: usize,
     },
-    None,
 }
 
 #[repr(u8)]
@@ -57,7 +56,6 @@ pub enum TriangleMessage {
     Remove {
         id: usize,
     },
-    None,
 }
 
 #[derive(Copy, Clone)]
