@@ -4,43 +4,21 @@ use std::time::Instant;
 use time::convert::*;
 
 pub struct FrameClock {
-    last_fps_tick: Instant,
     last_tick: Instant,
     target: u64,
-    frames: u32,
-    last_fps: u32,
 }
 
 impl FrameClock {
     pub fn new() -> FrameClock {
         FrameClock {
-            last_fps_tick: Instant::now(),
             last_tick: Instant::now(),
             target: 0,
-            frames: 0,
-            last_fps: 0,
         }
     }
 
     pub fn set_fps(&mut self, fps: u64) {
         self.target = if fps == 0 { 0 } else { NANOS_PER_SEC / fps };
     }
-
-    pub fn get_last_fps(&self) -> u32 {
-        return self.last_fps;
-    }
-
-    pub fn tick_fps(&mut self) {
-        // FPS tracking.
-        self.frames += 1;
-        if as_nanoseconds(&self.last_fps_tick.elapsed()) > NANOS_PER_SEC {
-            println!("FPS: {}", self.last_fps);
-            self.last_fps = self.frames;
-            self.last_fps_tick = Instant::now();
-            self.frames = 0;
-        }
-    }
-
     pub fn tick(&mut self) {
         // Sleep logic.
         let duration = as_nanoseconds(&self.last_tick.elapsed());
