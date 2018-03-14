@@ -5,7 +5,6 @@ extern crate bounded_spsc_queue;
 extern crate cgmath;
 extern crate gl;
 extern crate glutin;
-extern crate rand;
 extern crate test;
 
 mod game;
