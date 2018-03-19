@@ -2,6 +2,19 @@ pub struct IndexToken {
     index: usize,
 }
 
+impl IndexToken {
+    /// Creates an invalid token. If this token is used, a panic is thrown.
+    pub fn invalid() -> IndexToken {
+        IndexToken { index: !0 }
+    }
+
+    fn validate(&self) {
+        if self.index == !0 {
+            panic!("Attempted to use an invalid token.");
+        }
+    }
+}
+
 pub struct Slot {
     to_data: usize,
     to_map: usize,
@@ -48,6 +61,7 @@ impl IndexMap {
     }
 
     pub fn remove(&mut self, token: IndexToken) -> usize {
+        token.validate();
         self.free.push(token.index);
         let data_index = self.table[token.index].to_data;
         self.data_len -= 1;
@@ -60,6 +74,7 @@ impl IndexMap {
     }
 
     pub fn get(&self, token: &IndexToken) -> usize {
+        token.validate();
         unsafe { self.table.get_unchecked(token.index).to_data as usize }
     }
 }
@@ -105,6 +120,7 @@ impl<T> SlotMap<T> {
     }
 
     pub fn remove(&mut self, token: IndexToken) -> T {
+        token.validate();
         self.free.push(token.index);
         let data_index = self.table[token.index].to_data;
         let data_length = self.data.len() - 1;
@@ -117,6 +133,7 @@ impl<T> SlotMap<T> {
     }
 
     pub fn get(&self, token: &IndexToken) -> &T {
+        token.validate();
         unsafe {
             &self.data
                 .get_unchecked(self.table.get_unchecked(token.index).to_data)
