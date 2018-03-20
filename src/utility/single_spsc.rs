@@ -1,3 +1,4 @@
+use std::mem;
 use std::sync::Arc;
 use std::sync::atomic::*;
 
@@ -61,9 +62,9 @@ impl<T: Copy> Drop for Buffer<T> {
     }
 }
 
-pub fn make<T: Copy>(initial: T) -> (Producer<T>, Consumer<T>) {
+pub fn make<T: Copy>() -> (Producer<T>, Consumer<T>) {
     let arc = Arc::new(Buffer {
-        buffer: Box::into_raw(Box::new(initial)),
+        buffer: unsafe { Box::into_raw(Box::new(mem::uninitialized())) },
         flag: AtomicUsize::new(0),
     });
     (Producer { buffer: arc.clone() }, Consumer { buffer: arc.clone() })
