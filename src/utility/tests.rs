@@ -137,7 +137,7 @@ pub fn compare_single_spsc_throughput() {
         let start = Instant::now();
         for i in 0..iterations as usize {
             black_box(p.push(i));
-            black_box(c.pop());
+            black_box(c.try_pop());
         }
         let duration = as_nanoseconds(&start.elapsed());
         let throughput = iterations as f64 / (duration as f64) * 1000000000f64;
