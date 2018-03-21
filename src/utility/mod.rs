@@ -1,4 +1,4 @@
-#[cfg(test)]
+#![allow(unused_imports)]
 pub mod tests;
 
 pub mod benching;

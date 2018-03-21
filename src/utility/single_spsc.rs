@@ -1,10 +1,12 @@
+use std::cell::Cell;
 use std::mem;
 use std::sync::Arc;
 use std::sync::atomic::*;
 
 struct Buffer<T: Copy> {
-    buffer: *mut T,
-    flag: AtomicUsize,
+    buffer: Cell<T>,
+    is_empty: AtomicBool,
+    is_reading: AtomicBool,
 }
 
 unsafe impl<T: Copy + Sync> Sync for Buffer<T> {}
@@ -24,60 +26,45 @@ impl<T> !Sync for Producer<T> {}
 impl<T> !Sync for Consumer<T> {}
 
 impl<T: Copy> Buffer<T> {
-    pub const EMPTY: usize = 0;
-    pub const FULL: usize = 1;
-    pub const PENDING: usize = 2;
-
-    pub fn load(&self) -> Option<T> {
-        if self.flag
-            .compare_and_swap(Self::FULL, Self::PENDING, Ordering::Acquire) == Self::FULL
-        {
-            let result = unsafe { Some(*self.buffer) };
-            self.flag.store(Self::EMPTY, Ordering::Release);
+    pub fn consume(&self) -> Option<T> {
+        self.is_reading.store(true, Ordering::Relaxed);
+        let result = if !self.is_empty.load(Ordering::Relaxed) {
+            let result = Some(self.buffer.get());
+            self.is_empty.store(true, Ordering::Relaxed);
             result
         } else {
             None
-        }
+        };
+        self.is_reading.store(false, Ordering::Relaxed);
+        result
     }
 
-    pub fn store(&self, value: T) {
-        // If the flag is FULL, then it updated to EMPTY. Break.
-        // If the flag is EMPTY, then nothing needs to be done. Break.
-        // If the flag is PENDING, then the value is in use. Spin.
-        while self.flag
-            .compare_and_swap(Self::FULL, Self::EMPTY, Ordering::Acquire) == Self::PENDING
-        {}
-        unsafe {
-            *self.buffer = value;
-        }
-        self.flag.store(Self::FULL, Ordering::Release);
-    }
-}
-
-impl<T: Copy> Drop for Buffer<T> {
-    fn drop(&mut self) {
-        unsafe {
-            Box::from_raw(self.buffer);
-        }
+    pub fn set(&self, value: T) {
+        self.is_empty.store(true, Ordering::Relaxed);
+        while self.is_reading.load(Ordering::Relaxed) {}
+        self.buffer.set(value);
+        self.is_empty.store(false, Ordering::Relaxed);
     }
 }
 
 pub fn make<T: Copy>() -> (Producer<T>, Consumer<T>) {
+    // This is the only place where a buffer can be created.
     let arc = Arc::new(Buffer {
-        buffer: unsafe { Box::into_raw(Box::new(mem::uninitialized())) },
-        flag: AtomicUsize::new(0),
+        buffer: unsafe { Cell::new(mem::uninitialized()) },
+        is_empty: AtomicBool::new(true),
+        is_reading: AtomicBool::new(false),
     });
     (Producer { buffer: arc.clone() }, Consumer { buffer: arc.clone() })
 }
 
 impl<T: Copy> Producer<T> {
     pub fn push(&self, value: T) {
-        (*self.buffer).store(value);
+        (*self.buffer).set(value);
     }
 }
 
 impl<T: Copy> Consumer<T> {
     pub fn pop(&self) -> Option<T> {
-        (*self.buffer).load()
+        (*self.buffer).consume()
     }
 }
