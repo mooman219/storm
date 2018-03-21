@@ -27,6 +27,5 @@ fn main() {
     // otherwise there'll be undefined behavior.
     init();
 
-    // utility::tests::compare_single_spsc_throughput();
     engine::run(TestGame::new());
 }

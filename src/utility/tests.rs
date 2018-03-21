@@ -1,9 +1,6 @@
 use bounded_spsc_queue;
 use std::sync::mpsc::sync_channel;
-use std::thread;
-use std::time::Instant;
 use test::Bencher;
-use time::convert::*;
 use utility::benching::black_box;
 use utility::single_spsc;
 use utility::slotmap::*;
@@ -87,80 +84,44 @@ fn bench_indexmap_get(bench: &mut Bencher) {
 fn test_single_spsc() {
     let (producer, consumer) = single_spsc::make();
 
-    assert_eq!(consumer.pop(), None);
+    assert_eq!(consumer.try_pop(), None);
 
     producer.push(0u32);
-    assert_eq!(consumer.pop(), Some(0u32));
-    assert_eq!(consumer.pop(), None);
+    assert_eq!(consumer.try_pop(), Some(0u32));
+    assert_eq!(consumer.try_pop(), None);
 
     producer.push(0u32);
     producer.push(1u32);
-    assert_eq!(consumer.pop(), Some(1u32));
-    assert_eq!(consumer.pop(), None);
+    assert_eq!(consumer.try_pop(), Some(1u32));
+    assert_eq!(consumer.try_pop(), None);
 }
 
 #[bench]
-fn bench_single_spsc_cycle(bench: &mut Bencher) {
-    let (producer, consumer) = single_spsc::make();
+fn bench_single_spsc_self_cycle(bench: &mut Bencher) {
+    let (p, c) = single_spsc::make();
 
     bench.iter(|| {
-        producer.push(0u32);
-        black_box(consumer.pop());
+        black_box(p.push(1));
+        black_box(c.try_pop());
     });
 }
 
-pub fn compare_single_spsc_throughput() {
-    let iterations: i64 = 20000i64;
+#[bench]
+fn bench_single_spsc_bounded_spsc_cycle(bench: &mut Bencher) {
+    let (p, c) = bounded_spsc_queue::make(10000 as usize);
 
-    //
-    // Bounded SPSC
-    //
-    {
-        let (p, c) = bounded_spsc_queue::make(iterations as usize);
-        let start = Instant::now();
-        for i in 0..iterations as usize {
-            black_box(p.push(i));
-            black_box(c.pop());
-        }
-        let duration = as_nanoseconds(&start.elapsed());
-        let throughput = iterations as f64 / (duration as f64) * 1000000000f64;
-        println!(
-            "Bounded SPSC Throughput     : {:14.2}/s -- (iterations: {} in {:7} ns)",
-            throughput, iterations, duration
-        );
-    }
-    //
-    // Single SPSC
-    //
-    {
-        let (p, c) = single_spsc::make();
-        let start = Instant::now();
-        for i in 0..iterations as usize {
-            black_box(p.push(i));
-            black_box(c.try_pop());
-        }
-        let duration = as_nanoseconds(&start.elapsed());
-        let throughput = iterations as f64 / (duration as f64) * 1000000000f64;
-        println!(
-            "Single SPSC Throughput      : {:14.2}/s -- (iterations: {} in {:7} ns)",
-            throughput, iterations, duration
-        );
-    }
-    //
-    // MPSC Sync Channel
-    //
-    {
-        let (tx, rx) = sync_channel(iterations as usize);
-        let start = Instant::now();
-        for i in 0..iterations as usize {
-            black_box(tx.send(i).unwrap());
-            black_box(rx.recv().unwrap());
-        }
-        let duration = as_nanoseconds(&start.elapsed());
-        let throughput = iterations as f64 / (duration as f64) * 1000000000f64;
-        println!(
-            "MPSC Sync Channel Throughput: {:14.2}/s -- (iterations: {} in {:7} ns)",
-            throughput, iterations, duration
-        );
-    }
+    bench.iter(|| {
+        black_box(p.push(1));
+        black_box(c.pop());
+    });
+}
+
+#[bench]
+fn bench_single_spsc_sync_mpsc_cycle(bench: &mut Bencher) {
+    let (tx, rx) = sync_channel(10000 as usize);
+
+    bench.iter(|| {
+        black_box(tx.send(1).unwrap());
+        black_box(rx.recv().unwrap());
+    });
 }
