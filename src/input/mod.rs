@@ -4,38 +4,21 @@ pub mod producer;
 use cgmath::*;
 use glutin::VirtualKeyCode;
 
-pub struct InputFrame {
-    pub cursor: Vec<CursorMessage>,
-    pub key: Vec<KeyMessage>,
-}
-
-impl InputFrame {
-    pub fn new() -> InputFrame {
-        InputFrame {
-            cursor: Vec::new(),
-            key: Vec::new(),
-        }
-    }
-}
-
-/// Represents a keyboard event.
+/// These are represented as an enumeration to preserve ordering when stored
+/// in a vector and read sequentially.
 #[repr(u8)]
 #[derive(Copy, Clone)]
-pub enum KeyMessage {
-    Pressed(VirtualKeyCode),
-    Released(VirtualKeyCode),
-}
+pub enum InputFrame {
+    // Represents keyboard events.
+    KeyPressed(VirtualKeyCode),
+    KeyReleased(VirtualKeyCode),
 
-/// Represents a cursor event. These are represented as an enumeration to
-/// preserve ordering when stored in a vector and read sequentially.
-#[repr(u8)]
-#[derive(Copy, Clone)]
-pub enum CursorMessage {
-    Moved(Vector2<f32>),
-    Pressed(CursorButton),
-    Released(CursorButton),
-    Left,
-    Entered,
+    // Represents cursor events.
+    CursorMoved(Vector2<f32>),
+    CursorPressed(CursorButton),
+    CursorReleased(CursorButton),
+    CursorLeft,
+    CursorEntered,
 }
 
 /// Describes the cursor button being manipulated.

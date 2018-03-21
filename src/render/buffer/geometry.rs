@@ -1,8 +1,8 @@
 use gl;
+use render::*;
 use render::buffer::*;
 use render::buffer::fixed::*;
 use render::buffer::immutable::*;
-use render::enums::*;
 use render::geometry::*;
 use render::vertex::*;
 

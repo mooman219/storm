@@ -1,6 +1,6 @@
 use gl;
+use render::*;
 use render::buffer::*;
-use render::enums::*;
 use std::marker::PhantomData;
 use std::mem;
 

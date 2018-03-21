@@ -1,6 +1,7 @@
 use gl;
 use glutin;
 use glutin::GlContext;
+use render::*;
 
 pub struct Display {
     window: glutin::GlWindow,
@@ -14,16 +15,21 @@ impl Display {
         events_loop: &glutin::EventsLoop,
     ) -> Display {
         let gl_window = glutin::GlWindow::new(window_builder, context_builder, &events_loop).unwrap();
-        unsafe {
-            gl_window.make_current().unwrap();
-            gl::load_with(|symbol| gl_window.get_proc_address(symbol) as *const _);
-            gl::Enable(gl::CULL_FACE);
-            gl::CullFace(gl::BACK);
-        }
         Display {
             window: gl_window,
             clear_mode: 0,
         }
+    }
+
+    pub fn bind(&self) {
+        unsafe {
+            self.window.make_current().unwrap();
+            gl::load_with(|symbol| self.window.get_proc_address(symbol) as *const _);
+            gl::Enable(gl::CULL_FACE);
+            gl::CullFace(gl::BACK);
+        }
+        println!("Render: Bound new display");
+        println!("Render: OpenGL version {}", GlString::Version.get_string());
     }
 
     // Clear
@@ -79,8 +85,6 @@ impl Display {
     // Buffer
 
     pub fn swap_buffers(&self) {
-        self.window
-            .swap_buffers()
-            .expect("Error while swapping buffers.");
+        self.window.swap_buffers().expect("Error while swapping buffers.");
     }
 }

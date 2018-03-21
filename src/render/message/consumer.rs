@@ -1,4 +1,4 @@
-use bounded_spsc_queue::Consumer;
+use bounded_spsc_queue;
 use gl;
 use input::*;
 use render::buffer::geometry::*;
@@ -10,10 +10,12 @@ use render::message::*;
 use render::shader::shape::*;
 use render::vertex::shape::*;
 use time::timer::*;
+use utility::single_spsc;
 
 pub struct RenderConsumer {
     display: Display,
-    render_consumer: Consumer<RenderFrame>,
+    render_consumer: bounded_spsc_queue::Consumer<RenderFrame>,
+    resize_consumer: single_spsc::Consumer<ResizeMessage>,
     shape_shader: ShapeShader,
     triangle_buffer: GeometryBuffer<Triangle<ShapeVertex>>,
     quad_buffer: GeometryBuffer<Quad<ShapeVertex>>,
@@ -21,11 +23,16 @@ pub struct RenderConsumer {
 }
 
 impl RenderConsumer {
-    pub fn new(display: Display, render_consumer: Consumer<RenderFrame>) -> RenderConsumer {
+    pub fn new(
+        display: Display,
+        render_consumer: bounded_spsc_queue::Consumer<RenderFrame>,
+        resize_consumer: single_spsc::Consumer<ResizeMessage>,
+    ) -> RenderConsumer {
         // Get the composed consumer
         let mut consumer = RenderConsumer {
             display: display,
             render_consumer: render_consumer,
+            resize_consumer: resize_consumer,
             shape_shader: ShapeShader::new(),
             triangle_buffer: Triangle::new_geometry_buffer(50),
             quad_buffer: Quad::new_geometry_buffer(100),
@@ -47,12 +54,7 @@ impl RenderConsumer {
                     let quad = Quad::new_rect(pos, size, color);
                     self.quad_buffer.add(quad);
                 },
-                QuadMessage::Update {
-                    id,
-                    pos,
-                    size,
-                    color,
-                } => {
+                QuadMessage::Update { id, pos, size, color } => {
                     let quad = Quad::new_rect(pos, size, color);
                     self.quad_buffer.update(id, quad);
                 },
@@ -100,14 +102,16 @@ impl RenderConsumer {
             Some(msg) => unsafe {
                 gl::Viewport(0, 0, msg.width as i32, msg.height as i32);
                 self.shape_shader.bind();
-                self.shape_shader
-                    .set_bounds(msg.width as f32, msg.height as f32);
+                self.shape_shader.set_bounds(msg.width as f32, msg.height as f32);
             },
             None => {},
         }
     }
 
     pub fn tick(&mut self) {
+        // Resizing
+        let message = self.resize_consumer.try_pop();
+        self.resize(message);
         // Frame processing
         match self.render_consumer.try_pop().as_mut() {
             Some(f) => {
