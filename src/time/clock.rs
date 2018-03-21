@@ -6,6 +6,7 @@ use time::convert::*;
 pub struct Clock {
     last_tick: Instant,
     target: u64,
+    delta: f32,
 }
 
 impl Clock {
@@ -13,6 +14,7 @@ impl Clock {
         Clock {
             last_tick: Instant::now(),
             target: Clock::tps_to_target(tps),
+            delta: 0f32,
         }
     }
 
@@ -24,9 +26,17 @@ impl Clock {
         }
     }
 
+    fn duration_to_delta(duration: &Duration) -> f32 {
+        (as_nanoseconds(duration) as f64 / NANOS_PER_SEC as f64) as f32
+    }
+
     /// Sets the target ticks per second for the clock.
     pub fn set_tps(&mut self, tps: u64) {
         self.target = Clock::tps_to_target(tps);
+    }
+
+    pub fn get_delta(&self) -> f32 {
+        self.delta
     }
 
     /// To meet the target TPS, this function will sleep (or spin) until it's
@@ -49,6 +59,7 @@ impl Clock {
                 sleep(Duration::new(0, diff));
             }
         }
+        self.delta = Clock::duration_to_delta(&self.last_tick.elapsed());
         self.last_tick = Instant::now();
     }
 }
