@@ -1,7 +1,4 @@
-#[cfg(test)]
-pub mod tests;
-
-use utility::init::StaticHeap;
+use utility::init::LazyStatic;
 
 pub fn init() {
     SIN.init();
@@ -54,7 +51,7 @@ const DEG_FULL: f32 = 360f32;
 const RAD_INDEX: f32 = (SIN_COUNT as f32) / RAD_FULL;
 const DEG_INDEX: f32 = (SIN_COUNT as f32) / DEG_FULL;
 const SIZE: usize = (SIN_COUNT as usize);
-pub static SIN: StaticHeap<[f32; SIZE]> = StaticHeap::new(|| {
+pub static SIN: LazyStatic<[f32; SIZE]> = LazyStatic::new(|| {
     let mut sin = [0f32; SIZE];
     for n in 0..SIZE {
         sin[n] = (((n as f32) + 0.5f32) / (SIN_COUNT as f32) * RAD_FULL).sin();
@@ -67,7 +64,7 @@ pub static SIN: StaticHeap<[f32; SIZE]> = StaticHeap::new(|| {
     }
     sin
 });
-pub static COS: StaticHeap<[f32; SIZE]> = StaticHeap::new(|| {
+pub static COS: LazyStatic<[f32; SIZE]> = LazyStatic::new(|| {
     let mut cos = [0f32; SIZE];
     for n in 0..SIZE {
         cos[n] = (((n as f32) + 0.5f32) / (SIN_COUNT as f32) * RAD_FULL).cos();

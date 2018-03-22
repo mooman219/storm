@@ -1,66 +1,29 @@
 use std::cell::UnsafeCell;
 use std::ops::Deref;
+use std::sync::Once;
+use std::sync::atomic::*;
 
 //
-// StaticStack
-//
-
-/// Helper union to reserve space for T without initializing it.
-union StackStore<T: Sync> {
-    value: T,
-    dummy: bool,
-}
-
-/// Stores T on the stack.
-pub struct StaticStack<T: Sync> {
-    store: UnsafeCell<StackStore<T>>,
-    initializer: fn() -> T,
-}
-
-unsafe impl<T: Sync> Sync for StaticStack<T> {}
-
-impl<T: Sync> StaticStack<T> {
-    pub const fn new(initializer: fn() -> T) -> StaticStack<T> {
-        StaticStack {
-            store: UnsafeCell::new(StackStore { dummy: false }),
-            initializer: initializer,
-        }
-    }
-
-    pub fn init(&self) {
-        unsafe {
-            let value = (self.initializer)();
-            let pointer = self.store.get();
-            *pointer = StackStore { value: value };
-        }
-    }
-}
-
-impl<T: Sync> Deref for StaticStack<T> {
-    type Target = T;
-
-    fn deref(&self) -> &T {
-        unsafe { &(*self.store.get()).value }
-    }
-}
-
-//
-// StaticHeap
+// LazyStatic
 //
 
 /// Stores T on the heap.
-pub struct StaticHeap<T: Sync> {
+pub struct LazyStatic<T: Sync> {
     store: UnsafeCell<*const T>,
     initializer: fn() -> T,
+    is_loading: AtomicBool,
+    is_ready: AtomicBool,
 }
 
-unsafe impl<T: Sync> Sync for StaticHeap<T> {}
+unsafe impl<T: Sync> Sync for LazyStatic<T> {}
 
-impl<T: Sync> StaticHeap<T> {
-    pub const fn new(initializer: fn() -> T) -> StaticHeap<T> {
-        StaticHeap {
+impl<T: Sync> LazyStatic<T> {
+    pub const fn new(initializer: fn() -> T) -> LazyStatic<T> {
+        LazyStatic {
             store: UnsafeCell::new(0 as *const _),
             initializer: initializer,
+            is_loading: AtomicBool::new(false),
+            is_ready: AtomicBool::new(false),
         }
     }
 
@@ -73,10 +36,11 @@ impl<T: Sync> StaticHeap<T> {
     }
 }
 
-impl<T: Sync> Deref for StaticHeap<T> {
+impl<T: Sync> Deref for LazyStatic<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
+        // self.once.call_once();
         unsafe { &**self.store.get() }
     }
 }

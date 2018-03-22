@@ -1,6 +1,3 @@
-#[cfg(test)] 
-pub mod tests;
-
 pub mod benching;
 pub mod init;
 pub mod slotmap;

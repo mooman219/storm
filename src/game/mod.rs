@@ -1,1 +1,1 @@
-pub mod test_game;
+pub mod testgame;
