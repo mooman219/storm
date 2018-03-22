@@ -41,7 +41,7 @@ pub fn run<G: Game + Send + 'static>(mut game: G) {
         let mut render_producer = RenderProducer::new(render_producer_pipe);
         let mut _input_consumer = InputConsumer::new(input_consumer_pipe);
         loop {
-            // TODO: Input loop {game.input(asdf)}
+            // TODO: Call the input loop: game.input(asdf)
             game.tick(&mut render_producer);
         }
     });

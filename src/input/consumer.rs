@@ -20,7 +20,7 @@ impl InputConsumer {
         // Frame processing
         match self.input_consumer.try_pop().as_mut() {
             Some(_) => {
-                // TODO
+                // TODO: Actually process input.
             },
             None => {},
         }
