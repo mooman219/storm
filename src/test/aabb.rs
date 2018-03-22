@@ -1,11 +1,5 @@
-#![feature(test)]
-
-extern crate cgmath;
-extern crate storm;
-extern crate test;
-
 use cgmath::Vector2;
-use storm::physics::aabb::*;
+use physics::aabb::*;
 
 #[test]
 fn test_slide() {

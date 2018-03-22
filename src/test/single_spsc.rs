@@ -1,9 +1,4 @@
-#![feature(test)]
-
-extern crate storm;
-extern crate test;
-
-use storm::utility::single_spsc;
+use utility::single_spsc;
 
 #[test]
 fn test_single_spsc() {

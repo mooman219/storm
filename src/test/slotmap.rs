@@ -1,9 +1,4 @@
-#![feature(test)]
-
-extern crate storm;
-extern crate test;
-
-use storm::utility::slotmap::*;
+use utility::slotmap::*;
 
 #[test]
 fn test_indexmap() {

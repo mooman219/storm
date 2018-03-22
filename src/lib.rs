@@ -14,3 +14,6 @@ pub mod time;
 pub mod utility;
 pub mod engine;
 pub mod game;
+
+#[cfg(test)]
+mod test;
