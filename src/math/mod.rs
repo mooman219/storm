@@ -1,10 +1,5 @@
 use utility::init::LazyStatic;
 
-pub fn init() {
-    SIN.init();
-    COS.init();
-}
-
 const PI: f32 = 3.141592653589793238f32;
 const PI_2: f32 = 1.570796326794896619f32;
 const PI_NEG_2: f32 = -1.570796326794896619f32;

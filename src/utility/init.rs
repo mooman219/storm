@@ -1,6 +1,5 @@
 use std::cell::UnsafeCell;
 use std::ops::Deref;
-use std::sync::Once;
 use std::sync::atomic::*;
 
 //
@@ -11,7 +10,7 @@ use std::sync::atomic::*;
 pub struct LazyStatic<T: Sync> {
     store: UnsafeCell<*const T>,
     initializer: fn() -> T,
-    is_loading: AtomicBool,
+    is_pending: AtomicBool,
     is_ready: AtomicBool,
 }
 
@@ -22,17 +21,21 @@ impl<T: Sync> LazyStatic<T> {
         LazyStatic {
             store: UnsafeCell::new(0 as *const _),
             initializer: initializer,
-            is_loading: AtomicBool::new(false),
+            is_pending: AtomicBool::new(false),
             is_ready: AtomicBool::new(false),
         }
     }
 
-    pub fn init(&self) {
+    fn init(&self) {
+        if self.is_ready.load(Ordering::Relaxed) {
+            return;
+        }
+        let value = (self.initializer)();
+        let pointer = self.store.get();
         unsafe {
-            let value = (self.initializer)();
-            let pointer = self.store.get();
             *pointer = Box::into_raw(Box::new(value));
         }
+        self.is_ready.store(true, Ordering::Relaxed);
     }
 }
 
@@ -40,7 +43,8 @@ impl<T: Sync> Deref for LazyStatic<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
-        // self.once.call_once();
+        // TODO: Safe init code
+        self.init();
         unsafe { &**self.store.get() }
     }
 }

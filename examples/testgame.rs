@@ -6,3 +6,5 @@ use storm::game::testgame::*;
 fn main() {
     engine::run(TestGame::new());
 }
+
+// cargo run --example testgame --release

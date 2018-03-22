@@ -51,7 +51,6 @@ const INC_SIN: f32 = 0.01f32;
 
 #[bench]
 fn bench_sin(b: &mut Bencher) {
-    SIN.init();
     b.iter(|| {
         let mut sum = black_box(0f32);
         let mut x = MIN_SIN;
