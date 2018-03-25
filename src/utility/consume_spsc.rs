@@ -11,7 +11,8 @@ const BUFFER_SIZE: usize = 16;
 
 /// The internal memory buffer used by the replace spsc. It's unlikely, but during a read, a write
 /// could happen inbetween the atomic load and the dereference. This is unlikely because 16 writes
-/// would have to happen during that time.
+/// would have to happen during that time. If a write it timed properly, there's a chance that the
+/// written value could be returned at most twice.
 struct Buffer<T: Copy> {
     is_empty: AtomicBool,
     read: AtomicPtr<T>,
@@ -32,7 +33,6 @@ impl<T: Copy> Buffer<T> {
         this
     }
 
-    #[inline]
     pub fn read(&self) -> Option<T> {
         // It's unlikely, but a write could happen inbetween the atomic load and the dereference.
         // This is unlikely because 16 writes would have to happen during that time.
@@ -40,11 +40,13 @@ impl<T: Copy> Buffer<T> {
             None
         } else {
             self.is_empty.store(true, Ordering::Release);
+            // There's a chance a write could happen here, meaning read will return the same value
+            // twice because the is_empty flag would not be set false. If we set the flag later,
+            // there's a chance we miss the write which is worse and returning it twice.
             Some(unsafe { *self.read.load(Ordering::Acquire) })
         }
     }
 
-    #[inline]
     pub fn write(&self, value: T) {
         let x = self.current.get();
         let pointer = self.buffer.as_ptr().wrapping_add(x) as *mut T;
