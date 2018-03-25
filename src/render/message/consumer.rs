@@ -10,12 +10,12 @@ use render::message::*;
 use render::shader::shape::*;
 use render::vertex::shape::*;
 use time::timer::*;
-use utility::single_spsc;
+use utility::consume_spsc;
 
 pub struct RenderConsumer {
     display: Display,
     render_consumer: bounded_spsc_queue::Consumer<RenderFrame>,
-    resize_consumer: single_spsc::Consumer<ResizeMessage>,
+    resize_consumer: consume_spsc::Consumer<ResizeMessage>,
     shape_shader: ShapeShader,
     triangle_buffer: GeometryBuffer<Triangle<ShapeVertex>>,
     quad_buffer: GeometryBuffer<Quad<ShapeVertex>>,
@@ -26,7 +26,7 @@ impl RenderConsumer {
     pub fn new(
         display: Display,
         render_consumer: bounded_spsc_queue::Consumer<RenderFrame>,
-        resize_consumer: single_spsc::Consumer<ResizeMessage>,
+        resize_consumer: consume_spsc::Consumer<ResizeMessage>,
     ) -> RenderConsumer {
         // Get the composed consumer
         let mut consumer = RenderConsumer {
@@ -110,7 +110,7 @@ impl RenderConsumer {
 
     pub fn tick(&mut self) {
         // Resizing
-        let message = self.resize_consumer.try_pop();
+        let message = self.resize_consumer.consume();
         self.resize(message);
         // Frame processing
         match self.render_consumer.try_pop().as_mut() {

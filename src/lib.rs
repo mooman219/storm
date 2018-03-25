@@ -1,4 +1,4 @@
-#![feature(asm, const_fn, untagged_unions, optin_builtin_traits)]
+#![feature(asm, const_fn, pointer_methods, optin_builtin_traits)]
 #![allow(dead_code, unions_with_drop_fields)]
 
 extern crate bounded_spsc_queue;

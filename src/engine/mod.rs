@@ -9,7 +9,7 @@ use render::message::producer::*;
 use std::thread;
 use std::thread::sleep;
 use std::time::Duration;
-use utility::single_spsc;
+use utility::consume_spsc;
 
 pub trait Game {
     const TITLE: &'static str = "Untitled";
@@ -32,9 +32,9 @@ pub fn run<G: Game + Send + 'static>(mut game: G) {
         &event_loop,
     );
     // Inter-thread message queues for input and rendering
-    let (render_producer_pipe, render_consumer_pipe) = bounded_spsc_queue::make(3);
-    let (input_producer_pipe, input_consumer_pipe) = bounded_spsc_queue::make(100);
-    let (resize_producer, resize_consumer) = single_spsc::make();
+    let (render_producer_pipe, render_consumer_pipe) = bounded_spsc_queue::make(4);
+    let (input_producer_pipe, input_consumer_pipe) = bounded_spsc_queue::make(256);
+    let (resize_producer, resize_consumer) = consume_spsc::make();
 
     // Game thread (daemon)
     thread::spawn(move || {

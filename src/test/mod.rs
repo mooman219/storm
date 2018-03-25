@@ -1,3 +1,4 @@
 mod aabb;
-mod single_spsc;
+mod consume_spsc;
+mod replace_spsc;
 mod slotmap;

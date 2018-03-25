@@ -3,7 +3,14 @@ use std::mem;
 use std::sync::Arc;
 use std::sync::atomic::*;
 
-/// The internal memory buffer used by the single spsc.
+// ////////////////////////////////////////////////////////
+// Internal
+// ////////////////////////////////////////////////////////
+
+/// The internal memory buffer used by the replace spsc. If a read occurs during a write, None is
+/// returned instead. If a write occurs during a read, the write waits for the read to complete
+/// and fresh data is returned by the read. The worst case is a read always occuring during a
+/// write, meaning None is always returned.
 struct Buffer<T: Copy> {
     buffer: Cell<T>,
     is_empty: AtomicBool,
@@ -11,6 +18,42 @@ struct Buffer<T: Copy> {
 }
 
 unsafe impl<T: Copy + Sync> Sync for Buffer<T> {}
+
+impl<T: Copy> Buffer<T> {
+    #[inline]
+    pub fn read(&self) -> Option<T> {
+        self.is_reading.store(true, Ordering::Release);
+        let mut result = None;
+        if !self.is_empty.load(Ordering::Acquire) {
+            result = Some(self.buffer.get());
+            self.is_empty.store(true, Ordering::Release);
+        }
+        self.is_reading.store(false, Ordering::Release);
+        result
+    }
+
+    #[inline]
+    pub fn write(&self, value: T) {
+        self.is_empty.store(true, Ordering::Release);
+        while self.is_reading.load(Ordering::Acquire) {}
+        self.buffer.set(value);
+        self.is_empty.store(false, Ordering::Release);
+    }
+}
+
+pub fn make<T: Copy>() -> (Producer<T>, Consumer<T>) {
+    // This is the only place where a buffer can be created.
+    let arc = Arc::new(Buffer {
+        buffer: unsafe { Cell::new(mem::uninitialized()) },
+        is_empty: AtomicBool::new(true),
+        is_reading: AtomicBool::new(false),
+    });
+    (Producer { buffer: arc.clone() }, Consumer { buffer: arc.clone() })
+}
+
+// ////////////////////////////////////////////////////////
+// Public
+// ////////////////////////////////////////////////////////
 
 /// A handle which allows adding values onto the buffer.
 pub struct Producer<T: Copy> {
@@ -28,44 +71,6 @@ unsafe impl<T: Copy + Send> Send for Consumer<T> {}
 impl<T> !Sync for Producer<T> {}
 impl<T> !Sync for Consumer<T> {}
 
-impl<T: Copy> Buffer<T> {
-    pub fn try_pop(&self) -> Option<T> {
-        self.is_reading.store(true, Ordering::Release);
-        let result = if !self.is_empty.load(Ordering::Acquire) {
-            self.is_empty.store(true, Ordering::Release);
-            Some(self.buffer.get())
-        } else {
-            None
-        };
-        self.is_reading.store(false, Ordering::Release);
-        result
-    }
-
-    pub fn push(&self, value: T) {
-        self.is_empty.store(true, Ordering::Release);
-        while self.is_reading.load(Ordering::Acquire) {
-            // Implementation note: pop and try_push cannot be implemented due to the potential
-            // for deadlock. A call to push and pop for example may get into a state where push is
-            // waiting for is_reading to be false and pop is waiting for is_empty to be false.
-        }
-        self.buffer.set(value);
-        self.is_empty.store(false, Ordering::Release);
-    }
-}
-
-pub fn make<T: Copy>() -> (Producer<T>, Consumer<T>) {
-    // This is the only place where a buffer can be created.
-    let arc = Arc::new(Buffer {
-        // The initial state is EMPTY, so the uninitialized memory will never be served.
-        buffer: unsafe { Cell::new(mem::uninitialized()) },
-        // Mark the buffer as empty.
-        is_empty: AtomicBool::new(true),
-        // Mark the buffer was not reading.
-        is_reading: AtomicBool::new(false),
-    });
-    (Producer { buffer: arc.clone() }, Consumer { buffer: arc.clone() })
-}
-
 impl<T: Copy> Producer<T> {
     /// Push a value onto the buffer.
     ///
@@ -76,12 +81,15 @@ impl<T: Copy> Producer<T> {
     /// # Examples
     ///
     /// ```
+    /// extern crate storm;
+    /// use storm::utility::consume_spsc::*;
+    ///
     /// let (producer, _) = make();
     ///
-    /// producer.push(123);
+    /// producer.set(123);
     /// ```
-    pub fn push(&self, value: T) {
-        (*self.buffer).push(value);
+    pub fn set(&self, value: T) {
+        (*self.buffer).write(value);
     }
 }
 
@@ -95,18 +103,19 @@ impl<T: Copy> Consumer<T> {
     /// # Examples
     ///
     /// ```
-    /// use single_spsc::*;
+    /// extern crate storm;
+    /// use storm::utility::consume_spsc::*;
     ///
     /// let (_, consumer) = make();
     ///
     /// // Attempt to pop a value from the buffer.
-    /// let t = consumer.try_pop();
+    /// let t: Option<u32> = consumer.consume();
     /// match t {
     ///     Some(v) => {},      // Successfully popped a value
     ///     None => {}          // Buffer empty, try again later
     /// }
     /// ```
-    pub fn try_pop(&self) -> Option<T> {
-        (*self.buffer).try_pop()
+    pub fn consume(&self) -> Option<T> {
+        (*self.buffer).read()
     }
 }

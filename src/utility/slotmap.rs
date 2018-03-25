@@ -2,6 +2,12 @@ pub struct IndexToken {
     index: usize,
 }
 
+impl Default for IndexToken {
+    fn default() -> IndexToken {
+        IndexToken::invalid()
+    }
+}
+
 impl IndexToken {
     /// Creates an invalid token. If this token is used, a panic is thrown.
     pub fn invalid() -> IndexToken {

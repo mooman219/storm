@@ -4,11 +4,11 @@ use glutin::ElementState;
 use glutin::EventsLoop;
 use glutin::MouseButton;
 use input::*;
-use utility::single_spsc;
+use utility::consume_spsc;
 
 pub struct InputProducer {
     input_producer: bounded_spsc_queue::Producer<InputFrame>,
-    resize_producer: single_spsc::Producer<ResizeMessage>,
+    resize_producer: consume_spsc::Producer<ResizeMessage>,
     event_loop: EventsLoop,
     is_active: bool,
 }
@@ -17,7 +17,7 @@ impl InputProducer {
     pub fn new(
         event_loop: EventsLoop,
         input_producer: bounded_spsc_queue::Producer<InputFrame>,
-        resize_producer: single_spsc::Producer<ResizeMessage>,
+        resize_producer: consume_spsc::Producer<ResizeMessage>,
     ) -> InputProducer {
         InputProducer {
             input_producer: input_producer,
@@ -40,7 +40,7 @@ impl InputProducer {
         self.event_loop.poll_events(|event| match event {
             glutin::Event::WindowEvent { event, .. } => match event {
                 glutin::WindowEvent::Resized(w, h) => {
-                    resize_producer.push(ResizeMessage { width: w, height: h });
+                    resize_producer.set(ResizeMessage { width: w, height: h });
                 },
                 glutin::WindowEvent::Closed => *is_active = false,
                 glutin::WindowEvent::KeyboardInput { input, .. } => match input.virtual_keycode {

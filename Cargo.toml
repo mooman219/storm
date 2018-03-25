@@ -3,9 +3,6 @@ name = "storm"
 version = "0.0.1"
 authors = ["mooman219"]
 
-[lib]
-doctest = false
-
 [dependencies]
 gl = "0.6"
 glutin = "0.12"
