@@ -1,0 +1,7 @@
+[package]
+name = "testgame"
+version = "0.0.1"
+authors = ["mooman219 <mooman219@gmail.com>"]
+
+[dependencies]
+storm = { path = "../.." }

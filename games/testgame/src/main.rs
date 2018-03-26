@@ -1,9 +1,22 @@
-use cgmath::*;
-use engine::*;
-use render::color;
-use render::message::producer::*;
-use time::clock::*;
-use utility::slotmap::*;
+extern crate storm;
+
+use storm::cgmath::*;
+use storm::engine;
+use storm::engine::*;
+use storm::render::color;
+use storm::render::message::producer::*;
+use storm::time::clock::*;
+use storm::utility::slotmap::*;
+
+/// Run with: cargo run --release
+/// Ideally the game code would exist in examples/, but it is difficult to develop on because
+/// files in the examples folder are not referenced by the RLS. Game code will exist in this sub
+/// directory for the time being while this project is being prototyped.
+///
+/// See https://github.com/rust-lang-nursery/rls/issues/269
+fn main() {
+    engine::run::<TestGame>();
+}
 
 pub struct TestGame {
     state: GameState,

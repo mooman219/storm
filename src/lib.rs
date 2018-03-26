@@ -2,7 +2,7 @@
 #![allow(dead_code, unions_with_drop_fields)]
 
 extern crate bounded_spsc_queue;
-extern crate cgmath;
+pub extern crate cgmath;
 extern crate gl;
 extern crate glutin;
 
@@ -13,7 +13,6 @@ pub mod render;
 pub mod time;
 pub mod utility;
 pub mod engine;
-pub mod game;
 
 #[cfg(test)]
 mod test;
