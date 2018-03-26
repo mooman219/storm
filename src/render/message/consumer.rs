@@ -107,6 +107,7 @@ impl RenderConsumer {
     pub fn resize(&mut self, message: Option<ResizeMessage>) {
         match message {
             Some(msg) => unsafe {
+                self.display.resize(msg.width, msg.height);
                 gl::Viewport(0, 0, msg.width as i32, msg.height as i32);
                 self.shape_shader.bind();
                 self.shape_shader.set_bounds(msg.width as f32, msg.height as f32);
