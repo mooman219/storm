@@ -3,6 +3,7 @@ extern crate storm;
 use storm::cgmath::*;
 use storm::engine;
 use storm::engine::*;
+use storm::input::*;
 use storm::render::color;
 use storm::render::message::producer::*;
 use storm::time::clock::*;
@@ -19,80 +20,112 @@ fn main() {
 }
 
 pub struct TestGame {
-    state: GameState,
     render: RenderProducer,
     clock: Clock,
     translation: Vector2<f32>,
-    triangle: IndexToken,
+    triangle: MovableTriangle,
 }
 
-#[derive(Copy, Clone)]
-pub enum GameState {
-    Startup,
-    Running,
+pub struct MovableTriangle {
+    pos: Vector2<f32>,
+    velocity: Vector2<f32>,
+    index: IndexToken,
+}
+
+impl MovableTriangle {
+    pub fn new(render: &mut RenderProducer) -> MovableTriangle {
+        let index = render.create_triangle(Vector2::new(0.0, 0.0), 1f32, color::YELLOW);
+        MovableTriangle {
+            pos: Vector2::new(0f32, 0f32),
+            velocity: Vector2::new(0f32, 0f32),
+            index: index,
+        }
+    }
+
+    pub fn update(&mut self, delta: f32, render: &mut RenderProducer) {
+        self.pos += self.velocity * delta;
+        render.update_triangle(&self.index, self.pos, 1f32, color::YELLOW);
+        self.velocity *= 0.95;
+    }
 }
 
 impl Game for TestGame {
     const TITLE: &'static str = "Test Game";
 
-    fn new(render: RenderProducer) -> Self {
+    fn new(mut render: RenderProducer) -> Self {
+        let triangle = MovableTriangle::new(&mut render);
+        for x in -16..4 {
+            let offset = x as f32;
+            render.create_rect(
+                Vector2::new(-1f32 + offset, 0f32),
+                Vector2::new(0.5f32, 0.5f32),
+                color::ORANGE,
+            );
+            render.create_rect(
+                Vector2::new(-0.5f32 + offset, 0.5f32),
+                Vector2::new(0.5f32, 0.5f32),
+                color::RED,
+            );
+            render.create_rect(
+                Vector2::new(0f32 + offset, 1f32),
+                Vector2::new(0.5f32, 0.5f32),
+                color::PURPLE,
+            );
+            render.create_rect(
+                Vector2::new(0.5f32 + offset, 1.5f32),
+                Vector2::new(0.5f32, 0.5f32),
+                color::BLUE,
+            );
+        }
+        render.set_scale(0.5f32);
+        render.send();
         TestGame {
-            state: GameState::Startup,
             render: render,
             clock: Clock::new(200),
             translation: Vector2::new(0f32, 0f32),
-            triangle: IndexToken::invalid(),
+            triangle: triangle,
+        }
+    }
+
+    fn input(&mut self, event: InputFrame) {
+        match event {
+            InputFrame::KeyPressed(KeyCode::W) => {
+                self.triangle.velocity.y += 1f32;
+            },
+            InputFrame::KeyReleased(KeyCode::W) => {
+                self.triangle.velocity.y -= 1f32;
+            },
+            InputFrame::KeyPressed(KeyCode::A) => {
+                self.triangle.velocity.x -= 1f32;
+            },
+            InputFrame::KeyReleased(KeyCode::A) => {
+                self.triangle.velocity.x += 1f32;
+            },
+            InputFrame::KeyPressed(KeyCode::S) => {
+                self.triangle.velocity.y -= 1f32;
+            },
+            InputFrame::KeyReleased(KeyCode::S) => {
+                self.triangle.velocity.y += 1f32;
+            },
+            InputFrame::KeyPressed(KeyCode::D) => {
+                self.triangle.velocity.x += 1f32;
+            },
+            InputFrame::KeyReleased(KeyCode::D) => {
+                self.triangle.velocity.x -= 1f32;
+            },
+            _ => {},
         }
     }
 
     fn tick(&mut self) {
-        match self.state {
-            GameState::Startup => {
-                for x in -16..4 {
-                    let offset = x as f32;
-                    self.render.create_rect(
-                        Vector2::new(-1f32 + offset, 0f32),
-                        Vector2::new(0.5f32, 0.5f32),
-                        color::ORANGE,
-                    );
-                    self.render.create_rect(
-                        Vector2::new(-0.5f32 + offset, 0.5f32),
-                        Vector2::new(0.5f32, 0.5f32),
-                        color::RED,
-                    );
-                    self.render.create_rect(
-                        Vector2::new(0f32 + offset, 1f32),
-                        Vector2::new(0.5f32, 0.5f32),
-                        color::PURPLE,
-                    );
-                    self.render.create_rect(
-                        Vector2::new(0.5f32 + offset, 1.5f32),
-                        Vector2::new(0.5f32, 0.5f32),
-                        color::BLUE,
-                    );
-                }
-                self.triangle = self.render
-                    .create_triangle(Vector2::new(0.0, 1.0), 1f32, color::YELLOW);
-                self.render.set_scale(0.5f32);
-                self.render.send();
-                self.state = GameState::Running;
-            },
-            GameState::Running => {
-                let delta = self.clock.get_delta();
-                if self.translation.x > 6f32 {
-                    self.translation.x = 0f32;
-                }
-                self.translation.x += 1f32 * delta;
-                self.render.update_triangle(
-                    &self.triangle,
-                    Vector2::new(self.translation.x - 6f32, 1.0),
-                    -1f32,
-                    color::GREEN,
-                );
-                self.render.set_translation(self.translation);
-                self.render.send();
-            },
+        let delta = self.clock.get_delta();
+        if self.translation.x > 6f32 {
+            self.translation.x = 0f32;
         }
+        self.translation.x += 0.25f32 * delta;
+        self.triangle.update(delta, &mut self.render);
+        self.render.set_translation(self.translation);
+        self.render.send();
         self.clock.tick();
     }
 }

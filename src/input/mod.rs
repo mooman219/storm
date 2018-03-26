@@ -2,7 +2,7 @@ pub mod consumer;
 pub mod producer;
 
 use cgmath::*;
-use glutin::VirtualKeyCode;
+pub use glutin::VirtualKeyCode as KeyCode;
 
 /// These are represented as an enumeration to preserve ordering when stored
 /// in a vector and read sequentially.
@@ -10,8 +10,8 @@ use glutin::VirtualKeyCode;
 #[derive(Copy, Clone)]
 pub enum InputFrame {
     // Represents keyboard events.
-    KeyPressed(VirtualKeyCode),
-    KeyReleased(VirtualKeyCode),
+    KeyPressed(KeyCode),
+    KeyReleased(KeyCode),
 
     // Represents cursor events.
     CursorPressed(CursorButton, Vector2<f32>),

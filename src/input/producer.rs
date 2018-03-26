@@ -40,6 +40,7 @@ impl InputProducer {
     }
 
     pub fn tick(&mut self) {
+        // TODO: Track input so we ignore the os when it sends a key multiple times.
         // Run the event loop
         let inner = &mut self.inner;
         self.event_loop.poll_events(|event| match event {

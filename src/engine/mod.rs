@@ -1,11 +1,11 @@
 use bounded_spsc_queue;
 use glutin;
-use input::*;
 use input::consumer::*;
 use input::producer::*;
-use render::*;
+use input::*;
 use render::message::consumer::*;
 use render::message::producer::*;
+use render::*;
 use std::thread;
 use std::thread::sleep;
 use std::time::Duration;
