@@ -5,6 +5,6 @@ authors = ["Joe Cumbo <mooman219@gmail.com>"]
 
 [dependencies]
 gl = "0.6"
-glutin = "0.12"
+glutin = "0.13"
 cgmath = "0.15"
 bounded-spsc-queue = "0.2.0"

@@ -1,11 +1,11 @@
 use bounded_spsc_queue;
 use glutin;
+use input::*;
 use input::consumer::*;
 use input::producer::*;
-use input::*;
+use render::*;
 use render::message::consumer::*;
 use render::message::producer::*;
-use render::*;
 use std::thread;
 use std::thread::sleep;
 use std::time::Duration;
@@ -35,7 +35,7 @@ pub fn run<G: Game>() {
     let display = display::Display::new(
         glutin::WindowBuilder::new()
             .with_title(G::TITLE)
-            .with_dimensions(400, 400),
+            .with_dimensions(500, 100),
         glutin::ContextBuilder::new(),
         &event_loop,
     );
