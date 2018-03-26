@@ -41,8 +41,6 @@ impl RenderConsumer {
         // Initialize it
         consumer.display.enable_clear_color();
         consumer.display.clear_color(0.0, 0.0, 0.2, 1.0);
-        consumer.shape_shader.bind();
-        consumer.shape_shader.set_scale(0.25f32);
         // Return
         consumer
     }
@@ -88,10 +86,19 @@ impl RenderConsumer {
         }
     }
 
-    fn handle_set_translation(&mut self, message: Option<SetTranslationMessage>) {
+    fn handle_set_translation(&mut self, message: Option<Vector2<f32>>) {
         match message {
-            Some(msg) => {
-                self.shape_shader.set_translation(msg.translation);
+            Some(translation) => {
+                self.shape_shader.set_translation(translation);
+            },
+            None => {},
+        };
+    }
+
+    fn handle_set_scale(&mut self, message: Option<f32>) {
+        match message {
+            Some(scale) => {
+                self.shape_shader.set_scale(scale);
             },
             None => {},
         };
@@ -126,6 +133,7 @@ impl RenderConsumer {
                 // Message Shader
                 self.shape_shader.bind();
                 self.handle_set_translation(f.translation);
+                self.handle_set_scale(f.scale);
                 // Draw Shapes
                 self.shape_shader.bind();
                 self.quad_buffer.draw();

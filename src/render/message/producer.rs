@@ -76,11 +76,12 @@ impl RenderProducer {
         self.frame.triangles.push(message);
     }
 
-    pub fn set_translation(&mut self, translation: Vector3<f32>) {
-        let message = SetTranslationMessage {
-            translation: translation,
-        };
-        self.frame.translation = Some(message);
+    pub fn set_translation(&mut self, translation: Vector2<f32>) {
+        self.frame.translation = Some(translation);
+    }
+
+    pub fn set_scale(&mut self, scale: f32) {
+        self.frame.scale = Some(scale);
     }
 
     pub fn send(&mut self) {

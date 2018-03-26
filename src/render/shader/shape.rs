@@ -56,8 +56,8 @@ impl ShapeShader {
         self.sync();
     }
 
-    pub fn set_translation(&mut self, translation: Vector3<f32>) {
-        self.ortho_translation = Matrix4::from_translation(translation);
+    pub fn set_translation(&mut self, translation: Vector2<f32>) {
+        self.ortho_translation = Matrix4::from_translation(Vector3::new(translation.x, translation.y, 0f32));
         self.sync();
     }
 

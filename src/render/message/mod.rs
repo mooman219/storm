@@ -7,7 +7,8 @@ use render::color::*;
 pub struct RenderFrame {
     pub quads: Vec<QuadMessage>,
     pub triangles: Vec<TriangleMessage>,
-    pub translation: Option<SetTranslationMessage>,
+    pub translation: Option<Vector2<f32>>,
+    pub scale: Option<f32>,
 }
 
 impl RenderFrame {
@@ -16,6 +17,7 @@ impl RenderFrame {
             quads: Vec::new(),
             triangles: Vec::new(),
             translation: None,
+            scale: None,
         }
     }
 }
@@ -56,9 +58,4 @@ pub enum TriangleMessage {
     Remove {
         id: usize,
     },
-}
-
-#[derive(Copy, Clone)]
-pub struct SetTranslationMessage {
-    pub translation: Vector3<f32>,
 }

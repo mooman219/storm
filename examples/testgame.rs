@@ -22,7 +22,7 @@ pub struct TestGame {
     state: GameState,
     render: RenderProducer,
     clock: Clock,
-    translation: Vector3<f32>,
+    translation: Vector2<f32>,
     triangle: IndexToken,
 }
 
@@ -40,7 +40,7 @@ impl Game for TestGame {
             state: GameState::Startup,
             render: render,
             clock: Clock::new(200),
-            translation: Vector3::new(0f32, 0f32, 0f32),
+            translation: Vector2::new(0f32, 0f32),
             triangle: IndexToken::invalid(),
         }
     }
@@ -73,6 +73,7 @@ impl Game for TestGame {
                 }
                 self.triangle = self.render
                     .create_triangle(Vector2::new(0.0, 1.0), 1f32, color::YELLOW);
+                self.render.set_scale(0.5f32);
                 self.render.send();
                 self.state = GameState::Running;
             },

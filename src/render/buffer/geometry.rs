@@ -12,7 +12,6 @@ pub struct GeometryBuffer<T: Geometry> {
     vertex_array: VertexArray<T::VertexType>,
 }
 
-// TODO: This can be a shape buffer since we're only drawing triangles.
 impl<T: Geometry> GeometryBuffer<T> {
     pub fn new(capacity: usize) -> GeometryBuffer<T> {
         // Vertex Buffer Object
