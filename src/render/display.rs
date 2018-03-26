@@ -8,6 +8,8 @@ pub struct Display {
     clear_mode: u32,
 }
 
+unsafe impl Send for Display {}
+
 impl Display {
     pub fn new(
         window_builder: glutin::WindowBuilder,
