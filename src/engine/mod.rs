@@ -12,17 +12,23 @@ use std::time::Duration;
 use utility::consume_spsc;
 
 pub trait Game {
+    /// The window name for the game.
     const TITLE: &'static str = "Untitled";
 
+    /// Function to instantiate a new game object.
     fn new(render: RenderProducer) -> Self;
 
+    /// Called once per iteration of the game loop.
     fn tick(&mut self) {}
 
-    /// Called when there's input to handle. This is called before the tick is
-    /// called.
+    /// Called when there's input to handle. If there is more then one input event to handle, this
+    /// function is called repeatedly until the events are exhausted.
     fn input(&mut self, _: InputFrame) {}
 }
 
+/// Creates and runs a game. Threads for input, rendering, and game logic are created along with
+/// communication channels between them. The game is then instantiated. This function blocks until
+/// the game window is closed.
 pub fn run<G: Game>() {
     // Winow creation
     let event_loop = glutin::EventsLoop::new();
@@ -51,6 +57,8 @@ pub fn run<G: Game>() {
 
     // Render thread (daemon)
     thread::spawn(move || {
+        // The display is bound in the thread we're going to be making opengl calls in. Behavior is
+        // undefined is the display is bound outside of the thread and usually segfaults.
         display.bind();
         let mut render_consumer = RenderConsumer::new(display, render_consumer_pipe, resize_consumer);
         loop {
