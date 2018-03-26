@@ -1,4 +1,5 @@
 use bounded_spsc_queue::Consumer;
+use engine::*;
 use input::*;
 
 pub struct InputConsumer {
@@ -12,17 +13,15 @@ impl InputConsumer {
         }
     }
 
-    pub fn consume_keyboard() {}
-
-    pub fn consume_cursor() {}
-
-    pub fn tick(&mut self) {
+    pub fn tick<G: Game>(&mut self, game: &mut G) {
         // Frame processing
-        match self.input_consumer.try_pop().as_mut() {
-            Some(_) => {
-                // TODO: Actually process input.
-            },
-            None => {},
+        loop {
+            match self.input_consumer.try_pop() {
+                Some(frame) => {
+                    game.input(frame);
+                },
+                None => return,
+            }
         }
     }
 }

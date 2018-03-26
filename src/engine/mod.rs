@@ -14,14 +14,16 @@ use utility::consume_spsc;
 pub trait Game {
     const TITLE: &'static str = "Untitled";
 
-    fn tick(&mut self, _: &mut RenderProducer) {}
+    fn new(render: RenderProducer) -> Self;
+
+    fn tick(&mut self) {}
 
     /// Called when there's input to handle. This is called before the tick is
     /// called.
     fn input(&mut self, _: InputFrame) {}
 }
 
-pub fn run<G: Game + Send + 'static>(mut game: G) {
+pub fn run<G: Game>() {
     // Winow creation
     let event_loop = glutin::EventsLoop::new();
     let display = display::Display::new(
@@ -38,11 +40,12 @@ pub fn run<G: Game + Send + 'static>(mut game: G) {
 
     // Game thread (daemon)
     thread::spawn(move || {
-        let mut render_producer = RenderProducer::new(render_producer_pipe);
-        let mut _input_consumer = InputConsumer::new(input_consumer_pipe);
+        let mut input_consumer = InputConsumer::new(input_consumer_pipe);
+        let render_producer = RenderProducer::new(render_producer_pipe);
+        let mut game = G::new(render_producer);
         loop {
-            // TODO: Call the input loop: game.input(asdf)
-            game.tick(&mut render_producer);
+            input_consumer.tick(&mut game);
+            game.tick();
         }
     });
 

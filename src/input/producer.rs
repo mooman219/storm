@@ -6,11 +6,16 @@ use glutin::MouseButton;
 use input::*;
 use utility::consume_spsc;
 
-pub struct InputProducer {
+struct InputState {
     input_producer: bounded_spsc_queue::Producer<InputFrame>,
     resize_producer: consume_spsc::Producer<ResizeMessage>,
-    event_loop: EventsLoop,
     is_active: bool,
+    cursos_pos: Vector2<f32>,
+}
+
+pub struct InputProducer {
+    inner: InputState,
+    event_loop: EventsLoop,
 }
 
 impl InputProducer {
@@ -20,51 +25,49 @@ impl InputProducer {
         resize_producer: consume_spsc::Producer<ResizeMessage>,
     ) -> InputProducer {
         InputProducer {
-            input_producer: input_producer,
-            resize_producer: resize_producer,
+            inner: InputState {
+                input_producer: input_producer,
+                resize_producer: resize_producer,
+                is_active: true,
+                cursos_pos: Vector2::new(0f32, 0f32),
+            },
             event_loop: event_loop,
-            is_active: true,
         }
     }
 
     pub fn is_active(&self) -> bool {
-        self.is_active
+        self.inner.is_active
     }
 
     pub fn tick(&mut self) {
-        // Disjoint References
-        let is_active = &mut self.is_active;
-        let resize_producer = &mut self.resize_producer;
-        let input_producer = &mut self.input_producer;
         // Run the event loop
+        let inner = &mut self.inner;
         self.event_loop.poll_events(|event| match event {
             glutin::Event::WindowEvent { event, .. } => match event {
                 glutin::WindowEvent::Resized(w, h) => {
-                    resize_producer.set(ResizeMessage { width: w, height: h });
+                    inner.resize_producer.set(ResizeMessage { width: w, height: h });
                 },
-                glutin::WindowEvent::Closed => *is_active = false,
+                glutin::WindowEvent::Closed => inner.is_active = false,
                 glutin::WindowEvent::KeyboardInput { input, .. } => match input.virtual_keycode {
                     Some(key) => {
                         let message = match input.state {
                             ElementState::Pressed => InputFrame::KeyPressed(key),
                             ElementState::Released => InputFrame::KeyReleased(key),
                         };
-                        input_producer.push(message);
+                        inner.input_producer.push(message);
                     },
                     None => {},
                 },
                 glutin::WindowEvent::CursorMoved { position, .. } => {
                     let (x, y) = position;
-                    println!("{}, {}", x, y);
-                    // TODO: This fills the buffer.
-                    // let message = InputFrame::CursorMoved(Vector2::new(x as f32, y as f32));
-                    // input_producer.push(message);
+                    inner.cursos_pos = Vector2::new(x as f32, y as f32);
+                    // TODO: Replace_spsc for mouse position
                 },
                 glutin::WindowEvent::CursorEntered { .. } => {
-                    input_producer.push(InputFrame::CursorEntered);
+                    inner.input_producer.push(InputFrame::CursorEntered);
                 },
                 glutin::WindowEvent::CursorLeft { .. } => {
-                    input_producer.push(InputFrame::CursorLeft);
+                    inner.input_producer.push(InputFrame::CursorLeft);
                 },
                 glutin::WindowEvent::MouseInput { state, button, .. } => {
                     let button = match button {
@@ -74,10 +77,10 @@ impl InputProducer {
                         MouseButton::Other(value) => CursorButton::Other(value),
                     };
                     let message = match state {
-                        ElementState::Pressed => InputFrame::CursorPressed(button),
-                        ElementState::Released => InputFrame::CursorReleased(button),
+                        ElementState::Pressed => InputFrame::CursorPressed(button, inner.cursos_pos),
+                        ElementState::Released => InputFrame::CursorReleased(button, inner.cursos_pos),
                     };
-                    input_producer.push(message);
+                    inner.input_producer.push(message);
                 },
                 // Other events: https://docs.rs/glutin/0.13.1/glutin/enum.WindowEvent.html
                 _ => (),

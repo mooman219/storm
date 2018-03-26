@@ -14,9 +14,8 @@ pub enum InputFrame {
     KeyReleased(VirtualKeyCode),
 
     // Represents cursor events.
-    CursorMoved(Vector2<f32>),
-    CursorPressed(CursorButton),
-    CursorReleased(CursorButton),
+    CursorPressed(CursorButton, Vector2<f32>),
+    CursorReleased(CursorButton, Vector2<f32>),
     CursorLeft,
     CursorEntered,
 }

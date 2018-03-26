@@ -10,5 +10,5 @@ use storm::game::testgame::*;
 ///
 /// See https://github.com/rust-lang-nursery/rls/issues/269
 fn main() {
-    engine::run(TestGame::new());
+    engine::run::<TestGame>();
 }
