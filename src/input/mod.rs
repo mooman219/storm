@@ -9,6 +9,7 @@ use glutin::MouseButton;
 use input::message::*;
 use std::thread::sleep;
 use std::time::Duration;
+use time::timer::*;
 use utility::consume_spsc;
 use utility::replace_spsc;
 
@@ -31,7 +32,11 @@ pub fn start(
         key_states: [false; 512],
     };
 
+    // Log input timings.
+    let mut timer_input = Timer::new("Input: Frame");
     while state.is_active {
+        // Start timing.
+        timer_input.start();
         // Run the event loop to record input events.
         event_loop.poll_events(|event| match event {
             glutin::Event::WindowEvent { event, .. } => match event {
@@ -94,6 +99,8 @@ pub fn start(
             // Other events: https://docs.rs/glutin/0.13.1/glutin/enum.Event.html
             _ => (),
         });
+        // Finish timing.
+        timer_input.stop();
         // Sleep to avoid pegging a core.
         sleep(Duration::new(0, 100));
     }

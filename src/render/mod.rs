@@ -51,7 +51,7 @@ pub fn start(
     };
 
     // Log render timings.
-    let mut timer_render = Timer::new("Frame");
+    let mut timer_render = Timer::new("Render: Frame");
     loop {
         // Resizing.
         state.resize(resize_consumer.consume());

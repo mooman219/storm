@@ -42,7 +42,7 @@ impl<T> FixedBuffer<T> {
             buffer_type: buffer_type,
             capacity: capacity,
             items: items,
-            timer_sync: Timer::new("Fixed - Sync"),
+            timer_sync: Timer::new("Render: Fixed Sync"),
         }
     }
 }
