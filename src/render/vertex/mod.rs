@@ -1,4 +1,5 @@
 pub mod color;
+pub mod texture;
 
 use gl;
 use std::marker::PhantomData;
