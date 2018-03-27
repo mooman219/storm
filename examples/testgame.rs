@@ -44,7 +44,6 @@ impl MovableTriangle {
     pub fn update(&mut self, delta: f32, render: &mut RenderProducer) {
         self.pos += self.velocity * delta;
         render.update_triangle(&self.index, self.pos, 1f32, color::YELLOW);
-        self.velocity *= 0.95;
     }
 }
 
@@ -88,30 +87,14 @@ impl Game for TestGame {
 
     fn input(&mut self, event: InputFrame) {
         match event {
-            InputFrame::KeyPressed(Key::W) => {
-                self.triangle.velocity.y += 1f32;
-            },
-            InputFrame::KeyReleased(Key::W) => {
-                self.triangle.velocity.y -= 1f32;
-            },
-            InputFrame::KeyPressed(Key::A) => {
-                self.triangle.velocity.x -= 1f32;
-            },
-            InputFrame::KeyReleased(Key::A) => {
-                self.triangle.velocity.x += 1f32;
-            },
-            InputFrame::KeyPressed(Key::S) => {
-                self.triangle.velocity.y -= 1f32;
-            },
-            InputFrame::KeyReleased(Key::S) => {
-                self.triangle.velocity.y += 1f32;
-            },
-            InputFrame::KeyPressed(Key::D) => {
-                self.triangle.velocity.x += 1f32;
-            },
-            InputFrame::KeyReleased(Key::D) => {
-                self.triangle.velocity.x -= 1f32;
-            },
+            InputFrame::KeyPressed(Key::W) => self.triangle.velocity.y += 1.5f32,
+            InputFrame::KeyReleased(Key::W) => self.triangle.velocity.y -= 1.5f32,
+            InputFrame::KeyPressed(Key::A) => self.triangle.velocity.x -= 1.5f32,
+            InputFrame::KeyReleased(Key::A) => self.triangle.velocity.x += 1.5f32,
+            InputFrame::KeyPressed(Key::S) => self.triangle.velocity.y -= 1.5f32,
+            InputFrame::KeyReleased(Key::S) => self.triangle.velocity.y += 1.5f32,
+            InputFrame::KeyPressed(Key::D) => self.triangle.velocity.x += 1.5f32,
+            InputFrame::KeyReleased(Key::D) => self.triangle.velocity.x -= 1.5f32,
             _ => {},
         }
     }
@@ -121,7 +104,7 @@ impl Game for TestGame {
         if self.translation.x > 6f32 {
             self.translation.x = 0f32;
         }
-        self.translation.x += 0.25f32 * delta;
+        self.translation.x += 0.1f32 * delta;
         self.triangle.update(delta, &mut self.render);
         self.render.set_translation(self.translation);
         self.render.send();

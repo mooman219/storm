@@ -15,6 +15,7 @@ use utility::replace_spsc;
 struct InputState {
     is_active: bool,
     cursos_pos: Vector2<f32>,
+    key_states: [bool; 512],
 }
 
 pub fn start(
@@ -27,6 +28,7 @@ pub fn start(
     let mut state = InputState {
         is_active: true,
         cursos_pos: Vector2::new(0f32, 0f32),
+        key_states: [false; 512],
     };
 
     while state.is_active {
@@ -39,11 +41,22 @@ pub fn start(
                 glutin::WindowEvent::Closed => state.is_active = false,
                 glutin::WindowEvent::KeyboardInput { input, .. } => match input.virtual_keycode {
                     Some(key) => {
-                        let message = match input.state {
-                            ElementState::Pressed => InputFrame::KeyPressed(key),
-                            ElementState::Released => InputFrame::KeyReleased(key),
-                        };
-                        input_producer.push(message);
+                        // pub scancode: u32,
+                        let index = input.scancode as usize;
+                        match input.state {
+                            ElementState::Pressed => {
+                                if !state.key_states[index] {
+                                    input_producer.push(InputFrame::KeyPressed(key));
+                                    state.key_states[index] = true;
+                                }
+                            },
+                            ElementState::Released => {
+                                if state.key_states[index] {
+                                    input_producer.push(InputFrame::KeyReleased(key));
+                                    state.key_states[index] = false;
+                                }
+                            },
+                        }
                     },
                     None => {},
                 },

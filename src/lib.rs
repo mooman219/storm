@@ -1,5 +1,5 @@
 #![feature(asm, const_fn, pointer_methods, optin_builtin_traits)]
-#![allow(dead_code, unions_with_drop_fields)]
+#![allow(dead_code)]
 
 extern crate bounded_spsc_queue;
 pub extern crate cgmath;
