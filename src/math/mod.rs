@@ -1,3 +1,5 @@
+pub mod aabb;
+
 use utility::init::LazyStatic;
 
 const PI: f32 = 3.141592653589793238f32;

@@ -4,21 +4,21 @@ use render::color::*;
 use render::vertex::*;
 
 #[repr(C)]
-pub struct ShapeVertex {
+pub struct ColorVertex {
     position: Vector2<f32>,
     color: Color,
 }
 
-impl ShapeVertex {
-    pub fn new(x: f32, y: f32, color: Color) -> ShapeVertex {
-        ShapeVertex {
+impl ColorVertex {
+    pub fn new(x: f32, y: f32, color: Color) -> ColorVertex {
+        ColorVertex {
             position: Vector2 { x: x, y: y },
             color: color,
         }
     }
 }
 
-impl Vertex for ShapeVertex {
+impl Vertex for ColorVertex {
     const VERTEX_SIZE: usize = mem::size_of::<Self>();
 
     fn configure_vertex_attribute() {

@@ -1,8 +1,8 @@
 use cgmath::*;
 use render::color::*;
 use render::geometry::*;
+use render::vertex::color::*;
 use render::vertex::*;
-use render::vertex::shape::*;
 
 #[repr(C)]
 pub struct Quad<T: Vertex> {
@@ -32,14 +32,7 @@ impl<T: Vertex> Geometry for Quad<T> {
 
     fn generate_indice(index: u16) -> Self::IndiceType {
         let index = index * 4;
-        [
-            index + 0,
-            index + 1,
-            index + 2,
-            index + 2,
-            index + 1,
-            index + 3,
-        ]
+        [index + 0, index + 1, index + 2, index + 2, index + 1, index + 3]
     }
 }
 
@@ -47,13 +40,13 @@ impl<T: Vertex> Geometry for Quad<T> {
 // Default implementations
 // ////////////////////////////////////////////////////////
 
-impl Quad<ShapeVertex> {
-    pub fn new_rect(pos: Vector2<f32>, size: Vector2<f32>, color: Color) -> Quad<ShapeVertex> {
+impl Quad<ColorVertex> {
+    pub fn new_rect(pos: Vector2<f32>, size: Vector2<f32>, color: Color) -> Quad<ColorVertex> {
         Self::new(
-            ShapeVertex::new(pos.x, pos.y + size.y, color),
-            ShapeVertex::new(pos.x, pos.y, color),
-            ShapeVertex::new(pos.x + size.x, pos.y + size.y, color),
-            ShapeVertex::new(pos.x + size.x, pos.y, color),
+            ColorVertex::new(pos.x, pos.y + size.y, color),
+            ColorVertex::new(pos.x, pos.y, color),
+            ColorVertex::new(pos.x + size.x, pos.y + size.y, color),
+            ColorVertex::new(pos.x + size.x, pos.y, color),
         )
     }
 }

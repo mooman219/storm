@@ -1,6 +1,6 @@
 use gl;
 use render::buffer::*;
-use render::*;
+use render::enums::*;
 use std::mem;
 use std::ptr;
 use time::timer::*;

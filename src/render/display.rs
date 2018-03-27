@@ -1,13 +1,15 @@
 use gl;
 use glutin;
 use glutin::GlContext;
-use render::*;
+use render::enums::*;
 
 pub struct Display {
     window: glutin::GlWindow,
     clear_mode: u32,
 }
 
+// Mark the display as send. In some systems, glutin::GlWindow isn't send so we
+// make it as such. This might be a problem later, but not today.
 unsafe impl Send for Display {}
 
 impl Display {

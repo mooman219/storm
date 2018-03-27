@@ -1,38 +1,87 @@
-pub mod consumer;
-pub mod producer;
+pub mod message;
 
+use bounded_spsc_queue;
 use cgmath::*;
-pub use glutin::VirtualKeyCode as KeyCode;
+use glutin;
+use glutin::ElementState;
+use glutin::EventsLoop;
+use glutin::MouseButton;
+use input::message::*;
+use std::thread::sleep;
+use std::time::Duration;
+use utility::consume_spsc;
+use utility::replace_spsc;
 
-/// These are represented as an enumeration to preserve ordering when stored
-/// in a vector and read sequentially.
-#[repr(u8)]
-#[derive(Copy, Clone)]
-pub enum InputFrame {
-    // Represents keyboard events.
-    KeyPressed(KeyCode),
-    KeyReleased(KeyCode),
-
-    // Represents cursor events.
-    CursorPressed(CursorButton, Vector2<f32>),
-    CursorReleased(CursorButton, Vector2<f32>),
-    CursorLeft,
-    CursorEntered,
+struct InputState {
+    is_active: bool,
+    cursos_pos: Vector2<f32>,
 }
 
-/// Describes the cursor button being manipulated.
-#[repr(u8)]
-#[derive(Copy, Clone)]
-pub enum CursorButton {
-    Left,
-    Right,
-    Middle,
-    Other(u8),
-}
+pub fn start(
+    mut event_loop: EventsLoop,
+    input_producer: bounded_spsc_queue::Producer<InputFrame>,
+    resize_producer: consume_spsc::Producer<Vector2<u32>>,
+    cursor_producer: replace_spsc::Producer<Vector2<f32>>,
+) {
+    // Create the input state.
+    let mut state = InputState {
+        is_active: true,
+        cursos_pos: Vector2::new(0f32, 0f32),
+    };
 
-/// Describes the new bounds the window has been resized to.
-#[derive(Copy, Clone)]
-pub struct ResizeMessage {
-    pub width: u32,
-    pub height: u32,
+    while state.is_active {
+        // Run the event loop to record input events.
+        event_loop.poll_events(|event| match event {
+            glutin::Event::WindowEvent { event, .. } => match event {
+                glutin::WindowEvent::Resized(w, h) => {
+                    resize_producer.set(Vector2::new(w, h));
+                },
+                glutin::WindowEvent::Closed => state.is_active = false,
+                glutin::WindowEvent::KeyboardInput { input, .. } => match input.virtual_keycode {
+                    Some(key) => {
+                        let message = match input.state {
+                            ElementState::Pressed => InputFrame::KeyPressed(key),
+                            ElementState::Released => InputFrame::KeyReleased(key),
+                        };
+                        input_producer.push(message);
+                    },
+                    None => {},
+                },
+                glutin::WindowEvent::CursorMoved { position, .. } => {
+                    let (x, y) = position;
+                    state.cursos_pos = Vector2::new(x as f32, y as f32);
+                    cursor_producer.set(state.cursos_pos);
+                },
+                glutin::WindowEvent::CursorEntered { .. } => {
+                    input_producer.push(InputFrame::CursorEntered);
+                },
+                glutin::WindowEvent::CursorLeft { .. } => {
+                    input_producer.push(InputFrame::CursorLeft);
+                },
+                glutin::WindowEvent::MouseInput {
+                    state: button_state,
+                    button,
+                    ..
+                } => {
+                    let button = match button {
+                        MouseButton::Left => CursorButton::Left,
+                        MouseButton::Right => CursorButton::Right,
+                        MouseButton::Middle => CursorButton::Middle,
+                        MouseButton::Other(value) => CursorButton::Other(value),
+                    };
+                    let message = match button_state {
+                        ElementState::Pressed => InputFrame::CursorPressed(button, state.cursos_pos),
+                        ElementState::Released => InputFrame::CursorReleased(button, state.cursos_pos),
+                    };
+                    input_producer.push(message);
+                },
+                // Other events: https://docs.rs/glutin/0.13.1/glutin/enum.WindowEvent.html
+                _ => (),
+            },
+            // Other events: https://docs.rs/glutin/0.13.1/glutin/enum.Event.html
+            _ => (),
+        });
+        // Sleep to avoid pegging a core.
+        sleep(Duration::new(0, 100));
+    }
 }

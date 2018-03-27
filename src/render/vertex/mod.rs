@@ -1,4 +1,4 @@
-pub mod shape;
+pub mod color;
 
 use gl;
 use std::marker::PhantomData;

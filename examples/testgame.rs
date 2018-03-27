@@ -1,11 +1,10 @@
 extern crate storm;
 
 use storm::cgmath::*;
-use storm::engine;
-use storm::engine::*;
-use storm::input::*;
+use storm::game::*;
+use storm::input::message::*;
 use storm::render::color;
-use storm::render::message::producer::*;
+use storm::render::message::*;
 use storm::time::clock::*;
 use storm::utility::slotmap::*;
 
@@ -16,7 +15,7 @@ use storm::utility::slotmap::*;
 ///
 /// See https://github.com/rust-lang-nursery/rls/issues/269
 fn main() {
-    engine::run::<TestGame>();
+    storm::run::<TestGame>();
 }
 
 pub struct TestGame {
@@ -89,28 +88,28 @@ impl Game for TestGame {
 
     fn input(&mut self, event: InputFrame) {
         match event {
-            InputFrame::KeyPressed(KeyCode::W) => {
+            InputFrame::KeyPressed(Key::W) => {
                 self.triangle.velocity.y += 1f32;
             },
-            InputFrame::KeyReleased(KeyCode::W) => {
+            InputFrame::KeyReleased(Key::W) => {
                 self.triangle.velocity.y -= 1f32;
             },
-            InputFrame::KeyPressed(KeyCode::A) => {
+            InputFrame::KeyPressed(Key::A) => {
                 self.triangle.velocity.x -= 1f32;
             },
-            InputFrame::KeyReleased(KeyCode::A) => {
+            InputFrame::KeyReleased(Key::A) => {
                 self.triangle.velocity.x += 1f32;
             },
-            InputFrame::KeyPressed(KeyCode::S) => {
+            InputFrame::KeyPressed(Key::S) => {
                 self.triangle.velocity.y -= 1f32;
             },
-            InputFrame::KeyReleased(KeyCode::S) => {
+            InputFrame::KeyReleased(Key::S) => {
                 self.triangle.velocity.y += 1f32;
             },
-            InputFrame::KeyPressed(KeyCode::D) => {
+            InputFrame::KeyPressed(Key::D) => {
                 self.triangle.velocity.x += 1f32;
             },
-            InputFrame::KeyReleased(KeyCode::D) => {
+            InputFrame::KeyReleased(Key::D) => {
                 self.triangle.velocity.x -= 1f32;
             },
             _ => {},

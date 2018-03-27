@@ -25,7 +25,7 @@ static FRAGMENT: &str = r#"
     }
 "#;
 
-pub struct ShapeShader {
+pub struct ColorShader {
     program: ShaderProgram,
     uniform_ortho: i32,
     ortho: Matrix4<f32>,
@@ -33,11 +33,11 @@ pub struct ShapeShader {
     ortho_scale: Matrix4<f32>,
 }
 
-impl ShapeShader {
-    pub fn new() -> ShapeShader {
+impl ColorShader {
+    pub fn new() -> ColorShader {
         let program = ShaderProgram::new(VERTEX, FRAGMENT);
         let uniform_ortho = program.get_uniform_location("ortho");
-        ShapeShader {
+        ColorShader {
             program: program,
             uniform_ortho: uniform_ortho,
             ortho: ortho(0f32, 1f32, 0f32, 1f32, -1f32, 1f32),
