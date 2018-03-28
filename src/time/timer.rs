@@ -30,7 +30,7 @@ impl Timer {
         if as_nanoseconds(&self.last_display.elapsed()) > NANOS_PER_SEC {
             self.last_display = Instant::now();
             let average = (self.duration as f32) / (self.invocations as f32);
-            println!("{}: {} ns / {} tps", self.label, average, self.invocations);
+            trace!("{}: {} ns / {} tps", self.label, average, self.invocations);
             self.duration = 0;
             self.invocations = 0;
         }

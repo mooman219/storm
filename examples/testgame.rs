@@ -3,6 +3,7 @@ extern crate storm;
 use storm::cgmath::*;
 use storm::game::*;
 use storm::input::message::*;
+use storm::log::LevelFilter;
 use storm::render::color;
 use storm::render::message::*;
 use storm::time::clock::*;
@@ -10,8 +11,9 @@ use storm::utility::slotmap::*;
 
 /// Run with: cargo run --example testgame --release
 fn main() {
+    storm::log::set_max_level(LevelFilter::Trace);
     storm::run::<TestGame>();
-}  
+}
 
 pub struct TestGame {
     render: RenderProducer,

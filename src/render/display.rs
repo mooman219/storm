@@ -32,8 +32,8 @@ impl Display {
             gl::Enable(gl::CULL_FACE);
             gl::CullFace(gl::BACK);
         }
-        println!("Render: Bound new display");
-        println!("Render: OpenGL version {}", GlString::Version.get_string());
+        info!("Render: Bound new display");
+        info!("Render: OpenGL version {}", GlString::Version.get_string());
     }
 
     // Clear

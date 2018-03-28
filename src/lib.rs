@@ -5,6 +5,8 @@ extern crate bounded_spsc_queue;
 pub extern crate cgmath;
 extern crate gl;
 extern crate glutin;
+#[macro_use]
+pub extern crate log;
 
 pub mod game;
 pub mod input;
@@ -18,6 +20,7 @@ mod test;
 
 use cgmath::*;
 use game::*;
+use log::*;
 use render::display::*;
 use std::thread;
 use utility::consume_spsc;
@@ -27,6 +30,9 @@ use utility::replace_spsc;
 /// communication channels between them. The game is then instantiated. This function blocks until
 /// the game window is closed.
 pub fn run<G: Game>() {
+    // Initialze logging.
+    SimpleLogger::init();
+
     // Winow creation
     let event_loop = glutin::EventsLoop::new();
     let display = Display::new(
@@ -55,4 +61,32 @@ pub fn run<G: Game>() {
 
     // Input thread (main)
     input::start(event_loop, input_producer_pipe, resize_producer, cursor_producer);
+}
+
+// ////////////////////////////////////////////////////////
+// Logging
+// ////////////////////////////////////////////////////////
+
+static LOGGER: SimpleLogger = SimpleLogger;
+struct SimpleLogger;
+
+impl SimpleLogger {
+    fn init() {
+        if log::max_level() == LevelFilter::Off {
+            log::set_max_level(LevelFilter::Info);
+        }
+        log::set_logger(&LOGGER).expect("Unable to setup logging for storm-engine.");
+    }
+}
+
+impl Log for SimpleLogger {
+    fn enabled(&self, _: &Metadata) -> bool {
+        true
+    }
+
+    fn log(&self, record: &Record) {
+        println!("{:<5} {}", record.level().to_string(), record.args());
+    }
+
+    fn flush(&self) {}
 }
