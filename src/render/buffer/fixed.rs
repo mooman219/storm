@@ -1,6 +1,7 @@
 use gl;
 use render::buffer::*;
 use render::enums::*;
+use std::cmp;
 use std::mem;
 use std::ptr;
 use time::timer::*;
@@ -8,6 +9,8 @@ use time::timer::*;
 pub struct FixedBuffer<T> {
     vbo: u32,
     dirty: bool,
+    dirty_min: usize,
+    dirty_max: usize,
     buffer_type: BufferType,
     capacity: usize,
     items: Vec<T>,
@@ -39,10 +42,23 @@ impl<T> FixedBuffer<T> {
         FixedBuffer {
             vbo: vbo,
             dirty: false,
+            dirty_min: 0,
+            dirty_max: 0,
             buffer_type: buffer_type,
             capacity: capacity,
             items: items,
             timer_sync: Timer::new("Render: Fixed Sync"),
+        }
+    }
+
+    fn mark(&mut self, index: usize) {
+        if self.dirty {
+            self.dirty_min = cmp::min(self.dirty_min, index);
+            self.dirty_max = cmp::max(self.dirty_max, index + 1);
+        } else {
+            self.dirty = true;
+            self.dirty_min = index;
+            self.dirty_max = index + 1;
         }
     }
 }
@@ -54,18 +70,18 @@ impl<T> RawBuffer<T> for FixedBuffer<T> {
             panic!("Attempting to add element to full buffer.");
         }
         self.items.push(item);
-        self.dirty = true;
+        self.mark(index);
         index
     }
 
     fn remove(&mut self, index: usize) {
         self.items.swap_remove(index);
-        self.dirty = true;
+        self.mark(index);
     }
 
     fn update(&mut self, index: usize, item: T) {
         self.items[index] = item;
-        self.dirty = true;
+        self.mark(index);
     }
 
     fn offset_index(&self) -> usize {
@@ -87,12 +103,13 @@ impl<T> RawBuffer<T> for FixedBuffer<T> {
             self.timer_sync.start();
             self.dirty = false;
             unsafe {
-                let size = (self.items.len() * mem::size_of::<T>()) as isize;
-                let data = self.items.as_ptr() as *const _;
+                let offset = (mem::size_of::<T>() * self.dirty_min) as isize;
+                let size = (mem::size_of::<T>() * (self.dirty_max - self.dirty_min)) as isize;
+                let data = self.items.as_ptr().wrapping_add(self.dirty_min) as *const _;
                 gl::BindBuffer(self.buffer_type as u32, self.vbo);
                 gl::BufferSubData(
                     self.buffer_type as u32, // Buffer type
-                    0,                       // Offset
+                    offset,                  // Offset
                     size,                    // Size
                     data,                    // Data
                 );
