@@ -11,7 +11,7 @@ use storm::utility::slotmap::*;
 /// Run with: cargo run --example testgame --release
 fn main() {
     storm::run::<TestGame>();
-}
+}  
 
 pub struct TestGame {
     render: RenderProducer,
