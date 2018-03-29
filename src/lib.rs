@@ -68,13 +68,11 @@ pub fn run<G: Game>() {
 // ////////////////////////////////////////////////////////
 
 static LOGGER: SimpleLogger = SimpleLogger;
+
 struct SimpleLogger;
 
 impl SimpleLogger {
     fn init() {
-        if log::max_level() == LevelFilter::Off {
-            log::set_max_level(LevelFilter::Info);
-        }
         log::set_logger(&LOGGER).expect("Unable to setup logging for storm-engine.");
     }
 }
