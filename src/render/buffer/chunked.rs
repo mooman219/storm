@@ -124,6 +124,7 @@ impl<T> RawBuffer<T> for ChunkedBuffer<T> {
                                     },
                                 }
                             }
+                            gl::DeleteSync(fence);
                         },
                         None => {},
                     }
