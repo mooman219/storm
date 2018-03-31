@@ -18,13 +18,24 @@ pub struct DynamicBuffer<T> {
 }
 
 impl<T> DynamicBuffer<T> {
-    const DEFAULT_CAPACITY: usize = 16;
+    fn mark(&mut self, index: usize) {
+        if self.dirty {
+            self.buffer_min = cmp::min(self.buffer_min, index);
+            self.buffer_max = cmp::max(self.buffer_max, index + 1);
+        } else {
+            self.dirty = true;
+            self.buffer_min = index;
+            self.buffer_max = index + 1;
+        }
+    }
+}
 
-    pub fn new(buffer_type: BufferType) -> DynamicBuffer<T> {
-        let items: Vec<T> = Vec::<T>::with_capacity(DynamicBuffer::<T>::DEFAULT_CAPACITY);
+impl<T> RawBuffer<T> for DynamicBuffer<T> {
+    fn new(buffer_type: BufferType, capacity: usize) -> DynamicBuffer<T> {
+        let items: Vec<T> = Vec::<T>::with_capacity(capacity);
         let mut vbo = 0u32;
         unsafe {
-            let default_size = (mem::size_of::<T>() * DynamicBuffer::<T>::DEFAULT_CAPACITY) as isize;
+            let default_size = (mem::size_of::<T>() * capacity) as isize;
             gl::GenBuffers(1, &mut vbo);
             gl::BindBuffer(buffer_type as u32, vbo);
             gl::BufferData(
@@ -39,26 +50,13 @@ impl<T> DynamicBuffer<T> {
             dirty: false,
             buffer_min: 0,
             buffer_max: 0,
-            buffer_capacity: DynamicBuffer::<T>::DEFAULT_CAPACITY,
+            buffer_capacity: capacity,
             buffer_type: buffer_type,
             items: items,
             timer_sync: Timer::new("Dynamic - Sync"),
         }
     }
 
-    fn mark(&mut self, index: usize) {
-        if self.dirty {
-            self.buffer_min = cmp::min(self.buffer_min, index);
-            self.buffer_max = cmp::max(self.buffer_max, index + 1);
-        } else {
-            self.dirty = true;
-            self.buffer_min = index;
-            self.buffer_max = index + 1;
-        }
-    }
-}
-
-impl<T> RawBuffer<T> for DynamicBuffer<T> {
     fn add(&mut self, item: T) -> usize {
         let index = self.items.len();
         self.items.push(item);

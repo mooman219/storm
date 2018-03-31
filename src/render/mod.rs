@@ -60,6 +60,8 @@ pub fn start(
             Some(f) => {
                 // Start timing.
                 timer_render.start();
+                // Clear the screen.
+                state.display.clear();
                 // Message quads.
                 state.handle_quads(&mut f.quads);
                 state.quad_buffer.sync();
@@ -74,11 +76,10 @@ pub fn start(
                 state.shape_shader.bind();
                 state.quad_buffer.draw();
                 state.triangle_buffer.draw();
-                // Finish.
-                state.display.swap_buffers();
-                state.display.clear();
                 // Finish timing.
                 timer_render.stop();
+                // Finish.
+                state.display.swap_buffers();
             },
             None => {},
         }

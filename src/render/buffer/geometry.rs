@@ -19,7 +19,7 @@ impl<T: Geometry> GeometryBuffer<T> {
         // Vertex Array Object
         let vertex_array = VertexArray::new();
         // Element Buffer Object
-        let element_buffer = ImmutableBuffer::new(
+        let element_buffer = ImmutableBuffer::from_vec(
             BufferType::ElementArrayBuffer,
             T::generate_indice_list(capacity as u16),
         );

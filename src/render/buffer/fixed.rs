@@ -18,7 +18,20 @@ pub struct FixedBuffer<T> {
 }
 
 impl<T> FixedBuffer<T> {
-    pub fn new(buffer_type: BufferType, capacity: usize) -> FixedBuffer<T> {
+    fn mark(&mut self, index: usize) {
+        if self.dirty {
+            self.dirty_min = cmp::min(self.dirty_min, index);
+            self.dirty_max = cmp::max(self.dirty_max, index + 1);
+        } else {
+            self.dirty = true;
+            self.dirty_min = index;
+            self.dirty_max = index + 1;
+        }
+    }
+}
+
+impl<T> RawBuffer<T> for FixedBuffer<T> {
+    fn new(buffer_type: BufferType, capacity: usize) -> FixedBuffer<T> {
         // Validate input
         if capacity == 0 {
             panic!("Capacity must be greater than 0.");
@@ -51,19 +64,6 @@ impl<T> FixedBuffer<T> {
         }
     }
 
-    fn mark(&mut self, index: usize) {
-        if self.dirty {
-            self.dirty_min = cmp::min(self.dirty_min, index);
-            self.dirty_max = cmp::max(self.dirty_max, index + 1);
-        } else {
-            self.dirty = true;
-            self.dirty_min = index;
-            self.dirty_max = index + 1;
-        }
-    }
-}
-
-impl<T> RawBuffer<T> for FixedBuffer<T> {
     fn add(&mut self, item: T) -> usize {
         let index = self.items.len();
         if index == self.capacity {
@@ -100,7 +100,9 @@ impl<T> RawBuffer<T> for FixedBuffer<T> {
 
     fn sync(&mut self) {
         if self.dirty {
+            // Timing start.
             self.timer_sync.start();
+            // Sync state.
             self.dirty = false;
             unsafe {
                 let offset = (mem::size_of::<T>() * self.dirty_min) as isize;
@@ -114,6 +116,7 @@ impl<T> RawBuffer<T> for FixedBuffer<T> {
                     data,                    // Data
                 );
             }
+            // Timing finish.
             self.timer_sync.stop();
         }
     }

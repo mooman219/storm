@@ -1,21 +1,21 @@
 use std::time::Duration;
 
 /// The number of nanoseconds in a microsecond.
-pub const NANOS_PER_MICRO: u64 = 1000;
+pub const NANOS_PER_MICRO: u64 = 1_000;
 /// The number of nanoseconds in a millisecond.
-pub const NANOS_PER_MILLI: u64 = 1000_000;
+pub const NANOS_PER_MILLI: u64 = 1_000_000;
 /// The number of nanoseconds in seconds.
 pub const NANOS_PER_SEC: u64 = 1_000_000_000;
 /// The number of microseconds per second.
-pub const MICROS_PER_SEC: u64 = 1000_000;
+pub const MICROS_PER_SEC: u64 = 1_000_000;
 /// The number of milliseconds per second.
-pub const MILLIS_PER_SEC: u64 = 1000;
+pub const MILLIS_PER_SEC: u64 = 1_000;
 /// The number of seconds in a minute.
 pub const SECS_PER_MINUTE: u64 = 60;
 /// The number of seconds in an hour.
-pub const SECS_PER_HOUR: u64 = 3600;
+pub const SECS_PER_HOUR: u64 = 3_600;
 /// The number of (non-leap) seconds in days.
-pub const SECS_PER_DAY: u64 = 86400;
+pub const SECS_PER_DAY: u64 = 86_400;
 
 #[inline]
 pub fn as_days(duration: &Duration) -> u64 {

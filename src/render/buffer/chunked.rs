@@ -3,6 +3,7 @@ use render::buffer::*;
 use render::enums::*;
 use std::mem;
 use std::ptr;
+use time;
 use time::timer::*;
 
 pub struct ChunkedBuffer<T> {
@@ -10,30 +11,30 @@ pub struct ChunkedBuffer<T> {
     dirty: bool,
     buffer_type: BufferType,
     current_chunk: usize,
-    chunk_count: usize,
-    chunk_length: usize,
+    capacity: usize,
     items: Vec<T>,
+    fence: Option<gl::types::GLsync>,
     map: *mut T,
     timer_sync: Timer,
 }
 
-impl<T> ChunkedBuffer<T> {
-    pub fn new(buffer_type: BufferType, chunk_count: usize, chunk_length: usize) -> ChunkedBuffer<T> {
+const CHUNK_COUNT: usize = 4;
+const CHUNK_MASK: usize = CHUNK_COUNT - 1;
+
+impl<T> RawBuffer<T> for ChunkedBuffer<T> {
+    fn new(buffer_type: BufferType, capacity: usize) -> ChunkedBuffer<T> {
         // Validate input
-        if chunk_count == 0 {
-            panic!("Chunk count must be greater than 0.");
-        }
-        if chunk_length == 0 {
-            panic!("Chunk length must be greater than 0.");
+        if capacity == 0 {
+            panic!("Capacity must be greater than 0.");
         }
         // Prepare data
-        let items = Vec::with_capacity(chunk_length);
+        let items = Vec::with_capacity(capacity);
         let flags = gl::MAP_WRITE_BIT | gl::MAP_PERSISTENT_BIT | gl::MAP_COHERENT_BIT;
         let mut vbo = 0u32;
         let map;
         // Call into opengl
         unsafe {
-            let capacity = chunk_count * chunk_length;
+            let capacity = CHUNK_COUNT * capacity;
             let max_size = (capacity * mem::size_of::<T>()) as isize;
             gl::GenBuffers(1, &mut vbo);
             gl::BindBuffer(buffer_type as u32, vbo);
@@ -55,20 +56,18 @@ impl<T> ChunkedBuffer<T> {
             vbo: vbo,
             dirty: false,
             buffer_type: buffer_type,
-            current_chunk: chunk_count - 1,
-            chunk_count: chunk_count,
-            chunk_length: chunk_length,
+            current_chunk: 3,
+            capacity: capacity,
             items: items,
+            fence: None,
             map: map,
-            timer_sync: Timer::new("Chunked - Sync"),
+            timer_sync: Timer::new("Render: Chunked Sync"),
         }
     }
-}
 
-impl<T> RawBuffer<T> for ChunkedBuffer<T> {
     fn add(&mut self, item: T) -> usize {
         let index = self.items.len();
-        if index == self.chunk_length {
+        if index == self.capacity {
             panic!("Attempting to add element to full buffer.");
         }
         self.items.push(item);
@@ -87,7 +86,7 @@ impl<T> RawBuffer<T> for ChunkedBuffer<T> {
     }
 
     fn offset_index(&self) -> usize {
-        self.current_chunk * self.chunk_length
+        self.current_chunk * self.capacity
     }
 
     fn len(&self) -> usize {
@@ -102,14 +101,39 @@ impl<T> RawBuffer<T> for ChunkedBuffer<T> {
 
     fn sync(&mut self) {
         if self.dirty {
+            // Timing start.
             self.timer_sync.start();
+            // Sync state.
             self.dirty = false;
-            self.current_chunk = (self.current_chunk + 1) % self.chunk_count;
+            // Increment the current chunk, wrapping if needed.
+            self.current_chunk = (self.current_chunk + 1) & CHUNK_MASK;
             unsafe {
+                // Handle locking.
+                if self.current_chunk == 0 {
+                    match self.fence {
+                        Some(fence) => {
+                            let mut wait_flags = 0;
+                            let mut wait_duration = 0;
+                            loop {
+                                match gl::ClientWaitSync(fence, wait_flags, wait_duration) {
+                                    gl::ALREADY_SIGNALED | gl::CONDITION_SATISFIED => break,
+                                    gl::WAIT_FAILED => panic!("Failed to wait for fence."),
+                                    _ => {
+                                        wait_flags = gl::SYNC_FLUSH_COMMANDS_BIT;
+                                        wait_duration = time::convert::NANOS_PER_SEC;
+                                    },
+                                }
+                            }
+                        },
+                        None => {},
+                    }
+                    self.fence = Some(gl::FenceSync(gl::SYNC_GPU_COMMANDS_COMPLETE, 0));
+                }
+                // Write to the current chunk.
                 let pointer = self.map.offset(self.offset_index() as isize);
                 ptr::copy_nonoverlapping(self.items.as_ptr(), pointer, self.len());
-                // TODO: Proper sync logic
             }
+            // Timing finish.
             self.timer_sync.stop();
         }
     }
@@ -124,7 +148,3 @@ impl<T> Drop for ChunkedBuffer<T> {
         }
     }
 }
-
-// https://github.com/nvMcJohn/apitest/blob/a3f38b1c15ca160c883cddaa141c5376db56a5e6/src/framework/bufferlock.cpp
-// https://github.com/nvMcJohn/apitest/blob/master/src/solutions/dynamicstreaming/gl/mappersistent.cpp
-// https://github.com/nvMcJohn/apitest/blob/master/src/solutions/untexturedobjects/gl/mappersistent.cpp

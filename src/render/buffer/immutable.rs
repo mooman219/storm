@@ -12,7 +12,7 @@ pub struct ImmutableBuffer<T> {
 }
 
 impl<T> ImmutableBuffer<T> {
-    pub fn new(buffer_type: BufferType, items: Vec<T>) -> ImmutableBuffer<T> {
+    pub fn from_vec(buffer_type: BufferType, items: Vec<T>) -> ImmutableBuffer<T> {
         let mut vbo = 0u32;
         let size = (mem::size_of::<T>() * items.len()) as isize;
         let data = items.as_ptr() as *const _;
@@ -36,6 +36,10 @@ impl<T> ImmutableBuffer<T> {
 }
 
 impl<T> RawBuffer<T> for ImmutableBuffer<T> {
+    fn new(_: BufferType, _: usize) -> Self {
+        panic!("Must provide initial data with ImmutableBuffer::from_vec.");
+    }
+
     fn add(&mut self, _: T) -> usize {
         panic!("Cannot add immutable buffers.");
     }
