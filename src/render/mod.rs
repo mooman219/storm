@@ -62,11 +62,9 @@ pub fn start(
                 timer_render.start();
                 // Clear the screen.
                 state.display.clear();
-                // Message quads.
-                state.handle_quads(&mut f.quads);
+                // Message geometry.
+                state.handle_geometry(&mut f.geometry);
                 state.quad_buffer.sync();
-                // Message triangles.
-                state.handle_triangles(&mut f.triangles);
                 state.triangle_buffer.sync();
                 // Message shader.
                 state.shape_shader.bind();
@@ -89,32 +87,27 @@ pub fn start(
 }
 
 impl RenderState {
-    fn handle_quads(&mut self, messages: &mut Vec<QuadMessage>) {
+    fn handle_geometry(&mut self, messages: &mut Vec<GeometryMessage>) {
         for message in messages.drain(..) {
             match message {
-                QuadMessage::Create { pos, size, color } => {
+                // Quads
+                GeometryMessage::QuadCreate { pos, size, color } => {
                     let quad = Quad::new_rect(pos, size, color);
                     self.quad_buffer.add(quad);
                 },
-                QuadMessage::Update { id, pos, size, color } => {
+                GeometryMessage::QuadUpdate { id, pos, size, color } => {
                     let quad = Quad::new_rect(pos, size, color);
                     self.quad_buffer.update(id, quad);
                 },
-                QuadMessage::Remove { id } => {
+                GeometryMessage::QuadRemove { id } => {
                     self.quad_buffer.remove(id);
                 },
-            }
-        }
-    }
-
-    fn handle_triangles(&mut self, messages: &mut Vec<TriangleMessage>) {
-        for message in messages.drain(..) {
-            match message {
-                TriangleMessage::Create { pos, height, color } => {
+                // Triangles.
+                GeometryMessage::TriangleCreate { pos, height, color } => {
                     let triangle = Triangle::new_iso(pos, height, color);
                     self.triangle_buffer.add(triangle);
                 },
-                TriangleMessage::Update {
+                GeometryMessage::TriangleUpdate {
                     id,
                     pos,
                     height,
@@ -123,7 +116,7 @@ impl RenderState {
                     let triangle = Triangle::new_iso(pos, height, color);
                     self.triangle_buffer.update(id, triangle);
                 },
-                TriangleMessage::Remove { id } => {
+                GeometryMessage::TriangleRemove { id } => {
                     self.triangle_buffer.remove(id);
                 },
             }

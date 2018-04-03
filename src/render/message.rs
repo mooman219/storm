@@ -9,8 +9,7 @@ use utility::slotmap::*;
 // ////////////////////////////////////////////////////////
 
 pub struct RenderFrame {
-    pub quads: Vec<QuadMessage>,
-    pub triangles: Vec<TriangleMessage>,
+    pub geometry: Vec<GeometryMessage>,
     pub translation: Option<Vector2<f32>>,
     pub scale: Option<f32>,
 }
@@ -18,8 +17,7 @@ pub struct RenderFrame {
 impl RenderFrame {
     pub fn new() -> RenderFrame {
         RenderFrame {
-            quads: Vec::new(),
-            triangles: Vec::new(),
+            geometry: Vec::new(),
             translation: None,
             scale: None,
         }
@@ -28,38 +26,33 @@ impl RenderFrame {
 
 #[repr(u8)]
 #[derive(Copy, Clone)]
-pub enum QuadMessage {
-    Create {
+pub enum GeometryMessage {
+    QuadCreate {
         pos: Vector2<f32>,
         size: Vector2<f32>,
         color: Color,
     },
-    Update {
+    QuadUpdate {
         id: usize,
         pos: Vector2<f32>,
         size: Vector2<f32>,
         color: Color,
     },
-    Remove {
+    QuadRemove {
         id: usize,
     },
-}
-
-#[repr(u8)]
-#[derive(Copy, Clone)]
-pub enum TriangleMessage {
-    Create {
+    TriangleCreate {
         pos: Vector2<f32>,
         height: f32,
         color: Color,
     },
-    Update {
+    TriangleUpdate {
         id: usize,
         pos: Vector2<f32>,
         height: f32,
         color: Color,
     },
-    Remove {
+    TriangleRemove {
         id: usize,
     },
 }
@@ -86,57 +79,57 @@ impl RenderProducer {
     }
 
     pub fn create_rect(&mut self, pos: Vector2<f32>, size: Vector2<f32>, color: Color) -> IndexToken {
-        let message = QuadMessage::Create {
+        let message = GeometryMessage::QuadCreate {
             pos: pos,
             size: size,
             color: color,
         };
-        self.frame.quads.push(message);
+        self.frame.geometry.push(message);
         self.map_rect.add()
     }
 
     pub fn update_rect(&mut self, token: &IndexToken, pos: Vector2<f32>, size: Vector2<f32>, color: Color) {
-        let message = QuadMessage::Update {
+        let message = GeometryMessage::QuadUpdate {
             id: self.map_rect.get(token),
             pos: pos,
             size: size,
             color: color,
         };
-        self.frame.quads.push(message);
+        self.frame.geometry.push(message);
     }
 
     pub fn remove_rect(&mut self, token: IndexToken) {
-        let message = QuadMessage::Remove {
+        let message = GeometryMessage::QuadRemove {
             id: self.map_rect.remove(token),
         };
-        self.frame.quads.push(message);
+        self.frame.geometry.push(message);
     }
 
     pub fn create_triangle(&mut self, pos: Vector2<f32>, height: f32, color: Color) -> IndexToken {
-        let message = TriangleMessage::Create {
+        let message = GeometryMessage::TriangleCreate {
             pos: pos,
             height: height,
             color: color,
         };
-        self.frame.triangles.push(message);
+        self.frame.geometry.push(message);
         self.map_triangle.add()
     }
 
     pub fn update_triangle(&mut self, token: &IndexToken, pos: Vector2<f32>, height: f32, color: Color) {
-        let message = TriangleMessage::Update {
+        let message = GeometryMessage::TriangleUpdate {
             id: self.map_triangle.get(token),
             pos: pos,
             height: height,
             color: color,
         };
-        self.frame.triangles.push(message);
+        self.frame.geometry.push(message);
     }
 
     pub fn remove_triangle(&mut self, token: IndexToken) {
-        let message = TriangleMessage::Remove {
+        let message = GeometryMessage::TriangleRemove {
             id: self.map_triangle.remove(token),
         };
-        self.frame.triangles.push(message);
+        self.frame.geometry.push(message);
     }
 
     pub fn set_translation(&mut self, translation: Vector2<f32>) {
