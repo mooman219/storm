@@ -8,6 +8,7 @@ extern crate glutin;
 #[macro_use]
 pub extern crate log;
 
+pub mod channel;
 pub mod game;
 pub mod input;
 pub mod math;
@@ -19,12 +20,12 @@ pub mod utility;
 mod test;
 
 use cgmath::*;
+use channel::consume_spsc;
+use channel::replace_spsc;
 use game::*;
 use log::*;
 use render::display::*;
 use std::thread;
-use utility::consume_spsc;
-use utility::replace_spsc;
 
 /// Creates and runs a game. Threads for input, rendering, and game logic are created along with
 /// communication channels between them. The game is then instantiated. This function blocks until

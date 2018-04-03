@@ -2,6 +2,8 @@ pub mod message;
 
 use bounded_spsc_queue;
 use cgmath::*;
+use channel::consume_spsc;
+use channel::replace_spsc;
 use glutin;
 use glutin::ElementState;
 use glutin::EventsLoop;
@@ -10,8 +12,6 @@ use input::message::*;
 use std::thread::sleep;
 use std::time::Duration;
 use time::timer::*;
-use utility::consume_spsc;
-use utility::replace_spsc;
 
 struct InputState {
     is_active: bool,

@@ -5,9 +5,9 @@ extern crate storm;
 extern crate test;
 
 use std::sync::mpsc::sync_channel;
+use storm::channel::consume_spsc;
+use storm::channel::replace_spsc;
 use storm::utility::benching::black_box;
-use storm::utility::consume_spsc;
-use storm::utility::replace_spsc;
 use test::Bencher;
 
 const ITERATIONS: usize = 1000;

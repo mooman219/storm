@@ -9,6 +9,7 @@ pub mod vertex;
 
 use bounded_spsc_queue;
 use cgmath::*;
+use channel::consume_spsc;
 use gl;
 use render::buffer::geometry::*;
 use render::display::*;
@@ -21,7 +22,6 @@ use render::vertex::color::*;
 use std::thread::sleep;
 use std::time::Duration;
 use time::timer::*;
-use utility::consume_spsc;
 
 struct RenderState {
     display: Display,

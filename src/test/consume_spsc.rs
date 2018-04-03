@@ -1,4 +1,4 @@
-use utility::consume_spsc;
+use channel::consume_spsc;
 
 #[test]
 fn test_consume_spsc() {
