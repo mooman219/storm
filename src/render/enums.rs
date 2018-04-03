@@ -39,6 +39,19 @@ pub enum BufferType {
 
 #[repr(u32)]
 #[derive(Copy, Clone)]
+pub enum DepthTest {
+    Always = gl::ALWAYS,
+    Never = gl::NEVER,
+    Equal = gl::EQUAL,
+    NotEqual = gl::NOTEQUAL,
+    Less = gl::LESS,
+    LessEqual = gl::LEQUAL,
+    Greater = gl::GREATER,
+    GreaterEqual = gl::GEQUAL,
+}
+
+#[repr(u32)]
+#[derive(Copy, Clone)]
 pub enum GlString {
     Vendor = gl::VENDOR,
     Renderer = gl::RENDERER,

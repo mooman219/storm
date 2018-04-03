@@ -56,11 +56,20 @@ impl Display {
         }
     }
 
+    pub fn depth_test(&mut self, test: DepthTest) {
+        unsafe {
+            gl::DepthFunc(test as u32);
+        }
+    }
+
     pub fn enable_clear_color(&mut self) {
         self.clear_mode |= gl::COLOR_BUFFER_BIT;
     }
 
     pub fn enable_clear_depth(&mut self) {
+        unsafe {
+            gl::Enable(gl::DEPTH_TEST);
+        }
         self.clear_mode |= gl::DEPTH_BUFFER_BIT;
     }
 
@@ -73,6 +82,9 @@ impl Display {
     }
 
     pub fn disable_clear_depth(&mut self) {
+        unsafe {
+            gl::Disable(gl::DEPTH_TEST);
+        }
         self.clear_mode &= !gl::DEPTH_BUFFER_BIT;
     }
 
