@@ -52,6 +52,14 @@ pub enum DepthTest {
 
 #[repr(u32)]
 #[derive(Copy, Clone)]
+pub enum CullFace {
+    Front = gl::FRONT,
+    Back = gl::BACK,
+    FrontBack = gl::FRONT_AND_BACK,
+}
+
+#[repr(u32)]
+#[derive(Copy, Clone)]
 pub enum GlString {
     Vendor = gl::VENDOR,
     Renderer = gl::RENDERER,
