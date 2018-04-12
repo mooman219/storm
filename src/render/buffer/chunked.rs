@@ -61,7 +61,7 @@ impl<T> RawBuffer<T> for ChunkedBuffer<T> {
             items: items,
             fence: None,
             map: map,
-            timer_sync: Timer::new("Render: Chunked Sync"),
+            timer_sync: Timer::new("[R] Chunked Sync"),
         }
     }
 

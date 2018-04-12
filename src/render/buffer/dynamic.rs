@@ -53,7 +53,7 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
             buffer_capacity: capacity,
             buffer_type: buffer_type,
             items: items,
-            timer_sync: Timer::new("Dynamic - Sync"),
+            timer_sync: Timer::new("[R] Dynamic Sync"),
         }
     }
 
