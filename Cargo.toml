@@ -7,5 +7,5 @@ authors = ["Joe Cumbo <mooman219@gmail.com>"]
 gl = "0.6"
 glutin = "0.13"
 cgmath = "0.15"
-bounded-spsc-queue = "0.2.0"
+bounded-spsc-queue = "0.3"
 log = "0.4"
