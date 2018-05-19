@@ -47,7 +47,7 @@ pub fn start(
         display: display,
         shape_shader: ColorShader::new(),
         triangle_buffer: Triangle::new_geometry_buffer(50),
-        quad_buffer: Quad::new_geometry_buffer(100),
+        quad_buffer: Quad::new_geometry_buffer(2500),
     };
 
     // Log render timings.
