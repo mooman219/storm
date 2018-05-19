@@ -29,13 +29,12 @@ impl Game for GOL {
             clock: Clock::new(1)
         };
 
-        new_gol.system.create_blinker(24, 24);
+        new_gol.system.create_blinker(45, 45);
 
         new_gol
     }
 
     fn input(&mut self, event: InputFrame) {
-        //TODO: create input handle function for system
         self.system.handle_input(event);
     }
 

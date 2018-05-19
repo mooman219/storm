@@ -28,7 +28,7 @@ impl System {
     pub fn new(render: &mut RenderProducer)-> System {
         
         //gotten through person experimentation
-        render.set_scale(0.001f32);
+        render.set_scale(0.002f32);
         //precreate our index tokens for the board, they will never change in number
         let mut index_tokens: Vec<Vec<IndexToken>> = vec![];
         for x in 0..MAP_X_SIZE {
@@ -38,7 +38,6 @@ impl System {
             }
         }
         render.send();
-        
         System {
             a_frame: [[false; MAP_X_SIZE]; MAP_X_SIZE],
             b_frame: [[false; MAP_X_SIZE]; MAP_X_SIZE],
@@ -79,30 +78,37 @@ impl System {
             if count_x < 0 || count_x > (MAP_X_SIZE as i8) - 1 {
                 continue;
             }
-
             let count_x = count_x as usize;
-
             for loop_y in 0..3 {
-                
                 //creted and check shifted y value
                 let count_y = (y + loop_y) as i8 - 1;
                 if count_y < 0 || count_y > (MAP_X_SIZE as i8) - 1 {
                     continue;
                 }
-                
                 let count_y = count_y as usize;
-                
                 if count_x == x && count_y == y {
                     continue;
                 }
-
                 if active_frame[count_x][count_y] == true {
                     count+=1;
                 }
             }
         }
-
         count
+    }
+
+    #[inline]
+    pub fn update_cell_color(x: usize, y: usize, index_token: &mut IndexToken, render: &mut RenderProducer, cell_value: bool) {
+        let use_color;
+
+        if cell_value == true {
+            use_color = color::ORANGE;
+        }
+        else {
+            use_color = color::PURPLE;
+        }
+        
+        render.update_rect(index_token, Vector2::new(x as f32 * 10.0, y as f32 * 10.0), Vector2::new(x as f32 * 10.0, y as f32 * 10.0), use_color);
     }
 
     pub fn tick(&mut self, render: &mut RenderProducer) {
@@ -114,9 +120,11 @@ impl System {
         else {
             self.extra_slow = 0;
         }
+
         //check for current active frame, a_frame or b_frame, and set our use and write frames
         let use_frame;
         let write_frame;
+
         match self.current_active_frame {
             CurrentActiveFrame::A => {
                 use_frame = &mut self.a_frame;
@@ -137,14 +145,17 @@ impl System {
                     //with fewer then 2 alive neighbors dies
                     if count < 2 {
                         write_frame[x][y] = false;
+                        System::update_cell_color(x, y, &mut self.index_tokens[x][y], render, write_frame[x][y]);
                     }
                     //with 2 or three neighbors surives
                     else if count == 2 || count == 3 {
                         write_frame[x][y] = true;
+                        System::update_cell_color(x, y, &mut self.index_tokens[x][y], render, write_frame[x][y]);
                     } 
                     //with greatern then 3 dies
                     else if count > 3 {
                         write_frame[x][y] = false;
+                        System::update_cell_color(x, y, &mut self.index_tokens[x][y], render, write_frame[x][y]);
                     }
                 }
                 //for any dead cell 
@@ -152,21 +163,9 @@ impl System {
                     //with exactaly 3 alive neighbors comes alive
                     if count == 3 {
                         write_frame[x][y] = true;
+                        System::update_cell_color(x, y, &mut self.index_tokens[x][y], render, write_frame[x][y]);
                     }
-                    
                 }
-
-                //if a cell is alive, it is orange, dead it is purple
-                let use_color;
-                if write_frame[x][y] {
-                    use_color = color::ORANGE;
-                }
-                else {
-                    use_color = color::PURPLE;
-                }
-
-                //update our cell to reflect its current status
-                render.update_rect(&mut self.index_tokens[x][y], Vector2::new(x as f32 * 10.0, y as f32 * 10.0), Vector2::new(x as f32 * 10.0, y as f32 * 10.0), use_color);
             }
         }
 
