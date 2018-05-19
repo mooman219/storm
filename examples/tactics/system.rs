@@ -1,8 +1,12 @@
-use tactics::overworldmap::MapController;
-use tactics::party_manager::PartyManagerController;
-use tactics::battle::BattleController;
 use std::io;
 
+use storm::input::message::*;
+use storm::render::message::*;
+
+use tactics::overworldmap::MapController;
+use tactics::party_manager::PartyManagerController;
+use tactics::controller::Controller;
+use tactics::battle::BattleController;
 
 enum SystemState {
     MainMenu,
@@ -42,15 +46,16 @@ impl System {
         }
     }
 
-    fn new_game(&mut self) {
-        self.map_controller.new_map();
+    fn new_game(&mut self, render: &mut RenderProducer) {
+        render.set_scale(0.01f32);
+        self.map_controller.new_map(render);
     }
 
     fn set_state(&mut self, new_state: SystemState) {
         self.system_state = new_state;
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, render: &mut RenderProducer) {
         loop {
             let mut exit_code = ExitCodes::Ok;
             match self.system_state {
@@ -63,8 +68,9 @@ impl System {
                         Ok(_n) => {
                             let input = input.trim();
                             if input == "New game" {
-                                self.new_game();
-                                exit_code = ExitCodes::ToBattle(10, 10);
+                                self.new_game(render);
+                                exit_code = ExitCodes::ToMapController;
+                          //      exit_code = ExitCodes::ToBattle(10, 10);
                                 //self.set_state(SystemState::PartyManager);
                             }
                         }, 
@@ -74,7 +80,7 @@ impl System {
                     }
                 },
                 SystemState::Map => {
-                    exit_code = self.map_controller.update();
+                    exit_code = self.map_controller.update(render);
                 },
                 SystemState::PartyManager => {
                     exit_code =  self.party_manager_controller.update();
@@ -111,6 +117,27 @@ impl System {
             ExitCodes::Ok => {
                 //just removing the OK code from any pattern 
             },
+        }
+    }
+
+    pub fn handle_input(&mut self, input: InputFrame) {
+        match self.system_state {
+            SystemState::MainMenu => {
+                //will get to this
+            },
+            SystemState::Map => {
+                self.map_controller.input_handler(input);
+            },
+            SystemState::PartyManager => {
+
+            },
+            SystemState::Exit => {
+
+            },
+            SystemState::Battle => {
+
+            },
+            _ => {}
         }
     }
 }

@@ -69,11 +69,11 @@ impl Battlefield {
 
     //other then the place_character function, this must be the only way to
     //change a characters position on the map, it will enforce board rules
-    pub fn move_characrter(&mut self, character_name: &String, direction: Vector2<i32>) {
+    pub fn move_characrter(&mut self, character_name: &String, _direction: Vector2<i32>) {
         let current = self.character_positions.remove(character_name);
 
         match current {
-            Some(current) => {
+            Some(_current) => {
                 //for now this is just a simple update of the characters
                 //current positions, but this should be the primary way 
                 //in which movement based events are triggered

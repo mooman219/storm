@@ -3,11 +3,14 @@ use rand::distributions::{Range, Sample};
 use rand;
 use std::io;
 use storm::cgmath::Vector2;
+use storm::render::message::*;
+use storm::utility::slotmap::*;
 
 const MAP_X_SIZE: usize = 10;
 const MAP_Y_SIZE: usize = 10;
 const START_POSITIONS_MIN: usize = 5;
-
+const MAP_TILE_WIDTH: usize = 10;
+const MAP_TILE_HEIGHT: usize = 10;
 //used in the the maps movement mode
 #[derive(Debug)]
 pub enum MovementDirection {
@@ -22,7 +25,12 @@ enum OverworldMapState {
 }
 
 pub struct OverworldMap {
-    map: Vec<Vec<MapTile>>,
+    map: Vec<Vec<MapTile>>,//this is the actual tiles that handle all logic with one tiles
+    map_state: Vec<Vec<char>>,//this is a record of the previous printed state of the map
+    //if this differs between two calls of layout, we must redraw the map
+    tile_index_tokens: Vec<Vec<IndexToken>>,//this is the list of index token for drawing the map
+    //we allocate them at the start of the game
+    //and then use them to update on a draw that triggers when the map_state was updated
     party_position_on_map: Vector2<usize>
 }
 
@@ -31,13 +39,17 @@ impl OverworldMap {
     pub fn new() -> OverworldMap {
         OverworldMap {
             map : vec![],
+            map_state: vec![],
+            tile_index_tokens: vec![],
             party_position_on_map: Vector2::new(0, 0),
         }
     }
 
     //this will genreate a 2d array made up of Vectors, with map tiles
-    pub fn generate_map() -> Vec<Vec<MapTile>> {
+    pub fn generate_maps(render: &mut RenderProducer) -> (Vec<Vec<MapTile>>, Vec<Vec<char>>, Vec<Vec<IndexToken>>) {
         let mut map = vec![];
+        let mut map_state = vec![];
+        let mut index_tokens = vec![];
 
         //this is a magic number for the number of MapTile enums, would love this to be compile time op
         let mut tile_type = Range::new(0, 4);
@@ -45,35 +57,53 @@ impl OverworldMap {
         
         //we create 100 tiles
         for i in 0..MAP_X_SIZE {
+            
             map.push(vec![]);
-            for _ in 0..MAP_Y_SIZE {
+            map_state.push(vec![]);
+            index_tokens.push(vec![]);
+
+            for j in 0..MAP_Y_SIZE {
                 //with this unhappy match statement, but what you going to do
                 //like please tell me, I would love a more elegant way of doing this
                 let tt = tile_type.sample(&mut rng);
+                let tile_type;
                 match tt {
                     0 => {
-                        let tile = MapTile::new(TileType::Nothing);
-                        map[i].push(tile);
+                        tile_type = TileType::Nothing;
+                        //if when asked to draw again, the token it returns differs from the one that map_state[x][y] has, that means we must redraw
+                        //that tile
+                        //we record its position, and add it to a list of changed tiles, that we itereat over and have it update the rects we want
                     },
                     1 => {
-                        let tile = MapTile::new(TileType::Battle);
-                        map[i].push(tile);
+                        tile_type = TileType::Battle;
                     },
                     2 => {
-                        let tile = MapTile::new(TileType::PersonEncounter);
-                        map[i].push(tile);
+                        tile_type = TileType::PersonEncounter;
                     },
                     3 => {
-                        let tile = MapTile::new(TileType::Shop);
-                        map[i].push(tile);
+                        tile_type = TileType::Shop;
                     },
                     _ => {
                         panic!("HELA ERROR: This is a problem with rusts random, soo a larger problem then");
                     }
                 }
+
+                let tile = MapTile::new(tile_type);
+                let initial_state = tile.draw();
+                let tag_color = tile.color();
+                
+                map[i].push(tile);//we add our new tile to its 2d array
+                map_state[i].push(initial_state);//we have it set an intial state for the map state
+                if i % 2 == 0 {
+                    index_tokens[i].push(render.create_rect(Vector2::new(i as f32 * 10.0, j as f32 * 10.0), Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32), tag_color));//we create a rect for it
+                }
+                else {
+                    index_tokens[i].push(render.create_rect(Vector2::new(i as f32 * 10.0, j as f32 * 10.0), Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32), tag_color));//we create a rect for it    
+                }
             }
         }
-        return map;
+        render.send();
+        return (map, map_state, index_tokens);
     }
 
     pub fn move_party_from_tile_to_tile(&mut self, direction: Vector2<usize>, do_subtract: bool) {
@@ -118,10 +148,13 @@ impl OverworldMap {
 
     //we call this start_new_game because after this we are offically in the new game
     //it will eventually have input of the party, and whatever user attributes
-    pub fn start_new_game(&mut self) -> bool {
+    pub fn start_new_game(&mut self, render: &mut RenderProducer) -> bool {
         //go through an create the actual map
-        self.map = OverworldMap::generate_map();
-        self.layout_map();
+        let all_nessacary_maps = OverworldMap::generate_maps(render);
+
+        self.map = all_nessacary_maps.0;
+        self.map_state = all_nessacary_maps.1;
+        self.tile_index_tokens = all_nessacary_maps.2;
 
         //ask the user where they want to start
         let start_position = OverworldMap::prompt_for_start_position();
@@ -261,12 +294,35 @@ impl OverworldMap {
         self.party_position_on_map
     }
 
-    pub fn layout_map(&self) {
-        println!("\n\n\t\t THE MAP \t\t");
+    pub fn layout_map(&mut self, render: &mut RenderProducer) {
+
+        if self.map.len() == 0 {
+            //we are making an assumption that you would only want to layout a full map
+            println!("Warning: Trying to layout empty map, Daft Punk: Something about us");
+            return;
+        }
+        
+        for x in 0..self.map.len() {
+            for y in 0..self.map[0].len() {
+                let possible_update_token = self.map[x][y].draw();
+                if possible_update_token != self.map_state[x][y] {
+                    //this means that this tile has to be updated
+                    self.map_state[x][y] = possible_update_token;
+                    
+                    //if we detect a change, that means we have to have update things
+                    let index_token = &self.tile_index_tokens[x][y];
+                    render.update_rect(index_token, Vector2::new(x as f32 * MAP_TILE_WIDTH as f32, y as f32 * MAP_TILE_HEIGHT as f32), Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32), self.map[x][y].color());
+                }
+            }
+        }
+
+        render.send();
+
         for row in 0..MAP_Y_SIZE {
             OverworldMap::draw_header();
             self.draw_row(row);
         }
+
         //cleanup formatting
         OverworldMap::draw_header();
     }

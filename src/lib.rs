@@ -4,7 +4,7 @@
 extern crate bounded_spsc_queue;
 pub extern crate cgmath;
 extern crate gl;
-extern crate glutin;
+pub extern crate glutin;
 #[macro_use]
 pub extern crate log;
 

@@ -1,10 +1,13 @@
-use tactics::battle::Battlefield;
-use tactics::party_manager::Character;
 use std::collections::HashMap;
-use tactics::system::ExitCodes;
-use tactics::battle::battle_commands::MovementMode;
 use std::io;
 
+use storm::input::message::*;
+
+use tactics::system::ExitCodes;
+use tactics::battle::battle_commands::MovementMode;
+use tactics::battle::Battlefield;
+use tactics::party_manager::Character;
+use tactics::Controller;
 
 //using this as a way to tracking who is currently up
 enum CurrentTeam {
@@ -74,7 +77,7 @@ impl BattleController {
 
 
         panic!("AHHHHH, NOT THE BEES");
-        ExitCodes::Ok
+      //  ExitCodes::Ok
     }
 
     //use this function to handle all player input at the battle_controller level
@@ -105,7 +108,7 @@ impl BattleController {
         }
     }
 
-    //this is a way pf having a single call to get the current team
+    //this is a way of having a single call to get the current team
     //most code that needs the current team should use this
     //avoids having disambiguation code all over the place
     //and having some referance varible that we switch between all the time
@@ -122,5 +125,11 @@ impl BattleController {
  //               &self.player_characters///THIS IS NEVER EVER SUPPOSED TO BE CALLED
             }
         }
+    }
+}
+
+impl Controller for BattleController {
+    fn input_handler(&mut self, _input: InputFrame) {
+        
     }
 }

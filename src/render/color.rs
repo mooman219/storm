@@ -4,6 +4,7 @@ pub const BLUE: Color = Color { color: 0xC000_03FF };
 pub const GREEN: Color = Color { color: 0xC00F_FC00 };
 pub const YELLOW: Color = Color { color: 0xFFFF_FC00 };
 pub const ORANGE: Color = Color { color: 0xFFFA_5400 };
+pub const MAGENTA: Color = Color {color: 0xC0FF00FF};
 
 #[repr(C)]
 #[derive(Copy, Clone)]

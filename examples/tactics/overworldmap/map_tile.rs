@@ -1,3 +1,12 @@
+use storm::render::color;
+use storm::render::color::Color;
+
+pub const BATTLE_COLOR : Color = color::RED;
+pub const NOTHING_COLOR : Color = color::YELLOW;
+pub const PERSON_ENCOUNTER_COLOR : Color = color::ORANGE;
+pub const SHOP_COLOR : Color = color::GREEN;
+
+
 pub enum TileType {
     Nothing,//An empty tile with no encounter
     Battle,//this will be a battle encounter
@@ -28,10 +37,12 @@ pub struct MapTile {
     tile_type: TileType,
     has_been_flipped: bool,//tiles start without the player knowing what they are, so we keep track of that
     has_party_on_it: bool
+
 }
 
 impl MapTile {
     pub fn new(tile_type: TileType) -> MapTile {
+
         MapTile {
             tile_type,
             has_been_flipped: false,
@@ -62,6 +73,32 @@ impl MapTile {
         else {
             //this is the FULL BLOCK █ unicode character
             '\u{2588}'
+        }
+    }
+
+    pub fn color(&self) -> Color {
+
+        if self.has_party_on_it {
+            return color::MAGENTA;
+        }
+        
+        if !self.has_been_flipped {
+            return color::PURPLE;
+        }
+
+        match self.tile_type {
+            TileType::Battle => {
+                BATTLE_COLOR
+            },
+            TileType::Nothing => {
+                NOTHING_COLOR
+            },
+            TileType::PersonEncounter => {
+                PERSON_ENCOUNTER_COLOR
+            },
+            TileType::Shop => {
+                SHOP_COLOR
+            }
         }
     }
 
