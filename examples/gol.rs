@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![feature(rustc_private)]
 extern crate storm;
-
+extern crate rand;
 
 
 use storm::game::*;
@@ -28,8 +28,6 @@ impl Game for GOL {
             render: render,
             clock: Clock::new(1)
         };
-
-        new_gol.system.create_blinker(45, 45);
 
         new_gol
     }

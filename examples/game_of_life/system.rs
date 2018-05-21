@@ -5,6 +5,9 @@ use storm::utility::slotmap::*;
 use storm::cgmath::Vector2;
 use storm::render::color;
 
+use rand::distributions::{Range, Sample};
+use rand;
+
 //////////
 /// Main Driver for conways game of life
 ///////
@@ -21,14 +24,23 @@ pub struct System {
     b_frame: [[bool; MAP_X_SIZE]; MAP_X_SIZE],
     index_tokens: Vec<Vec<IndexToken>>,
     current_active_frame: CurrentActiveFrame,
-    extra_slow: i32
+    extra_slow: i32,
+    created_blinker: bool
 }
 
 impl System {
     pub fn new(render: &mut RenderProducer)-> System {
         
-        //gotten through person experimentation
-        render.set_scale(0.002f32);
+
+        //BUG #2, overly large texture created for rects
+        //uncomment this line, and comment out the set_scale below
+        //then change the create_blinker positions to 48, 48
+//        render.set_scale(0.001f32);
+
+
+        //gotten through personal experimentation
+        render.set_scale(0.001f32);
+
         //precreate our index tokens for the board, they will never change in number
         let mut index_tokens: Vec<Vec<IndexToken>> = vec![];
         for x in 0..MAP_X_SIZE {
@@ -37,17 +49,19 @@ impl System {
                 index_tokens[x].push(render.create_rect(Vector2::new(x as f32 * 10.0, y as f32 * 10.0), Vector2::new(x as f32 * 10.0, y as f32 * 10.0), color::PURPLE));
             }
         }
+
         render.send();
         System {
             a_frame: [[false; MAP_X_SIZE]; MAP_X_SIZE],
             b_frame: [[false; MAP_X_SIZE]; MAP_X_SIZE],
             current_active_frame: CurrentActiveFrame::A,
             index_tokens,
-            extra_slow: 0
+            extra_slow: 0,
+            created_blinker: false
         }
     }
 
-    pub fn create_blinker(&mut self, x: usize, y: usize) {
+    pub fn create_blinker(&mut self, x: usize, y: usize, render: &mut RenderProducer) {
         if x > 0 && x < 49 && y > 0 && y < 50{
             let use_frame;
             match self.current_active_frame {
@@ -58,17 +72,19 @@ impl System {
                     use_frame = &mut self.b_frame;
                 }
             }
-            use_frame[x][y] = true;
+            use_frame[x    ][y] = true;
             use_frame[x - 1][y] = true;
             use_frame[x + 1][y] = true;
-            use_frame[x][y + 1] = true;
-            use_frame[x][y - 1] = true;
+
+            System::update_cell_color(x, y, &mut self.index_tokens[x - 1][y], render, use_frame[x - 1][y]);
+            System::update_cell_color(x, y, &mut self.index_tokens[x + 1][y], render, use_frame[x + 1][y]);
+            System::update_cell_color(x, y, &mut self.index_tokens[x    ][y], render, use_frame[x    ][y]);
         }
     }
 
     //helper functions, will count the neighbors for any given x, y, in active_frame
     #[inline]
-    pub fn neighbor_count(x: usize, y:usize, active_frame: &mut [[bool;MAP_X_SIZE];MAP_X_SIZE] ) -> usize {
+    pub fn neighbor_count(x: usize, y:usize, active_frame: &mut [[bool;MAP_X_SIZE];MAP_X_SIZE]) -> usize {
         let mut count = 0;
         //needs to be between 0 and 3 to handle inclusive lower value, but exclusive higer value
         //and the fact that rust does not allow for negative iterations
@@ -111,16 +127,19 @@ impl System {
         render.update_rect(index_token, Vector2::new(x as f32 * 10.0, y as f32 * 10.0), Vector2::new(x as f32 * 10.0, y as f32 * 10.0), use_color);
     }
 
-    pub fn tick(&mut self, render: &mut RenderProducer) {
-        self.extra_slow += 1;
+    pub fn entropy(&mut self) {
+        for x in 0..50 {
+            for y in 0..50 {
 
-        if self.extra_slow < 50 {
-            return;
+            }
         }
-        else {
-            self.extra_slow = 0;
-        }
+    }
 
+    pub fn order() {
+
+    }
+
+    pub fn apply_rules(&mut self, render: &mut RenderProducer) {
         //check for current active frame, a_frame or b_frame, and set our use and write frames
         let use_frame;
         let write_frame;
@@ -168,7 +187,24 @@ impl System {
                 }
             }
         }
+    }
 
+    pub fn tick(&mut self, render: &mut RenderProducer) {
+        self.extra_slow += 1;
+
+        if self.extra_slow < 50 {
+            return;
+        }
+        else {
+            self.extra_slow = 0;
+        }
+
+        if self.created_blinker == false {
+            self.created_blinker = true;
+            self.create_blinker(25, 25, render);
+        }
+
+        self.apply_rules(render);
         match self.current_active_frame {
             CurrentActiveFrame::A => {
                 self.current_active_frame = CurrentActiveFrame::B;
