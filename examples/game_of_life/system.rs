@@ -39,7 +39,7 @@ impl System {
 
 
         //gotten through personal experimentation
-        render.set_scale(0.001f32);
+        render.set_scale(0.002f32);
 
         //precreate our index tokens for the board, they will never change in number
         let mut index_tokens: Vec<Vec<IndexToken>> = vec![];
