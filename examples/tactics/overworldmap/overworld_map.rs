@@ -95,10 +95,10 @@ impl OverworldMap {
                 map[i].push(tile);//we add our new tile to its 2d array
                 map_state[i].push(initial_state);//we have it set an intial state for the map state
                 if i % 2 == 0 {
-                    index_tokens[i].push(render.create_rect(Vector2::new(i as f32 * 10.0, j as f32 * 10.0), Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32), tag_color));//we create a rect for it
+                    index_tokens[i].push(render.create_rect(Vector2::new(i as f32 * 10.0, j as f32 * 10.0), 0f32, Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32), tag_color));//we create a rect for it
                 }
                 else {
-                    index_tokens[i].push(render.create_rect(Vector2::new(i as f32 * 10.0, j as f32 * 10.0), Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32), tag_color));//we create a rect for it    
+                    index_tokens[i].push(render.create_rect(Vector2::new(i as f32 * 10.0, j as f32 * 10.0), 0f32, Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32), tag_color));//we create a rect for it    
                 }
             }
         }
@@ -311,7 +311,7 @@ impl OverworldMap {
                     
                     //if we detect a change, that means we have to have update things
                     let index_token = &self.tile_index_tokens[x][y];
-                    render.update_rect(index_token, Vector2::new(x as f32 * MAP_TILE_WIDTH as f32, y as f32 * MAP_TILE_HEIGHT as f32), Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32), self.map[x][y].color());
+                    render.update_rect(index_token, Vector2::new(x as f32 * MAP_TILE_WIDTH as f32, y as f32 * MAP_TILE_HEIGHT as f32), 0f32, Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32), self.map[x][y].color());
                 }
             }
         }

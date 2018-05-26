@@ -5,7 +5,6 @@ use std::collections::HashMap;
 use storm::input::message::*;
 use storm::cgmath::Vector2;
 use storm::render::message::*;
-use storm::glutin::VirtualKeyCode;
 
 use tactics::Controller;
 use tactics::overworldmap::OverworldMap;
@@ -103,13 +102,13 @@ impl MapController {
         match input_frame {
             InputFrame::KeyPressed(key) => {
                 //which key does what matches up with the numbers in the prints in the menu function
-                if key == VirtualKeyCode::Key1 { 
+                if key == Key::Key1 { 
                     self.set_state(MapControllerState::Movement);
                 }
-                else if key == VirtualKeyCode::Key2 {
+                else if key == Key::Key2 {
                     self.set_state(MapControllerState::ExitToPartyManager);
                 }
-                else if key == VirtualKeyCode::Key3 {
+                else if key == Key::Key3 {
                     self.set_state(MapControllerState::ExitGame);
                 }
              },

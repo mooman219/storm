@@ -46,7 +46,7 @@ impl System {
         for x in 0..MAP_X_SIZE {
             index_tokens.push(vec![]);
             for y in 0..MAP_X_SIZE { 
-                index_tokens[x].push(render.create_rect(Vector2::new(x as f32 * 10.0, y as f32 * 10.0), Vector2::new(x as f32 * 10.0, y as f32 * 10.0), color::PURPLE));
+                index_tokens[x].push(render.create_rect(Vector2::new(x as f32 * 10.0, y as f32 * 10.0), 0f32, Vector2::new(x as f32 * 10.0, y as f32 * 10.0), color::PURPLE));
             }
         }
 
@@ -124,7 +124,7 @@ impl System {
             use_color = color::PURPLE;
         }
         
-        render.update_rect(index_token, Vector2::new(x as f32 * 10.0, y as f32 * 10.0), Vector2::new(x as f32 * 10.0, y as f32 * 10.0), use_color);
+        render.update_rect(index_token, Vector2::new(x as f32 * 10.0, y as f32 * 10.0), 0f32, Vector2::new(x as f32 * 10.0, y as f32 * 10.0), use_color);
     }
 
     pub fn entropy(&mut self) {
