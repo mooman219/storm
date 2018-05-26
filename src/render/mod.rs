@@ -13,9 +13,10 @@ use channel::consume_spsc;
 use gl;
 use render::buffer::geometry::*;
 use render::display::*;
+use render::enums::*;
+use render::geometry::*;
 use render::geometry::quad::*;
 use render::geometry::triangle::*;
-use render::geometry::*;
 use render::message::*;
 use render::shader::color::*;
 use render::vertex::color::*;
@@ -40,7 +41,11 @@ pub fn start(
     // segfaults.
     display.bind();
     display.enable_clear_color();
-    display.clear_color(0.0, 0.0, 0.2, 1.0);
+    display.enable_clear_depth();
+    display.enable_cull_face();
+    display.set_clear_color(0.0, 0.0, 0.2, 1.0);
+    display.set_depth_test(DepthTest::LessEqual);
+    display.set_cull_face(CullFace::Back);
 
     // Create the render state.
     let mut state = RenderState {
@@ -51,7 +56,7 @@ pub fn start(
     };
 
     // Log render timings.
-    let mut timer_render = Timer::new("Render: Frame");
+    let mut timer_render = Timer::new("[R] Frame");
     loop {
         // Resizing.
         state.resize(resize_consumer.consume());
@@ -74,10 +79,10 @@ pub fn start(
                 state.shape_shader.bind();
                 state.quad_buffer.draw();
                 state.triangle_buffer.draw();
-                // Finish timing.
-                timer_render.stop();
                 // Finish.
                 state.display.swap_buffers();
+                // Finish timing.
+                timer_render.stop();
             },
             None => {},
         }
@@ -95,7 +100,12 @@ impl RenderState {
                     let quad = Quad::new_rect(pos, size, color);
                     self.quad_buffer.add(quad);
                 },
-                GeometryMessage::QuadUpdate { id, pos, size, color } => {
+                GeometryMessage::QuadUpdate {
+                    id,
+                    pos,
+                    size,
+                    color,
+                } => {
                     let quad = Quad::new_rect(pos, size, color);
                     self.quad_buffer.update(id, quad);
                 },

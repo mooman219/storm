@@ -36,9 +36,7 @@ pub struct InputConsumer {
 
 impl InputConsumer {
     pub fn new(input_consumer: Consumer<InputFrame>) -> InputConsumer {
-        InputConsumer {
-            input_consumer: input_consumer,
-        }
+        InputConsumer { input_consumer: input_consumer }
     }
 
     pub fn tick<G: Game>(&mut self, game: &mut G) {

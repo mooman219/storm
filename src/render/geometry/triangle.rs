@@ -1,8 +1,8 @@
 use cgmath::*;
 use render::color::*;
 use render::geometry::*;
-use render::vertex::color::*;
 use render::vertex::*;
+use render::vertex::color::*;
 
 #[repr(C)]
 pub struct Triangle<T: Vertex> {
@@ -39,21 +39,21 @@ impl<T: Vertex> Geometry for Triangle<T> {
 // ////////////////////////////////////////////////////////
 
 impl Triangle<ColorVertex> {
-    pub fn new_iso(pos: Vector2<f32>, height: f32, color: Color) -> Triangle<ColorVertex> {
+    pub fn new_iso(pos: Vector3<f32>, height: f32, color: Color) -> Triangle<ColorVertex> {
         let half = height.abs() / 2f32;
         // Points must be in the correct order for culling. Arrange the points
         // differently depending on the height.
         if height < 0f32 {
             Self::new(
-                ColorVertex::new(pos.x - half, pos.y, color),
-                ColorVertex::new(pos.x, pos.y + height, color),
-                ColorVertex::new(pos.x + half, pos.y, color),
+                ColorVertex::new(pos.x - half, pos.y, pos.z, color),
+                ColorVertex::new(pos.x, pos.y + height, pos.z, color),
+                ColorVertex::new(pos.x + half, pos.y, pos.z, color),
             )
         } else {
             Self::new(
-                ColorVertex::new(pos.x, pos.y + height, color),
-                ColorVertex::new(pos.x - half, pos.y, color),
-                ColorVertex::new(pos.x + half, pos.y, color),
+                ColorVertex::new(pos.x, pos.y + height, pos.z, color),
+                ColorVertex::new(pos.x - half, pos.y, pos.z, color),
+                ColorVertex::new(pos.x + half, pos.y, pos.z, color),
             )
         }
     }

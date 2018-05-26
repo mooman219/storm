@@ -29,36 +29,32 @@ impl Display {
         unsafe {
             self.window.make_current().unwrap();
             gl::load_with(|symbol| self.window.get_proc_address(symbol) as *const _);
-            gl::Enable(gl::CULL_FACE);
-            gl::CullFace(gl::BACK);
         }
         info!("Render: Bound new display");
         info!("Render: OpenGL version {}", GlString::Version.get_string());
     }
 
-    // Clear
-
-    pub fn clear_color(&mut self, red: f32, green: f32, blue: f32, alpha: f32) {
+    pub fn set_clear_color(&mut self, red: f32, green: f32, blue: f32, alpha: f32) {
         unsafe {
             gl::ClearColor(red, green, blue, alpha);
         }
     }
 
-    pub fn clear_stencil(&mut self, stencil: i32) {
-        unsafe {
-            gl::ClearStencil(stencil);
-        }
-    }
-
-    pub fn clear_depth(&mut self, clamp: f32) {
+    pub fn set_clear_depth(&mut self, clamp: f32) {
         unsafe {
             gl::ClearDepthf(clamp);
         }
     }
 
-    pub fn depth_test(&mut self, test: DepthTest) {
+    pub fn set_depth_test(&mut self, test: DepthTest) {
         unsafe {
             gl::DepthFunc(test as u32);
+        }
+    }
+
+    pub fn set_cull_face(&mut self, cull_face: CullFace) {
+        unsafe {
+            gl::CullFace(cull_face as u32);
         }
     }
 
@@ -73,8 +69,10 @@ impl Display {
         self.clear_mode |= gl::DEPTH_BUFFER_BIT;
     }
 
-    pub fn enable_clear_stencil(&mut self) {
-        self.clear_mode |= gl::STENCIL_BUFFER_BIT;
+    pub fn enable_cull_face(&mut self) {
+        unsafe {
+            gl::Enable(gl::CULL_FACE);
+        }
     }
 
     pub fn disable_clear_color(&mut self) {
@@ -88,8 +86,10 @@ impl Display {
         self.clear_mode &= !gl::DEPTH_BUFFER_BIT;
     }
 
-    pub fn disable_clear_stencil(&mut self) {
-        self.clear_mode &= !gl::STENCIL_BUFFER_BIT;
+    pub fn disable_cull_face(&mut self) {
+        unsafe {
+            gl::Disable(gl::CULL_FACE);
+        }
     }
 
     pub fn clear(&self) {
@@ -101,7 +101,9 @@ impl Display {
     // Buffer
 
     pub fn swap_buffers(&self) {
-        self.window.swap_buffers().expect("Error while swapping buffers.");
+        self.window.swap_buffers().expect(
+            "Error while swapping buffers.",
+        );
     }
 
     pub fn resize(&self, width: u32, height: u32) {

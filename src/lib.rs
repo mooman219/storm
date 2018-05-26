@@ -61,7 +61,12 @@ pub fn run<G: Game>() {
     });
 
     // Input thread (main)
-    input::start(event_loop, input_producer_pipe, resize_producer, cursor_producer);
+    input::start(
+        event_loop,
+        input_producer_pipe,
+        resize_producer,
+        cursor_producer,
+    );
 }
 
 // ////////////////////////////////////////////////////////

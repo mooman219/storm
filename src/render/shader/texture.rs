@@ -5,27 +5,29 @@ use render::shader::*;
 static VERTEX: &str = r#"
 #version 400
 layout(location = 0) in vec3 a_pos;
-layout(location = 1) in vec4 a_color;
-out vec4 v_color;
+layout(location = 1) in vec4 a_uv;
+out vec2 v_uv;
 
 uniform mat4 ortho;
 
 void main() {
     gl_Position = ortho * vec4(a_pos, 1.0);
-    v_color = a_color;
+    v_uv = a_uv;
 }
 "#;
 static FRAGMENT: &str = r#"
 #version 330
-in vec4 v_color;
+in vec2 v_uv;
 out vec4 a_color;
 
+uniform sampler2D sampler;
+
 void main() {
-    a_color = v_color;
+    a_color = texture(sampler, v_uv).rgba;
 }
 "#;
 
-pub struct ColorShader {
+pub struct TextureShader {
     program: ShaderProgram,
     uniform_ortho: i32,
     ortho: Matrix4<f32>,
@@ -33,11 +35,11 @@ pub struct ColorShader {
     ortho_scale: Matrix4<f32>,
 }
 
-impl ColorShader {
-    pub fn new() -> ColorShader {
+impl TextureShader {
+    pub fn new() -> TextureShader {
         let program = ShaderProgram::new(VERTEX, FRAGMENT);
         let uniform_ortho = program.get_uniform_location("ortho");
-        ColorShader {
+        TextureShader {
             program: program,
             uniform_ortho: uniform_ortho,
             ortho: ortho(0f32, 1f32, 0f32, 1f32, -1f32, 1f32),
@@ -70,9 +72,9 @@ impl ColorShader {
         let matrix = self.ortho * self.ortho_translation * self.ortho_scale;
         unsafe {
             gl::UniformMatrix4fv(
-                self.uniform_ortho, // Program location
-                1, // Count
-                gl::FALSE, // Should transpose
+                self.uniform_ortho,          // Program location
+                1,                           // Count
+                gl::FALSE,                   // Should transpose
                 matrix.as_ptr() as *const _, // Value pointer
             );
         }

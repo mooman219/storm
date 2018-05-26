@@ -28,33 +28,29 @@ impl RenderFrame {
 #[derive(Copy, Clone)]
 pub enum GeometryMessage {
     QuadCreate {
-        pos: Vector2<f32>,
+        pos: Vector3<f32>,
         size: Vector2<f32>,
         color: Color,
     },
     QuadUpdate {
         id: usize,
-        pos: Vector2<f32>,
+        pos: Vector3<f32>,
         size: Vector2<f32>,
         color: Color,
     },
-    QuadRemove {
-        id: usize,
-    },
+    QuadRemove { id: usize },
     TriangleCreate {
-        pos: Vector2<f32>,
+        pos: Vector3<f32>,
         height: f32,
         color: Color,
     },
     TriangleUpdate {
         id: usize,
-        pos: Vector2<f32>,
+        pos: Vector3<f32>,
         height: f32,
         color: Color,
     },
-    TriangleRemove {
-        id: usize,
-    },
+    TriangleRemove { id: usize },
 }
 
 // ////////////////////////////////////////////////////////
@@ -78,9 +74,10 @@ impl RenderProducer {
         }
     }
 
-    pub fn create_rect(&mut self, pos: Vector2<f32>, size: Vector2<f32>, color: Color) -> IndexToken {
+    // pub fn create_rect(&mut self, pos: Vector2<f32>, size: Vector2<f32>, color: Color) -> IndexToken {
+    pub fn create_rect(&mut self, pos: Vector2<f32>, depth: f32, size: Vector2<f32>, color: Color) -> IndexToken {
         let message = GeometryMessage::QuadCreate {
-            pos: pos,
+            pos: pos.extend(depth),
             size: size,
             color: color,
         };
@@ -88,10 +85,10 @@ impl RenderProducer {
         self.map_rect.add()
     }
 
-    pub fn update_rect(&mut self, token: &IndexToken, pos: Vector2<f32>, size: Vector2<f32>, color: Color) {
+    pub fn update_rect(&mut self, token: &IndexToken, pos: Vector2<f32>, depth: f32, size: Vector2<f32>, color: Color) {
         let message = GeometryMessage::QuadUpdate {
             id: self.map_rect.get(token),
-            pos: pos,
+            pos: pos.extend(depth),
             size: size,
             color: color,
         };
@@ -99,15 +96,13 @@ impl RenderProducer {
     }
 
     pub fn remove_rect(&mut self, token: IndexToken) {
-        let message = GeometryMessage::QuadRemove {
-            id: self.map_rect.remove(token),
-        };
+        let message = GeometryMessage::QuadRemove { id: self.map_rect.remove(token) };
         self.frame.geometry.push(message);
     }
 
-    pub fn create_triangle(&mut self, pos: Vector2<f32>, height: f32, color: Color) -> IndexToken {
+    pub fn create_triangle(&mut self, pos: Vector2<f32>, depth: f32, height: f32, color: Color) -> IndexToken {
         let message = GeometryMessage::TriangleCreate {
-            pos: pos,
+            pos: pos.extend(depth),
             height: height,
             color: color,
         };
@@ -115,10 +110,10 @@ impl RenderProducer {
         self.map_triangle.add()
     }
 
-    pub fn update_triangle(&mut self, token: &IndexToken, pos: Vector2<f32>, height: f32, color: Color) {
+    pub fn update_triangle(&mut self, token: &IndexToken, pos: Vector2<f32>, depth: f32, height: f32, color: Color) {
         let message = GeometryMessage::TriangleUpdate {
             id: self.map_triangle.get(token),
-            pos: pos,
+            pos: pos.extend(depth),
             height: height,
             color: color,
         };
@@ -126,9 +121,7 @@ impl RenderProducer {
     }
 
     pub fn remove_triangle(&mut self, token: IndexToken) {
-        let message = GeometryMessage::TriangleRemove {
-            id: self.map_triangle.remove(token),
-        };
+        let message = GeometryMessage::TriangleRemove { id: self.map_triangle.remove(token) };
         self.frame.geometry.push(message);
     }
 
