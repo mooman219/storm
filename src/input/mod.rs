@@ -39,62 +39,66 @@ pub fn start(
         timer_input.start();
         // Run the event loop to record input events.
         event_loop.poll_events(|event| match event {
-            glutin::Event::WindowEvent { event, .. } => match event {
-                glutin::WindowEvent::Resized(w, h) => {
-                    resize_producer.set(Vector2::new(w, h));
-                },
-                glutin::WindowEvent::Closed => state.is_active = false,
-                glutin::WindowEvent::KeyboardInput { input, .. } => match input.virtual_keycode {
-                    Some(key) => {
-                        // pub scancode: u32,
-                        let index = input.scancode as usize;
-                        match input.state {
-                            ElementState::Pressed => {
-                                if !state.key_states[index] {
-                                    input_producer.push(InputFrame::KeyPressed(key));
-                                    state.key_states[index] = true;
+            glutin::Event::WindowEvent { event, .. } => {
+                match event {
+                    glutin::WindowEvent::Resized(w, h) => {
+                        resize_producer.set(Vector2::new(w, h));
+                    },
+                    glutin::WindowEvent::Closed => state.is_active = false,
+                    glutin::WindowEvent::KeyboardInput { input, .. } => {
+                        match input.virtual_keycode {
+                            Some(key) => {
+                                // pub scancode: u32,
+                                let index = input.scancode as usize;
+                                match input.state {
+                                    ElementState::Pressed => {
+                                        if !state.key_states[index] {
+                                            input_producer.push(InputFrame::KeyPressed(key));
+                                            state.key_states[index] = true;
+                                        }
+                                    },
+                                    ElementState::Released => {
+                                        if state.key_states[index] {
+                                            input_producer.push(InputFrame::KeyReleased(key));
+                                            state.key_states[index] = false;
+                                        }
+                                    },
                                 }
                             },
-                            ElementState::Released => {
-                                if state.key_states[index] {
-                                    input_producer.push(InputFrame::KeyReleased(key));
-                                    state.key_states[index] = false;
-                                }
-                            },
+                            None => {},
                         }
                     },
-                    None => {},
-                },
-                glutin::WindowEvent::CursorMoved { position, .. } => {
-                    let (x, y) = position;
-                    state.cursos_pos = Vector2::new(x as f32, y as f32);
-                    cursor_producer.set(state.cursos_pos);
-                },
-                glutin::WindowEvent::CursorEntered { .. } => {
-                    input_producer.push(InputFrame::CursorEntered);
-                },
-                glutin::WindowEvent::CursorLeft { .. } => {
-                    input_producer.push(InputFrame::CursorLeft);
-                },
-                glutin::WindowEvent::MouseInput {
-                    state: button_state,
-                    button,
-                    ..
-                } => {
-                    let button = match button {
-                        MouseButton::Left => CursorButton::Left,
-                        MouseButton::Right => CursorButton::Right,
-                        MouseButton::Middle => CursorButton::Middle,
-                        MouseButton::Other(value) => CursorButton::Other(value),
-                    };
-                    let message = match button_state {
-                        ElementState::Pressed => InputFrame::CursorPressed(button, state.cursos_pos),
-                        ElementState::Released => InputFrame::CursorReleased(button, state.cursos_pos),
-                    };
-                    input_producer.push(message);
-                },
-                // Other events: https://docs.rs/glutin/0.13.1/glutin/enum.WindowEvent.html
-                _ => (),
+                    glutin::WindowEvent::CursorMoved { position, .. } => {
+                        let (x, y) = position;
+                        state.cursos_pos = Vector2::new(x as f32, y as f32);
+                        cursor_producer.set(state.cursos_pos);
+                    },
+                    glutin::WindowEvent::CursorEntered { .. } => {
+                        input_producer.push(InputFrame::CursorEntered);
+                    },
+                    glutin::WindowEvent::CursorLeft { .. } => {
+                        input_producer.push(InputFrame::CursorLeft);
+                    },
+                    glutin::WindowEvent::MouseInput {
+                        state: button_state,
+                        button,
+                        ..
+                    } => {
+                        let button = match button {
+                            MouseButton::Left => CursorButton::Left,
+                            MouseButton::Right => CursorButton::Right,
+                            MouseButton::Middle => CursorButton::Middle,
+                            MouseButton::Other(value) => CursorButton::Other(value),
+                        };
+                        let message = match button_state {
+                            ElementState::Pressed => InputFrame::CursorPressed(button, state.cursos_pos),
+                            ElementState::Released => InputFrame::CursorReleased(button, state.cursos_pos),
+                        };
+                        input_producer.push(message);
+                    },
+                    // Other events: https://docs.rs/glutin/0.13.1/glutin/enum.WindowEvent.html
+                    _ => (),
+                }
             },
             // Other events: https://docs.rs/glutin/0.13.1/glutin/enum.Event.html
             _ => (),

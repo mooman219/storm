@@ -21,9 +21,9 @@ impl<T> ImmutableBuffer<T> {
             gl::BindBuffer(buffer_type as u32, vbo);
             gl::BufferData(
                 buffer_type as u32, // Buffer type
-                size,               // Size
-                data,               // Initial data
-                gl::STATIC_DRAW,    // Usage
+                size, // Size
+                data, // Initial data
+                gl::STATIC_DRAW, // Usage
             );
         }
         ImmutableBuffer {

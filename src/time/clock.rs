@@ -19,11 +19,7 @@ impl Clock {
     }
 
     fn tps_to_target(tps: u64) -> u64 {
-        if tps == 0 {
-            0
-        } else {
-            NANOS_PER_SEC / tps
-        }
+        if tps == 0 { 0 } else { NANOS_PER_SEC / tps }
     }
 
     fn duration_to_delta(duration: &Duration) -> f32 {

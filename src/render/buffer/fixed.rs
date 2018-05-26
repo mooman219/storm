@@ -46,9 +46,9 @@ impl<T> RawBuffer<T> for FixedBuffer<T> {
             gl::BindBuffer(buffer_type as u32, vbo);
             gl::BufferData(
                 buffer_type as u32, // Buffer type
-                max_size,           // Size
-                ptr::null(),        // Initial data
-                gl::DYNAMIC_DRAW,   // Usage
+                max_size, // Size
+                ptr::null(), // Initial data
+                gl::DYNAMIC_DRAW, // Usage
             );
         }
         // Finish
@@ -111,9 +111,9 @@ impl<T> RawBuffer<T> for FixedBuffer<T> {
                 gl::BindBuffer(self.buffer_type as u32, self.vbo);
                 gl::BufferSubData(
                     self.buffer_type as u32, // Buffer type
-                    offset,                  // Offset
-                    size,                    // Size
-                    data,                    // Data
+                    offset, // Offset
+                    size, // Size
+                    data, // Data
                 );
             }
             // Timing finish.

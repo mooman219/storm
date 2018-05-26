@@ -7,7 +7,7 @@ use std::sync::atomic::*;
 // Internal
 // ////////////////////////////////////////////////////////
 
-const BUFFER_SIZE: usize = 16;
+const BUFFER_SIZE: usize = 32;
 
 /// The internal memory buffer used by the replace spsc. It's unlikely, but during a read, a write
 /// could happen inbetween the atomic load and the dereference. This is unlikely because 16 writes
@@ -31,7 +31,7 @@ impl<T: Copy> Buffer<T> {
 
     pub fn read(&self) -> T {
         // It's unlikely, but a write could happen inbetween the atomic load and the dereference.
-        // This is unlikely because 16 writes would have to happen during that time.
+        // This is unlikely because BUFFER_SIZE writes would have to happen during that time.
         unsafe { *self.read.load(Ordering::Acquire) }
     }
 
@@ -50,7 +50,10 @@ pub fn make<T: Copy>(initial: T) -> (Producer<T>, Consumer<T>) {
     // This is the only place where a buffer is created.
     let arc = Arc::new(Buffer::new());
     (*arc).write(initial);
-    (Producer { buffer: arc.clone() }, Consumer { buffer: arc.clone() })
+    (
+        Producer { buffer: arc.clone() },
+        Consumer { buffer: arc.clone() },
+    )
 }
 
 // ////////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
 use gl;
+use render::buffer::*;
 use render::buffer::fixed::*;
 use render::buffer::immutable::*;
-use render::buffer::*;
 use render::enums::*;
 use render::geometry::*;
 use render::vertex::*;
@@ -54,10 +54,10 @@ impl<T: Geometry> GeometryBuffer<T> {
             self.vertex_array.bind();
             gl::DrawElementsBaseVertex(
                 DrawMode::Triangles as u32, // Draw mode
-                vertices as i32,            // Number of vertices
-                gl::UNSIGNED_SHORT,         // Size of indices
-                0 as *const _,              // Offset of indices
-                offset_index,               // Base vertex offset
+                vertices as i32, // Number of vertices
+                gl::UNSIGNED_SHORT, // Size of indices
+                0 as *const _, // Offset of indices
+                offset_index, // Base vertex offset
             );
         }
     }
