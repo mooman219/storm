@@ -35,11 +35,11 @@ impl System {
         //BUG #2, overly large texture created for rects
         //uncomment this line, and comment out the set_scale below
         //then change the create_blinker positions to 48, 48
-//        render.set_scale(0.001f32);
+       render.set_scale(0.001f32);
 
 
         //gotten through personal experimentation
-        render.set_scale(0.002f32);
+        // render.set_scale(0.002f32);
 
         //precreate our index tokens for the board, they will never change in number
         let mut index_tokens: Vec<Vec<IndexToken>> = vec![];
@@ -190,14 +190,14 @@ impl System {
     }
 
     pub fn tick(&mut self, render: &mut RenderProducer) {
-        self.extra_slow += 1;
+        // self.extra_slow += 1;
 
-        if self.extra_slow < 50 {
-            return;
-        }
-        else {
-            self.extra_slow = 0;
-        }
+        // if self.extra_slow < 50 {
+        //     return;
+        // }
+        // else {
+        //     self.extra_slow = 0;
+        // }
 
         if self.created_blinker == false {
             self.created_blinker = true;

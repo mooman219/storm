@@ -4,6 +4,7 @@ extern crate storm;
 extern crate rand;
 
 
+use storm::log::LevelFilter;
 use storm::game::*;
 use storm::input::message::*;
 use storm::render::message::*;
@@ -39,9 +40,11 @@ impl Game for GOL {
     fn tick(&mut self) {
         self.system.tick(&mut self.render);
         self.render.send();
+        self.clock.tick();
     }
 }
 
 fn main() {
+    storm::log::set_max_level(LevelFilter::Trace);
     storm::run::<GOL>();
 }
