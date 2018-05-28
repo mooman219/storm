@@ -9,9 +9,9 @@ use time::timer::*;
 pub struct DynamicBuffer<T> {
     vbo: u32,
     dirty: bool,
-    buffer_min: usize,
-    buffer_max: usize,
-    buffer_capacity: usize,
+    dirty_min: usize,
+    dirty_max: usize,
+    capacity: usize,
     buffer_type: BufferType,
     items: Vec<T>,
     timer_sync: Timer,
@@ -20,12 +20,12 @@ pub struct DynamicBuffer<T> {
 impl<T> DynamicBuffer<T> {
     fn mark(&mut self, index: usize) {
         if self.dirty {
-            self.buffer_min = cmp::min(self.buffer_min, index);
-            self.buffer_max = cmp::max(self.buffer_max, index + 1);
+            self.dirty_min = cmp::min(self.dirty_min, index);
+            self.dirty_max = cmp::max(self.dirty_max, index + 1);
         } else {
             self.dirty = true;
-            self.buffer_min = index;
-            self.buffer_max = index + 1;
+            self.dirty_min = index;
+            self.dirty_max = index + 1;
         }
     }
 }
@@ -48,9 +48,9 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
         DynamicBuffer {
             vbo: vbo,
             dirty: false,
-            buffer_min: 0,
-            buffer_max: 0,
-            buffer_capacity: capacity,
+            dirty_min: 0,
+            dirty_max: 0,
+            capacity: capacity,
             buffer_type: buffer_type,
             items: items,
             timer_sync: Timer::new("[R] Dynamic Sync"),
@@ -90,22 +90,25 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
 
     fn sync(&mut self) {
         if self.dirty {
+            // Timing start.
             self.timer_sync.start();
+            // Sync state.
             self.dirty = false;
             unsafe {
                 gl::BindBuffer(self.buffer_type as u32, self.vbo);
-                if self.buffer_capacity < self.items.capacity() {
+                if self.capacity < self.items.capacity() {
                     let length = (mem::size_of::<T>() * self.items.capacity()) as isize;
                     let data = self.items.as_ptr() as *const _;
                     gl::BufferData(self.buffer_type as u32, length, data, gl::DYNAMIC_DRAW);
-                    self.buffer_capacity = self.items.capacity();
+                    self.capacity = self.items.capacity();
                 } else {
-                    let start = (mem::size_of::<T>() * self.buffer_min) as isize;
-                    let length = (mem::size_of::<T>() * (self.buffer_max - self.buffer_min)) as isize;
-                    let offset = self.items.as_ptr().offset(self.buffer_min as isize) as *const _;
+                    let start = (mem::size_of::<T>() * self.dirty_min) as isize;
+                    let length = (mem::size_of::<T>() * (self.dirty_max - self.dirty_min)) as isize;
+                    let offset = self.items.as_ptr().offset(self.dirty_min as isize) as *const _;
                     gl::BufferSubData(self.buffer_type as u32, start, length, offset);
                 }
             }
+            // Timing finish.
             self.timer_sync.stop();
         }
     }
