@@ -29,13 +29,10 @@ pub struct System {
 
 impl System {
     pub fn new(render: &mut RenderProducer) -> System {
-
-
         //BUG #2, overly large texture created for rects
         //uncomment this line, and comment out the set_scale below
         //then change the create_blinker positions to 48, 48
         render.set_scale(0.001f32);
-
 
         //gotten through personal experimentation
         // render.set_scale(0.002f32);
@@ -80,20 +77,8 @@ impl System {
             use_frame[x - 1][y] = true;
             use_frame[x + 1][y] = true;
 
-            System::update_cell_color(
-                x,
-                y,
-                &mut self.index_tokens[x - 1][y],
-                render,
-                use_frame[x - 1][y],
-            );
-            System::update_cell_color(
-                x,
-                y,
-                &mut self.index_tokens[x + 1][y],
-                render,
-                use_frame[x + 1][y],
-            );
+            System::update_cell_color(x, y, &mut self.index_tokens[x - 1][y], render, use_frame[x - 1][y]);
+            System::update_cell_color(x, y, &mut self.index_tokens[x + 1][y], render, use_frame[x + 1][y]);
             System::update_cell_color(x, y, &mut self.index_tokens[x][y], render, use_frame[x][y]);
         }
     }
@@ -187,35 +172,17 @@ impl System {
                     //with fewer then 2 alive neighbors dies
                     if count < 2 {
                         write_frame[x][y] = false;
-                        System::update_cell_color(
-                            x,
-                            y,
-                            &mut self.index_tokens[x][y],
-                            render,
-                            write_frame[x][y],
-                        );
+                        System::update_cell_color(x, y, &mut self.index_tokens[x][y], render, write_frame[x][y]);
                     }
                     //with 2 or three neighbors surives
                     else if count == 2 || count == 3 {
                         write_frame[x][y] = true;
-                        System::update_cell_color(
-                            x,
-                            y,
-                            &mut self.index_tokens[x][y],
-                            render,
-                            write_frame[x][y],
-                        );
+                        System::update_cell_color(x, y, &mut self.index_tokens[x][y], render, write_frame[x][y]);
                     }
                     //with greatern then 3 dies
                     else if count > 3 {
                         write_frame[x][y] = false;
-                        System::update_cell_color(
-                            x,
-                            y,
-                            &mut self.index_tokens[x][y],
-                            render,
-                            write_frame[x][y],
-                        );
+                        System::update_cell_color(x, y, &mut self.index_tokens[x][y], render, write_frame[x][y]);
                     }
                 }
                 //for any dead cell
@@ -223,13 +190,7 @@ impl System {
                     //with exactaly 3 alive neighbors comes alive
                     if count == 3 {
                         write_frame[x][y] = true;
-                        System::update_cell_color(
-                            x,
-                            y,
-                            &mut self.index_tokens[x][y],
-                            render,
-                            write_frame[x][y],
-                        );
+                        System::update_cell_color(x, y, &mut self.index_tokens[x][y], render, write_frame[x][y]);
                     }
                 }
             }

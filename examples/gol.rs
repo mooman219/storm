@@ -1,33 +1,32 @@
 #![allow(dead_code)]
 #![feature(rustc_private)]
-extern crate storm;
 extern crate rand;
+extern crate storm;
 
-
-use storm::log::LevelFilter;
 use storm::game::*;
 use storm::input::message::*;
+use storm::log::LevelFilter;
 use storm::render::message::*;
 use storm::time::clock::*;
 
 mod game_of_life;
 use game_of_life::system::System;
 
+/// Run with: cargo run --example gol --release
 pub struct GOL {
     system: System,
     render: RenderProducer,
-    clock: Clock
+    clock: Clock,
 }
 
 impl Game for GOL {
     const TITLE: &'static str = "Game Of Life";
 
     fn new(mut render: RenderProducer) -> Self {
-        let mut new_gol =
-        GOL {
+        let mut new_gol = GOL {
             system: System::new(&mut render),
             render: render,
-            clock: Clock::new(1)
+            clock: Clock::new(1),
         };
 
         new_gol
