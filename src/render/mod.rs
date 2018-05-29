@@ -15,7 +15,6 @@ use render::buffer::geometry::*;
 use render::display::*;
 use render::enums::*;
 use render::geometry::quad::*;
-use render::geometry::triangle::*;
 use render::geometry::*;
 use render::message::*;
 use render::shader::color::*;
@@ -27,7 +26,6 @@ use time::timer::*;
 struct RenderState {
     display: Display,
     shape_shader: ColorShader,
-    triangle_buffer: GeometryBuffer<Triangle<ColorVertex>>,
     quad_buffer: GeometryBuffer<Quad<ColorVertex>>,
 }
 
@@ -51,26 +49,24 @@ pub fn start(
     let mut state = RenderState {
         display: display,
         shape_shader: ColorShader::new(),
-        triangle_buffer: Triangle::new_geometry_buffer(50),
         quad_buffer: Quad::new_geometry_buffer(2500),
     };
 
     // Log render timings.
     let mut timer_render = Timer::new("[R] Frame");
     loop {
-        // Resizing.
-        state.resize(resize_consumer.consume());
         // Frame processing.
         match render_consumer.try_pop().as_mut() {
             Some(f) => {
                 // Start timing.
                 timer_render.start();
+                // Resizing.
+                state.resize(resize_consumer.consume());
                 // Clear the screen.
                 state.display.clear();
                 // Message geometry.
                 state.handle_geometry(&mut f.geometry);
                 state.quad_buffer.sync();
-                state.triangle_buffer.sync();
                 // Message shader.
                 state.shape_shader.bind();
                 state.handle_set_translation(f.translation);
@@ -78,7 +74,6 @@ pub fn start(
                 // Draw shapes.
                 state.shape_shader.bind();
                 state.quad_buffer.draw();
-                state.triangle_buffer.draw();
                 // Finish.
                 state.display.swap_buffers();
                 // Finish timing.
@@ -106,18 +101,6 @@ impl RenderState {
                 },
                 GeometryMessage::QuadRemove { id } => {
                     self.quad_buffer.remove(id);
-                },
-                // Triangles.
-                GeometryMessage::TriangleCreate { pos, height, color } => {
-                    let triangle = Triangle::new_iso(pos, height, color);
-                    self.triangle_buffer.add(triangle);
-                },
-                GeometryMessage::TriangleUpdate { id, pos, height, color } => {
-                    let triangle = Triangle::new_iso(pos, height, color);
-                    self.triangle_buffer.update(id, triangle);
-                },
-                GeometryMessage::TriangleRemove { id } => {
-                    self.triangle_buffer.remove(id);
                 },
             }
         }

@@ -41,21 +41,11 @@ pub enum GeometryMessage {
     QuadRemove {
         id: usize,
     },
-    TriangleCreate {
-        pos: Vector3<f32>,
-        height: f32,
-        color: Color,
-    },
-    TriangleUpdate {
-        id: usize,
-        pos: Vector3<f32>,
-        height: f32,
-        color: Color,
-    },
-    TriangleRemove {
-        id: usize,
-    },
 }
+
+// ////////////////////////////////////////////////////////
+// Enums
+// ////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////
 // Messenger
@@ -77,6 +67,8 @@ impl RenderProducer {
             map_triangle: IndexMap::new(),
         }
     }
+
+    // Geometry Functions
 
     pub fn create_rect(&mut self, pos: Vector3<f32>, size: Vector2<f32>, color: Color) -> IndexToken {
         let message = GeometryMessage::QuadCreate {
@@ -105,32 +97,7 @@ impl RenderProducer {
         self.frame.geometry.push(message);
     }
 
-    pub fn create_triangle(&mut self, pos: Vector3<f32>, height: f32, color: Color) -> IndexToken {
-        let message = GeometryMessage::TriangleCreate {
-            pos: pos,
-            height: height,
-            color: color,
-        };
-        self.frame.geometry.push(message);
-        self.map_triangle.add()
-    }
-
-    pub fn update_triangle(&mut self, token: &IndexToken, pos: Vector3<f32>, height: f32, color: Color) {
-        let message = GeometryMessage::TriangleUpdate {
-            id: self.map_triangle.get(token),
-            pos: pos,
-            height: height,
-            color: color,
-        };
-        self.frame.geometry.push(message);
-    }
-
-    pub fn remove_triangle(&mut self, token: IndexToken) {
-        let message = GeometryMessage::TriangleRemove {
-            id: self.map_triangle.remove(token),
-        };
-        self.frame.geometry.push(message);
-    }
+    // Scene Functions
 
     pub fn set_translation(&mut self, translation: Vector2<f32>) {
         self.frame.translation = Some(translation);
@@ -139,6 +106,8 @@ impl RenderProducer {
     pub fn set_scale(&mut self, scale: f32) {
         self.frame.scale = Some(scale);
     }
+
+    // Utility Functions
 
     pub fn send(&mut self) {
         let mut frame = RenderFrame::new();
