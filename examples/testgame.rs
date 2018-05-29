@@ -31,8 +31,7 @@ pub struct MoveableSquare {
 impl MoveableSquare {
     pub fn new(render: &mut RenderProducer) -> MoveableSquare {
         let index = render.create_rect(
-            Vector2::new(0.0f32, 0.0f32),
-            -0.125f32,
+            Vector3::new(0.0f32, 0.0f32, -0.125f32),
             Vector2::new(0.75f32, 0.75f32),
             color::YELLOW,
         );
@@ -47,8 +46,7 @@ impl MoveableSquare {
         self.pos += self.velocity * delta;
         render.update_rect(
             &self.index,
-            self.pos,
-            -0.125f32,
+            self.pos.extend(-0.125f32),
             Vector2::new(0.75f32, 0.75f32),
             color::YELLOW,
         );
@@ -63,26 +61,22 @@ impl Game for TestGame {
         for x in -16..4 {
             let offset = x as f32;
             render.create_rect(
-                Vector2::new(-1f32 + offset, 0f32),
-                0f32,
+                Vector3::new(-1f32 + offset, 0f32, 0f32),
                 Vector2::new(0.5f32, 0.5f32),
                 color::ORANGE,
             );
             render.create_rect(
-                Vector2::new(-0.5f32 + offset, 0.5f32),
-                0f32,
+                Vector3::new(-0.5f32 + offset, 0.5f32, 0f32),
                 Vector2::new(0.5f32, 0.5f32),
                 color::RED,
             );
             render.create_rect(
-                Vector2::new(0f32 + offset, 1f32),
-                0f32,
+                Vector3::new(0f32 + offset, 1f32, 0f32),
                 Vector2::new(0.5f32, 0.5f32),
                 color::PURPLE,
             );
             render.create_rect(
-                Vector2::new(0.5f32 + offset, 1.5f32),
-                0f32,
+                Vector3::new(0.5f32 + offset, 1.5f32, 0f32),
                 Vector2::new(0.5f32, 0.5f32),
                 color::BLUE,
             );

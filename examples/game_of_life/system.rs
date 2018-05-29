@@ -1,7 +1,7 @@
 use rand;
 
 use rand::distributions::{Range, Sample};
-use storm::cgmath::Vector2;
+use storm::cgmath::{Vector2, Vector3};
 use storm::input::message::*;
 use storm::render::color;
 use storm::render::message::*;
@@ -43,8 +43,7 @@ impl System {
             index_tokens.push(vec![]);
             for y in 0..MAP_X_SIZE {
                 index_tokens[x].push(render.create_rect(
-                    Vector2::new(x as f32 * 10.0, y as f32 * 10.0),
-                    0f32,
+                    Vector3::new(x as f32 * 10.0, y as f32 * 10.0, 0f32),
                     Vector2::new(10.0, 10.0),
                     color::PURPLE,
                 ));
@@ -132,8 +131,7 @@ impl System {
 
         render.update_rect(
             index_token,
-            Vector2::new(x as f32 * 10.0, y as f32 * 10.0),
-            0f32,
+            Vector3::new(x as f32 * 10.0, y as f32 * 10.0, 0f32),
             Vector2::new(10.0, 10.0),
             use_color,
         );

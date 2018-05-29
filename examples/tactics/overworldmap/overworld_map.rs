@@ -1,7 +1,7 @@
 use rand;
 use rand::distributions::{Range, Sample};
 use std::io;
-use storm::cgmath::Vector2;
+use storm::cgmath::{Vector2, Vector3};
 use storm::render::message::*;
 use storm::utility::slotmap::*;
 use tactics::overworldmap::map_tile::{MapTile, TileType};
@@ -94,15 +94,13 @@ impl OverworldMap {
                 map_state[i].push(initial_state); //we have it set an intial state for the map state
                 if i % 2 == 0 {
                     index_tokens[i].push(render.create_rect(
-                        Vector2::new(i as f32 * 10.0, j as f32 * 10.0),
-                        0f32,
+                        Vector3::new(i as f32 * 10.0, j as f32 * 10.0, 0f32),
                         Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32),
                         tag_color,
                     )); //we create a rect for it
                 } else {
                     index_tokens[i].push(render.create_rect(
-                        Vector2::new(i as f32 * 10.0, j as f32 * 10.0),
-                        0f32,
+                        Vector3::new(i as f32 * 10.0, j as f32 * 10.0, 0f32),
                         Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32),
                         tag_color,
                     )); //we create a rect for it
@@ -311,8 +309,11 @@ impl OverworldMap {
                     let index_token = &self.tile_index_tokens[x][y];
                     render.update_rect(
                         index_token,
-                        Vector2::new(x as f32 * MAP_TILE_WIDTH as f32, y as f32 * MAP_TILE_HEIGHT as f32),
-                        0f32,
+                        Vector3::new(
+                            x as f32 * MAP_TILE_WIDTH as f32,
+                            y as f32 * MAP_TILE_HEIGHT as f32,
+                            0f32,
+                        ),
                         Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32),
                         self.map[x][y].color(),
                     );

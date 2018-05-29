@@ -78,10 +78,9 @@ impl RenderProducer {
         }
     }
 
-    // pub fn create_rect(&mut self, pos: Vector2<f32>, size: Vector2<f32>, color: Color) -> IndexToken {
-    pub fn create_rect(&mut self, pos: Vector2<f32>, depth: f32, size: Vector2<f32>, color: Color) -> IndexToken {
+    pub fn create_rect(&mut self, pos: Vector3<f32>, size: Vector2<f32>, color: Color) -> IndexToken {
         let message = GeometryMessage::QuadCreate {
-            pos: pos.extend(depth),
+            pos: pos,
             size: size,
             color: color,
         };
@@ -89,10 +88,10 @@ impl RenderProducer {
         self.map_rect.add()
     }
 
-    pub fn update_rect(&mut self, token: &IndexToken, pos: Vector2<f32>, depth: f32, size: Vector2<f32>, color: Color) {
+    pub fn update_rect(&mut self, token: &IndexToken, pos: Vector3<f32>, size: Vector2<f32>, color: Color) {
         let message = GeometryMessage::QuadUpdate {
             id: self.map_rect.get(token),
-            pos: pos.extend(depth),
+            pos: pos,
             size: size,
             color: color,
         };
@@ -106,9 +105,9 @@ impl RenderProducer {
         self.frame.geometry.push(message);
     }
 
-    pub fn create_triangle(&mut self, pos: Vector2<f32>, depth: f32, height: f32, color: Color) -> IndexToken {
+    pub fn create_triangle(&mut self, pos: Vector3<f32>, height: f32, color: Color) -> IndexToken {
         let message = GeometryMessage::TriangleCreate {
-            pos: pos.extend(depth),
+            pos: pos,
             height: height,
             color: color,
         };
@@ -116,10 +115,10 @@ impl RenderProducer {
         self.map_triangle.add()
     }
 
-    pub fn update_triangle(&mut self, token: &IndexToken, pos: Vector2<f32>, depth: f32, height: f32, color: Color) {
+    pub fn update_triangle(&mut self, token: &IndexToken, pos: Vector3<f32>, height: f32, color: Color) {
         let message = GeometryMessage::TriangleUpdate {
             id: self.map_triangle.get(token),
-            pos: pos.extend(depth),
+            pos: pos,
             height: height,
             color: color,
         };
