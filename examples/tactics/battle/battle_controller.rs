@@ -3,43 +3,42 @@ use std::io;
 
 use storm::input::message::*;
 
-use tactics::system::ExitCodes;
 use tactics::battle::battle_commands::MovementMode;
 use tactics::battle::Battlefield;
 use tactics::party_manager::Character;
+use tactics::system::ExitCodes;
 use tactics::Controller;
 
 //using this as a way to tracking who is currently up
 enum CurrentTeam {
     None,
     Player,
-    AI
+    AI,
 }
 
 enum BattleControllerState {
     MainState,
-    MovementState    
+    MovementState,
 }
 
 pub struct BattleController {
-    battlefield: Battlefield,//the data and functionality of the current battlefield
-    player_characters: HashMap<String, Character>,//all character the player are using
-    ai_characters: HashMap<String, Character>,//the AI is suing
-    current_team: CurrentTeam,//who is going
-    movement_mode: MovementMode,//Controller for move actions
-    battle_controller_state: BattleControllerState
+    battlefield: Battlefield, //the data and functionality of the current battlefield
+    player_characters: HashMap<String, Character>, //all character the player are using
+    ai_characters: HashMap<String, Character>, //the AI is suing
+    current_team: CurrentTeam, //who is going
+    movement_mode: MovementMode, //Controller for move actions
+    battle_controller_state: BattleControllerState,
 }
 
 impl BattleController {
-    
     pub fn new() -> BattleController {
         BattleController {
             battlefield: Battlefield::new(),
-            player_characters: HashMap::new(), 
+            player_characters: HashMap::new(),
             ai_characters: HashMap::new(),
             current_team: CurrentTeam::Player,
             movement_mode: MovementMode::new(),
-            battle_controller_state: BattleControllerState::MainState
+            battle_controller_state: BattleControllerState::MainState,
         }
     }
 
@@ -49,7 +48,7 @@ impl BattleController {
     //placing all the characters from both teams
     //genreating rewards
     //setting battle into initial state
-    pub fn new_battle(&mut self, x_size: usize, y_size: usize, player_characters: HashMap<String, Character>) { 
+    pub fn new_battle(&mut self, x_size: usize, y_size: usize, player_characters: HashMap<String, Character>) {
         self.battlefield.initalize_new_battlefield(x_size, y_size);
         self.player_characters = player_characters;
 
@@ -72,12 +71,11 @@ impl BattleController {
             },
             BattleControllerState::MovementState => {
                 self.movement_mode.execute_movement_mode(&mut self.battlefield);
-            }
+            },
         }
 
-
         panic!("AHHHHH, NOT THE BEES");
-      //  ExitCodes::Ok
+        //  ExitCodes::Ok
     }
 
     //use this function to handle all player input at the battle_controller level
@@ -96,15 +94,13 @@ impl BattleController {
                         Some(character_name) => {
                             self.movement_mode.set_character_name(character_name);
                         },
-                        None => {
-                            
-                        }
+                        None => {},
                     }
                 }
             },
             Err(e) => {
                 panic!("{} HEMIDALL ERROR with player input in the battlefield", e);
-            }
+            },
         }
     }
 
@@ -112,24 +108,18 @@ impl BattleController {
     //most code that needs the current team should use this
     //avoids having disambiguation code all over the place
     //and having some referance varible that we switch between all the time
-    fn get_current_team(&self) -> &HashMap<String, Character>{
+    fn get_current_team(&self) -> &HashMap<String, Character> {
         match self.current_team {
-            CurrentTeam::Player => {
-                &self.player_characters
-            },
-            CurrentTeam::AI => {
-                &self.ai_characters
-            },
+            CurrentTeam::Player => &self.player_characters,
+            CurrentTeam::AI => &self.ai_characters,
             CurrentTeam::None => {
                 panic!("THIS IS NOT SUPPOSED TO BE CALLED, LOKI ERROR");
- //               &self.player_characters///THIS IS NEVER EVER SUPPOSED TO BE CALLED
-            }
+                //               &self.player_characters///THIS IS NEVER EVER SUPPOSED TO BE CALLED
+            },
         }
     }
 }
 
 impl Controller for BattleController {
-    fn input_handler(&mut self, _input: InputFrame) {
-        
-    }
+    fn input_handler(&mut self, _input: InputFrame) {}
 }

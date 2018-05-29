@@ -3,10 +3,7 @@ use math::aabb::*;
 
 #[test]
 fn test_slide() {
-    let v = vec![
-        AABB2D::new(2f32, 0f32, 3f32, 1f32),
-        AABB2D::new(0f32, 1f32, 1f32, 2f32),
-    ];
+    let v = vec![AABB2D::new(2f32, 0f32, 3f32, 1f32), AABB2D::new(0f32, 1f32, 1f32, 2f32)];
     let mut aabb = AABB2D::new(0f32, 0f32, 1f32, 1f32);
 
     {

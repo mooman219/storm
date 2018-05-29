@@ -9,14 +9,13 @@ use storm::input::message::*;
 use storm::render::message::*;
 use storm::time::clock::*;
 
-
 mod tactics;
 use tactics::system::System;
 
 pub struct TacticsLauncher {
     system: System,
     render: RenderProducer,
-    clock: Clock
+    clock: Clock,
 }
 
 impl Game for TacticsLauncher {

@@ -101,9 +101,7 @@ impl Display {
     // Buffer
 
     pub fn swap_buffers(&self) {
-        self.window.swap_buffers().expect(
-            "Error while swapping buffers.",
-        );
+        self.window.swap_buffers().expect("Error while swapping buffers.");
     }
 
     pub fn resize(&self, width: u32, height: u32) {

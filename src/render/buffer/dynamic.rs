@@ -40,9 +40,9 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
             gl::BindBuffer(buffer_type as u32, vbo);
             gl::BufferData(
                 buffer_type as u32, // Buffer type
-                default_size, // Size
-                ptr::null(), // Initial data
-                gl::DYNAMIC_DRAW, // Usage
+                default_size,       // Size
+                ptr::null(),        // Initial data
+                gl::DYNAMIC_DRAW,   // Usage
             );
         }
         DynamicBuffer {

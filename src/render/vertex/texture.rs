@@ -25,22 +25,22 @@ impl Vertex for TextureVertex {
             // Position 2D
             gl::EnableVertexAttribArray(0);
             gl::VertexAttribPointer(
-                0, // Index
-                3, // Count
-                gl::FLOAT, // Type
-                gl::FALSE, // Normalized
+                0,                        // Index
+                3,                        // Count
+                gl::FLOAT,                // Type
+                gl::FALSE,                // Normalized
                 Self::VERTEX_SIZE as i32, // Stride
-                (0) as *const _, // Offset
+                (0) as *const _,          // Offset
             );
             // UV
             gl::EnableVertexAttribArray(1);
             gl::VertexAttribPointer(
-                1, // Index
-                2, // Count
-                gl::FLOAT, // Type
-                gl::FALSE, // Normalized
+                1,                        // Index
+                2,                        // Count
+                gl::FLOAT,                // Type
+                gl::FALSE,                // Normalized
                 Self::VERTEX_SIZE as i32, // Stride
-                (3 * 4) as *const _, // Offset
+                (3 * 4) as *const _,      // Offset
             );
         }
     }

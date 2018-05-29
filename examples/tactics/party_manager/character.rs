@@ -12,12 +12,10 @@ pub struct Character {
     pub total_attack: i32,
 
     pub current_speed: i32,
-    pub total_speed: i32
+    pub total_speed: i32,
 }
 
-
-impl Character{
-    
+impl Character {
     pub fn new(name: String, health: i32, attack: i32, speed: i32) -> Character {
         Character {
             name,
@@ -26,15 +24,15 @@ impl Character{
             current_attack: attack,
             total_attack: attack,
             current_speed: speed,
-            total_speed: speed
+            total_speed: speed,
         }
     }
 
     //regular random character, feel, well, random, so what if we could do a more genetics based way
     //if we can break down each character into a string of characterics, standardizes this into format
-    //then use a human version of child generation, create two parents, "mate" them to create a child 
+    //then use a human version of child generation, create two parents, "mate" them to create a child
     //and that is the character we genreate
-    //allow for both passing traits, names, characterics, down to childern, but also allow them to 
+    //allow for both passing traits, names, characterics, down to childern, but also allow them to
     //mutate, and mutate in different ways
     //example, Jean-Louis Жуков, has a child with 诸葛亮 Grant
     //possible childern, Jean-Louis Grant, Jean-Louis Жуков, 诸葛亮 Жуков, Freddie Grant, George Жуков
@@ -46,11 +44,44 @@ impl Character{
         let first_name = num_range.sample(&mut rng);
         let second_name = num_range.sample(&mut rng);
 
-        let first_names = ["Jean-Louis", "George", "诸葛亮", "Freddie", "Billy-Joe", "Robert",  "Uylsses", "Simon",   "Георгий", "Никита", "იოსებ",    "Ἀλέξανδρος", "Toussaint",  "이",   "嬴", "秦"];
-        let last_names =  ["육군 원수",     "올리언즈", "孔明",   "Patton",  "The Great", "Marquis", "Grant",   "Bolivar", "Жуков",   "Хрущёв", "სტალინი", "Μέγας",       "Louverture", "순신", "政", "始皇"];
+        let first_names = [
+            "Jean-Louis",
+            "George",
+            "诸葛亮",
+            "Freddie",
+            "Billy-Joe",
+            "Robert",
+            "Uylsses",
+            "Simon",
+            "Георгий",
+            "Никита",
+            "იოსებ",
+            "Ἀλέξανδρος",
+            "Toussaint",
+            "이",
+            "嬴",
+            "秦",
+        ];
+        let last_names = [
+            "육군 원수",
+            "올리언즈",
+            "孔明",
+            "Patton",
+            "The Great",
+            "Marquis",
+            "Grant",
+            "Bolivar",
+            "Жуков",
+            "Хрущёв",
+            "სტალინი",
+            "Μέγας",
+            "Louverture",
+            "순신",
+            "政",
+            "始皇",
+        ];
         let random_name = first_names[first_name].to_owned() + " " + last_names[second_name];
-        
-        
+
         Character {
             name: random_name,
             current_health: 5,
@@ -58,8 +89,7 @@ impl Character{
             current_attack: 2,
             total_attack: 2,
             current_speed: 2,
-            total_speed: 2
+            total_speed: 2,
         }
     }
-
 }

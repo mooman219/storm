@@ -1,8 +1,8 @@
 use cgmath::*;
 use render::color::*;
 use render::geometry::*;
-use render::vertex::*;
 use render::vertex::color::*;
+use render::vertex::*;
 
 #[repr(C)]
 pub struct Triangle<T: Vertex> {

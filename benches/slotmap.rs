@@ -24,5 +24,7 @@ fn bench_indexmap_get(bench: &mut Bencher) {
     let mut map = IndexMap::new();
     let a = map.add();
 
-    bench.iter(|| { black_box(map.get(&a)); });
+    bench.iter(|| {
+        black_box(map.get(&a));
+    });
 }

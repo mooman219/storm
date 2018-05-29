@@ -3,10 +3,8 @@ pub struct BattlefieldTile {
 }
 
 impl BattlefieldTile {
-    pub fn new () -> BattlefieldTile {
-        BattlefieldTile {
-            character_name: None
-        }
+    pub fn new() -> BattlefieldTile {
+        BattlefieldTile { character_name: None }
     }
 
     //we denote empty as not having a character on it
@@ -45,7 +43,7 @@ impl BattlefieldTile {
             None => {
                 //'e' is the empty tile character
                 return '\u{2592}';
-            }
-        }   
+            },
+        }
     }
 }

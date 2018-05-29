@@ -40,15 +40,15 @@ impl<T> RawBuffer<T> for ChunkedBuffer<T> {
             gl::BindBuffer(buffer_type as u32, vbo);
             gl::BufferStorage(
                 buffer_type as u32, // Buffer type
-                max_size, // Buffer size
-                ptr::null(), // Initial data
-                flags, // Flags
+                max_size,           // Buffer size
+                ptr::null(),        // Initial data
+                flags,              // Flags
             );
             map = gl::MapBufferRange(
                 buffer_type as u32, // Buffer type
-                0, // Offset
-                max_size, // Length
-                flags, // Flags
+                0,                  // Offset
+                max_size,           // Length
+                flags,              // Flags
             ) as *mut _;
         }
         // Finish
@@ -116,8 +116,7 @@ impl<T> RawBuffer<T> for ChunkedBuffer<T> {
                             let mut wait_duration = 0;
                             loop {
                                 match gl::ClientWaitSync(fence, wait_flags, wait_duration) {
-                                    gl::ALREADY_SIGNALED |
-                                    gl::CONDITION_SATISFIED => break,
+                                    gl::ALREADY_SIGNALED | gl::CONDITION_SATISFIED => break,
                                     gl::WAIT_FAILED => panic!("Failed to wait for fence."),
                                     _ => {
                                         wait_flags = gl::SYNC_FLUSH_COMMANDS_BIT;

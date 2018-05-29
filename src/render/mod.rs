@@ -14,9 +14,9 @@ use gl;
 use render::buffer::geometry::*;
 use render::display::*;
 use render::enums::*;
-use render::geometry::*;
 use render::geometry::quad::*;
 use render::geometry::triangle::*;
+use render::geometry::*;
 use render::message::*;
 use render::shader::color::*;
 use render::vertex::color::*;
@@ -100,12 +100,7 @@ impl RenderState {
                     let quad = Quad::new_rect(pos, size, color);
                     self.quad_buffer.add(quad);
                 },
-                GeometryMessage::QuadUpdate {
-                    id,
-                    pos,
-                    size,
-                    color,
-                } => {
+                GeometryMessage::QuadUpdate { id, pos, size, color } => {
                     let quad = Quad::new_rect(pos, size, color);
                     self.quad_buffer.update(id, quad);
                 },
@@ -117,12 +112,7 @@ impl RenderState {
                     let triangle = Triangle::new_iso(pos, height, color);
                     self.triangle_buffer.add(triangle);
                 },
-                GeometryMessage::TriangleUpdate {
-                    id,
-                    pos,
-                    height,
-                    color,
-                } => {
+                GeometryMessage::TriangleUpdate { id, pos, height, color } => {
                     let triangle = Triangle::new_iso(pos, height, color);
                     self.triangle_buffer.update(id, triangle);
                 },

@@ -61,12 +61,7 @@ fn compile_shader(src: &str, shader_type: GLenum) -> u32 {
         let shader_id = gl::CreateShader(shader_type);
 
         // Attempt to compile the shader
-        gl::ShaderSource(
-            shader_id,
-            1,
-            [c_src.as_ptr() as *const _].as_ptr(),
-            ptr::null(),
-        );
+        gl::ShaderSource(shader_id, 1, [c_src.as_ptr() as *const _].as_ptr(), ptr::null());
         gl::CompileShader(shader_id);
 
         // Error check
@@ -90,17 +85,10 @@ fn check_link_status(program_id: u32) {
             let mut buf = Vec::with_capacity(len as usize);
             // Subtract 1 to skip the trailing null character
             buf.set_len((len as usize) - 1);
-            gl::GetProgramInfoLog(
-                program_id,
-                len,
-                ptr::null_mut(),
-                buf.as_mut_ptr() as *mut GLchar,
-            );
+            gl::GetProgramInfoLog(program_id, len, ptr::null_mut(), buf.as_mut_ptr() as *mut GLchar);
             panic!(
                 "Link Status: {}",
-                str::from_utf8(&buf).ok().expect(
-                    "ProgramInfoLog not valid utf8",
-                )
+                str::from_utf8(&buf).ok().expect("ProgramInfoLog not valid utf8",)
             );
         }
     }
@@ -118,17 +106,10 @@ fn check_compile_status(shader_id: u32) {
             gl::GetShaderiv(shader_id, gl::INFO_LOG_LENGTH, &mut len);
             let mut buf = Vec::with_capacity(len as usize);
             buf.set_len((len as usize) - 1); // subtract 1 to skip the trailing null character
-            gl::GetShaderInfoLog(
-                shader_id,
-                len,
-                ptr::null_mut(),
-                buf.as_mut_ptr() as *mut GLchar,
-            );
+            gl::GetShaderInfoLog(shader_id, len, ptr::null_mut(), buf.as_mut_ptr() as *mut GLchar);
             panic!(
                 "Compile Status: {}",
-                str::from_utf8(&buf).ok().expect(
-                    "ShaderInfoLog not valid utf8",
-                )
+                str::from_utf8(&buf).ok().expect("ShaderInfoLog not valid utf8",)
             );
         }
     }

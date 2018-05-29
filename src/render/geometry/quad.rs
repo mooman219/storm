@@ -1,8 +1,8 @@
 use cgmath::*;
 use render::color::*;
 use render::geometry::*;
-use render::vertex::*;
 use render::vertex::color::*;
+use render::vertex::*;
 
 #[repr(C)]
 pub struct Quad<T: Vertex> {
@@ -32,14 +32,7 @@ impl<T: Vertex> Geometry for Quad<T> {
 
     fn generate_indice(index: u16) -> Self::IndiceType {
         let index = index * 4;
-        [
-            index + 0,
-            index + 1,
-            index + 2,
-            index + 2,
-            index + 1,
-            index + 3,
-        ]
+        [index + 0, index + 1, index + 2, index + 2, index + 1, index + 3]
     }
 }
 

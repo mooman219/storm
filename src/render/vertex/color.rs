@@ -26,22 +26,22 @@ impl Vertex for ColorVertex {
             // Position 2D
             gl::EnableVertexAttribArray(0);
             gl::VertexAttribPointer(
-                0, // Index
-                3, // Count
-                gl::FLOAT, // Type
-                gl::FALSE, // Normalized
+                0,                        // Index
+                3,                        // Count
+                gl::FLOAT,                // Type
+                gl::FALSE,                // Normalized
                 Self::VERTEX_SIZE as i32, // Stride
-                (0) as *const _, // Offset
+                (0) as *const _,          // Offset
             );
             // Color
             gl::EnableVertexAttribArray(1);
             gl::VertexAttribPointer(
-                1, // Index
-                gl::BGRA as i32, // Count
+                1,                               // Index
+                gl::BGRA as i32,                 // Count
                 gl::UNSIGNED_INT_2_10_10_10_REV, // Type
-                gl::TRUE, // Normalized
-                Self::VERTEX_SIZE as i32, // Stride
-                (3 * 4) as *const _, // Offset
+                gl::TRUE,                        // Normalized
+                Self::VERTEX_SIZE as i32,        // Stride
+                (3 * 4) as *const _,             // Offset
             );
         }
     }

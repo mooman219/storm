@@ -1,10 +1,10 @@
-use tactics::overworldmap::map_tile::{MapTile, TileType};
-use rand::distributions::{Range, Sample};
 use rand;
+use rand::distributions::{Range, Sample};
 use std::io;
 use storm::cgmath::Vector2;
 use storm::render::message::*;
 use storm::utility::slotmap::*;
+use tactics::overworldmap::map_tile::{MapTile, TileType};
 
 const MAP_X_SIZE: usize = 10;
 const MAP_Y_SIZE: usize = 10;
@@ -17,28 +17,27 @@ pub enum MovementDirection {
     Up,
     Down,
     Left,
-    Right
+    Right,
 }
 
 enum OverworldMapState {
-    WaitingForPlayerInput
+    WaitingForPlayerInput,
 }
 
 pub struct OverworldMap {
-    map: Vec<Vec<MapTile>>,//this is the actual tiles that handle all logic with one tiles
-    map_state: Vec<Vec<char>>,//this is a record of the previous printed state of the map
+    map: Vec<Vec<MapTile>>,    //this is the actual tiles that handle all logic with one tiles
+    map_state: Vec<Vec<char>>, //this is a record of the previous printed state of the map
     //if this differs between two calls of layout, we must redraw the map
-    tile_index_tokens: Vec<Vec<IndexToken>>,//this is the list of index token for drawing the map
+    tile_index_tokens: Vec<Vec<IndexToken>>, //this is the list of index token for drawing the map
     //we allocate them at the start of the game
     //and then use them to update on a draw that triggers when the map_state was updated
-    party_position_on_map: Vector2<usize>
+    party_position_on_map: Vector2<usize>,
 }
 
 impl OverworldMap {
-
     pub fn new() -> OverworldMap {
         OverworldMap {
-            map : vec![],
+            map: vec![],
             map_state: vec![],
             tile_index_tokens: vec![],
             party_position_on_map: Vector2::new(0, 0),
@@ -54,10 +53,9 @@ impl OverworldMap {
         //this is a magic number for the number of MapTile enums, would love this to be compile time op
         let mut tile_type = Range::new(0, 4);
         let mut rng = rand::thread_rng();
-        
+
         //we create 100 tiles
         for i in 0..MAP_X_SIZE {
-            
             map.push(vec![]);
             map_state.push(vec![]);
             index_tokens.push(vec![]);
@@ -85,20 +83,29 @@ impl OverworldMap {
                     },
                     _ => {
                         panic!("HELA ERROR: This is a problem with rusts random, soo a larger problem then");
-                    }
+                    },
                 }
 
                 let tile = MapTile::new(tile_type);
                 let initial_state = tile.draw();
                 let tag_color = tile.color();
-                
-                map[i].push(tile);//we add our new tile to its 2d array
-                map_state[i].push(initial_state);//we have it set an intial state for the map state
+
+                map[i].push(tile); //we add our new tile to its 2d array
+                map_state[i].push(initial_state); //we have it set an intial state for the map state
                 if i % 2 == 0 {
-                    index_tokens[i].push(render.create_rect(Vector2::new(i as f32 * 10.0, j as f32 * 10.0), 0f32, Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32), tag_color));//we create a rect for it
-                }
-                else {
-                    index_tokens[i].push(render.create_rect(Vector2::new(i as f32 * 10.0, j as f32 * 10.0), 0f32, Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32), tag_color));//we create a rect for it    
+                    index_tokens[i].push(render.create_rect(
+                        Vector2::new(i as f32 * 10.0, j as f32 * 10.0),
+                        0f32,
+                        Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32),
+                        tag_color,
+                    )); //we create a rect for it
+                } else {
+                    index_tokens[i].push(render.create_rect(
+                        Vector2::new(i as f32 * 10.0, j as f32 * 10.0),
+                        0f32,
+                        Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32),
+                        tag_color,
+                    )); //we create a rect for it
                 }
             }
         }
@@ -107,12 +114,10 @@ impl OverworldMap {
     }
 
     pub fn move_party_from_tile_to_tile(&mut self, direction: Vector2<usize>, do_subtract: bool) {
-        
         self.map[self.party_position_on_map.x][self.party_position_on_map.y].party_left_tile();
         if !do_subtract {
             self.party_position_on_map += direction;
-        }
-        else {
+        } else {
             self.party_position_on_map -= direction;
         }
         self.map[self.party_position_on_map.x][self.party_position_on_map.y].flip_tile();
@@ -122,14 +127,14 @@ impl OverworldMap {
     pub fn find_available_movement_direction_for_party(pos: Vector2<usize>) -> Vec<MovementDirection> {
         let mut directions = vec![];
         let current_party_position = pos;
-        
+
         //above the current tile
         if (current_party_position.y as i32) - 1 >= 0 {
             directions.push(MovementDirection::Up);
         }
 
         //below
-        if current_party_position.y + 1  < MAP_Y_SIZE {
+        if current_party_position.y + 1 < MAP_Y_SIZE {
             directions.push(MovementDirection::Down);
         }
 
@@ -172,7 +177,7 @@ impl OverworldMap {
             None => {
                 println!("You need to have a start position to start the game, aborting new game startup");
                 return false;
-            }
+            },
         }
     }
 
@@ -180,12 +185,11 @@ impl OverworldMap {
     fn prompt_for_start_position() -> Option<Vector2<usize>> {
         println!("Please pick a following position to start");
         println!("Enter the number you would like to start at");
-        
-      
+
         let possible_start_positions = OverworldMap::genreate_random_start_positions();
 
         let mut count = 0;
-        
+
         for start in &possible_start_positions {
             println!("{}. {}, {}", count, start.x, start.y);
             count += 1;
@@ -206,20 +210,25 @@ impl OverworldMap {
                         Ok(index) => {
                             if index < possible_start_positions.len() {
                                 return Some(possible_start_positions[index]);
-                            }
-                            else {
-                                println!("BALDER ERROR: {} is larger then the number of options, please try again", index);
+                            } else {
+                                println!(
+                                    "BALDER ERROR: {} is larger then the number of options, please try again",
+                                    index
+                                );
                             }
                         },
                         Err(_e) => {
                             println!("ODIN ERROR {} is not a number", input);
-                        }
+                        },
                     }
-                }
+                },
                 //I am just going to panic on an error here, not sure what the cases of the error are
                 //and this is so early in the new game flow that getting back to it isnt hard
                 Err(error) => {
-                    panic!("{} HEMIDALL ERROR with the input for starting position selection", error);
+                    panic!(
+                        "{} HEMIDALL ERROR with the input for starting position selection",
+                        error
+                    );
                 },
             }
         }
@@ -237,7 +246,7 @@ impl OverworldMap {
         //this will return a position in the form of either ([0...x_length), 0), or (0..[0..y_legth))
         //provides no gurantee that it is unique
         let mut random_start = move |x_length: usize, y_length: usize| -> Vector2<usize> {
-//            let mut rng = rand::thread_rng();
+            //            let mut rng = rand::thread_rng();
             let mut x_num_range = Range::new(0, x_length);
             let mut y_num_range = Range::new(0, y_length);
 
@@ -250,41 +259,31 @@ impl OverworldMap {
             //are we adding a starting positiong along the x-axis, or y-axis
             if di == 0 {
                 //some number of the positions should be on the other edge of the map, this is repeated below for the y-axis starts
-                let shift_over_to_other_edge = match y_num_range.sample(&mut rng) % 2 == 0{
-                    true => {
-                        0
-                    },
-                    false => {
-                        y_length - 1
-                    } 
+                let shift_over_to_other_edge = match y_num_range.sample(&mut rng) % 2 == 0 {
+                    true => 0,
+                    false => y_length - 1,
                 };
                 return Vector2::new(x_num, shift_over_to_other_edge);
             }
 
-            let shift_over_to_other_edge = match y_num_range.sample(&mut rng) % 2 == 1{
-                true => {
-                    0
-                },
-                false => {
-                    x_length - 1
-                }
+            let shift_over_to_other_edge = match y_num_range.sample(&mut rng) % 2 == 1 {
+                true => 0,
+                false => x_length - 1,
             };
             return Vector2::new(shift_over_to_other_edge, y_num);
         };
 
-
         let mut count = 0;
         while count != range_top {
-            
             let possible_new = random_start(MAP_X_SIZE, MAP_Y_SIZE);
 
-            //no use in having duplicate start positions 
+            //no use in having duplicate start positions
             if possible_start_positions.contains(&possible_new) {
                 continue;
             }
 
             possible_start_positions.push(possible_new);
-            count+=1;
+            count += 1;
         }
 
         return possible_start_positions;
@@ -295,23 +294,28 @@ impl OverworldMap {
     }
 
     pub fn layout_map(&mut self, render: &mut RenderProducer) {
-
         if self.map.len() == 0 {
             //we are making an assumption that you would only want to layout a full map
             println!("Warning: Trying to layout empty map, Daft Punk: Something about us");
             return;
         }
-        
+
         for x in 0..self.map.len() {
             for y in 0..self.map[0].len() {
                 let possible_update_token = self.map[x][y].draw();
                 if possible_update_token != self.map_state[x][y] {
                     //this means that this tile has to be updated
                     self.map_state[x][y] = possible_update_token;
-                    
+
                     //if we detect a change, that means we have to have update things
                     let index_token = &self.tile_index_tokens[x][y];
-                    render.update_rect(index_token, Vector2::new(x as f32 * MAP_TILE_WIDTH as f32, y as f32 * MAP_TILE_HEIGHT as f32), 0f32, Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32), self.map[x][y].color());
+                    render.update_rect(
+                        index_token,
+                        Vector2::new(x as f32 * MAP_TILE_WIDTH as f32, y as f32 * MAP_TILE_HEIGHT as f32),
+                        0f32,
+                        Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32),
+                        self.map[x][y].color(),
+                    );
                 }
             }
         }
@@ -326,16 +330,16 @@ impl OverworldMap {
         //cleanup formatting
         OverworldMap::draw_header();
     }
-    
+
     #[inline]
     pub fn draw_header() {
-       for _ in 0..MAP_X_SIZE {
-           OverworldMap::draw_top_or_bottom();
-       } 
-       //formatting cleanup
-       print!("+\n");
+        for _ in 0..MAP_X_SIZE {
+            OverworldMap::draw_top_or_bottom();
+        }
+        //formatting cleanup
+        print!("+\n");
     }
-    
+
     #[inline]
     pub fn draw_row(&self, row: usize) {
         for col_num in 0..MAP_X_SIZE {

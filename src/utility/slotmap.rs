@@ -140,10 +140,6 @@ impl<T> SlotMap<T> {
 
     pub fn get(&self, token: &IndexToken) -> &T {
         token.validate();
-        unsafe {
-            &self.data.get_unchecked(
-                self.table.get_unchecked(token.index).to_data,
-            )
-        }
+        unsafe { &self.data.get_unchecked(self.table.get_unchecked(token.index).to_data) }
     }
 }

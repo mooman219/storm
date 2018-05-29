@@ -1,5 +1,5 @@
-use tactics::party_manager::Character;
 use std::collections::HashMap;
+use tactics::party_manager::Character;
 
 pub struct Caravan {
     lead: String,
@@ -8,22 +8,20 @@ pub struct Caravan {
 }
 
 impl Caravan {
-    
-    //you must have a lead character for a caravan, they will 
+    //you must have a lead character for a caravan, they will
     //also automatically added to the active roster
     pub fn new(party_lead: Character) -> Caravan {
         //the party is set of character that a player has to field at any momemnt
         let mut party = HashMap::new();
-        
+
         //we enforce now empty parties, a parties is about half of a game, the other being the map
         let lead_name = party_lead.name.clone();
         party.insert(party_lead.name.clone(), party_lead);
 
-
         Caravan {
             party_members: party,
-            lead: lead_name.clone(),//we keep this as a record for later
-            active_roster: vec![lead_name]
+            lead: lead_name.clone(), //we keep this as a record for later
+            active_roster: vec![lead_name],
         }
     }
 
@@ -55,12 +53,12 @@ impl Caravan {
                 Ok(index) => {
                     self.active_roster.remove(index);
                 },
-                Err(_e) => {}
+                Err(_e) => {},
             }
         }
     }
 
-    pub fn get_party(&self) -> &HashMap<String, Character>{
+    pub fn get_party(&self) -> &HashMap<String, Character> {
         return &self.party_members;
     }
 

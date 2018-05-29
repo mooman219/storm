@@ -70,9 +70,9 @@ impl ColorShader {
         let matrix = self.ortho * self.ortho_translation * self.ortho_scale;
         unsafe {
             gl::UniformMatrix4fv(
-                self.uniform_ortho, // Program location
-                1, // Count
-                gl::FALSE, // Should transpose
+                self.uniform_ortho,          // Program location
+                1,                           // Count
+                gl::FALSE,                   // Should transpose
                 matrix.as_ptr() as *const _, // Value pointer
             );
         }

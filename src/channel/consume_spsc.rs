@@ -1,7 +1,7 @@
 use std::cell::Cell;
 use std::mem;
-use std::sync::Arc;
 use std::sync::atomic::*;
+use std::sync::Arc;
 
 // ////////////////////////////////////////////////////////
 // Internal
@@ -62,10 +62,7 @@ impl<T: Copy> Buffer<T> {
 pub fn make<T: Copy>() -> (Producer<T>, Consumer<T>) {
     // This is the only place where a buffer is created.
     let arc = Arc::new(Buffer::new());
-    (
-        Producer { buffer: arc.clone() },
-        Consumer { buffer: arc.clone() },
-    )
+    (Producer { buffer: arc.clone() }, Consumer { buffer: arc.clone() })
 }
 
 // ////////////////////////////////////////////////////////

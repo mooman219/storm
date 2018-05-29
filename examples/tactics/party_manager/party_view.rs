@@ -3,15 +3,11 @@ use tactics::party_manager::Caravan;
 //this view should display all characters that a caravan has
 //display the most basic information about them
 //allow for the player to swap them in and out of the active roster
-pub struct PartyView {
-
-}
+pub struct PartyView {}
 
 impl PartyView {
     pub fn new() -> PartyView {
-        PartyView {
-
-        }
+        PartyView {}
     }
 
     pub fn draw(&self, caravan: &Caravan) {
@@ -23,11 +19,10 @@ impl PartyView {
             println!("-=========================-");
             if caravan.is_lead(&v.name) {
                 println!("{} Lead : {}", count, v.name);
-            }
-            else {
+            } else {
                 println!("{} Party Member: {}", count, v.name);
             }
-            
+
             count += 1;
         }
         println!("-=========================-");

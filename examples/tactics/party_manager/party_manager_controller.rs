@@ -1,7 +1,7 @@
-use tactics::party_manager::{Caravan,Character, PartyView};
-use tactics::system::ExitCodes;
 use std::collections::HashMap;
 use std::io;
+use tactics::party_manager::{Caravan, Character, PartyView};
+use tactics::system::ExitCodes;
 
 enum PartyMangerControllerState {
     MenuState,
@@ -16,7 +16,6 @@ pub struct PartyManagerController {
 
 impl PartyManagerController {
     pub fn new() -> PartyManagerController {
-        
         //test character, will work on this flow more after battle is fleshed out
         let character = Character::new(String::from("Joachim Murat"), 5, 2, 2);
         let mut caravan = Caravan::new(character);
@@ -29,13 +28,12 @@ impl PartyManagerController {
                 }
                 caravan.add_party_member(character.name.clone(), character);
             }
-            
         }
 
         PartyManagerController {
             party_manager_controller_state: PartyMangerControllerState::MenuState,
             caravan,
-            party_view: PartyView::new()
+            party_view: PartyView::new(),
         }
     }
 
@@ -43,7 +41,7 @@ impl PartyManagerController {
         self.party_manager_controller_state = new_state;
     }
 
-    pub fn update(&mut self) -> ExitCodes{
+    pub fn update(&mut self) -> ExitCodes {
         match self.party_manager_controller_state {
             PartyMangerControllerState::MenuState => {
                 println!("What do you want to in the party manager");
@@ -57,23 +55,20 @@ impl PartyManagerController {
                         let input = input.trim();
                         if input == "1" {
                             return ExitCodes::ToMapController;
-                        }
-                        else if input == "2" {
+                        } else if input == "2" {
                             return ExitCodes::Exit;
-                        }
-                        else if input == "3" {
+                        } else if input == "3" {
                             self.set_state(PartyMangerControllerState::PartyViewState);
                         }
-                    }
+                    },
                     Err(e) => {
                         panic!("{} HEMIDALL ERROR with the input for party manager controller", e);
-                    }
+                    },
                 }
-
             },
             PartyMangerControllerState::PartyViewState => {
                 self.party_view();
-            }
+            },
         }
 
         ExitCodes::Ok
@@ -92,10 +87,13 @@ impl PartyManagerController {
                 if input == "1" {
                     self.set_state(PartyMangerControllerState::MenuState);
                 }
-            }
+            },
             Err(e) => {
-                panic!("{} HEMIDALL ERROR with the input for party view party manager controller", e);
-            }
+                panic!(
+                    "{} HEMIDALL ERROR with the input for party view party manager controller",
+                    e
+                );
+            },
         }
     }
 
