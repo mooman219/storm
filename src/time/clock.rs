@@ -2,11 +2,13 @@ use std::thread::sleep;
 use std::time::Duration;
 use std::time::Instant;
 use time::convert::*;
+use time::timer::*;
 
 pub struct Clock {
     last_tick: Instant,
     target: u64,
     delta: f32,
+    timer_input: Timer,
 }
 
 impl Clock {
@@ -15,11 +17,16 @@ impl Clock {
             last_tick: Instant::now(),
             target: Clock::tps_to_target(tps),
             delta: 0f32,
+            timer_input: Timer::new("[T] Tick"),
         }
     }
 
     fn tps_to_target(tps: u64) -> u64 {
-        if tps == 0 { 0 } else { NANOS_PER_SEC / tps }
+        if tps == 0 {
+            0
+        } else {
+            NANOS_PER_SEC / tps
+        }
     }
 
     fn duration_to_delta(duration: &Duration) -> f32 {
@@ -43,17 +50,21 @@ impl Clock {
     /// 10ms. If 4ms is spent outside of this function, then calling tick will
     /// sleep for 6ms.
     pub fn tick(&mut self) {
-        // Sleep logic.
+        // Find the duration since ticked last.
+        let duration = as_nanoseconds(&self.last_tick.elapsed());
+        // OS Sleep logic.
+        if duration < self.target {
+            let diff = self.target - duration;
+            if diff > 1_250_000 {
+                sleep(Duration::new(0, (diff - 1_250_000) as u32));
+            }
+        }
+        // Spin sleep logic.
         let duration = as_nanoseconds(&self.last_tick.elapsed());
         if duration < self.target {
-            let diff = (self.target - duration) as u32;
-            if self.target < 16666667 {
-                // Spin instead of sleeping above 60TPS.
-                let spin_start = Instant::now();
-                while as_nanoseconds(&spin_start.elapsed()) < diff as u64 {}
-            } else {
-                sleep(Duration::new(0, diff));
-            }
+            let diff = self.target - duration;
+            let spin_start = Instant::now();
+            while as_nanoseconds(&spin_start.elapsed()) < diff {}
         }
         self.delta = Clock::duration_to_delta(&self.last_tick.elapsed());
         self.last_tick = Instant::now();

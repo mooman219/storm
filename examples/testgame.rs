@@ -91,7 +91,7 @@ impl Game for TestGame {
         render.send();
         TestGame {
             render: render,
-            clock: Clock::new(200),
+            clock: Clock::new(144),
             translation: Vector2::new(0f32, 0f32),
             square: square,
         }
