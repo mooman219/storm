@@ -1,4 +1,3 @@
-
 use rand;
 
 use rand::distributions::{Range, Sample};
@@ -49,7 +48,7 @@ impl System {
                 index_tokens[x].push(render.create_rect(
                     Vector2::new(x as f32 * 10.0, y as f32 * 10.0),
                     0f32,
-                    Vector2::new(x as f32 * 10.0, y as f32 * 10.0),
+                    Vector2::new(10.0, 10.0),
                     color::PURPLE,
                 ));
             }
@@ -150,7 +149,7 @@ impl System {
             index_token,
             Vector2::new(x as f32 * 10.0, y as f32 * 10.0),
             0f32,
-            Vector2::new(x as f32 * 10.0, y as f32 * 10.0),
+            Vector2::new(10.0, 10.0),
             use_color,
         );
     }
