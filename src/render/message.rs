@@ -38,7 +38,9 @@ pub enum GeometryMessage {
         size: Vector2<f32>,
         color: Color,
     },
-    QuadRemove { id: usize },
+    QuadRemove {
+        id: usize,
+    },
     TriangleCreate {
         pos: Vector3<f32>,
         height: f32,
@@ -50,7 +52,9 @@ pub enum GeometryMessage {
         height: f32,
         color: Color,
     },
-    TriangleRemove { id: usize },
+    TriangleRemove {
+        id: usize,
+    },
 }
 
 // ////////////////////////////////////////////////////////
@@ -96,7 +100,9 @@ impl RenderProducer {
     }
 
     pub fn remove_rect(&mut self, token: IndexToken) {
-        let message = GeometryMessage::QuadRemove { id: self.map_rect.remove(token) };
+        let message = GeometryMessage::QuadRemove {
+            id: self.map_rect.remove(token),
+        };
         self.frame.geometry.push(message);
     }
 
@@ -121,7 +127,9 @@ impl RenderProducer {
     }
 
     pub fn remove_triangle(&mut self, token: IndexToken) {
-        let message = GeometryMessage::TriangleRemove { id: self.map_triangle.remove(token) };
+        let message = GeometryMessage::TriangleRemove {
+            id: self.map_triangle.remove(token),
+        };
         self.frame.geometry.push(message);
     }
 

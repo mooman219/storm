@@ -44,7 +44,7 @@ pub fn start(
                     glutin::WindowEvent::Resized(w, h) => {
                         resize_producer.set(Vector2::new(w, h));
                     },
-                    glutin::WindowEvent::Closed => state.is_active = false,
+                    glutin::WindowEvent::CloseRequested => state.is_active = false,
                     glutin::WindowEvent::KeyboardInput { input, .. } => {
                         match input.virtual_keycode {
                             Some(key) => {
