@@ -9,24 +9,21 @@ use utility::slotmap::*;
 // ////////////////////////////////////////////////////////
 
 pub struct RenderFrame {
-    pub geometry: Vec<GeometryMessage>,
-    pub translation: Option<Vector2<f32>>,
-    pub scale: Option<f32>,
+    pub messages: Vec<RenderMessage>,
 }
 
 impl RenderFrame {
     pub fn new() -> RenderFrame {
-        RenderFrame {
-            geometry: Vec::new(),
-            translation: None,
-            scale: None,
-        }
+        RenderFrame { messages: Vec::new() }
     }
 }
 
 #[repr(u8)]
-#[derive(Copy, Clone)]
-pub enum GeometryMessage {
+// #[derive(Copy, Clone)]
+pub enum RenderMessage {
+    //
+    // Geometry
+    //
     QuadCreate {
         pos: Vector3<f32>,
         size: Vector2<f32>,
@@ -41,11 +38,22 @@ pub enum GeometryMessage {
     QuadRemove {
         id: usize,
     },
+    //
+    // Texture
+    //
+    TextureCreate {
+        path: String,
+    },
+    //
+    // Scene
+    //
+    Translate {
+        pos: Vector2<f32>,
+    },
+    Scale {
+        factor: f32,
+    },
 }
-
-// ////////////////////////////////////////////////////////
-// Enums
-// ////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////
 // Messenger
@@ -56,6 +64,7 @@ pub struct RenderProducer {
     frame: RenderFrame,
     map_rect: IndexMap,
     map_triangle: IndexMap,
+    map_texture: IndexMap,
 }
 
 impl RenderProducer {
@@ -65,46 +74,59 @@ impl RenderProducer {
             frame: RenderFrame::new(),
             map_rect: IndexMap::new(),
             map_triangle: IndexMap::new(),
+            map_texture: IndexMap::new(),
         }
     }
 
     // Geometry Functions
 
     pub fn create_rect(&mut self, pos: Vector3<f32>, size: Vector2<f32>, color: Color) -> IndexToken {
-        let message = GeometryMessage::QuadCreate {
+        let message = RenderMessage::QuadCreate {
             pos: pos,
             size: size,
             color: color,
         };
-        self.frame.geometry.push(message);
+        self.frame.messages.push(message);
         self.map_rect.add()
     }
 
     pub fn update_rect(&mut self, token: &IndexToken, pos: Vector3<f32>, size: Vector2<f32>, color: Color) {
-        let message = GeometryMessage::QuadUpdate {
+        let message = RenderMessage::QuadUpdate {
             id: self.map_rect.get(token),
             pos: pos,
             size: size,
             color: color,
         };
-        self.frame.geometry.push(message);
+        self.frame.messages.push(message);
     }
 
     pub fn remove_rect(&mut self, token: IndexToken) {
-        let message = GeometryMessage::QuadRemove {
+        let message = RenderMessage::QuadRemove {
             id: self.map_rect.remove(token),
         };
-        self.frame.geometry.push(message);
+        self.frame.messages.push(message);
+    }
+
+    // Texture Functions
+
+    pub fn create_texture(&mut self, path: &str) -> IndexToken {
+        let message = RenderMessage::TextureCreate {
+            path: String::from(path),
+        };
+        self.frame.messages.push(message);
+        self.map_texture.add()
     }
 
     // Scene Functions
 
     pub fn set_translation(&mut self, translation: Vector2<f32>) {
-        self.frame.translation = Some(translation);
+        let message = RenderMessage::Translate { pos: translation };
+        self.frame.messages.push(message);
     }
 
     pub fn set_scale(&mut self, scale: f32) {
-        self.frame.scale = Some(scale);
+        let message = RenderMessage::Scale { factor: scale };
+        self.frame.messages.push(message);
     }
 
     // Utility Functions

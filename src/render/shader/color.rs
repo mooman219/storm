@@ -53,20 +53,18 @@ impl ColorShader {
     pub fn set_bounds(&mut self, width: f32, height: f32) {
         let aspect_ratio = width / height;
         self.ortho = ortho(0f32, aspect_ratio, 0f32, 1f32, -1f32, 1f32);
-        self.sync();
     }
 
     pub fn set_translation(&mut self, translation: Vector2<f32>) {
         self.ortho_translation = Matrix4::from_translation(Vector3::new(translation.x, translation.y, 0f32));
-        self.sync();
     }
 
     pub fn set_scale(&mut self, scale: f32) {
         self.ortho_scale = Matrix4::from_scale(scale);
-        self.sync();
     }
 
-    fn sync(&self) {
+    pub fn sync(&self) {
+        self.program.bind();
         let matrix = self.ortho * self.ortho_translation * self.ortho_scale;
         unsafe {
             gl::UniformMatrix4fv(

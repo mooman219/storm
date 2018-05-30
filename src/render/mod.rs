@@ -60,17 +60,12 @@ pub fn start(
             Some(f) => {
                 // Start timing.
                 timer_render.start();
-                // Resizing.
-                state.resize(resize_consumer.consume());
                 // Clear the screen.
                 state.display.clear();
-                // Message geometry.
-                state.handle_geometry(&mut f.geometry);
-                state.quad_buffer.sync();
-                // Message shader.
-                state.shape_shader.bind();
-                state.handle_set_translation(f.translation);
-                state.handle_set_scale(f.scale);
+                // Resizing.
+                state.resize(resize_consumer.consume());
+                // Message handling.
+                state.handle_messages(&mut f.messages);
                 // Draw shapes.
                 state.shape_shader.bind();
                 state.quad_buffer.draw();
@@ -87,41 +82,45 @@ pub fn start(
 }
 
 impl RenderState {
-    fn handle_geometry(&mut self, messages: &mut Vec<GeometryMessage>) {
+    fn handle_messages(&mut self, messages: &mut Vec<RenderMessage>) {
+        let mut shader_modified = false;
+        let mut geometry_modified = false;
         for message in messages.drain(..) {
             match message {
                 // Quads
-                GeometryMessage::QuadCreate { pos, size, color } => {
+                RenderMessage::QuadCreate { pos, size, color } => {
                     let quad = Quad::new_rect(pos, size, color);
                     self.quad_buffer.add(quad);
+                    geometry_modified = true;
                 },
-                GeometryMessage::QuadUpdate { id, pos, size, color } => {
+                RenderMessage::QuadUpdate { id, pos, size, color } => {
                     let quad = Quad::new_rect(pos, size, color);
                     self.quad_buffer.update(id, quad);
+                    geometry_modified = true;
                 },
-                GeometryMessage::QuadRemove { id } => {
+                RenderMessage::QuadRemove { id } => {
                     self.quad_buffer.remove(id);
+                    geometry_modified = true;
+                },
+                RenderMessage::TextureCreate { .. } => {
+                    // TODO
+                },
+                RenderMessage::Translate { pos } => {
+                    self.shape_shader.set_translation(pos);
+                    shader_modified = true;
+                },
+                RenderMessage::Scale { factor } => {
+                    self.shape_shader.set_scale(factor);
+                    shader_modified = true;
                 },
             }
         }
-    }
-
-    fn handle_set_translation(&mut self, message: Option<Vector2<f32>>) {
-        match message {
-            Some(translation) => {
-                self.shape_shader.set_translation(translation);
-            },
-            None => {},
-        };
-    }
-
-    fn handle_set_scale(&mut self, message: Option<f32>) {
-        match message {
-            Some(scale) => {
-                self.shape_shader.set_scale(scale);
-            },
-            None => {},
-        };
+        if geometry_modified {
+            self.quad_buffer.sync();
+        }
+        if shader_modified {
+            self.shape_shader.sync();
+        }
     }
 
     fn resize(&mut self, message: Option<Vector2<u32>>) {
