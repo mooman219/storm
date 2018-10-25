@@ -21,7 +21,7 @@ impl AABB2D {
         self.max.y = other.max.y;
     }
 
-    pub fn intersects(&self, other: AABB2D) -> bool {
+    pub fn intersects(&self, other: &AABB2D) -> bool {
         if self.max.x < other.min.x || self.min.x > other.max.x {
             return false;
         }

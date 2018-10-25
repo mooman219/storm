@@ -35,7 +35,7 @@ impl<T: Copy> Buffer<T> {
 
     pub fn read(&self) -> Option<T> {
         // It's unlikely, but a write could happen inbetween the atomic load and the dereference.
-        // This is unlikely because 16 writes would have to happen during that time.
+        // This is unlikely because BUFFER_SIZE writes would have to happen during that time.
         if self.is_empty.load(Ordering::Acquire) {
             None
         } else {

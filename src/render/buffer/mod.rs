@@ -1,13 +1,12 @@
-pub mod chunked;
 pub mod dynamic;
 pub mod fixed;
 pub mod geometry;
 pub mod immutable;
 
-use render::enums::*;
+use render::raw::*;
 
 pub trait RawBuffer<T> {
-    fn new(buffer_type: BufferType, capacity: usize) -> Self;
+    fn new(buffer_type: BufferBindingTarget, capacity: usize) -> Self;
 
     fn add(&mut self, item: T) -> usize;
 

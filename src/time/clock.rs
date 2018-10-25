@@ -2,13 +2,11 @@ use std::thread::sleep;
 use std::time::Duration;
 use std::time::Instant;
 use time::convert::*;
-use time::timer::*;
 
 pub struct Clock {
     last_tick: Instant,
     target: u64,
     delta: f32,
-    timer_input: Timer,
 }
 
 impl Clock {
@@ -17,7 +15,6 @@ impl Clock {
             last_tick: Instant::now(),
             target: Clock::tps_to_target(tps),
             delta: 0f32,
-            timer_input: Timer::new("[T] Tick"),
         }
     }
 

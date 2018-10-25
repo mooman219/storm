@@ -1,6 +1,6 @@
 use cgmath::*;
-use gl;
-use render::shader::*;
+use render::raw::*;
+use render::shader::shader_program::*;
 
 static VERTEX: &str = r#"
 #version 400
@@ -66,13 +66,6 @@ impl ColorShader {
     pub fn sync(&self) {
         self.program.bind();
         let matrix = self.ortho * self.ortho_translation * self.ortho_scale;
-        unsafe {
-            gl::UniformMatrix4fv(
-                self.uniform_ortho,          // Program location
-                1,                           // Count
-                gl::FALSE,                   // Should transpose
-                matrix.as_ptr() as *const _, // Value pointer
-            );
-        }
+        uniform_matrix_4fv(self.uniform_ortho, 1, false, matrix.as_ptr());
     }
 }

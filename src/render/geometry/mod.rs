@@ -1,5 +1,8 @@
-pub mod quad;
-pub mod triangle;
+mod quad;
+mod triangle;
+
+pub use render::geometry::quad::*;
+pub use render::geometry::triangle::*;
 
 use render::buffer::geometry::*;
 use render::vertex::*;

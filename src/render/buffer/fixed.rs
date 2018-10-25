@@ -1,6 +1,5 @@
-use gl;
 use render::buffer::*;
-use render::enums::*;
+use render::raw::*;
 use std::cmp;
 use std::mem;
 use std::ptr;
@@ -11,7 +10,7 @@ pub struct FixedBuffer<T> {
     dirty: bool,
     dirty_min: usize,
     dirty_max: usize,
-    buffer_type: BufferType,
+    buffer_type: BufferBindingTarget,
     capacity: usize,
     items: Vec<T>,
     timer_sync: Timer,
@@ -31,26 +30,22 @@ impl<T> FixedBuffer<T> {
 }
 
 impl<T> RawBuffer<T> for FixedBuffer<T> {
-    fn new(buffer_type: BufferType, capacity: usize) -> FixedBuffer<T> {
+    fn new(buffer_type: BufferBindingTarget, capacity: usize) -> FixedBuffer<T> {
         // Validate input
         if capacity == 0 {
             panic!("Capacity must be greater than 0.");
         }
         // Prepare data
         let items = Vec::with_capacity(capacity);
-        let mut vbo = 0u32;
-        // Call into opengl
-        unsafe {
-            let max_size = (capacity * mem::size_of::<T>()) as isize;
-            gl::GenBuffers(1, &mut vbo);
-            gl::BindBuffer(buffer_type as u32, vbo);
-            gl::BufferData(
-                buffer_type as u32, // Buffer type
-                max_size,           // Size
-                ptr::null(),        // Initial data
-                gl::DYNAMIC_DRAW,   // Usage
-            );
-        }
+        let max_size = (capacity * mem::size_of::<T>()) as isize;
+        let vbo = gen_buffer();
+        bind_buffer(buffer_type, vbo);
+        buffer_data(
+            buffer_type,              // Buffer type
+            max_size,                 // Size
+            ptr::null(),              // Initial data
+            BufferUsage::DynamicDraw, // Usage
+        );
         // Finish
         FixedBuffer {
             vbo: vbo,
@@ -93,9 +88,7 @@ impl<T> RawBuffer<T> for FixedBuffer<T> {
     }
 
     fn bind(&self) {
-        unsafe {
-            gl::BindBuffer(self.buffer_type as u32, self.vbo);
-        }
+        bind_buffer(self.buffer_type, self.vbo);
     }
 
     fn sync(&mut self) {
@@ -104,18 +97,16 @@ impl<T> RawBuffer<T> for FixedBuffer<T> {
             self.timer_sync.start();
             // Sync state.
             self.dirty = false;
-            unsafe {
-                let offset = (mem::size_of::<T>() * self.dirty_min) as isize;
-                let size = (mem::size_of::<T>() * (self.dirty_max - self.dirty_min)) as isize;
-                let data = self.items.as_ptr().wrapping_add(self.dirty_min) as *const _;
-                gl::BindBuffer(self.buffer_type as u32, self.vbo);
-                gl::BufferSubData(
-                    self.buffer_type as u32, // Buffer type
-                    offset,                  // Offset
-                    size,                    // Size
-                    data,                    // Data
-                );
-            }
+            let offset = (mem::size_of::<T>() * self.dirty_min) as isize;
+            let size = (mem::size_of::<T>() * (self.dirty_max - self.dirty_min)) as isize;
+            let data = self.items.as_ptr().wrapping_add(self.dirty_min) as *const _;
+            bind_buffer(self.buffer_type, self.vbo);
+            buffer_sub_data(
+                self.buffer_type, // Buffer type
+                offset,           // Offset
+                size,             // Size
+                data,             // Data
+            );
             // Timing finish.
             self.timer_sync.stop();
         }
@@ -124,8 +115,6 @@ impl<T> RawBuffer<T> for FixedBuffer<T> {
 
 impl<T> Drop for FixedBuffer<T> {
     fn drop(&mut self) {
-        unsafe {
-            gl::DeleteBuffers(1, &self.vbo as *const _);
-        }
+        delete_buffer(self.vbo);
     }
 }

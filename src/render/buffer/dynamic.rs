@@ -1,6 +1,5 @@
-use gl;
 use render::buffer::*;
-use render::enums::*;
+use render::raw::*;
 use std::cmp;
 use std::mem;
 use std::ptr;
@@ -12,7 +11,7 @@ pub struct DynamicBuffer<T> {
     dirty_min: usize,
     dirty_max: usize,
     capacity: usize,
-    buffer_type: BufferType,
+    buffer_type: BufferBindingTarget,
     items: Vec<T>,
     timer_sync: Timer,
 }
@@ -31,20 +30,17 @@ impl<T> DynamicBuffer<T> {
 }
 
 impl<T> RawBuffer<T> for DynamicBuffer<T> {
-    fn new(buffer_type: BufferType, capacity: usize) -> DynamicBuffer<T> {
+    fn new(buffer_type: BufferBindingTarget, capacity: usize) -> DynamicBuffer<T> {
         let items: Vec<T> = Vec::<T>::with_capacity(capacity);
-        let mut vbo = 0u32;
-        unsafe {
-            let default_size = (mem::size_of::<T>() * capacity) as isize;
-            gl::GenBuffers(1, &mut vbo);
-            gl::BindBuffer(buffer_type as u32, vbo);
-            gl::BufferData(
-                buffer_type as u32, // Buffer type
-                default_size,       // Size
-                ptr::null(),        // Initial data
-                gl::DYNAMIC_DRAW,   // Usage
-            );
-        }
+        let default_size = (mem::size_of::<T>() * capacity) as isize;
+        let vbo = gen_buffer();
+        bind_buffer(buffer_type, vbo);
+        buffer_data(
+            buffer_type,              // Buffer type
+            default_size,             // Size
+            ptr::null(),              // Initial data
+            BufferUsage::DynamicDraw, // Usage
+        );
         DynamicBuffer {
             vbo: vbo,
             dirty: false,
@@ -83,9 +79,7 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
     }
 
     fn bind(&self) {
-        unsafe {
-            gl::BindBuffer(self.buffer_type as u32, self.vbo);
-        }
+        bind_buffer(self.buffer_type, self.vbo);
     }
 
     fn sync(&mut self) {
@@ -94,19 +88,17 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
             self.timer_sync.start();
             // Sync state.
             self.dirty = false;
-            unsafe {
-                gl::BindBuffer(self.buffer_type as u32, self.vbo);
-                if self.capacity < self.items.capacity() {
-                    let length = (mem::size_of::<T>() * self.items.capacity()) as isize;
-                    let data = self.items.as_ptr() as *const _;
-                    gl::BufferData(self.buffer_type as u32, length, data, gl::DYNAMIC_DRAW);
-                    self.capacity = self.items.capacity();
-                } else {
-                    let start = (mem::size_of::<T>() * self.dirty_min) as isize;
-                    let length = (mem::size_of::<T>() * (self.dirty_max - self.dirty_min)) as isize;
-                    let offset = self.items.as_ptr().offset(self.dirty_min as isize) as *const _;
-                    gl::BufferSubData(self.buffer_type as u32, start, length, offset);
-                }
+            bind_buffer(self.buffer_type, self.vbo);
+            if self.capacity < self.items.capacity() {
+                let length = (mem::size_of::<T>() * self.items.capacity()) as isize;
+                let data = self.items.as_ptr() as *const _;
+                buffer_data(self.buffer_type, length, data, BufferUsage::DynamicDraw);
+                self.capacity = self.items.capacity();
+            } else {
+                let start = (mem::size_of::<T>() * self.dirty_min) as isize;
+                let length = (mem::size_of::<T>() * (self.dirty_max - self.dirty_min)) as isize;
+                let data = unsafe { self.items.as_ptr().offset(self.dirty_min as isize) as *const _ };
+                buffer_sub_data(self.buffer_type, start, length, data);
             }
             // Timing finish.
             self.timer_sync.stop();
@@ -116,8 +108,6 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
 
 impl<T> Drop for DynamicBuffer<T> {
     fn drop(&mut self) {
-        unsafe {
-            gl::DeleteBuffers(1, &self.vbo as *const _);
-        }
+        delete_buffer(self.vbo);
     }
 }

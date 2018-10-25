@@ -12,6 +12,7 @@ use storm::time::clock::*;
 mod tactics;
 use tactics::system::System;
 
+/// Run with: cargo run --example tactics_launcher --release
 pub struct TacticsLauncher {
     system: System,
     render: RenderProducer,

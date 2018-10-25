@@ -1,10 +1,11 @@
 #![feature(asm, const_fn, pointer_methods, optin_builtin_traits)]
-#![allow(dead_code)]
+#![allow(dead_code, non_camel_case_types, non_snake_case)]
 
 extern crate bounded_spsc_queue;
 pub extern crate cgmath;
 extern crate gl;
 extern crate glutin;
+extern crate image;
 #[macro_use]
 pub extern crate log;
 

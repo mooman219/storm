@@ -1,0 +1,138 @@
+use gl;
+
+#[repr(u32)]
+#[derive(Copy, Clone)]
+pub enum Capability {
+    Blend = gl::BLEND,
+    ColorLogicOp = gl::COLOR_LOGIC_OP,
+    CullFace = gl::CULL_FACE,
+    DebugOutput = gl::DEBUG_OUTPUT,
+    DebugOutputSynchronous = gl::DEBUG_OUTPUT_SYNCHRONOUS,
+    DepthClamp = gl::DEPTH_CLAMP,
+    DepthTest = gl::DEPTH_TEST,
+    Dither = gl::DITHER,
+    FramebufferSrgb = gl::FRAMEBUFFER_SRGB,
+    LineSmooth = gl::LINE_SMOOTH,
+    Multisample = gl::MULTISAMPLE,
+    PolygonOffsetFill = gl::POLYGON_OFFSET_FILL,
+    PolygonOffsetLine = gl::POLYGON_OFFSET_LINE,
+    PolygonOffsetPoint = gl::POLYGON_OFFSET_POINT,
+    PolygonSmooth = gl::POLYGON_SMOOTH,
+    PrimitiveRestart = gl::PRIMITIVE_RESTART,
+    PrimitiveRestartFixedIndex = gl::PRIMITIVE_RESTART_FIXED_INDEX,
+    RasterizerDiscard = gl::RASTERIZER_DISCARD,
+    SampleAlphaToCoverage = gl::SAMPLE_ALPHA_TO_COVERAGE,
+    SampleAlphaToOne = gl::SAMPLE_ALPHA_TO_ONE,
+    SampleCoverage = gl::SAMPLE_COVERAGE,
+    SampleShading = gl::SAMPLE_SHADING,
+    SampleMask = gl::SAMPLE_MASK,
+    ScissorTest = gl::SCISSOR_TEST,
+    StencilTest = gl::STENCIL_TEST,
+    TextureCubeMapSeamless = gl::TEXTURE_CUBE_MAP_SEAMLESS,
+    ProgramPointSize = gl::PROGRAM_POINT_SIZE,
+}
+
+#[repr(u32)]
+#[derive(Copy, Clone)]
+pub enum DepthTest {
+    Always = gl::ALWAYS,
+    Never = gl::NEVER,
+    Equal = gl::EQUAL,
+    NotEqual = gl::NOTEQUAL,
+    Less = gl::LESS,
+    LessEqual = gl::LEQUAL,
+    Greater = gl::GREATER,
+    GreaterEqual = gl::GEQUAL,
+}
+
+#[allow(non_snake_case, non_upper_case_globals)]
+pub mod ClearBit {
+    pub const ColorBuffer: u32 = 0x00004000; // gl::COLOR_BUFFER_BIT;
+    pub const DepthBuffer: u32 = 0x00000100; // gl::DEPTH_BUFFER_BIT;
+    pub const StencilBuffer: u32 = 0x00000400; // gl::STENCIL_BUFFER_BIT;
+}
+
+#[repr(u32)]
+#[derive(Copy, Clone)]
+pub enum CullFace {
+    Front = gl::FRONT,
+    Back = gl::BACK,
+    FrontBack = gl::FRONT_AND_BACK,
+}
+
+/// Specify the value used for depth buffer comparisons.
+///
+/// # Arguments
+///
+/// `func` - Specifies the depth comparison function. Symbolic constants GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, and GL_ALWAYS are accepted. The initial value is GL_LESS.
+pub fn depth_func(func: DepthTest) {
+    unsafe {
+        gl::DepthFunc(func as u32);
+    }
+}
+
+/// Specify whether front- or back-facing facets can be culled.
+///
+/// # Arguments
+///
+/// `mode` - Specifies whether front- or back-facing facets are candidates for culling. Symbolic constants GL_FRONT, GL_BACK, and GL_FRONT_AND_BACK are accepted. The initial value is GL_BACK.
+pub fn cull_face(mode: CullFace) {
+    unsafe {
+        gl::CullFace(mode as u32);
+    }
+}
+
+/// Enable server-side GL capabilities.
+///
+/// # Arguments
+///
+/// `cap` - Specifies a symbolic constant indicating a GL capability.
+pub fn enable(cap: Capability) {
+    unsafe {
+        gl::Enable(cap as u32);
+    }
+}
+
+/// Disable server-side GL capabilities.
+///
+/// # Arguments
+///
+/// `cap` - Specifies a symbolic constant indicating a GL capability.
+pub fn disable(cap: Capability) {
+    unsafe {
+        gl::Disable(cap as u32);
+    }
+}
+
+/// Specify the clear value for the depth buffer.
+///
+/// # Arguments
+///
+/// `depth` - Specifies the depth value used when the depth buffer is cleared. The initial value is 1.
+pub fn clear_depth_f(depth: f32) {
+    unsafe {
+        gl::ClearDepthf(depth);
+    }
+}
+
+/// Clear buffers to preset values.
+///
+/// # Arguments
+///
+/// `mask` - Bitwise OR of masks that indicate the buffers to be cleared. The three masks are GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, and GL_STENCIL_BUFFER_BIT.
+pub fn clear(mask: u32) {
+    unsafe {
+        gl::Clear(mask);
+    }
+}
+
+/// Specify clear values for the color buffers.
+///
+/// # Arguments
+///
+/// `red, green, blue, alpha` - Specify the red, green, blue, and alpha values used when the color buffers are cleared. The initial values are all 0.
+pub fn clear_color(red: f32, green: f32, blue: f32, alpha: f32) {
+    unsafe {
+        gl::ClearColor(red, green, blue, alpha);
+    }
+}

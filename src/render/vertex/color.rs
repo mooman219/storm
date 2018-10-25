@@ -1,7 +1,8 @@
 use cgmath::*;
-use gl;
 use render::color::*;
+use render::raw::*;
 use render::vertex::*;
+use std::mem;
 
 #[repr(C)]
 pub struct ColorVertex {
@@ -22,27 +23,25 @@ impl Vertex for ColorVertex {
     const VERTEX_SIZE: usize = mem::size_of::<Self>();
 
     fn configure_vertex_attribute() {
-        unsafe {
-            // Position 2D
-            gl::EnableVertexAttribArray(0);
-            gl::VertexAttribPointer(
-                0,                        // Index
-                3,                        // Count
-                gl::FLOAT,                // Type
-                gl::FALSE,                // Normalized
-                Self::VERTEX_SIZE as i32, // Stride
-                (0) as *const _,          // Offset
-            );
-            // Color
-            gl::EnableVertexAttribArray(1);
-            gl::VertexAttribPointer(
-                1,                               // Index
-                gl::BGRA as i32,                 // Count
-                gl::UNSIGNED_INT_2_10_10_10_REV, // Type
-                gl::TRUE,                        // Normalized
-                Self::VERTEX_SIZE as i32,        // Stride
-                (3 * 4) as *const _,             // Offset
-            );
-        }
+        // Position 2D
+        enable_vertex_attrib_array(0);
+        vertex_attrib_pointer(
+            0,                        // Index
+            3,                        // Count
+            AttributeType::Float,     // Type
+            false,                    // Normalized
+            Self::VERTEX_SIZE as i32, // Stride
+            (0) as *const _,          // Offset
+        );
+        // Color
+        enable_vertex_attrib_array(1);
+        vertex_attrib_pointer(
+            1,                                        // Index
+            0x80E1,                                   // Count (gl::BGRA = 0x80E1)
+            AttributeType::UnsignedInt2_10_10_10_Rev, // Type
+            true,                                     // Normalized
+            Self::VERTEX_SIZE as i32,                 // Stride
+            (3 * 4) as *const _,                      // Offset
+        );
     }
 }

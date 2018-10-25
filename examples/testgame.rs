@@ -81,6 +81,7 @@ impl Game for TestGame {
                 color::BLUE,
             );
         }
+        render.create_texture("./examples/test.png");
         render.set_scale(0.5f32);
         render.send();
         TestGame {

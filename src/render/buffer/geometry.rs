@@ -1,10 +1,10 @@
-use gl;
 use render::buffer::fixed::*;
 use render::buffer::immutable::*;
 use render::buffer::*;
-use render::enums::*;
 use render::geometry::*;
+use render::raw::*;
 use render::vertex::*;
+use std::ptr;
 
 pub struct GeometryBuffer<T: Geometry> {
     element_buffer: ImmutableBuffer<T::IndiceType>,
@@ -12,15 +12,19 @@ pub struct GeometryBuffer<T: Geometry> {
     vertex_array: VertexArray<T::VertexType>,
 }
 
+// TODO: We need a Dynamic Indexed Object Buffer
+
 impl<T: Geometry> GeometryBuffer<T> {
     pub fn new(capacity: usize) -> GeometryBuffer<T> {
         // Vertex Buffer Object
-        let vertex_buffer = FixedBuffer::new(BufferType::ArrayBuffer, capacity);
+        let vertex_buffer = FixedBuffer::new(BufferBindingTarget::ArrayBuffer, capacity);
         // Vertex Array Object
         let vertex_array = VertexArray::new();
         // Element Buffer Object
-        let element_buffer =
-            ImmutableBuffer::from_vec(BufferType::ElementArrayBuffer, T::generate_indice_list(capacity as u16));
+        let element_buffer = ImmutableBuffer::from_vec(
+            BufferBindingTarget::ElementArrayBuffer,
+            T::generate_indice_list(capacity as u16),
+        );
         // Return
         GeometryBuffer {
             element_buffer: element_buffer,
@@ -46,17 +50,15 @@ impl<T: Geometry> GeometryBuffer<T> {
     }
 
     pub fn draw(&mut self) {
-        unsafe {
-            let vertices = self.vertex_buffer.len() * T::VERTEX_COUNT;
-            let offset_index = (self.vertex_buffer.offset_index() * T::VERTEX_OFFSET) as i32;
-            self.vertex_array.bind();
-            gl::DrawElementsBaseVertex(
-                DrawMode::Triangles as u32, // Draw mode
-                vertices as i32,            // Number of vertices
-                gl::UNSIGNED_SHORT,         // Size of indices
-                0 as *const _,              // Offset of indices
-                offset_index,               // Base vertex offset
-            );
-        }
+        let vertices = self.vertex_buffer.len() * T::VERTEX_COUNT;
+        let offset_index = (self.vertex_buffer.offset_index() * T::VERTEX_OFFSET) as i32;
+        self.vertex_array.bind();
+        draw_elements_base_vertex(
+            DrawMode::Triangles,       // Draw mode
+            vertices as i32,           // Number of vertices
+            IndiceType::UnsignedShort, // Size of indices
+            ptr::null(),               // Offset of indices
+            offset_index,              // Base vertex offset
+        );
     }
 }

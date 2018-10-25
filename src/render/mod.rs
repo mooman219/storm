@@ -1,36 +1,40 @@
 pub mod buffer;
 pub mod color;
 pub mod display;
-pub mod enums;
 pub mod geometry;
 pub mod message;
+pub mod packer;
+pub mod raw;
 pub mod shader;
+pub mod texture;
 pub mod vertex;
 
 use bounded_spsc_queue;
 use cgmath::*;
 use channel::consume_spsc;
-use gl;
+use image::*;
 use render::buffer::geometry::*;
 use render::display::*;
-use render::enums::*;
-use render::geometry::quad::*;
 use render::geometry::*;
 use render::message::*;
-use render::shader::color::*;
-use render::vertex::color::*;
+use render::raw::*;
+use render::shader::*;
+use render::texture::*;
+use render::vertex::*;
+use std::path::Path;
 use std::thread::sleep;
 use std::time::Duration;
 use time::timer::*;
 
 struct RenderState {
     display: Display,
-    shape_shader: ColorShader,
-    quad_buffer: GeometryBuffer<Quad<ColorVertex>>,
+    shader_texture: TextureShader,
+    quad_texture: GeometryBuffer<Quad<TextureVertex>>,
+    texture_atlas: TextureGl,
 }
 
 pub fn start(
-    mut display: Display,
+    display: Display,
     render_consumer: bounded_spsc_queue::Consumer<RenderFrame>,
     resize_consumer: consume_spsc::Consumer<Vector2<u32>>,
 ) {
@@ -38,19 +42,21 @@ pub fn start(
     // calls in. Behavior is undefined is the display is bound outside of the thread and usually
     // segfaults.
     display.bind();
-    display.enable_clear_color();
-    display.enable_clear_depth();
-    display.enable_cull_face();
-    display.set_clear_color(0.0, 0.0, 0.2, 1.0);
-    display.set_depth_test(DepthTest::LessEqual);
-    display.set_cull_face(CullFace::Back);
+    enable(Capability::DepthTest);
+    enable(Capability::CullFace);
+    clear_color(0.0, 0.0, 0.2, 1.0);
+    depth_func(DepthTest::LessEqual);
+    cull_face(CullFace::Back);
 
     // Create the render state.
     let mut state = RenderState {
         display: display,
-        shape_shader: ColorShader::new(),
-        quad_buffer: Quad::new_geometry_buffer(2500),
+        shader_texture: TextureShader::new(),
+        quad_texture: Quad::new_geometry_buffer(2500),
+        texture_atlas: TextureGl::new(TextureUnit::Atlas),
     };
+    // Set the default texture.
+    state.shader_texture.set_texture_unit(TextureUnit::Atlas);
 
     // Log render timings.
     let mut timer_render = Timer::new("[R] Frame");
@@ -61,14 +67,14 @@ pub fn start(
                 // Start timing.
                 timer_render.start();
                 // Clear the screen.
-                state.display.clear();
+                clear(ClearBit::ColorBuffer | ClearBit::DepthBuffer);
                 // Resizing.
                 state.resize(resize_consumer.consume());
                 // Message handling.
                 state.handle_messages(&mut f.messages);
                 // Draw shapes.
-                state.shape_shader.bind();
-                state.quad_buffer.draw();
+                state.shader_texture.bind();
+                state.quad_texture.draw();
                 // Finish.
                 state.display.swap_buffers();
                 // Finish timing.
@@ -89,47 +95,52 @@ impl RenderState {
             match message {
                 // Quads
                 RenderMessage::QuadCreate { pos, size, color } => {
-                    let quad = Quad::new_rect(pos, size, color);
-                    self.quad_buffer.add(quad);
+                    let quad = Quad::texture_rect(pos, size, color);
+                    self.quad_texture.add(quad);
                     geometry_modified = true;
                 },
                 RenderMessage::QuadUpdate { id, pos, size, color } => {
-                    let quad = Quad::new_rect(pos, size, color);
-                    self.quad_buffer.update(id, quad);
+                    let quad = Quad::texture_rect(pos, size, color);
+                    self.quad_texture.update(id, quad);
                     geometry_modified = true;
                 },
                 RenderMessage::QuadRemove { id } => {
-                    self.quad_buffer.remove(id);
+                    self.quad_texture.remove(id);
                     geometry_modified = true;
                 },
-                RenderMessage::TextureCreate { .. } => {
-                    // TODO
+                RenderMessage::CreateTexture { path } => match open(Path::new(&path)) {
+                    Ok(image) => {
+                        self.texture_atlas.set_image(image);
+                    },
+                    Err(..) => {
+                        panic!("Unable to set image as atlas: {}", &path);
+                    },
                 },
                 RenderMessage::Translate { pos } => {
-                    self.shape_shader.set_translation(pos);
+                    self.shader_texture.set_translation(pos);
                     shader_modified = true;
                 },
                 RenderMessage::Scale { factor } => {
-                    self.shape_shader.set_scale(factor);
+                    self.shader_texture.set_scale(factor);
                     shader_modified = true;
                 },
             }
         }
         if geometry_modified {
-            self.quad_buffer.sync();
+            self.quad_texture.sync();
         }
         if shader_modified {
-            self.shape_shader.sync();
+            self.shader_texture.sync();
         }
     }
 
     fn resize(&mut self, message: Option<Vector2<u32>>) {
         match message {
-            Some(msg) => unsafe {
+            Some(msg) => {
                 self.display.resize(msg.x, msg.y);
-                gl::Viewport(0, 0, msg.x as i32, msg.y as i32);
-                self.shape_shader.bind();
-                self.shape_shader.set_bounds(msg.x as f32, msg.y as f32);
+                viewport(0, 0, msg.x as i32, msg.y as i32);
+                self.shader_texture.bind();
+                self.shader_texture.set_bounds(msg.x as f32, msg.y as f32);
             },
             None => {},
         }

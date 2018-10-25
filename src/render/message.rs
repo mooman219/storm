@@ -19,7 +19,6 @@ impl RenderFrame {
 }
 
 #[repr(u8)]
-// #[derive(Copy, Clone)]
 pub enum RenderMessage {
     //
     // Geometry
@@ -41,7 +40,7 @@ pub enum RenderMessage {
     //
     // Texture
     //
-    TextureCreate {
+    CreateTexture {
         path: String,
     },
     //
@@ -110,7 +109,7 @@ impl RenderProducer {
     // Texture Functions
 
     pub fn create_texture(&mut self, path: &str) -> IndexToken {
-        let message = RenderMessage::TextureCreate {
+        let message = RenderMessage::CreateTexture {
             path: String::from(path),
         };
         self.frame.messages.push(message);
