@@ -25,6 +25,7 @@ pub enum AttributeType {
 /// # Arguments
 ///
 /// `name` - Specifies the name of the vertex array to bind.
+#[inline]
 pub fn bind_vertex_array(name: u32) {
     unsafe {
         gl::BindVertexArray(name);
@@ -32,6 +33,7 @@ pub fn bind_vertex_array(name: u32) {
 }
 
 /// Generate a vertex array.
+#[inline]
 pub fn gen_vertex_array() -> u32 {
     unsafe {
         let mut name = 0u32;
@@ -45,6 +47,7 @@ pub fn gen_vertex_array() -> u32 {
 /// # Arguments
 ///
 /// `name` - Specifies the name of a vertex array to delete.
+#[inline]
 pub fn delete_vertex_array(name: u32) {
     unsafe {
         gl::DeleteVertexArrays(1, &name as *const _);
@@ -56,6 +59,7 @@ pub fn delete_vertex_array(name: u32) {
 /// # Arguments
 ///
 /// `index` - Specifies the index of the generic vertex attribute to be enabled or disabled.
+#[inline]
 pub fn enable_vertex_attrib_array(index: u32) {
     unsafe {
         gl::EnableVertexAttribArray(index);
@@ -67,6 +71,7 @@ pub fn enable_vertex_attrib_array(index: u32) {
 /// # Arguments
 ///
 /// `index` - Specifies the index of the generic vertex attribute to be enabled or disabled.
+#[inline]
 pub fn disable_vertex_attrib_array(index: u32) {
     unsafe {
         gl::DisableVertexAttribArray(index);
@@ -83,6 +88,7 @@ pub fn disable_vertex_attrib_array(index: u32) {
 /// `normalized` - Specifies whether fixed-point data values should be normalized.
 /// `stride` - Specifies the byte offset between consecutive generic vertex attributes. If stride is 0, the generic vertex attributes are understood to be tightly packed in the array. The initial value is 0.
 /// `pointer` - Specifies a offset of the first component of the first generic vertex attribute in the array in the data store of the buffer currently bound to the array buffer target. The initial value is 0.
+#[inline]
 pub fn vertex_attrib_pointer(
     index: u32,
     size: i32,

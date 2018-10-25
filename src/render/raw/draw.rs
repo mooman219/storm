@@ -35,6 +35,7 @@ pub enum DrawMode {
 /// `type` - Specifies the type of the values in indices.
 /// `indices` - Specifies a pointer to the location where the indices are stored.
 /// `basevertex` - Specifies a constant that should be added to each element of indices when chosing elements from the enabled vertex arrays.
+#[inline]
 pub fn draw_elements_base_vertex(
     mode: DrawMode,
     count: i32,

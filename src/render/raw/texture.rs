@@ -195,7 +195,36 @@ pub enum TextureParameterName {
     TextureWrapR = gl::TEXTURE_WRAP_R,
 }
 
+#[repr(u32)]
+#[derive(Copy, Clone)]
+pub enum TextureWrapValue {
+    ClampToEdge = gl::CLAMP_TO_EDGE,
+    ClampToBorder = gl::CLAMP_TO_BORDER,
+    MirroredRepeat = gl::MIRRORED_REPEAT,
+    Repeat = gl::REPEAT,
+    MirrorClampToEdge = gl::MIRROR_CLAMP_TO_EDGE,
+}
+
+#[repr(u32)]
+#[derive(Copy, Clone)]
+pub enum TextureMinFilterValue {
+    Nearest = gl::NEAREST,
+    Linear = gl::LINEAR,
+    NearestMipmapNearest = gl::NEAREST_MIPMAP_NEAREST,
+    LinearMipmapNearest = gl::LINEAR_MIPMAP_NEAREST,
+    NearestMipmapLinear = gl::NEAREST_MIPMAP_LINEAR,
+    LinearMipmapLinear = gl::LINEAR_MIPMAP_LINEAR,
+}
+
+#[repr(u32)]
+#[derive(Copy, Clone)]
+pub enum TextureMagFilterValue {
+    Nearest = gl::NEAREST,
+    Linear = gl::LINEAR,
+}
+
 /// Generate a texture name.
+#[inline]
 pub fn gen_texture() -> u32 {
     unsafe {
         let mut id = 0;
@@ -209,6 +238,7 @@ pub fn gen_texture() -> u32 {
 /// # Arguments
 ///
 /// `texture` - Specifies which texture unit to make active. The number of texture units is implementation dependent, but must be at least 80.
+#[inline]
 pub fn active_texture(texture: TextureUnit) {
     unsafe {
         gl::ActiveTexture(texture as u32);
@@ -221,6 +251,7 @@ pub fn active_texture(texture: TextureUnit) {
 ///
 /// `target` - Specifies the target to which the texture is bound.
 /// `texture` - Specifies the name of a texture.
+#[inline]
 pub fn bind_texture(target: TextureBindingTarget, texture: u32) {
     unsafe {
         gl::BindTexture(target as u32, texture);
@@ -232,6 +263,7 @@ pub fn bind_texture(target: TextureBindingTarget, texture: u32) {
 /// # Arguments
 ///
 /// `name` - Specifies a textures to be deleted.
+#[inline]
 pub fn delete_texture(name: u32) {
     unsafe {
         gl::DeleteTextures(1, &name as *const _);
@@ -250,6 +282,7 @@ pub fn delete_texture(name: u32) {
 /// `format` - Specifies the format of the pixel data.
 /// `pixel_type` - Specifies the data type of the pixel data.
 /// `data` - Specifies a pointer to the image data in memory.
+#[inline]
 pub fn tex_image_2D(
     target: TextureLoadTarget,
     level: i32,
@@ -275,22 +308,13 @@ pub fn tex_image_2D(
     }
 }
 
-#[repr(u32)]
-#[derive(Copy, Clone)]
-pub enum TextureWrapValue {
-    ClampToEdge = gl::CLAMP_TO_EDGE,
-    ClampToBorder = gl::CLAMP_TO_BORDER,
-    MirroredRepeat = gl::MIRRORED_REPEAT,
-    Repeat = gl::REPEAT,
-    MirrorClampToEdge = gl::MIRROR_CLAMP_TO_EDGE,
-}
-
 /// Sets the wrap parameter for texture coordinate s.
 ///
 /// # Arguments
 ///
 /// `target` - Specifies the target texture.
 /// `param` - The wrap parameter for texture coordinate.
+#[inline]
 pub fn tex_parameter_wrap_s(target: TextureParameterTarget, param: TextureWrapValue) {
     unsafe {
         gl::TexParameteri(target as u32, gl::TEXTURE_WRAP_S, param as i32);
@@ -303,6 +327,7 @@ pub fn tex_parameter_wrap_s(target: TextureParameterTarget, param: TextureWrapVa
 ///
 /// `target` - Specifies the target texture.
 /// `param` - The wrap parameter for texture coordinate.
+#[inline]
 pub fn tex_parameter_wrap_t(target: TextureParameterTarget, param: TextureWrapValue) {
     unsafe {
         gl::TexParameteri(target as u32, gl::TEXTURE_WRAP_T, param as i32);
@@ -315,21 +340,11 @@ pub fn tex_parameter_wrap_t(target: TextureParameterTarget, param: TextureWrapVa
 ///
 /// `target` - Specifies the target texture.
 /// `param` - The wrap parameter for texture coordinate.
+#[inline]
 pub fn tex_parameter_wrap_r(target: TextureParameterTarget, param: TextureWrapValue) {
     unsafe {
         gl::TexParameteri(target as u32, gl::TEXTURE_WRAP_R, param as i32);
     }
-}
-
-#[repr(u32)]
-#[derive(Copy, Clone)]
-pub enum TextureMinFilterValue {
-    Nearest = gl::NEAREST,
-    Linear = gl::LINEAR,
-    NearestMipmapNearest = gl::NEAREST_MIPMAP_NEAREST,
-    LinearMipmapNearest = gl::LINEAR_MIPMAP_NEAREST,
-    NearestMipmapLinear = gl::NEAREST_MIPMAP_LINEAR,
-    LinearMipmapLinear = gl::LINEAR_MIPMAP_LINEAR,
 }
 
 /// The texture minifying function is used whenever the level-of-detail function used when sampling from the texture determines that the texture should be minified.
@@ -338,17 +353,11 @@ pub enum TextureMinFilterValue {
 ///
 /// `target` - Specifies the target texture.
 /// `param` - The texture minifying function.
+#[inline]
 pub fn tex_parameter_min_filter(target: TextureParameterTarget, param: TextureMinFilterValue) {
     unsafe {
         gl::TexParameteri(target as u32, gl::TEXTURE_MIN_FILTER, param as i32);
     }
-}
-
-#[repr(u32)]
-#[derive(Copy, Clone)]
-pub enum TextureMagFilterValue {
-    Nearest = gl::NEAREST,
-    Linear = gl::LINEAR,
 }
 
 /// The texture magnification function is used whenever the level-of-detail function used when sampling from the texture determines that the texture should be magified.
@@ -357,6 +366,7 @@ pub enum TextureMagFilterValue {
 ///
 /// `target` - Specifies the target texture.
 /// `param` - The texture magnification function.
+#[inline]
 pub fn tex_parameter_mag_filter(target: TextureParameterTarget, param: TextureMagFilterValue) {
     unsafe {
         gl::TexParameteri(target as u32, gl::TEXTURE_MAG_FILTER, param as i32);

@@ -13,6 +13,7 @@ pub enum StringTarget {
 }
 
 /// Load each OpenGL symbol using a custom load function. This allows for the use of functions like glfwGetProcAddress or SDL_GL_GetProcAddress.
+#[inline]
 pub fn load_with<F>(loadfn: F)
 where
     F: FnMut(&str) -> *const c_void,
@@ -25,6 +26,7 @@ where
 /// # Arguments
 ///
 /// `target` - Specify the target to load the string from.
+#[inline]
 pub fn get_string(target: StringTarget) -> String {
     unsafe {
         let data = CStr::from_ptr(gl::GetString(target as u32) as *const _)

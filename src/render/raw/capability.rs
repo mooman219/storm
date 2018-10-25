@@ -65,6 +65,7 @@ pub enum CullFace {
 /// # Arguments
 ///
 /// `func` - Specifies the depth comparison function. Symbolic constants GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, and GL_ALWAYS are accepted. The initial value is GL_LESS.
+#[inline]
 pub fn depth_func(func: DepthTest) {
     unsafe {
         gl::DepthFunc(func as u32);
@@ -76,6 +77,7 @@ pub fn depth_func(func: DepthTest) {
 /// # Arguments
 ///
 /// `mode` - Specifies whether front- or back-facing facets are candidates for culling. Symbolic constants GL_FRONT, GL_BACK, and GL_FRONT_AND_BACK are accepted. The initial value is GL_BACK.
+#[inline]
 pub fn cull_face(mode: CullFace) {
     unsafe {
         gl::CullFace(mode as u32);
@@ -87,6 +89,7 @@ pub fn cull_face(mode: CullFace) {
 /// # Arguments
 ///
 /// `cap` - Specifies a symbolic constant indicating a GL capability.
+#[inline]
 pub fn enable(cap: Capability) {
     unsafe {
         gl::Enable(cap as u32);
@@ -98,6 +101,7 @@ pub fn enable(cap: Capability) {
 /// # Arguments
 ///
 /// `cap` - Specifies a symbolic constant indicating a GL capability.
+#[inline]
 pub fn disable(cap: Capability) {
     unsafe {
         gl::Disable(cap as u32);
@@ -109,6 +113,7 @@ pub fn disable(cap: Capability) {
 /// # Arguments
 ///
 /// `depth` - Specifies the depth value used when the depth buffer is cleared. The initial value is 1.
+#[inline]
 pub fn clear_depth_f(depth: f32) {
     unsafe {
         gl::ClearDepthf(depth);
@@ -120,6 +125,7 @@ pub fn clear_depth_f(depth: f32) {
 /// # Arguments
 ///
 /// `mask` - Bitwise OR of masks that indicate the buffers to be cleared. The three masks are GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, and GL_STENCIL_BUFFER_BIT.
+#[inline]
 pub fn clear(mask: u32) {
     unsafe {
         gl::Clear(mask);
@@ -131,6 +137,7 @@ pub fn clear(mask: u32) {
 /// # Arguments
 ///
 /// `red, green, blue, alpha` - Specify the red, green, blue, and alpha values used when the color buffers are cleared. The initial values are all 0.
+#[inline]
 pub fn clear_color(red: f32, green: f32, blue: f32, alpha: f32) {
     unsafe {
         gl::ClearColor(red, green, blue, alpha);
