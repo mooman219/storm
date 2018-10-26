@@ -42,7 +42,7 @@ pub fn run<G: Game>() {
         glutin::WindowBuilder::new()
             .with_title(G::TITLE)
             .with_dimensions(LogicalSize::from((500, 500))),
-        glutin::ContextBuilder::new(),
+        glutin::ContextBuilder::new().with_multisampling(2),
         &event_loop,
     );
 

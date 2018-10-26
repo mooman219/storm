@@ -44,6 +44,7 @@ pub fn start(
     display.bind();
     enable(Capability::DepthTest);
     enable(Capability::CullFace);
+    enable(Capability::Multisample);
     clear_color(0.0, 0.0, 0.2, 1.0);
     depth_func(DepthTest::LessEqual);
     cull_face(CullFace::Back);
