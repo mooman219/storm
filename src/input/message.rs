@@ -20,8 +20,8 @@ pub enum InputFrame {
     KeyReleased(Key),
 
     // Represents cursor events.
-    CursorPressed(CursorButton, Vector2<f32>),
-    CursorReleased(CursorButton, Vector2<f32>),
+    CursorPressed(CursorButton, Vector2<f64>),
+    CursorReleased(CursorButton, Vector2<f64>),
     CursorLeft,
     CursorEntered,
 }

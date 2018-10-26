@@ -1,4 +1,6 @@
+use cgmath::*;
 use glutin;
+use glutin::dpi::*;
 use glutin::GlContext;
 use render::raw::*;
 
@@ -35,7 +37,8 @@ impl Display {
         self.window.swap_buffers().expect("Error while swapping buffers.");
     }
 
-    pub fn resize(&self, width: u32, height: u32) {
-        self.window.resize(width, height);
+    pub fn resize(&self, dimensions: Vector2<f64>) {
+        self.window.resize(PhysicalSize::from((dimensions.x, dimensions.y)));
+        viewport(0, 0, dimensions.x as i32, dimensions.y as i32);
     }
 }

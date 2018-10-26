@@ -15,20 +15,20 @@ use time::timer::*;
 
 struct InputState {
     is_active: bool,
-    cursos_pos: Vector2<f32>,
+    cursos_pos: Vector2<f64>,
     key_states: [bool; 512],
 }
 
 pub fn start(
     mut event_loop: EventsLoop,
     input_producer: bounded_spsc_queue::Producer<InputFrame>,
-    resize_producer: consume_spsc::Producer<Vector2<u32>>,
-    cursor_producer: replace_spsc::Producer<Vector2<f32>>,
+    resize_producer: consume_spsc::Producer<Vector2<f64>>,
+    cursor_producer: replace_spsc::Producer<Vector2<f64>>,
 ) {
     // Create the input state.
     let mut state = InputState {
         is_active: true,
-        cursos_pos: Vector2::new(0f32, 0f32),
+        cursos_pos: Vector2::zero(),
         key_states: [false; 512],
     };
 
@@ -41,7 +41,8 @@ pub fn start(
         event_loop.poll_events(|event| match event {
             glutin::Event::WindowEvent { event, .. } => {
                 match event {
-                    glutin::WindowEvent::Resized(w, h) => {
+                    glutin::WindowEvent::Resized(dimensions) => {
+                        let (w, h) = dimensions.into();
                         resize_producer.set(Vector2::new(w, h));
                     },
                     glutin::WindowEvent::CloseRequested => state.is_active = false,
@@ -69,8 +70,8 @@ pub fn start(
                         }
                     },
                     glutin::WindowEvent::CursorMoved { position, .. } => {
-                        let (x, y) = position;
-                        state.cursos_pos = Vector2::new(x as f32, y as f32);
+                        let (x, y) = position.into();
+                        state.cursos_pos = Vector2::new(x, y);
                         cursor_producer.set(state.cursos_pos);
                     },
                     glutin::WindowEvent::CursorEntered { .. } => {

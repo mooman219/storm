@@ -36,7 +36,7 @@ struct RenderState {
 pub fn start(
     display: Display,
     render_consumer: bounded_spsc_queue::Consumer<RenderFrame>,
-    resize_consumer: consume_spsc::Consumer<Vector2<u32>>,
+    resize_consumer: consume_spsc::Consumer<Vector2<f64>>,
 ) {
     // Initialize the display. The display is bound in the thread we're going to be making opengl
     // calls in. Behavior is undefined is the display is bound outside of the thread and usually
@@ -134,11 +134,10 @@ impl RenderState {
         }
     }
 
-    fn resize(&mut self, message: Option<Vector2<u32>>) {
+    fn resize(&mut self, message: Option<Vector2<f64>>) {
         match message {
             Some(msg) => {
-                self.display.resize(msg.x, msg.y);
-                viewport(0, 0, msg.x as i32, msg.y as i32);
+                self.display.resize(msg);
                 self.shader_texture.bind();
                 self.shader_texture.set_bounds(msg.x as f32, msg.y as f32);
             },

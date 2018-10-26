@@ -24,6 +24,7 @@ use cgmath::*;
 use channel::consume_spsc;
 use channel::replace_spsc;
 use game::*;
+use glutin::dpi::*;
 use log::*;
 use render::display::*;
 use std::thread;
@@ -40,7 +41,7 @@ pub fn run<G: Game>() {
     let display = Display::new(
         glutin::WindowBuilder::new()
             .with_title(G::TITLE)
-            .with_dimensions(500, 500),
+            .with_dimensions(LogicalSize::from((500, 500))),
         glutin::ContextBuilder::new(),
         &event_loop,
     );
@@ -49,7 +50,7 @@ pub fn run<G: Game>() {
     let (render_producer_pipe, render_consumer_pipe) = bounded_spsc_queue::make(4);
     let (input_producer_pipe, input_consumer_pipe) = bounded_spsc_queue::make(256);
     let (resize_producer, resize_consumer) = consume_spsc::make();
-    let (cursor_producer, _cursor_consumer) = replace_spsc::make(Vector2::new(0f32, 0f32));
+    let (cursor_producer, _cursor_consumer) = replace_spsc::make(Vector2::zero());
 
     // Game thread (daemon)
     thread::spawn(move || {
