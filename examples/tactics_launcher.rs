@@ -15,14 +15,14 @@ use tactics::system::System;
 /// Run with: cargo run --example tactics_launcher --release
 pub struct TacticsLauncher {
     system: System,
-    render: RenderProducer,
+    render: RenderMessenger,
     clock: Clock,
 }
 
 impl Game for TacticsLauncher {
     const TITLE: &'static str = "Terra Ingognita";
 
-    fn new(render: RenderProducer) -> Self {
+    fn new(render: RenderMessenger) -> Self {
         TacticsLauncher {
             system: System::new(),
             render,

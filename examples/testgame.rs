@@ -16,7 +16,7 @@ fn main() {
 }
 
 pub struct TestGame {
-    render: RenderProducer,
+    render: RenderMessenger,
     clock: Clock,
     translation: Vector2<f32>,
     square: MoveableSquare,
@@ -29,7 +29,7 @@ pub struct MoveableSquare {
 }
 
 impl MoveableSquare {
-    pub fn new(render: &mut RenderProducer) -> MoveableSquare {
+    pub fn new(render: &mut RenderMessenger) -> MoveableSquare {
         let index = render.create_rect(
             Vector3::new(0.0f32, 0.0f32, -0.125f32),
             Vector2::new(0.75f32, 0.75f32),
@@ -42,7 +42,7 @@ impl MoveableSquare {
         }
     }
 
-    pub fn update(&mut self, delta: f32, render: &mut RenderProducer) {
+    pub fn update(&mut self, delta: f32, render: &mut RenderMessenger) {
         self.pos += self.velocity * delta;
         render.update_rect(
             &self.index,
@@ -56,7 +56,7 @@ impl MoveableSquare {
 impl Game for TestGame {
     const TITLE: &'static str = "Test Game";
 
-    fn new(mut render: RenderProducer) -> Self {
+    fn new(mut render: RenderMessenger) -> Self {
         let square = MoveableSquare::new(&mut render);
         for x in -16..4 {
             let offset = x as f32;

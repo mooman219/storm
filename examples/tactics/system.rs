@@ -45,7 +45,7 @@ impl System {
         }
     }
 
-    fn new_game(&mut self, render: &mut RenderProducer) {
+    fn new_game(&mut self, render: &mut RenderMessenger) {
         render.set_scale(0.01f32);
         self.map_controller.new_map(render);
     }
@@ -54,7 +54,7 @@ impl System {
         self.system_state = new_state;
     }
 
-    pub fn update(&mut self, render: &mut RenderProducer) {
+    pub fn update(&mut self, render: &mut RenderMessenger) {
         loop {
             let mut exit_code = ExitCodes::Ok;
             match self.system_state {

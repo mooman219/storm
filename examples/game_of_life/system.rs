@@ -28,7 +28,7 @@ pub struct System {
 }
 
 impl System {
-    pub fn new(render: &mut RenderProducer) -> System {
+    pub fn new(render: &mut RenderMessenger) -> System {
         //BUG #2, overly large texture created for rects
         //uncomment this line, and comment out the set_scale below
         //then change the create_blinker positions to 48, 48
@@ -61,7 +61,7 @@ impl System {
         }
     }
 
-    pub fn create_blinker(&mut self, x: usize, y: usize, render: &mut RenderProducer) {
+    pub fn create_blinker(&mut self, x: usize, y: usize, render: &mut RenderMessenger) {
         if x > 0 && x < 49 && y > 0 && y < 50 {
             let use_frame;
             match self.current_active_frame {
@@ -118,7 +118,7 @@ impl System {
         x: usize,
         y: usize,
         index_token: &mut IndexToken,
-        render: &mut RenderProducer,
+        render: &mut RenderMessenger,
         cell_value: bool,
     ) {
         let use_color;
@@ -145,7 +145,7 @@ impl System {
 
     pub fn order() {}
 
-    pub fn apply_rules(&mut self, render: &mut RenderProducer) {
+    pub fn apply_rules(&mut self, render: &mut RenderMessenger) {
         //check for current active frame, a_frame or b_frame, and set our use and write frames
         let use_frame;
         let write_frame;
@@ -195,7 +195,7 @@ impl System {
         }
     }
 
-    pub fn tick(&mut self, render: &mut RenderProducer) {
+    pub fn tick(&mut self, render: &mut RenderMessenger) {
         if self.created_blinker == false {
             self.created_blinker = true;
             self.create_blinker(48, 48, render);

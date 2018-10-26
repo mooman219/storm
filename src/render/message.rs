@@ -58,7 +58,7 @@ pub enum RenderMessage {
 // Messenger
 // ////////////////////////////////////////////////////////
 
-pub struct RenderProducer {
+pub struct RenderMessenger {
     render_producer: Producer<RenderFrame>,
     frame: RenderFrame,
     map_rect: IndexMap,
@@ -66,9 +66,9 @@ pub struct RenderProducer {
     map_texture: IndexMap,
 }
 
-impl RenderProducer {
-    pub fn new(render_producer: Producer<RenderFrame>) -> RenderProducer {
-        RenderProducer {
+impl RenderMessenger {
+    pub fn new(render_producer: Producer<RenderFrame>) -> RenderMessenger {
+        RenderMessenger {
             render_producer: render_producer,
             frame: RenderFrame::new(),
             map_rect: IndexMap::new(),

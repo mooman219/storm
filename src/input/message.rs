@@ -30,13 +30,13 @@ pub enum InputFrame {
 // Messenger
 // ////////////////////////////////////////////////////////
 
-pub struct InputConsumer {
+pub struct InputMessenger {
     input_consumer: Consumer<InputFrame>,
 }
 
-impl InputConsumer {
-    pub fn new(input_consumer: Consumer<InputFrame>) -> InputConsumer {
-        InputConsumer {
+impl InputMessenger {
+    pub fn new(input_consumer: Consumer<InputFrame>) -> InputMessenger {
+        InputMessenger {
             input_consumer: input_consumer,
         }
     }

@@ -7,7 +7,7 @@ pub trait Game {
     const TITLE: &'static str = "Untitled";
 
     /// Function to instantiate a new game object.
-    fn new(render: RenderProducer) -> Self;
+    fn new(render: RenderMessenger) -> Self;
 
     /// Called once per iteration of the game loop.
     fn tick(&mut self) {}
@@ -21,8 +21,8 @@ pub fn start<G: Game>(
     input_consumer_pipe: bounded_spsc_queue::Consumer<InputFrame>,
     render_producer_pipe: bounded_spsc_queue::Producer<RenderFrame>,
 ) {
-    let mut input_consumer = InputConsumer::new(input_consumer_pipe);
-    let render_producer = RenderProducer::new(render_producer_pipe);
+    let mut input_consumer = InputMessenger::new(input_consumer_pipe);
+    let render_producer = RenderMessenger::new(render_producer_pipe);
     let mut game = G::new(render_producer);
     loop {
         input_consumer.tick(&mut game);

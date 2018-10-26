@@ -33,7 +33,7 @@ impl MapController {
         }
     }
 
-    pub fn new_map(&mut self, render: &mut RenderProducer) {
+    pub fn new_map(&mut self, render: &mut RenderMessenger) {
         self.map = OverworldMap::new();
         self.map.start_new_game(render);
     }
@@ -46,7 +46,7 @@ impl MapController {
     //1. Resolve the state as much as possible, moving from special states to waiting states
     //2. Tick events that need to be ticked every frame, think like an NPC that is always moving
     //3. By the exit code query the state of the game
-    pub fn update(&mut self, render: &mut RenderProducer) -> ExitCodes {
+    pub fn update(&mut self, render: &mut RenderMessenger) -> ExitCodes {
         self.map.layout_map(render);
 
         match self.map_controller_state {

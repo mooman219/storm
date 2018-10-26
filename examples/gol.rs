@@ -15,14 +15,14 @@ use game_of_life::system::System;
 /// Run with: cargo run --example gol --release
 pub struct GOL {
     system: System,
-    render: RenderProducer,
+    render: RenderMessenger,
     clock: Clock,
 }
 
 impl Game for GOL {
     const TITLE: &'static str = "Game Of Life";
 
-    fn new(mut render: RenderProducer) -> Self {
+    fn new(mut render: RenderMessenger) -> Self {
         let mut new_gol = GOL {
             system: System::new(&mut render),
             render: render,

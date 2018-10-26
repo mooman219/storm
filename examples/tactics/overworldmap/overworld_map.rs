@@ -45,7 +45,7 @@ impl OverworldMap {
     }
 
     //this will genreate a 2d array made up of Vectors, with map tiles
-    pub fn generate_maps(render: &mut RenderProducer) -> (Vec<Vec<MapTile>>, Vec<Vec<char>>, Vec<Vec<IndexToken>>) {
+    pub fn generate_maps(render: &mut RenderMessenger) -> (Vec<Vec<MapTile>>, Vec<Vec<char>>, Vec<Vec<IndexToken>>) {
         let mut map = vec![];
         let mut map_state = vec![];
         let mut index_tokens = vec![];
@@ -151,7 +151,7 @@ impl OverworldMap {
 
     //we call this start_new_game because after this we are offically in the new game
     //it will eventually have input of the party, and whatever user attributes
-    pub fn start_new_game(&mut self, render: &mut RenderProducer) -> bool {
+    pub fn start_new_game(&mut self, render: &mut RenderMessenger) -> bool {
         //go through an create the actual map
         let all_nessacary_maps = OverworldMap::generate_maps(render);
 
@@ -291,7 +291,7 @@ impl OverworldMap {
         self.party_position_on_map
     }
 
-    pub fn layout_map(&mut self, render: &mut RenderProducer) {
+    pub fn layout_map(&mut self, render: &mut RenderMessenger) {
         if self.map.len() == 0 {
             //we are making an assumption that you would only want to layout a full map
             println!("Warning: Trying to layout empty map, Daft Punk: Something about us");
