@@ -1,7 +1,6 @@
 mod buffer;
 mod capability;
 mod draw;
-mod shader;
 mod texture;
 mod uniform;
 mod utility;
@@ -10,7 +9,6 @@ mod vertex;
 pub use render::raw::buffer::*;
 pub use render::raw::capability::*;
 pub use render::raw::draw::*;
-pub use render::raw::shader::*;
 pub use render::raw::texture::*;
 pub use render::raw::uniform::*;
 pub use render::raw::utility::*;
