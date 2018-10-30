@@ -7,7 +7,7 @@ use storm::log::LevelFilter;
 use storm::render::color;
 use storm::render::message::*;
 use storm::time::clock::*;
-use storm::utility::slotmap::*;
+use storm::utility::indexmap::*;
 
 /// Run with: cargo run --example testgame --release
 fn main() {
@@ -45,7 +45,7 @@ impl MoveableSquare {
     pub fn update(&mut self, delta: f32, render: &mut RenderMessenger) {
         self.pos += self.velocity * delta;
         render.update_rect(
-            &self.index,
+            self.index,
             self.pos.extend(-0.125f32),
             Vector2::new(0.75f32, 0.75f32),
             color::YELLOW,

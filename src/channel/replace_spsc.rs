@@ -84,7 +84,7 @@ impl<T: Copy> Producer<T> {
     ///
     /// ```
     /// extern crate storm;
-    /// use storm::utility::replace_spsc::*;
+    /// use storm::channel::replace_spsc::*;
     ///
     /// let (producer, _) = make(0u32);
     ///
@@ -106,7 +106,7 @@ impl<T: Copy> Consumer<T> {
     ///
     /// ```
     /// extern crate storm;
-    /// use storm::utility::replace_spsc::*;
+    /// use storm::channel::replace_spsc::*;
     ///
     /// let (_, consumer) = make(1u32);
     ///

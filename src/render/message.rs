@@ -2,7 +2,7 @@ use bounded_spsc_queue::Producer;
 use cgmath::*;
 use render::color::*;
 use std::mem;
-use utility::slotmap::*;
+use utility::indexmap::*;
 
 // ////////////////////////////////////////////////////////
 // Messages
@@ -89,7 +89,7 @@ impl RenderMessenger {
         self.map_rect.add()
     }
 
-    pub fn update_rect(&mut self, token: &IndexToken, pos: Vector3<f32>, size: Vector2<f32>, color: Color) {
+    pub fn update_rect(&mut self, token: IndexToken, pos: Vector3<f32>, size: Vector2<f32>, color: Color) {
         let message = RenderMessage::QuadUpdate {
             id: self.map_rect.get(token),
             pos: pos,

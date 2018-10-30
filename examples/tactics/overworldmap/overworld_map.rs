@@ -3,7 +3,7 @@ use rand::distributions::{Range, Sample};
 use std::io;
 use storm::cgmath::{Vector2, Vector3};
 use storm::render::message::*;
-use storm::utility::slotmap::*;
+use storm::utility::indexmap::*;
 use tactics::overworldmap::map_tile::{MapTile, TileType};
 
 const MAP_X_SIZE: usize = 10;
@@ -306,7 +306,7 @@ impl OverworldMap {
                     self.map_state[x][y] = possible_update_token;
 
                     //if we detect a change, that means we have to have update things
-                    let index_token = &self.tile_index_tokens[x][y];
+                    let index_token = self.tile_index_tokens[x][y];
                     render.update_rect(
                         index_token,
                         Vector3::new(

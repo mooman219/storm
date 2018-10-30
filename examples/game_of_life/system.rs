@@ -5,7 +5,7 @@ use storm::cgmath::{Vector2, Vector3};
 use storm::input::message::*;
 use storm::render::color;
 use storm::render::message::*;
-use storm::utility::slotmap::*;
+use storm::utility::indexmap::*;
 
 //////////
 /// Main Driver for conways game of life
@@ -76,9 +76,9 @@ impl System {
             use_frame[x - 1][y] = true;
             use_frame[x + 1][y] = true;
 
-            System::update_cell_color(x, y, &mut self.index_tokens[x - 1][y], render, use_frame[x - 1][y]);
-            System::update_cell_color(x, y, &mut self.index_tokens[x + 1][y], render, use_frame[x + 1][y]);
-            System::update_cell_color(x, y, &mut self.index_tokens[x][y], render, use_frame[x][y]);
+            System::update_cell_color(x, y, self.index_tokens[x - 1][y], render, use_frame[x - 1][y]);
+            System::update_cell_color(x, y, self.index_tokens[x + 1][y], render, use_frame[x + 1][y]);
+            System::update_cell_color(x, y, self.index_tokens[x][y], render, use_frame[x][y]);
         }
     }
 
@@ -117,7 +117,7 @@ impl System {
     pub fn update_cell_color(
         x: usize,
         y: usize,
-        index_token: &mut IndexToken,
+        index_token: IndexToken,
         render: &mut RenderMessenger,
         cell_value: bool,
     ) {
@@ -170,17 +170,17 @@ impl System {
                     //with fewer then 2 alive neighbors dies
                     if count < 2 {
                         write_frame[x][y] = false;
-                        System::update_cell_color(x, y, &mut self.index_tokens[x][y], render, write_frame[x][y]);
+                        System::update_cell_color(x, y, self.index_tokens[x][y], render, write_frame[x][y]);
                     }
                     //with 2 or three neighbors surives
                     else if count == 2 || count == 3 {
                         write_frame[x][y] = true;
-                        System::update_cell_color(x, y, &mut self.index_tokens[x][y], render, write_frame[x][y]);
+                        System::update_cell_color(x, y, self.index_tokens[x][y], render, write_frame[x][y]);
                     }
                     //with greatern then 3 dies
                     else if count > 3 {
                         write_frame[x][y] = false;
-                        System::update_cell_color(x, y, &mut self.index_tokens[x][y], render, write_frame[x][y]);
+                        System::update_cell_color(x, y, self.index_tokens[x][y], render, write_frame[x][y]);
                     }
                 }
                 //for any dead cell
@@ -188,7 +188,7 @@ impl System {
                     //with exactaly 3 alive neighbors comes alive
                     if count == 3 {
                         write_frame[x][y] = true;
-                        System::update_cell_color(x, y, &mut self.index_tokens[x][y], render, write_frame[x][y]);
+                        System::update_cell_color(x, y, self.index_tokens[x][y], render, write_frame[x][y]);
                     }
                 }
             }

@@ -5,7 +5,7 @@ extern crate storm;
 extern crate test;
 
 use storm::utility::benching::black_box;
-use storm::utility::slotmap::*;
+use storm::utility::indexmap::*;
 use test::Bencher;
 
 #[bench]
@@ -14,7 +14,7 @@ fn bench_indexmap_cycle(bench: &mut Bencher) {
 
     bench.iter(|| {
         let a = map.add();
-        black_box(map.get(&a));
+        black_box(map.get(a));
         black_box(map.remove(a));
     });
 }
@@ -25,6 +25,6 @@ fn bench_indexmap_get(bench: &mut Bencher) {
     let a = map.add();
 
     bench.iter(|| {
-        black_box(map.get(&a));
+        black_box(map.get(a));
     });
 }
