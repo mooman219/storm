@@ -3,12 +3,15 @@ use render::raw::*;
 use render::shader::shader_program::*;
 
 static VERTEX: &str = r#"
-#version 400
+#version 400 core
+#extension GL_ARB_explicit_uniform_location : enable
+#extension GL_ARB_explicit_attrib_location : enable
+
 layout(location = 0) in vec3 a_pos;
 layout(location = 1) in vec4 a_color;
 out vec4 v_color;
 
-uniform mat4 ortho;
+layout(location = 0) uniform mat4 ortho;
 
 void main() {
     gl_Position = ortho * vec4(a_pos, 1.0);
@@ -16,7 +19,10 @@ void main() {
 }
 "#;
 static FRAGMENT: &str = r#"
-#version 330
+#version 400 core
+#extension GL_ARB_explicit_uniform_location : enable
+#extension GL_ARB_explicit_attrib_location : enable
+
 in vec4 v_color;
 out vec4 a_color;
 
@@ -25,9 +31,10 @@ void main() {
 }
 "#;
 
+const UNIFORM_ORTHO: i32 = 0;
+
 pub struct ColorShader {
     program: ShaderProgram,
-    uniform_ortho: i32,
     ortho: Matrix4<f32>,
     ortho_translation: Matrix4<f32>,
     ortho_scale: Matrix4<f32>,
@@ -36,10 +43,8 @@ pub struct ColorShader {
 impl ColorShader {
     pub fn new() -> ColorShader {
         let program = ShaderProgram::new(VERTEX, FRAGMENT);
-        let uniform_ortho = program.get_uniform_location("ortho");
         ColorShader {
             program: program,
-            uniform_ortho: uniform_ortho,
             ortho: ortho(0f32, 1f32, 0f32, 1f32, -1f32, 1f32),
             ortho_translation: Matrix4::from_translation(Vector3::new(0f32, 0f32, 0f32)),
             ortho_scale: Matrix4::from_scale(1f32),
@@ -66,6 +71,6 @@ impl ColorShader {
     pub fn sync(&self) {
         self.program.bind();
         let matrix = self.ortho * self.ortho_translation * self.ortho_scale;
-        uniform_matrix_4fv(self.uniform_ortho, 1, false, matrix.as_ptr());
+        uniform_matrix_4fv(UNIFORM_ORTHO, 1, false, matrix.as_ptr());
     }
 }
