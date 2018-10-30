@@ -50,4 +50,18 @@ fn test_indexmap_cycle() {
     let a = map.add();
     assert_eq!(map.get(a), 0);
     assert_eq!(map.remove(a), 0);
+
+    let a = map.add();
+    let b = map.add();
+    assert_eq!(map.get(a), 0);
+    assert_eq!(map.get(b), 1);
+    assert_eq!(map.remove(a), 0);
+    assert_eq!(map.remove(b), 0);
+
+    let a = map.add();
+    let b = map.add();
+    assert_eq!(map.get(a), 0);
+    assert_eq!(map.get(b), 1);
+    assert_eq!(map.remove(a), 0);
+    assert_eq!(map.remove(b), 0);
 }
