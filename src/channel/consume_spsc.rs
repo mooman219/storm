@@ -82,9 +82,6 @@ pub struct Consumer<T: Copy> {
 unsafe impl<T: Copy + Send> Send for Producer<T> {}
 unsafe impl<T: Copy + Send> Send for Consumer<T> {}
 
-impl<T> !Sync for Producer<T> {}
-impl<T> !Sync for Consumer<T> {}
-
 impl<T: Copy> Producer<T> {
     /// Push a value onto the buffer.
     ///

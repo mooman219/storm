@@ -1,4 +1,4 @@
-#![feature(asm, const_fn, pointer_methods, optin_builtin_traits)]
+#![feature(asm, const_fn, pointer_methods)]
 #![allow(dead_code, non_camel_case_types, non_snake_case)]
 
 extern crate bounded_spsc_queue;
