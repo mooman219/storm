@@ -31,12 +31,37 @@ impl Display {
         info!("Render: OpenGL version {}", get_string(StringTarget::Version));
     }
 
+    // Window
+
+    /// Modifies the title of the window.
+    pub fn set_title(&self, title: &str) {
+        self.window.set_title(title);
+    }
+
+    /// Sets the window to maximized or back.
+    pub fn set_maximized(&self, maximized: bool) {
+        self.window.set_maximized(maximized);
+    }
+
+    /// Turn window decorations on or off.
+    pub fn set_decorations(&self, decorations: bool) {
+        self.window.set_decorations(decorations);
+    }
+
+    /// Change whether or not the window will always be on top of other windows.
+    pub fn set_always_on_top(&self, always_on_top: bool) {
+        self.window.set_always_on_top(always_on_top);
+    }
+
     // Buffer
 
+    /// Swaps the buffers in case of double or triple buffering.
+    /// You should call this function every time you have finished rendering, or the image may not be displayed on the screen.
     pub fn swap_buffers(&self) {
         self.window.swap_buffers().expect("Error while swapping buffers.");
     }
 
+    /// Resize the GL context.
     pub fn resize(&self, dimensions: Vector2<f64>) {
         self.window.resize(PhysicalSize::from((dimensions.x, dimensions.y)));
         viewport(0, 0, dimensions.x as i32, dimensions.y as i32);

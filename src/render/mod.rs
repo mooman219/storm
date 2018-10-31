@@ -41,12 +41,6 @@ pub fn start(
     // calls in. Behavior is undefined is the display is bound outside of the thread and usually
     // segfaults.
     display.bind();
-    enable(Capability::DepthTest);
-    enable(Capability::CullFace);
-    enable(Capability::Multisample);
-    clear_color(0.0, 0.0, 0.2, 1.0);
-    depth_func(DepthTest::LessEqual);
-    cull_face(CullFace::Back);
 
     // Create the render state.
     let mut state = RenderState {
@@ -55,6 +49,15 @@ pub fn start(
         quad_texture: Quad::new_geometry_buffer(2500),
         texture_atlas: TextureGl::new(TextureUnit::Atlas),
     };
+
+    // Setup cabilities.
+    enable(Capability::DepthTest);
+    enable(Capability::CullFace);
+    enable(Capability::Multisample);
+    clear_color(0.0, 0.0, 0.2, 1.0);
+    depth_func(DepthTest::LessEqual);
+    cull_face(CullFace::Back);
+
     // Set the default texture.
     state.shader_texture.set_texture_unit(TextureUnit::Atlas);
 
@@ -138,7 +141,6 @@ impl RenderState {
         match message {
             Some(msg) => {
                 self.display.resize(msg);
-                self.shader_texture.bind();
                 self.shader_texture.set_bounds(msg.x as f32, msg.y as f32);
             },
             None => {},
