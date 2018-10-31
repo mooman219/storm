@@ -1,5 +1,5 @@
 use image::{DynamicImage, ImageBuffer, Rgba};
-use render::packer::*;
+use render::texture::*;
 
 pub struct Texture {
     pixels: Vec<RGBA8>,

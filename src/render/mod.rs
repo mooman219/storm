@@ -3,7 +3,6 @@ pub mod color;
 pub mod display;
 pub mod geometry;
 pub mod message;
-pub mod packer;
 pub mod raw;
 pub mod shader;
 pub mod texture;
