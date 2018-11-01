@@ -1,18 +1,18 @@
 use storm::cgmath::{Vector2, Vector3};
-use storm::input::message::*;
 use storm::input::message::InputFrame::{KeyPressed, KeyReleased};
+use storm::input::message::*;
 use storm::render::color;
 use storm::render::message::*;
 
-use pong::Player;
 use pong::Ball;
+use pong::Player;
 
-const BALL_X_SPEED : f32 = 5.0;
-const PLAYER_Y_SPEED : f32 = 2.0;
+const BALL_X_SPEED: f32 = 5.0;
+const PLAYER_Y_SPEED: f32 = 2.0;
 
 enum PlayerType {
     A,
-    B
+    B,
 }
 
 pub struct System {
@@ -24,7 +24,7 @@ pub struct System {
     direction: f32,
 }
 
-impl System  {
+impl System {
     pub fn new(render: &mut RenderMessenger) -> System {
         render.set_scale(0.001f32);
 
@@ -37,12 +37,12 @@ impl System  {
         let player_b_shape = Vector2::new(100.0, 100.0);
         let player_b_token = render.create_rect(player_b_position, player_b_shape, color::ORANGE);
         let player_b = Player::new(player_b_token, player_b_position, player_b_shape, color::ORANGE);
-        
+
         let ball_postion = Vector3::new(500.0, 500.0, 0.0);
         let ball_shape = Vector2::new(50.0, 50.0);
         let ball_token = render.create_rect(ball_postion, ball_shape, color::RED);
         let ball = Ball::new(ball_token, ball_postion, ball_shape);
-        
+
         render.send();
 
         System {
@@ -51,18 +51,16 @@ impl System  {
             player_b,
             ball,
             count: 500.0,
-            direction: -1.0
+            direction: -1.0,
         }
     }
 
     pub fn input(&mut self, event: InputFrame) {
-
         match event {
             KeyPressed(k) => {
                 if k == Key::Up {
                     self.player_a_direction = 1.0;
-                }
-                else if k == Key::Down {
+                } else if k == Key::Down {
                     self.player_a_direction = -1.0;
                 }
             },
@@ -70,10 +68,8 @@ impl System  {
                 if k == Key::Up || k == Key::Down {
                     self.player_a_direction = 0.0;
                 }
-            }
-            _ => {
-
-            }
+            },
+            _ => {},
         }
     }
 
@@ -81,15 +77,14 @@ impl System  {
         if self.player_a.overlaps_box(&self.ball) {
             return Some(PlayerType::A);
         }
-        
+
         if self.player_b.overlaps_box(&self.ball) {
             return Some(PlayerType::B);
         }
         return None;
     }
 
-    pub fn tick(&mut self, render: &mut RenderMessenger)  {
-        
+    pub fn tick(&mut self, render: &mut RenderMessenger) {
         let result = self.is_ball_overlapping();
         if result.is_some() {
             self.direction = -1.0 * self.direction;
@@ -101,7 +96,12 @@ impl System  {
 
         self.player_a.box_position.y += self.player_a_direction * PLAYER_Y_SPEED;
 
-        render.update_rect(self.ball.ball_token, self.ball.ball_position, self.ball.ball_shape, color::RED);
+        render.update_rect(
+            self.ball.ball_token,
+            self.ball.ball_position,
+            self.ball.ball_shape,
+            color::RED,
+        );
         self.player_a.render(render);
     }
 }

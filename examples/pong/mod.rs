@@ -1,6 +1,6 @@
-pub mod system;
-pub mod player;
 pub mod ball;
+pub mod player;
+pub mod system;
 
-use self::player::Player;
 use self::ball::Ball;
+use self::player::Player;

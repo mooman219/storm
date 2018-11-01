@@ -9,10 +9,10 @@ use storm::log::LevelFilter;
 use storm::render::message::*;
 use storm::time::clock::*;
 
-mod pong;//system;
+mod pong; //system;
 use pong::system::System;
 
-/// Run with: cargo run --example pong --release
+/// Run with: cargo run --example pong_driver --release
 pub struct Pong {
     system: System,
     render: RenderMessenger,
