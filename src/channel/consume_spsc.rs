@@ -20,8 +20,6 @@ struct Buffer<T: Copy> {
     buffer: [T; BUFFER_SIZE],
 }
 
-unsafe impl<T: Copy + Sync> Sync for Buffer<T> {}
-
 impl<T: Copy> Buffer<T> {
     fn new() -> Buffer<T> {
         let this = Buffer {
