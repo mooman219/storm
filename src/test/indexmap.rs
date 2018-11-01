@@ -1,6 +1,36 @@
 use utility::indexmap::*;
 
 #[test]
+#[should_panic]
+fn test_indexmap_panic_reuse() {
+    let mut map = IndexMap::new();
+    let a = map.add();
+    assert_eq!(map.get(a), 0);
+    assert_eq!(map.len(), 1);
+
+    assert_eq!(map.remove(a), 0);
+    assert_eq!(map.len(), 0);
+
+    // Should panic here
+    assert_eq!(map.get(a), 0);
+}
+
+#[test]
+#[should_panic]
+fn test_indexmap_panic_clear() {
+    let mut map = IndexMap::new();
+    let a = map.add();
+    assert_eq!(map.get(a), 0);
+    assert_eq!(map.len(), 1);
+
+    map.clear();
+    assert_eq!(map.len(), 0);
+
+    // Should panic here
+    assert_eq!(map.get(a), 0);
+}
+
+#[test]
 fn test_indexmap_misc() {
     let mut map = IndexMap::new();
     let a = map.add();
@@ -47,6 +77,7 @@ fn test_indexmap_cycle() {
     let a = map.add();
     assert_eq!(map.get(a), 0);
     assert_eq!(map.remove(a), 0);
+
     let a = map.add();
     assert_eq!(map.get(a), 0);
     assert_eq!(map.remove(a), 0);

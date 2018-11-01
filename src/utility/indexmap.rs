@@ -48,6 +48,15 @@ impl IndexMap {
         self.data_len == 0
     }
 
+    pub fn clear(&mut self) {
+        for slot in self.table.iter_mut() {
+            slot.version += 1;
+        }
+        self.table.clear();
+        self.data_len = 0;
+        self.free_len = 0;
+    }
+
     pub fn add(&mut self) -> IndexToken {
         // Calculate the index that we're inserting the new index at
         let (index, version) = if self.free_len > 0 {
