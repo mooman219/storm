@@ -1,6 +1,8 @@
 use storm::cgmath::{Vector2, Vector3};
 use storm::utility::indexmap::*;
 use storm::math::aabb::AABB2D;
+use storm::render::message::*;
+use storm::render::color;
 
 use pong::Ball;
 //Writing this for record keepign
@@ -8,14 +10,16 @@ pub struct Player {
     pub box_token: IndexToken,
     pub box_position: Vector3<f32>,
     pub box_shape: Vector2<f32>,
+    pub col: color::Color,
 }
 
 impl Player {
-    pub fn new(box_token: IndexToken, box_position: Vector3<f32>, box_shape: Vector2<f32>) -> Player {
+    pub fn new(box_token: IndexToken, box_position: Vector3<f32>, box_shape: Vector2<f32>, col: color::Color) -> Player {
         Player {
             box_token,
             box_position,
-            box_shape
+            box_shape,
+            col
         }
     }
 
@@ -29,5 +33,9 @@ impl Player {
                                      ball.ball_position.y + ball.ball_shape.y);
         
         return my_aabb.intersects(&thier_aabb);
+    }
+
+    pub fn render(&self, render: &mut RenderMessenger) {
+        render.update_rect(self.box_token, self.box_position, self.box_shape, self.col);
     }
 }
