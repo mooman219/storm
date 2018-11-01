@@ -92,24 +92,19 @@ pub fn start(
 
 impl RenderState {
     fn handle_messages(&mut self, messages: &mut Vec<RenderMessage>) {
-        let mut shader_modified = false;
-        let mut geometry_modified = false;
         for message in messages.drain(..) {
             match message {
                 // Quads
                 RenderMessage::QuadCreate { pos, size, color } => {
                     let quad = Quad::texture_rect(pos, size, color);
                     self.quad_texture.add(quad);
-                    geometry_modified = true;
                 },
                 RenderMessage::QuadUpdate { id, pos, size, color } => {
                     let quad = Quad::texture_rect(pos, size, color);
                     self.quad_texture.update(id, quad);
-                    geometry_modified = true;
                 },
                 RenderMessage::QuadRemove { id } => {
                     self.quad_texture.remove(id);
-                    geometry_modified = true;
                 },
                 RenderMessage::QuadClear {} => {
                     self.quad_texture.clear();
@@ -124,20 +119,14 @@ impl RenderState {
                 },
                 RenderMessage::Translate { pos } => {
                     self.shader_texture.set_translation(pos);
-                    shader_modified = true;
                 },
                 RenderMessage::Scale { factor } => {
                     self.shader_texture.set_scale(factor);
-                    shader_modified = true;
                 },
             }
         }
-        if geometry_modified {
-            self.quad_texture.sync();
-        }
-        if shader_modified {
-            self.shader_texture.sync();
-        }
+        self.quad_texture.sync();
+        self.shader_texture.sync();
     }
 
     fn resize(&mut self, message: Option<Vector2<f64>>) {
