@@ -31,7 +31,7 @@ pub struct MoveableSquare {
 impl MoveableSquare {
     pub fn new(render: &mut RenderMessenger) -> MoveableSquare {
         let index = render.create_rect(
-            Vector3::new(0.0f32, 0.0f32, -0.125f32),
+            Vector3::new(0f32, 0f32, 0.125f32),
             Vector2::new(0.75f32, 0.75f32),
             color::YELLOW,
         );
@@ -46,7 +46,7 @@ impl MoveableSquare {
         self.pos += self.velocity * delta;
         render.update_rect(
             self.index,
-            self.pos.extend(-0.125f32),
+            self.pos.extend(0.125f32),
             Vector2::new(0.75f32, 0.75f32),
             color::YELLOW,
         );
@@ -116,11 +116,9 @@ impl Game for TestGame {
 
     fn tick(&mut self) {
         let delta = self.clock.get_delta();
-        if self.translation.x > 6f32 {
-            self.translation.x = 0f32;
-        }
-        self.translation.x += 0.05f32 * delta;
         self.square.update(delta, &mut self.render);
+        self.translation.x = -self.square.pos.x * 0.5 + 0.3125;
+        self.translation.y = -self.square.pos.y * 0.5 + 0.3125;
         self.render.set_translation(self.translation);
         self.render.send();
         self.clock.tick();
