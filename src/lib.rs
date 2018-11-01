@@ -1,11 +1,12 @@
-#![feature(asm, const_fn, pointer_methods, optin_builtin_traits)]
+#![feature(asm, const_fn, pointer_methods)]
 #![allow(dead_code, non_camel_case_types, non_snake_case)]
 
 extern crate bounded_spsc_queue;
-pub extern crate cgmath;
 extern crate gl;
 extern crate glutin;
 extern crate image;
+
+pub extern crate cgmath;
 #[macro_use]
 pub extern crate log;
 
@@ -17,6 +18,7 @@ pub mod render;
 pub mod time;
 pub mod utility;
 
+mod logger;
 #[cfg(test)]
 mod test;
 
@@ -25,7 +27,7 @@ use channel::consume_spsc;
 use channel::replace_spsc;
 use game::*;
 use glutin::dpi::*;
-use log::*;
+use logger::*;
 use render::display::*;
 use std::thread;
 
@@ -64,30 +66,4 @@ pub fn run<G: Game>() {
 
     // Input thread (main)
     input::start(event_loop, input_producer_pipe, resize_producer, cursor_producer);
-}
-
-// ////////////////////////////////////////////////////////
-// Logging
-// ////////////////////////////////////////////////////////
-
-static LOGGER: SimpleLogger = SimpleLogger;
-
-struct SimpleLogger;
-
-impl SimpleLogger {
-    fn init() {
-        log::set_logger(&LOGGER).expect("Unable to setup logging for storm-engine.");
-    }
-}
-
-impl Log for SimpleLogger {
-    fn enabled(&self, _: &Metadata) -> bool {
-        true
-    }
-
-    fn log(&self, record: &Record) {
-        println!("{:<5} {}", record.level().to_string(), record.args());
-    }
-
-    fn flush(&self) {}
 }

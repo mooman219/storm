@@ -4,7 +4,7 @@ extern crate storm;
 use std::fs::File;
 use std::path::Path;
 
-use storm::render::packer::*;
+use storm::render::texture::*;
 
 /// Run with: cargo run --example packer --release
 fn main() {

@@ -1,4 +1,4 @@
-use render::packer::*;
+use render::texture::*;
 use std;
 use std::cmp::max;
 
