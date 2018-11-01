@@ -48,8 +48,8 @@ impl<T> RawBuffer<T> for ImmutableBuffer<T> {
         panic!("Cannot update immutable buffers.");
     }
 
-    fn offset_index(&self) -> usize {
-        0
+    fn clear(&mut self) {
+        panic!("Cannot clear immutable buffers.");
     }
 
     fn len(&self) -> usize {

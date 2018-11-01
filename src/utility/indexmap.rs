@@ -49,12 +49,15 @@ impl IndexMap {
     }
 
     pub fn clear(&mut self) {
+        let mut counter = 0;
         for slot in self.table.iter_mut() {
             slot.version += 1;
+            slot.to_data = counter;
+            slot.to_map = counter;
+            counter += 1;
         }
-        self.table.clear();
         self.data_len = 0;
-        self.free_len = 0;
+        self.free_len = self.table.len();
     }
 
     pub fn add(&mut self) -> IndexToken {

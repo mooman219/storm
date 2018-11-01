@@ -11,7 +11,6 @@ pub struct FixedBuffer<T> {
     dirty_min: usize,
     dirty_max: usize,
     buffer_type: BufferBindingTarget,
-    capacity: usize,
     items: Vec<T>,
     timer_sync: Timer,
 }
@@ -53,7 +52,6 @@ impl<T> RawBuffer<T> for FixedBuffer<T> {
             dirty_min: 0,
             dirty_max: 0,
             buffer_type: buffer_type,
-            capacity: capacity,
             items: items,
             timer_sync: Timer::new("[R] Fixed Sync"),
         }
@@ -61,7 +59,7 @@ impl<T> RawBuffer<T> for FixedBuffer<T> {
 
     fn add(&mut self, item: T) -> usize {
         let index = self.items.len();
-        if index == self.capacity {
+        if index == self.items.capacity() {
             panic!("Attempting to add element to full buffer.");
         }
         self.items.push(item);
@@ -79,8 +77,11 @@ impl<T> RawBuffer<T> for FixedBuffer<T> {
         self.mark(index);
     }
 
-    fn offset_index(&self) -> usize {
-        0
+    fn clear(&mut self) {
+        let length = self.items.len();
+        self.mark(0);
+        self.mark(length);
+        self.items.clear();
     }
 
     fn len(&self) -> usize {

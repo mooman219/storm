@@ -37,6 +37,7 @@ pub enum RenderMessage {
     QuadRemove {
         id: usize,
     },
+    QuadClear {},
     //
     // Texture
     //
@@ -103,6 +104,12 @@ impl RenderMessenger {
         let message = RenderMessage::QuadRemove {
             id: self.map_rect.remove(token),
         };
+        self.frame.messages.push(message);
+    }
+
+    pub fn clear_rects(&mut self) {
+        self.map_rect.clear();
+        let message = RenderMessage::QuadClear {};
         self.frame.messages.push(message);
     }
 

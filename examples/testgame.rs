@@ -94,6 +94,14 @@ impl Game for TestGame {
 
     fn input(&mut self, event: InputFrame) {
         match event {
+            InputFrame::KeyPressed(Key::C) => {
+                self.render.clear_rects();
+                self.square.index = self.render.create_rect(
+                    Vector3::new(0.0f32, 0.0f32, -0.125f32),
+                    Vector2::new(0.75f32, 0.75f32),
+                    color::YELLOW,
+                );
+            },
             InputFrame::KeyPressed(Key::W) => self.square.velocity.y += 1.5f32,
             InputFrame::KeyReleased(Key::W) => self.square.velocity.y -= 1.5f32,
             InputFrame::KeyPressed(Key::A) => self.square.velocity.x -= 1.5f32,
@@ -111,7 +119,7 @@ impl Game for TestGame {
         if self.translation.x > 6f32 {
             self.translation.x = 0f32;
         }
-        self.translation.x += 0.1f32 * delta;
+        self.translation.x += 0.05f32 * delta;
         self.square.update(delta, &mut self.render);
         self.render.set_translation(self.translation);
         self.render.send();

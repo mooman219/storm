@@ -1,4 +1,4 @@
-use render::buffer::fixed::*;
+use render::buffer::dynamic::*;
 use render::buffer::immutable::*;
 use render::buffer::*;
 use render::geometry::*;
@@ -8,7 +8,7 @@ use std::ptr;
 
 pub struct GeometryBuffer<T: Geometry> {
     element_buffer: ImmutableBuffer<T::IndiceType>,
-    vertex_buffer: FixedBuffer<T>,
+    vertex_buffer: DynamicBuffer<T>,
     vertex_array: VertexArray<T::VertexType>,
 }
 
@@ -17,7 +17,7 @@ pub struct GeometryBuffer<T: Geometry> {
 impl<T: Geometry> GeometryBuffer<T> {
     pub fn new(capacity: usize) -> GeometryBuffer<T> {
         // Vertex Buffer Object
-        let vertex_buffer = FixedBuffer::new(BufferBindingTarget::ArrayBuffer, capacity);
+        let vertex_buffer = DynamicBuffer::new(BufferBindingTarget::ArrayBuffer, capacity);
         // Vertex Array Object
         let vertex_array = VertexArray::new();
         // Element Buffer Object
@@ -45,20 +45,23 @@ impl<T: Geometry> GeometryBuffer<T> {
         self.vertex_buffer.update(index, element);
     }
 
+    pub fn clear(&mut self) {
+        self.vertex_buffer.clear();
+    }
+
     pub fn sync(&mut self) {
         self.vertex_buffer.sync();
     }
 
     pub fn draw(&mut self) {
         let vertices = self.vertex_buffer.len() * T::VERTEX_COUNT;
-        let offset_index = (self.vertex_buffer.offset_index() * T::VERTEX_OFFSET) as i32;
         self.vertex_array.bind();
         draw_elements_base_vertex(
             DrawMode::Triangles,       // Draw mode
             vertices as i32,           // Number of vertices
             IndiceType::UnsignedShort, // Size of indices
             ptr::null(),               // Offset of indices
-            offset_index,              // Base vertex offset
+            0,                         // Base vertex offset
         );
     }
 }

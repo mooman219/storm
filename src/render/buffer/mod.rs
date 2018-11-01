@@ -14,7 +14,7 @@ pub trait RawBuffer<T> {
 
     fn update(&mut self, index: usize, item: T);
 
-    fn offset_index(&self) -> usize;
+    fn clear(&mut self);
 
     fn len(&self) -> usize;
 

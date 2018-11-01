@@ -111,6 +111,9 @@ impl RenderState {
                     self.quad_texture.remove(id);
                     geometry_modified = true;
                 },
+                RenderMessage::QuadClear {} => {
+                    self.quad_texture.clear();
+                },
                 RenderMessage::CreateTexture { path } => match open(Path::new(&path)) {
                     Ok(image) => {
                         self.texture_atlas.set_image(image);

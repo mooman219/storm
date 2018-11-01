@@ -70,8 +70,11 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
         self.mark(index);
     }
 
-    fn offset_index(&self) -> usize {
-        0
+    fn clear(&mut self) {
+        let length = self.items.len();
+        self.mark(0);
+        self.mark(length);
+        self.items.clear();
     }
 
     fn len(&self) -> usize {
