@@ -1,29 +1,23 @@
-use rand;
-
-use rand::distributions::{Range, Sample};
 use storm::cgmath::{Vector2, Vector3};
 use storm::input::message::*;
 use storm::input::message::InputFrame::KeyPressed;
 use storm::render::color;
 use storm::render::message::*;
-use storm::utility::indexmap::*;
 
-enum Player {
+use pong::Player;
+use pong::Ball;
+const BALL_X_SPEED : f32 = 5.0;
+
+enum PlayerType {
     A,
     B
 }
 
 pub struct System {
-    player_a: IndexToken,
-    player_a_position: Vector3<f32>,
-    player_a_shape: Vector2<f32>
-    player_b: IndexToken,
-    player_b_position: Vector3<f32>,
-    player_b_shape: Vector2<f32>
+    player_a: Player,
+    player_b: Player,
+    ball: Ball,
     count: f32,
-    ball: IndexToken,
-    ball_postion: Vector3<f32>,
-    ball_shape: Vector2<f32>,
     direction: f32,
 }
 
@@ -31,21 +25,27 @@ impl System  {
     pub fn new(render: &mut RenderMessenger) -> System {
         render.set_scale(0.001f32);
 
-        let player_a = render.create_rect(Vector3::new(0.0, 500.0, 0.0), Vector2::new(100.0, 100.0), color::PURPLE);
-        let player_b = render.create_rect(Vector3::new(910.0, 500.0, 0.0), Vector2::new(100.0, 100.0), color::ORANGE);
+        let player_a_position = Vector3::new(0.0, 500.0, 0.0);
+        let player_a_shape = Vector2::new(100.0, 100.0);
+        let player_a_token = render.create_rect(player_a_position, player_a_shape, color::PURPLE);
+        let player_a = Player::new(player_a_token, player_a_position, player_a_shape);
+
+        let player_b_position = Vector3::new(910.0, 500.0, 0.0);
+        let player_b_shape = Vector2::new(100.0, 100.0);
+        let player_b_token = render.create_rect(player_b_position, player_b_shape, color::ORANGE);
+        let player_b = Player::new(player_b_token, player_b_position, player_b_shape);
+        
         let ball_postion = Vector3::new(500.0, 500.0, 0.0);
         let ball_shape = Vector2::new(50.0, 50.0);
-        let ball = render.create_rect(ball_postion.clone(), ball_shape, color::RED);
+        let ball_token = render.create_rect(ball_postion, ball_shape, color::RED);
+        let ball = Ball::new(ball_token, ball_postion, ball_shape);
         
-
         render.send();
 
         System {
             player_a,
             player_b,
             ball,
-            ball_postion,
-            ball_shape,
             count: 500.0,
             direction: -1.0
         }
@@ -68,16 +68,28 @@ impl System  {
         }
     }
 
-    fn is_ball_overlapping() -> Option<Player> {
-
-
-
+    fn is_ball_overlapping(&self) -> Option<PlayerType> {
+        if self.player_a.overlaps_box(&self.ball) {
+            return Some(PlayerType::A);
+        }
+        
+        if self.player_b.overlaps_box(&self.ball) {
+            return Some(PlayerType::B);
+        }
         return None;
     }
 
     pub fn tick(&mut self, render: &mut RenderMessenger)  {
-        render.update_rect(self.ball, self.ball_postion, self.ball_shape, color::RED);
-        self.ball_postion.x = self.count;
-        self.count += 10.0 * self.direction;
+
+        let result = self.is_ball_overlapping();
+        if result.is_some() {
+            self.direction = -1.0 * self.direction;
+            self.count += (BALL_X_SPEED * self.direction) * 5.0;
+        }
+
+        self.ball.ball_position.x = self.count;
+        self.count += BALL_X_SPEED * self.direction;
+
+        render.update_rect(self.ball.ball_token, self.ball.ball_position, self.ball.ball_shape, color::RED);
     }
 }
