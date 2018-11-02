@@ -23,33 +23,32 @@ pub struct TestGame {
 }
 
 pub struct MoveableSquare {
-    pos: Vector2<f32>,
+    pos: Vector3<f32>,
+    size: Vector2<f32>,
     velocity: Vector2<f32>,
     index: IndexToken,
 }
 
 impl MoveableSquare {
     pub fn new(render: &mut RenderMessenger) -> MoveableSquare {
-        let index = render.create_rect(
-            Vector3::new(0f32, 0f32, 0.125f32),
-            Vector2::new(0.75f32, 0.75f32),
-            color::YELLOW,
-        );
+        let pos = Vector3::new(-0.5f32, -0.5f32, 0.125f32);
+        let size = Vector2::new(1f32, 1f32);
+        let index = render.create_rect(pos, size, color::YELLOW);
         MoveableSquare {
-            pos: Vector2::new(0f32, 0f32),
-            velocity: Vector2::new(0f32, 0f32),
+            pos: pos,
+            size: size,
+            velocity: Vector2::zero(),
             index: index,
         }
     }
 
+    pub fn regenerate_index(&mut self, render: &mut RenderMessenger) {
+        self.index = render.create_rect(self.pos, self.size, color::YELLOW);
+    }
+
     pub fn update(&mut self, delta: f32, render: &mut RenderMessenger) {
-        self.pos += self.velocity * delta;
-        render.update_rect(
-            self.index,
-            self.pos.extend(0.125f32),
-            Vector2::new(0.75f32, 0.75f32),
-            color::YELLOW,
-        );
+        self.pos += (self.velocity * delta).extend(0f32);
+        render.update_rect(self.index, self.pos, self.size, color::YELLOW);
     }
 }
 
@@ -82,7 +81,6 @@ impl Game for TestGame {
             );
         }
         render.create_texture("./examples/test.png");
-        render.set_scale(0.5f32);
         render.send();
         TestGame {
             render: render,
@@ -93,23 +91,20 @@ impl Game for TestGame {
     }
 
     fn input(&mut self, event: InputFrame) {
+        let speed = 2f32;
         match event {
             InputFrame::KeyPressed(Key::C) => {
                 self.render.clear_rects();
-                self.square.index = self.render.create_rect(
-                    Vector3::new(0.0f32, 0.0f32, -0.125f32),
-                    Vector2::new(0.75f32, 0.75f32),
-                    color::YELLOW,
-                );
+                self.square.regenerate_index(&mut self.render);
             },
-            InputFrame::KeyPressed(Key::W) => self.square.velocity.y += 1.5f32,
-            InputFrame::KeyReleased(Key::W) => self.square.velocity.y -= 1.5f32,
-            InputFrame::KeyPressed(Key::A) => self.square.velocity.x -= 1.5f32,
-            InputFrame::KeyReleased(Key::A) => self.square.velocity.x += 1.5f32,
-            InputFrame::KeyPressed(Key::S) => self.square.velocity.y -= 1.5f32,
-            InputFrame::KeyReleased(Key::S) => self.square.velocity.y += 1.5f32,
-            InputFrame::KeyPressed(Key::D) => self.square.velocity.x += 1.5f32,
-            InputFrame::KeyReleased(Key::D) => self.square.velocity.x -= 1.5f32,
+            InputFrame::KeyPressed(Key::W) => self.square.velocity.y += speed,
+            InputFrame::KeyReleased(Key::W) => self.square.velocity.y -= speed,
+            InputFrame::KeyPressed(Key::A) => self.square.velocity.x -= speed,
+            InputFrame::KeyReleased(Key::A) => self.square.velocity.x += speed,
+            InputFrame::KeyPressed(Key::S) => self.square.velocity.y -= speed,
+            InputFrame::KeyReleased(Key::S) => self.square.velocity.y += speed,
+            InputFrame::KeyPressed(Key::D) => self.square.velocity.x += speed,
+            InputFrame::KeyReleased(Key::D) => self.square.velocity.x -= speed,
             _ => {},
         }
     }
@@ -117,9 +112,12 @@ impl Game for TestGame {
     fn tick(&mut self) {
         let delta = self.clock.get_delta();
         self.square.update(delta, &mut self.render);
-        self.translation.x = -self.square.pos.x * 0.5 + 0.3125;
-        self.translation.y = -self.square.pos.y * 0.5 + 0.3125;
+
+        // Center the square
+        self.translation.x = -self.square.pos.x - 0.5f32;
+        self.translation.y = -self.square.pos.y - 0.5f32;
         self.render.set_translation(self.translation);
+
         self.render.send();
         self.clock.tick();
     }
