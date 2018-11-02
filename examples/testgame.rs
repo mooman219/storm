@@ -22,33 +22,31 @@ pub struct TestGame {
     square: MoveableSquare,
 }
 
-pub struct MoveableSquare {
-    pos: Vector3<f32>,
-    size: Vector2<f32>,
-    velocity: Vector2<f32>,
-    index: IndexToken,
-}
-
-impl MoveableSquare {
-    pub fn new(render: &mut RenderMessenger) -> MoveableSquare {
-        let pos = Vector3::new(-0.5f32, -0.5f32, 0.125f32);
-        let size = Vector2::new(1f32, 1f32);
-        let index = render.create_rect(pos, size, color::YELLOW);
-        MoveableSquare {
-            pos: pos,
-            size: size,
-            velocity: Vector2::zero(),
-            index: index,
+impl TestGame {
+    pub fn generate_world(&mut self) {
+        for x in -16..16 {
+            let offset = x as f32;
+            self.render.create_rect(
+                Vector3::new(-1f32 + offset, 0f32, 0f32),
+                Vector2::new(0.5f32, 0.5f32),
+                color::ORANGE,
+            );
+            self.render.create_rect(
+                Vector3::new(-0.5f32 + offset, 0.5f32, 0f32),
+                Vector2::new(0.5f32, 0.5f32),
+                color::RED,
+            );
+            self.render.create_rect(
+                Vector3::new(0f32 + offset, 1f32, 0f32),
+                Vector2::new(0.5f32, 0.5f32),
+                color::PURPLE,
+            );
+            self.render.create_rect(
+                Vector3::new(0.5f32 + offset, 1.5f32, 0f32),
+                Vector2::new(0.5f32, 0.5f32),
+                color::BLUE,
+            );
         }
-    }
-
-    pub fn regenerate_index(&mut self, render: &mut RenderMessenger) {
-        self.index = render.create_rect(self.pos, self.size, color::YELLOW);
-    }
-
-    pub fn update(&mut self, delta: f32, render: &mut RenderMessenger) {
-        self.pos += (self.velocity * delta).extend(0f32);
-        render.update_rect(self.index, self.pos, self.size, color::YELLOW);
     }
 }
 
@@ -57,37 +55,16 @@ impl Game for TestGame {
 
     fn new(mut render: RenderMessenger) -> Self {
         let square = MoveableSquare::new(&mut render);
-        for x in -16..4 {
-            let offset = x as f32;
-            render.create_rect(
-                Vector3::new(-1f32 + offset, 0f32, 0f32),
-                Vector2::new(0.5f32, 0.5f32),
-                color::ORANGE,
-            );
-            render.create_rect(
-                Vector3::new(-0.5f32 + offset, 0.5f32, 0f32),
-                Vector2::new(0.5f32, 0.5f32),
-                color::RED,
-            );
-            render.create_rect(
-                Vector3::new(0f32 + offset, 1f32, 0f32),
-                Vector2::new(0.5f32, 0.5f32),
-                color::PURPLE,
-            );
-            render.create_rect(
-                Vector3::new(0.5f32 + offset, 1.5f32, 0f32),
-                Vector2::new(0.5f32, 0.5f32),
-                color::BLUE,
-            );
-        }
-        render.create_texture("./examples/test.png");
-        render.send();
-        TestGame {
+        let mut game = TestGame {
             render: render,
             clock: Clock::new(144),
             translation: Vector2::new(0f32, 0f32),
             square: square,
-        }
+        };
+        game.render.create_texture("./examples/test.png");
+        game.generate_world();
+        game.render.send();
+        game
     }
 
     fn input(&mut self, event: InputFrame) {
@@ -95,7 +72,10 @@ impl Game for TestGame {
         match event {
             InputFrame::KeyPressed(Key::C) => {
                 self.render.clear_rects();
-                self.square.regenerate_index(&mut self.render);
+                self.square.generate_index(&mut self.render);
+            },
+            InputFrame::KeyPressed(Key::V) => {
+                self.generate_world();
             },
             InputFrame::KeyPressed(Key::W) => self.square.velocity.y += speed,
             InputFrame::KeyReleased(Key::W) => self.square.velocity.y -= speed,
@@ -120,5 +100,35 @@ impl Game for TestGame {
 
         self.render.send();
         self.clock.tick();
+    }
+}
+
+pub struct MoveableSquare {
+    pos: Vector3<f32>,
+    size: Vector2<f32>,
+    velocity: Vector2<f32>,
+    index: IndexToken,
+}
+
+impl MoveableSquare {
+    pub fn new(render: &mut RenderMessenger) -> MoveableSquare {
+        let pos = Vector3::new(-0.5f32, -0.5f32, 0.125f32);
+        let size = Vector2::new(1f32, 1f32);
+        let index = render.create_rect(pos, size, color::YELLOW);
+        MoveableSquare {
+            pos: pos,
+            size: size,
+            velocity: Vector2::zero(),
+            index: index,
+        }
+    }
+
+    pub fn generate_index(&mut self, render: &mut RenderMessenger) {
+        self.index = render.create_rect(self.pos, self.size, color::YELLOW);
+    }
+
+    pub fn update(&mut self, delta: f32, render: &mut RenderMessenger) {
+        self.pos += (self.velocity * delta).extend(0f32);
+        render.update_rect(self.index, self.pos, self.size, color::YELLOW);
     }
 }
