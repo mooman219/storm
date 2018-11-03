@@ -9,8 +9,8 @@ use storm::cgmath::InnerSpace;
 use pong::Ball;
 use pong::Player;
 
-const BALL_X_SPEED: f32 = 5.0;
-const PLAYER_Y_SPEED: f32 = 2.0;
+const BALL_X_SPEED: f32 = 0.1;
+const PLAYER_Y_SPEED: f32 = 0.05;
 
 const BALL_VELOCITY: f32 = 7.5;
 
@@ -33,20 +33,18 @@ pub struct System {
 
 impl System {
     pub fn new(render: &mut RenderMessenger) -> System {
-        render.set_scale(0.001f32);
-
-        let player_a_position = Vector3::new(0.0, 500.0, 0.0);
-        let player_a_shape = Vector2::new(100.0, 100.0);
+        let player_a_position = Vector3::new(-2.5, -0.5, 0.0);
+        let player_a_shape = Vector2::new(0.5, 1.0);
         let player_a_token = render.create_rect(player_a_position, player_a_shape, color::PURPLE);
         let player_a = Player::new(player_a_token, player_a_position, player_a_shape, color::PURPLE);
 
-        let player_b_position = Vector3::new(910.0, 500.0, 0.0);
-        let player_b_shape = Vector2::new(100.0, 100.0);
+        let player_b_position = Vector3::new(2.0, -0.5, 0.0);
+        let player_b_shape = Vector2::new(0.5, 1.0);
         let player_b_token = render.create_rect(player_b_position, player_b_shape, color::ORANGE);
         let player_b = Player::new(player_b_token, player_b_position, player_b_shape, color::ORANGE);
 
-        let ball_postion = Vector3::new(500.0, 500.0, 0.0);
-        let ball_shape = Vector2::new(50.0, 50.0);
+        let ball_postion = Vector3::new(-0.25, -0.25, 0.0);
+        let ball_shape = Vector2::new(0.5, 0.5);
         let ball_token = render.create_rect(ball_postion, ball_shape, color::RED);
         let ball = Ball::new(ball_token, ball_postion, ball_shape);
 
@@ -59,7 +57,7 @@ impl System {
             player_a_scores: vec![],
             player_b_scores: vec![],
             ball,
-            count: 500.0,
+            count: 0.5,
             direction: -1.0,
             ball_velocity: Vector3::new(BALL_VELOCITY * -1.0, 0.0, 0.0)
         }

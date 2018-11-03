@@ -65,6 +65,8 @@ pub struct RenderMessenger {
     map_rect: IndexMap,
     map_triangle: IndexMap,
     map_texture: IndexMap,
+    last_translation: Vector2<f32>,
+    last_scale: f32,
 }
 
 impl RenderMessenger {
@@ -75,6 +77,8 @@ impl RenderMessenger {
             map_rect: IndexMap::new(),
             map_triangle: IndexMap::new(),
             map_texture: IndexMap::new(),
+            last_translation: Vector2::zero(),
+            last_scale: 1f32,
         }
     }
 
@@ -126,11 +130,19 @@ impl RenderMessenger {
     // Scene Functions
 
     pub fn set_translation(&mut self, translation: Vector2<f32>) {
+        if self.last_translation == translation {
+            return;
+        }
+        self.last_translation = translation;
         let message = RenderMessage::Translate { pos: translation };
         self.frame.messages.push(message);
     }
 
     pub fn set_scale(&mut self, scale: f32) {
+        if self.last_scale == scale {
+            return;
+        }
+        self.last_scale = scale;
         let message = RenderMessage::Scale { factor: scale };
         self.frame.messages.push(message);
     }
