@@ -3,12 +3,16 @@ use storm::input::message::InputFrame::{KeyPressed, KeyReleased};
 use storm::input::message::*;
 use storm::render::color;
 use storm::render::message::*;
+use storm::utility::indexmap::*;
+use storm::cgmath::InnerSpace;
 
 use pong::Ball;
 use pong::Player;
 
 const BALL_X_SPEED: f32 = 5.0;
 const PLAYER_Y_SPEED: f32 = 2.0;
+
+const BALL_VELOCITY: f32 = 7.5;
 
 enum PlayerType {
     A,
@@ -19,7 +23,10 @@ pub struct System {
     player_a: Player,
     player_a_direction: f32,
     player_b: Player,
+    player_a_scores: Vec<IndexToken>,
+    player_b_scores: Vec<IndexToken>,
     ball: Ball,
+    ball_velocity: Vector3<f32>,
     count: f32,
     direction: f32,
 }
@@ -49,9 +56,12 @@ impl System {
             player_a,
             player_a_direction: 0.0,
             player_b,
+            player_a_scores: vec![],
+            player_b_scores: vec![],
             ball,
             count: 500.0,
             direction: -1.0,
+            ball_velocity: Vector3::new(BALL_VELOCITY * -1.0, 0.0, 0.0)
         }
     }
 
@@ -84,17 +94,44 @@ impl System {
         return None;
     }
 
+    fn find_bounce_angle(player: &Player, ball: &Ball) -> Vector3<f32> {
+        let player_center = Vector3::new(player.box_position.x + player.box_shape.x / 2.0, player.box_position.y + player.box_shape.y / 2.0, player.box_position.z);
+        let ball_center = Vector3::new(ball.ball_position.x + ball.ball_shape.x / 2.0, ball.ball_position.y + ball.ball_shape.y / 2.0, ball.ball_position.z);
+        return (ball_center - player_center).normalize();
+    }
+
     pub fn tick(&mut self, render: &mut RenderMessenger) {
         let result = self.is_ball_overlapping();
+        
         if result.is_some() {
+            let result = result.unwrap();
             self.direction = -1.0 * self.direction;
-            self.count += (BALL_X_SPEED * self.direction) * 5.0;
+            self.ball.ball_position += (self.ball_velocity * -5.0);
+            let use_player : &Player;
+            match result {
+                PlayerType::A => {
+                    use_player = &self.player_a;
+                },
+                PlayerType::B => {
+                    use_player = &self.player_b;
+                }
+            }
+            let angle_of_velocity = System::find_bounce_angle(use_player, &self.ball);
+            self.ball_velocity = BALL_VELOCITY * angle_of_velocity;
         }
 
-        self.ball.ball_position.x = self.count;
-        self.count += BALL_X_SPEED * self.direction;
+        if self.ball.ball_position.y <= 0.0 || self.ball.ball_position.y >= 950.0 {
+            self.ball_velocity.y = self.ball_velocity.y * -1.0;
+        }
 
-        self.player_a.box_position.y += self.player_a_direction * PLAYER_Y_SPEED;
+        if self.ball.ball_position.x <= 0.0 || self.ball.ball_position.x >= 950.0 {
+            self.ball.ball_position = Vector3::new(500.0, 500.0, 0.0);
+            self.ball_velocity = Vector3::new(BALL_VELOCITY, 0.0, 0.0);
+        }
+
+        self.ball.ball_position += self.ball_velocity;
+
+        self.player_a.box_position += Vector3::new(0.0, self.player_a_direction * PLAYER_Y_SPEED, 0.0);
 
         render.update_rect(
             self.ball.ball_token,
