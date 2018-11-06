@@ -47,6 +47,6 @@ impl Player {
     }
 
     pub fn render(&self, render: &mut RenderMessenger) {
-        render.update_rect(self.box_token, self.box_position, self.box_shape, self.col);
+        render.quad_update(self.box_token, self.box_position, self.box_shape, self.col);
     }
 }

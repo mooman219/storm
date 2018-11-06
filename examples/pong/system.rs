@@ -35,17 +35,17 @@ impl System {
     pub fn new(render: &mut RenderMessenger) -> System {
         let player_a_position = Vector3::new(-2.5, -0.5, 0.0);
         let player_a_shape = Vector2::new(0.5, 1.0);
-        let player_a_token = render.create_rect(player_a_position, player_a_shape, color::PURPLE);
+        let player_a_token = render.quad_create(player_a_position, player_a_shape, color::PURPLE);
         let player_a = Player::new(player_a_token, player_a_position, player_a_shape, color::PURPLE);
 
         let player_b_position = Vector3::new(2.0, -0.5, 0.0);
         let player_b_shape = Vector2::new(0.5, 1.0);
-        let player_b_token = render.create_rect(player_b_position, player_b_shape, color::ORANGE);
+        let player_b_token = render.quad_create(player_b_position, player_b_shape, color::ORANGE);
         let player_b = Player::new(player_b_token, player_b_position, player_b_shape, color::ORANGE);
 
         let ball_postion = Vector3::new(-0.25, -0.25, 0.0);
         let ball_shape = Vector2::new(0.5, 0.5);
-        let ball_token = render.create_rect(ball_postion, ball_shape, color::RED);
+        let ball_token = render.quad_create(ball_postion, ball_shape, color::RED);
         let ball = Ball::new(ball_token, ball_postion, ball_shape);
 
         render.send();
@@ -131,7 +131,7 @@ impl System {
 
         self.player_a.box_position += Vector3::new(0.0, self.player_a_direction * PLAYER_Y_SPEED, 0.0);
 
-        render.update_rect(
+        render.quad_update(
             self.ball.ball_token,
             self.ball.ball_position,
             self.ball.ball_shape,

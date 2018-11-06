@@ -46,7 +46,7 @@ impl System {
     }
 
     fn new_game(&mut self, render: &mut RenderMessenger) {
-        render.set_scale(0.01f32);
+        render.scale(0.01f32);
         self.map_controller.new_map(render);
     }
 

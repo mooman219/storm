@@ -1,6 +1,4 @@
-use std::collections::HashMap;
 use std::io;
-use std::usize;
 
 use storm::cgmath::Vector2;
 use storm::input::message::*;

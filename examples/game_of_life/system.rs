@@ -1,6 +1,3 @@
-use rand;
-
-use rand::distributions::{Range, Sample};
 use storm::cgmath::{Vector2, Vector3};
 use storm::input::message::*;
 use storm::render::color;
@@ -32,7 +29,7 @@ impl System {
         //BUG #2, overly large texture created for rects
         //uncomment this line, and comment out the set_scale below
         //then change the create_blinker positions to 48, 48
-        render.set_scale(0.001f32);
+        render.scale(0.001f32);
 
         //gotten through personal experimentation
         // render.set_scale(0.002f32);
@@ -42,7 +39,7 @@ impl System {
         for x in 0..MAP_X_SIZE {
             index_tokens.push(vec![]);
             for y in 0..MAP_X_SIZE {
-                index_tokens[x].push(render.create_rect(
+                index_tokens[x].push(render.quad_create(
                     Vector3::new(x as f32 * 10.0, y as f32 * 10.0, 0f32),
                     Vector2::new(10.0, 10.0),
                     color::PURPLE,
@@ -129,18 +126,12 @@ impl System {
             use_color = color::PURPLE;
         }
 
-        render.update_rect(
+        render.quad_update(
             index_token,
             Vector3::new(x as f32 * 10.0, y as f32 * 10.0, 0f32),
             Vector2::new(10.0, 10.0),
             use_color,
         );
-    }
-
-    pub fn entropy(&mut self) {
-        for x in 0..50 {
-            for y in 0..50 {}
-        }
     }
 
     pub fn order() {}

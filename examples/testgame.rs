@@ -26,22 +26,22 @@ impl TestGame {
     pub fn generate_world(&mut self) {
         for x in -16..16 {
             let offset = x as f32;
-            self.render.create_rect(
+            self.render.quad_create(
                 Vector3::new(-1f32 + offset, 0f32, 0f32),
                 Vector2::new(0.5f32, 0.5f32),
                 color::ORANGE,
             );
-            self.render.create_rect(
+            self.render.quad_create(
                 Vector3::new(-0.5f32 + offset, 0.5f32, 0f32),
                 Vector2::new(0.5f32, 0.5f32),
                 color::RED,
             );
-            self.render.create_rect(
+            self.render.quad_create(
                 Vector3::new(0f32 + offset, 1f32, 0f32),
                 Vector2::new(0.5f32, 0.5f32),
                 color::PURPLE,
             );
-            self.render.create_rect(
+            self.render.quad_create(
                 Vector3::new(0.5f32 + offset, 1.5f32, 0f32),
                 Vector2::new(0.5f32, 0.5f32),
                 color::BLUE,
@@ -59,7 +59,7 @@ impl Game for TestGame {
             translation: Vector2::new(0f32, 0f32),
             square: square,
         };
-        game.render.create_texture("./examples/test.png");
+        game.render.texture_create("./examples/test.png");
         game.render.window_title("Game of Testing");
         game.generate_world();
         game.render.send();
@@ -70,7 +70,7 @@ impl Game for TestGame {
         let speed = 2f32;
         match event {
             InputFrame::KeyPressed(Key::C) => {
-                self.render.clear_rects();
+                self.render.quad_clear();
                 self.square.generate_index(&mut self.render);
             },
             InputFrame::KeyPressed(Key::V) => {
@@ -95,7 +95,7 @@ impl Game for TestGame {
         // Center the square
         self.translation.x = -self.square.pos.x - 0.5f32;
         self.translation.y = -self.square.pos.y - 0.5f32;
-        self.render.set_translation(self.translation);
+        self.render.translate(self.translation);
 
         self.render.send();
         self.clock.tick();
@@ -113,7 +113,7 @@ impl MoveableSquare {
     pub fn new(render: &mut RenderMessenger) -> MoveableSquare {
         let pos = Vector3::new(-0.5f32, -0.5f32, 0.125f32);
         let size = Vector2::new(1f32, 1f32);
-        let index = render.create_rect(pos, size, color::YELLOW);
+        let index = render.quad_create(pos, size, color::YELLOW);
         MoveableSquare {
             pos: pos,
             size: size,
@@ -123,11 +123,11 @@ impl MoveableSquare {
     }
 
     pub fn generate_index(&mut self, render: &mut RenderMessenger) {
-        self.index = render.create_rect(self.pos, self.size, color::YELLOW);
+        self.index = render.quad_create(self.pos, self.size, color::YELLOW);
     }
 
     pub fn update(&mut self, delta: f32, render: &mut RenderMessenger) {
         self.pos += (self.velocity * delta).extend(0f32);
-        render.update_rect(self.index, self.pos, self.size, color::YELLOW);
+        render.quad_update(self.index, self.pos, self.size, color::YELLOW);
     }
 }

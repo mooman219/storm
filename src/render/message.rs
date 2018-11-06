@@ -21,7 +21,7 @@ impl RenderFrame {
 #[repr(u8)]
 pub enum RenderMessage {
     //
-    // Geometry
+    // Quad
     //
     QuadCreate {
         pos: Vector3<f32>,
@@ -41,7 +41,7 @@ pub enum RenderMessage {
     //
     // Texture
     //
-    CreateTexture {
+    TextureCreate {
         path: String,
     },
     //
@@ -86,9 +86,9 @@ impl RenderMessenger {
         }
     }
 
-    // Geometry Functions
+    // Quad Functions
 
-    pub fn create_rect(&mut self, pos: Vector3<f32>, size: Vector2<f32>, color: Color) -> IndexToken {
+    pub fn quad_create(&mut self, pos: Vector3<f32>, size: Vector2<f32>, color: Color) -> IndexToken {
         let message = RenderMessage::QuadCreate {
             pos: pos,
             size: size,
@@ -98,7 +98,7 @@ impl RenderMessenger {
         self.map_rect.add()
     }
 
-    pub fn update_rect(&mut self, token: IndexToken, pos: Vector3<f32>, size: Vector2<f32>, color: Color) {
+    pub fn quad_update(&mut self, token: IndexToken, pos: Vector3<f32>, size: Vector2<f32>, color: Color) {
         let message = RenderMessage::QuadUpdate {
             id: self.map_rect.get(token),
             pos: pos,
@@ -108,14 +108,14 @@ impl RenderMessenger {
         self.frame.messages.push(message);
     }
 
-    pub fn remove_rect(&mut self, token: IndexToken) {
+    pub fn quad_remove(&mut self, token: IndexToken) {
         let message = RenderMessage::QuadRemove {
             id: self.map_rect.remove(token),
         };
         self.frame.messages.push(message);
     }
 
-    pub fn clear_rects(&mut self) {
+    pub fn quad_clear(&mut self) {
         self.map_rect.clear();
         let message = RenderMessage::QuadClear {};
         self.frame.messages.push(message);
@@ -123,8 +123,8 @@ impl RenderMessenger {
 
     // Texture Functions
 
-    pub fn create_texture(&mut self, path: &str) -> IndexToken {
-        let message = RenderMessage::CreateTexture {
+    pub fn texture_create(&mut self, path: &str) -> IndexToken {
+        let message = RenderMessage::TextureCreate {
             path: String::from(path),
         };
         self.frame.messages.push(message);
@@ -133,7 +133,7 @@ impl RenderMessenger {
 
     // Scene Functions
 
-    pub fn set_translation(&mut self, translation: Vector2<f32>) {
+    pub fn translate(&mut self, translation: Vector2<f32>) {
         if self.last_translation == translation {
             return;
         }
@@ -142,7 +142,7 @@ impl RenderMessenger {
         self.frame.messages.push(message);
     }
 
-    pub fn set_scale(&mut self, scale: f32) {
+    pub fn scale(&mut self, scale: f32) {
         if self.last_scale == scale {
             return;
         }

@@ -95,7 +95,7 @@ impl RenderState {
         for message in messages.drain(..) {
             match message {
                 //
-                // Geometry
+                // Quad
                 //
                 RenderMessage::QuadCreate { pos, size, color } => {
                     let quad = Quad::texture_rect(pos, size, color);
@@ -114,7 +114,7 @@ impl RenderState {
                 //
                 // Texture
                 //
-                RenderMessage::CreateTexture { path } => match open(Path::new(&path)) {
+                RenderMessage::TextureCreate { path } => match open(Path::new(&path)) {
                     Ok(image) => {
                         self.texture_atlas.set_image(image);
                     },
