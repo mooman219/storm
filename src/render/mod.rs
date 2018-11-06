@@ -94,7 +94,9 @@ impl RenderState {
     fn handle_messages(&mut self, messages: &mut Vec<RenderMessage>) {
         for message in messages.drain(..) {
             match message {
-                // Quads
+                //
+                // Geometry
+                //
                 RenderMessage::QuadCreate { pos, size, color } => {
                     let quad = Quad::texture_rect(pos, size, color);
                     self.quad_texture.add(quad);
@@ -109,6 +111,9 @@ impl RenderState {
                 RenderMessage::QuadClear {} => {
                     self.quad_texture.clear();
                 },
+                //
+                // Texture
+                //
                 RenderMessage::CreateTexture { path } => match open(Path::new(&path)) {
                     Ok(image) => {
                         self.texture_atlas.set_image(image);
@@ -117,11 +122,20 @@ impl RenderState {
                         panic!("Unable to set image as atlas: {}", &path);
                     },
                 },
+                //
+                // Scene
+                //
                 RenderMessage::Translate { pos } => {
                     self.shader_texture.set_translation(pos);
                 },
                 RenderMessage::Scale { factor } => {
                     self.shader_texture.set_scale(factor);
+                },
+                //
+                // Window
+                //
+                RenderMessage::WindowTitle { title } => {
+                    self.display.set_title(title.as_str());
                 },
             }
         }

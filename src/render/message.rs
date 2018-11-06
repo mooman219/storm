@@ -53,6 +53,12 @@ pub enum RenderMessage {
     Scale {
         factor: f32,
     },
+    //
+    // Window
+    //
+    WindowTitle {
+        title: String,
+    },
 }
 
 // ////////////////////////////////////////////////////////
@@ -63,7 +69,6 @@ pub struct RenderMessenger {
     render_producer: Producer<RenderFrame>,
     frame: RenderFrame,
     map_rect: IndexMap,
-    map_triangle: IndexMap,
     map_texture: IndexMap,
     last_translation: Vector2<f32>,
     last_scale: f32,
@@ -75,7 +80,6 @@ impl RenderMessenger {
             render_producer: render_producer,
             frame: RenderFrame::new(),
             map_rect: IndexMap::new(),
-            map_triangle: IndexMap::new(),
             map_texture: IndexMap::new(),
             last_translation: Vector2::zero(),
             last_scale: 1f32,
@@ -144,6 +148,15 @@ impl RenderMessenger {
         }
         self.last_scale = scale;
         let message = RenderMessage::Scale { factor: scale };
+        self.frame.messages.push(message);
+    }
+
+    // Window Functions
+
+    pub fn window_title(&mut self, title: &str) {
+        let message = RenderMessage::WindowTitle {
+            title: String::from(title),
+        };
         self.frame.messages.push(message);
     }
 

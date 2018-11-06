@@ -42,7 +42,7 @@ pub fn run<G: Game>() {
     let event_loop = glutin::EventsLoop::new();
     let display = Display::new(
         glutin::WindowBuilder::new()
-            .with_title(G::TITLE)
+            .with_title("Storm Engine")
             .with_dimensions(LogicalSize::from((500, 500))),
         glutin::ContextBuilder::new().with_multisampling(2),
         &event_loop,

@@ -20,9 +20,8 @@ pub struct Pong {
 }
 
 impl Game for Pong {
-    const TITLE: &'static str = "Pong";
-
     fn new(mut render: RenderMessenger) -> Self {
+        render.window_title("Pong");
         let new_pong = Pong {
             system: System::new(&mut render),
             render: render,

@@ -51,8 +51,6 @@ impl TestGame {
 }
 
 impl Game for TestGame {
-    const TITLE: &'static str = "Test Game";
-
     fn new(mut render: RenderMessenger) -> Self {
         let square = MoveableSquare::new(&mut render);
         let mut game = TestGame {
@@ -62,6 +60,7 @@ impl Game for TestGame {
             square: square,
         };
         game.render.create_texture("./examples/test.png");
+        game.render.window_title("Game of Testing");
         game.generate_world();
         game.render.send();
         game

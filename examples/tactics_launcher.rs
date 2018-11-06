@@ -20,9 +20,8 @@ pub struct TacticsLauncher {
 }
 
 impl Game for TacticsLauncher {
-    const TITLE: &'static str = "Terra Ingognita";
-
-    fn new(render: RenderMessenger) -> Self {
+    fn new(mut render: RenderMessenger) -> Self {
+        render.window_title("Terra Ingognita");
         TacticsLauncher {
             system: System::new(),
             render,

@@ -20,10 +20,9 @@ pub struct GOL {
 }
 
 impl Game for GOL {
-    const TITLE: &'static str = "Game Of Life";
-
     fn new(mut render: RenderMessenger) -> Self {
-        let mut new_gol = GOL {
+        render.window_title("Game of Life");
+        let new_gol = GOL {
             system: System::new(&mut render),
             render: render,
             clock: Clock::new(1),

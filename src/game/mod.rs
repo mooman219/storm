@@ -3,9 +3,6 @@ use input::message::*;
 use render::message::*;
 
 pub trait Game {
-    /// The window name for the game.
-    const TITLE: &'static str = "Untitled";
-
     /// Function to instantiate a new game object.
     fn new(render: RenderMessenger) -> Self;
 
