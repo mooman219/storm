@@ -18,7 +18,6 @@ impl RenderFrame {
     }
 }
 
-#[repr(u8)]
 pub enum RenderMessage {
     //
     // Quad
