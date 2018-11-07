@@ -33,7 +33,7 @@ pub fn start(
     };
 
     // Log input timings.
-    let mut timer_input = Timer::new("[I] Frame");
+    let mut timer_input = Timer::new("[I] Tick");
     while state.is_active {
         // Start timing.
         timer_input.start();

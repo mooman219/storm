@@ -63,6 +63,7 @@ impl Display {
 
     /// Resize the GL context.
     pub fn resize(&self, dimensions: Vector2<f64>) {
+        let dimensions = dimensions * self.window.get_hidpi_factor();
         self.window.resize(PhysicalSize::from((dimensions.x, dimensions.y)));
         viewport(0, 0, dimensions.x as i32, dimensions.y as i32);
     }
