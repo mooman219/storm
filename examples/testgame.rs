@@ -59,7 +59,7 @@ impl Game for TestGame {
             translation: Vector2::new(0f32, 0f32),
             square: square,
         };
-        game.render.texture_create("./examples/test.png");
+        game.render.texture_create("./examples/testgame/test.png");
         game.render.window_title("Game of Testing");
         game.generate_world();
         game.render.send();
