@@ -1,10 +1,10 @@
+use storm::cgmath::InnerSpace;
 use storm::cgmath::{Vector2, Vector3};
 use storm::input::message::InputFrame::{KeyPressed, KeyReleased};
 use storm::input::message::*;
 use storm::render::color;
 use storm::render::message::*;
 use storm::utility::indexmap::*;
-use storm::cgmath::InnerSpace;
 
 use pong::Ball;
 use pong::Player;
@@ -59,7 +59,7 @@ impl System {
             ball,
             count: 0.5,
             direction: -1.0,
-            ball_velocity: Vector3::new(BALL_VELOCITY * -1.0, 0.0, 0.0)
+            ball_velocity: Vector3::new(BALL_VELOCITY * -1.0, 0.0, 0.0),
         }
     }
 
@@ -93,26 +93,34 @@ impl System {
     }
 
     fn find_bounce_angle(player: &Player, ball: &Ball) -> Vector3<f32> {
-        let player_center = Vector3::new(player.box_position.x + player.box_shape.x / 2.0, player.box_position.y + player.box_shape.y / 2.0, player.box_position.z);
-        let ball_center = Vector3::new(ball.ball_position.x + ball.ball_shape.x / 2.0, ball.ball_position.y + ball.ball_shape.y / 2.0, ball.ball_position.z);
+        let player_center = Vector3::new(
+            player.box_position.x + player.box_shape.x / 2.0,
+            player.box_position.y + player.box_shape.y / 2.0,
+            player.box_position.z,
+        );
+        let ball_center = Vector3::new(
+            ball.ball_position.x + ball.ball_shape.x / 2.0,
+            ball.ball_position.y + ball.ball_shape.y / 2.0,
+            ball.ball_position.z,
+        );
         return (ball_center - player_center).normalize();
     }
 
     pub fn tick(&mut self, render: &mut RenderMessenger) {
         let result = self.is_ball_overlapping();
-        
+
         if result.is_some() {
             let result = result.unwrap();
             self.direction = -1.0 * self.direction;
-            self.ball.ball_position += (self.ball_velocity * -5.0);
-            let use_player : &Player;
+            self.ball.ball_position += self.ball_velocity * -5.0;
+            let use_player: &Player;
             match result {
                 PlayerType::A => {
                     use_player = &self.player_a;
                 },
                 PlayerType::B => {
                     use_player = &self.player_b;
-                }
+                },
             }
             let angle_of_velocity = System::find_bounce_angle(use_player, &self.ball);
             self.ball_velocity = BALL_VELOCITY * angle_of_velocity;

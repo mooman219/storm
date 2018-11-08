@@ -1,7 +1,7 @@
-#![feature(asm, const_fn, pointer_methods)]
+#![feature(asm, const_fn)]
 #![allow(dead_code, non_camel_case_types, non_snake_case)]
 
-extern crate bounded_spsc_queue;
+extern crate core;
 extern crate gl;
 extern crate glutin;
 extern crate image;
@@ -23,6 +23,7 @@ mod logger;
 mod test;
 
 use cgmath::*;
+use channel::bounded_spsc;
 use channel::consume_spsc;
 use channel::replace_spsc;
 use game::*;
@@ -49,8 +50,8 @@ pub fn run<G: Game>() {
     );
 
     // Inter-thread message queues for input and rendering
-    let (render_producer_pipe, render_consumer_pipe) = bounded_spsc_queue::make(4);
-    let (input_producer_pipe, input_consumer_pipe) = bounded_spsc_queue::make(256);
+    let (render_producer_pipe, render_consumer_pipe) = bounded_spsc::make(4);
+    let (input_producer_pipe, input_consumer_pipe) = bounded_spsc::make(256);
     let (resize_producer, resize_consumer) = consume_spsc::make();
     let (cursor_producer, _cursor_consumer) = replace_spsc::make(Vector2::zero());
 

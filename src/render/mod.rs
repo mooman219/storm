@@ -8,8 +8,8 @@ pub mod shader;
 pub mod texture;
 pub mod vertex;
 
-use bounded_spsc_queue;
 use cgmath::*;
+use channel::bounded_spsc;
 use channel::consume_spsc;
 use image::*;
 use render::buffer::geometry::*;
@@ -31,10 +31,10 @@ struct RenderState {
     quad_texture: GeometryBuffer<Quad<TextureVertex>>,
     texture_atlas: TextureGl,
 }
-
+ 
 pub fn start(
     display: Display,
-    render_consumer: bounded_spsc_queue::Consumer<RenderFrame>,
+    render_consumer: bounded_spsc::Consumer<RenderFrame>,
     resize_consumer: consume_spsc::Consumer<Vector2<f64>>,
 ) {
     // Initialize the display. The display is bound in the thread we're going to be making opengl

@@ -1,5 +1,5 @@
-use bounded_spsc_queue::Consumer;
 use cgmath::*;
+use channel::bounded_spsc::Consumer;
 use game::*;
 
 // Re-exports.

@@ -1,11 +1,11 @@
 #![feature(test)]
 
-extern crate bounded_spsc_queue;
 extern crate storm;
 extern crate test;
 
 use std::sync::mpsc::sync_channel;
 use storm::channel::consume_spsc;
+use storm::channel::bounded_spsc;
 use storm::channel::replace_spsc;
 use storm::utility::benching::black_box;
 use test::Bencher;
@@ -38,7 +38,7 @@ fn bench_channel_replace_cycle(bench: &mut Bencher) {
 
 #[bench]
 fn bench_channel_bounded_cycle(bench: &mut Bencher) {
-    let (p, c) = bounded_spsc_queue::make(10000 as usize);
+    let (p, c) = bounded_spsc::make(10000 as usize);
 
     bench.iter(|| {
         for x in 0..ITERATIONS {

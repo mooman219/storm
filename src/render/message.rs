@@ -1,5 +1,5 @@
-use bounded_spsc_queue::Producer;
 use cgmath::*;
+use channel::bounded_spsc::Producer;
 use render::color::*;
 use std::mem;
 use utility::indexmap::*;

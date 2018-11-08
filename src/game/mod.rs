@@ -1,4 +1,4 @@
-use bounded_spsc_queue;
+use channel::bounded_spsc;
 use input::message::*;
 use render::message::*;
 
@@ -15,8 +15,8 @@ pub trait Game {
 }
 
 pub fn start<G: Game>(
-    input_consumer_pipe: bounded_spsc_queue::Consumer<InputFrame>,
-    render_producer_pipe: bounded_spsc_queue::Producer<RenderFrame>,
+    input_consumer_pipe: bounded_spsc::Consumer<InputFrame>,
+    render_producer_pipe: bounded_spsc::Producer<RenderFrame>,
 ) {
     let mut input_consumer = InputMessenger::new(input_consumer_pipe);
     let render_producer = RenderMessenger::new(render_producer_pipe);

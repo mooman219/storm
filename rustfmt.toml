@@ -6,6 +6,3 @@ max_width = 120
 
 # https://github.com/rust-lang-nursery/rustfmt/blob/master/Configurations.md#reorder_imports
 reorder_imports = true
-
-# https://github.com/rust-lang-nursery/rustfmt/blob/master/Configurations.md#use_small_heuristics
-use_small_heuristics = true

@@ -1,7 +1,7 @@
 pub mod message;
 
-use bounded_spsc_queue;
 use cgmath::*;
+use channel::bounded_spsc;
 use channel::consume_spsc;
 use channel::replace_spsc;
 use glutin;
@@ -21,7 +21,7 @@ struct InputState {
 
 pub fn start(
     mut event_loop: EventsLoop,
-    input_producer: bounded_spsc_queue::Producer<InputFrame>,
+    input_producer: bounded_spsc::Producer<InputFrame>,
     resize_producer: consume_spsc::Producer<Vector2<f64>>,
     cursor_producer: replace_spsc::Producer<Vector2<f64>>,
 ) {

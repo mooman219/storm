@@ -1,6 +1,5 @@
 #![feature(test)]
 
-extern crate bounded_spsc_queue;
 extern crate storm;
 extern crate test;
 
