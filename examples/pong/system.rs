@@ -12,7 +12,7 @@ use pong::Player;
 const BALL_X_SPEED: f32 = 0.1;
 const PLAYER_Y_SPEED: f32 = 0.05;
 
-const BALL_VELOCITY: f32 = 7.5;
+const BALL_VELOCITY: f32 = 0.05;
 
 enum PlayerType {
     A,
@@ -34,17 +34,17 @@ pub struct System {
 impl System {
     pub fn new(render: &mut RenderMessenger) -> System {
         let player_a_position = Vector3::new(-2.5, -0.5, 0.0);
-        let player_a_shape = Vector2::new(0.5, 1.0);
+        let player_a_shape = Vector2::new(0.5, 0.5);
         let player_a_token = render.quad_create(player_a_position, player_a_shape, color::PURPLE);
         let player_a = Player::new(player_a_token, player_a_position, player_a_shape, color::PURPLE);
 
         let player_b_position = Vector3::new(2.0, -0.5, 0.0);
-        let player_b_shape = Vector2::new(0.5, 1.0);
+        let player_b_shape = Vector2::new(0.5, 0.5);
         let player_b_token = render.quad_create(player_b_position, player_b_shape, color::ORANGE);
         let player_b = Player::new(player_b_token, player_b_position, player_b_shape, color::ORANGE);
 
-        let ball_postion = Vector3::new(-0.25, -0.25, 0.0);
-        let ball_shape = Vector2::new(0.5, 0.5);
+        let ball_postion = Vector3::new(0.0, -0.0, 0.0);
+        let ball_shape = Vector2::new(0.1, 0.1);
         let ball_token = render.quad_create(ball_postion, ball_shape, color::RED);
         let ball = Ball::new(ball_token, ball_postion, ball_shape);
 
@@ -81,6 +81,18 @@ impl System {
         }
     }
 
+    fn the_fucking_worst_ai(&mut self) {
+        if self.ball_velocity.x > 0.0 {
+            //if it is coming at the second player
+            if self.ball.ball_position.y > self.player_b.box_position.y {
+                self.player_b.box_position += Vector3::new(0.0, PLAYER_Y_SPEED, 0.0);
+            }
+            else if self.ball.ball_position.y < self.player_b.box_position.y {
+                self.player_b.box_position += Vector3::new(0.0, -PLAYER_Y_SPEED, 0.0);
+            }
+        }
+    }
+
     fn is_ball_overlapping(&self) -> Option<PlayerType> {
         if self.player_a.overlaps_box(&self.ball) {
             return Some(PlayerType::A);
@@ -112,7 +124,7 @@ impl System {
         if result.is_some() {
             let result = result.unwrap();
             self.direction = -1.0 * self.direction;
-            self.ball.ball_position += self.ball_velocity * -5.0;
+            self.ball.ball_position += self.ball_velocity ;//* -5.0;
             let use_player: &Player;
             match result {
                 PlayerType::A => {
@@ -126,18 +138,19 @@ impl System {
             self.ball_velocity = BALL_VELOCITY * angle_of_velocity;
         }
 
-        if self.ball.ball_position.y <= 0.0 || self.ball.ball_position.y >= 950.0 {
+        if self.ball.ball_position.y <= -2.5 || self.ball.ball_position.y >= 2.5 {
             self.ball_velocity.y = self.ball_velocity.y * -1.0;
         }
 
-        if self.ball.ball_position.x <= 0.0 || self.ball.ball_position.x >= 950.0 {
-            self.ball.ball_position = Vector3::new(500.0, 500.0, 0.0);
+        if self.ball.ball_position.x <= -2.5 || self.ball.ball_position.x >= 2.5 {
+            self.ball.ball_position = Vector3::new(0.0, 0.0, 0.0);
             self.ball_velocity = Vector3::new(BALL_VELOCITY, 0.0, 0.0);
         }
 
         self.ball.ball_position += self.ball_velocity;
 
         self.player_a.box_position += Vector3::new(0.0, self.player_a_direction * PLAYER_Y_SPEED, 0.0);
+        self.the_fucking_worst_ai();
 
         render.quad_update(
             self.ball.ball_token,
@@ -146,5 +159,6 @@ impl System {
             color::RED,
         );
         self.player_a.render(render);
+        self.player_b.render(render);
     }
 }
