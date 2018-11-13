@@ -1,16 +1,16 @@
 use image::DynamicImage;
 use render::raw::*;
 
-pub struct TextureGl {
+pub struct TextureHandle {
     id: u32,
     unit: TextureUnit,
 }
 
-impl TextureGl {
-    pub fn new(texture_unit: TextureUnit) -> TextureGl {
+impl TextureHandle {
+    pub fn new(texture_unit: TextureUnit) -> TextureHandle {
         let id = gen_texture();
         let unit = texture_unit;
-        let texture = TextureGl { id: id, unit: unit };
+        let texture = TextureHandle { id: id, unit: unit };
         texture.set_raw(1, 1, [255u8, 255u8, 255u8, 255u8].to_vec());
         texture
     }
@@ -44,7 +44,7 @@ impl TextureGl {
     }
 }
 
-impl Drop for TextureGl {
+impl Drop for TextureHandle {
     fn drop(&mut self) {
         delete_texture(self.id);
     }

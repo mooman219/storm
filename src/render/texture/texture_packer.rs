@@ -148,7 +148,7 @@ impl Packer for TexturePacker {
         self.texture.clone()
     }
 
-    fn pack(&mut self, texture: &Texture) -> Option<Rect> {
+    fn pack(&mut self, texture: &Texture) -> Rect {
         let mut width = texture.width();
         let mut height = texture.height();
 
@@ -164,9 +164,9 @@ impl Packer for TexturePacker {
 
             self.texture.set_texture(rect.x, rect.y, texture);
 
-            Some(rect)
+            rect
         } else {
-            None
+            panic!("Unable to find space for the texture.");
         }
     }
 }

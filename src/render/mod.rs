@@ -29,9 +29,10 @@ struct RenderState {
     display: Display,
     shader_texture: TextureShader,
     quad_texture: GeometryBuffer<Quad<TextureVertex>>,
-    texture_atlas: TextureGl,
+    texture_packer: TexturePacker,
+    texture_atlas: TextureHandle,
 }
- 
+
 pub fn start(
     display: Display,
     render_consumer: bounded_spsc::Consumer<RenderFrame>,
@@ -47,7 +48,12 @@ pub fn start(
         display: display,
         shader_texture: TextureShader::new(),
         quad_texture: Quad::new_geometry_buffer(2500),
-        texture_atlas: TextureGl::new(TextureUnit::Atlas),
+        texture_packer: TexturePacker::new(TexturePackerConfig {
+            max_width: 2048,
+            max_height: 2048,
+            texture_padding: 0,
+        }),
+        texture_atlas: TextureHandle::new(TextureUnit::Atlas),
     };
 
     // Setup cabilities.

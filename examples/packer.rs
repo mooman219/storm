@@ -9,7 +9,7 @@ use storm::render::texture::*;
 /// Run with: cargo run --example packer --release
 fn main() {
     let mut packer = TexturePacker::new(TexturePackerConfig {
-        max_width: 256,
+        max_width: 1024,
         max_height: 1024,
         texture_padding: 0,
     });
@@ -18,9 +18,8 @@ fn main() {
     for i in 1..11 {
         let name = format!("{}.png", i);
         let path = format!("examples/packer/assets/{}", name);
-        packer.pack_path(&Path::new(&path)).map(|rect| {
-            println!("  {:7} : {:?}", name, rect);
-        });
+        let rect = packer.pack_path(&Path::new(&path));
+        println!("  {:7} : {:?}", name, rect);
     }
 
     // Save the result
