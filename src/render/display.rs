@@ -27,7 +27,6 @@ impl Display {
             self.window.make_current().unwrap();
         }
         load_with(|symbol| self.window.get_proc_address(symbol) as *const _);
-        info!("Render: Bound new display");
         info!("Render: OpenGL version {}", get_string(StringTarget::Version));
     }
 
