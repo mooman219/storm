@@ -12,7 +12,7 @@ use pong::Player;
 const BALL_X_SPEED: f32 = 0.1;
 const PLAYER_Y_SPEED: f32 = 0.05;
 
-const BALL_VELOCITY: f32 = 0.05;
+const BALL_VELOCITY: f32 = 0.06;
 
 enum PlayerType {
     A,
@@ -47,6 +47,19 @@ impl System {
         let ball_shape = Vector2::new(0.1, 0.1);
         let ball_token = render.quad_create(ball_postion, ball_shape, color::RED);
         let ball = Ball::new(ball_token, ball_postion, ball_shape);
+
+        let mut player_a_scores = vec![];
+//        let mut player_b_scores = vec![];
+        let y_height = 2.5;
+
+        for _ in 0..5 {
+
+            let a_score = render.quad_create(Vector3::new(0.0, y_height, 0.0), Vector2::new(0.2, 0.2), color::GREEN);
+//            let b_score = render.quad_create();
+            player_a_scores.push(a_score);
+//            player_b_scores.push(b_score);
+        }
+
 
         render.send();
 
@@ -118,9 +131,18 @@ impl System {
         return (ball_center - player_center).normalize();
     }
 
-    pub fn tick(&mut self, render: &mut RenderMessenger) {
-        let result = self.is_ball_overlapping();
+    fn check_for_out_of_bounds(&mut self) {
+       if self.ball.ball_position.y <= -2.5 || self.ball.ball_position.y >= 2.5 {
+            self.ball_velocity.y = self.ball_velocity.y * -1.0;
+        }
 
+        if self.ball.ball_position.x <= -2.5 || self.ball.ball_position.x >= 2.5 {
+            self.ball.ball_position = Vector3::new(0.0, 0.0, 0.0);
+            self.ball_velocity = Vector3::new(BALL_VELOCITY, 0.0, 0.0);
+        }
+    }
+
+    fn handle_collision_check(&mut self, result: Option<PlayerType>) {
         if result.is_some() {
             let result = result.unwrap();
             self.direction = -1.0 * self.direction;
@@ -137,20 +159,16 @@ impl System {
             let angle_of_velocity = System::find_bounce_angle(use_player, &self.ball);
             self.ball_velocity = BALL_VELOCITY * angle_of_velocity;
         }
+    }
 
-        if self.ball.ball_position.y <= -2.5 || self.ball.ball_position.y >= 2.5 {
-            self.ball_velocity.y = self.ball_velocity.y * -1.0;
-        }
-
-        if self.ball.ball_position.x <= -2.5 || self.ball.ball_position.x >= 2.5 {
-            self.ball.ball_position = Vector3::new(0.0, 0.0, 0.0);
-            self.ball_velocity = Vector3::new(BALL_VELOCITY, 0.0, 0.0);
-        }
+    pub fn tick(&mut self, render: &mut RenderMessenger) {
+        let result = self.is_ball_overlapping();
+        self.handle_collision_check(result);
+        self.check_for_out_of_bounds();
+        self.the_fucking_worst_ai();
 
         self.ball.ball_position += self.ball_velocity;
-
         self.player_a.box_position += Vector3::new(0.0, self.player_a_direction * PLAYER_Y_SPEED, 0.0);
-        self.the_fucking_worst_ai();
 
         render.quad_update(
             self.ball.ball_token,
