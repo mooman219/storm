@@ -7,7 +7,6 @@ use storm::log::LevelFilter;
 use storm::render::color;
 use storm::render::message::*;
 use storm::time::clock::*;
-use storm::utility::indexmap::*;
 
 /// Run with: cargo run --example testgame --release
 fn main() {
@@ -30,21 +29,25 @@ impl Tetris {
                 Vector3::new(-1f32 + offset, 0f32, 0f32),
                 Vector2::new(0.5f32, 0.5f32),
                 color::ORANGE,
+                DEFAULT_TEXTURE,
             );
             self.render.quad_create(
                 Vector3::new(-0.5f32 + offset, 0.5f32, 0f32),
                 Vector2::new(0.5f32, 0.5f32),
                 color::RED,
+                DEFAULT_TEXTURE,
             );
             self.render.quad_create(
                 Vector3::new(0f32 + offset, 1f32, 0f32),
                 Vector2::new(0.5f32, 0.5f32),
                 color::PURPLE,
+                DEFAULT_TEXTURE,
             );
             self.render.quad_create(
                 Vector3::new(0.5f32 + offset, 1.5f32, 0f32),
                 Vector2::new(0.5f32, 0.5f32),
                 color::BLUE,
+                DEFAULT_TEXTURE,
             );
         }
     }
@@ -61,7 +64,7 @@ impl Game for Tetris {
         };
         game.render.texture_create("./examples/tetris/block.png");
         game.render.window_title("Tetris");
-   //     game.generate_world();
+        //     game.generate_world();
         game.render.send();
         game
     }
@@ -106,14 +109,14 @@ pub struct MoveableSquare {
     pos: Vector3<f32>,
     size: Vector2<f32>,
     velocity: Vector2<f32>,
-    index: IndexToken,
+    index: QuadReference,
 }
 
 impl MoveableSquare {
     pub fn new(render: &mut RenderMessenger) -> MoveableSquare {
         let pos = Vector3::new(-0.5f32, -0.5f32, 0.125f32);
         let size = Vector2::new(1.0f32, 1.0f32);
-        let index = render.quad_create(pos, size, color::WHITE);
+        let index = render.quad_create(pos, size, color::WHITE, DEFAULT_TEXTURE);
         MoveableSquare {
             pos: pos,
             size: size,
@@ -123,11 +126,11 @@ impl MoveableSquare {
     }
 
     pub fn generate_index(&mut self, render: &mut RenderMessenger) {
-        self.index = render.quad_create(self.pos, self.size, color::WHITE);
+        self.index = render.quad_create(self.pos, self.size, color::WHITE, DEFAULT_TEXTURE);
     }
 
     pub fn update(&mut self, delta: f32, render: &mut RenderMessenger) {
         self.pos += (self.velocity * delta).extend(0f32);
-        render.quad_update(self.index, self.pos, self.size, color::WHITE);
+        render.quad_update(self.index, self.pos, self.size, color::WHITE, DEFAULT_TEXTURE);
     }
 }

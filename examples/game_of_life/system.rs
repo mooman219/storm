@@ -2,7 +2,6 @@ use storm::cgmath::{Vector2, Vector3};
 use storm::input::message::*;
 use storm::render::color;
 use storm::render::message::*;
-use storm::utility::indexmap::*;
 
 //////////
 /// Main Driver for conways game of life
@@ -18,7 +17,7 @@ pub enum CurrentActiveFrame {
 pub struct System {
     a_frame: [[bool; MAP_X_SIZE]; MAP_X_SIZE],
     b_frame: [[bool; MAP_X_SIZE]; MAP_X_SIZE],
-    index_tokens: Vec<Vec<IndexToken>>,
+    index_tokens: Vec<Vec<QuadReference>>,
     current_active_frame: CurrentActiveFrame,
     extra_slow: i32,
     created_blinker: bool,
@@ -35,7 +34,7 @@ impl System {
         // render.set_scale(0.002f32);
 
         //precreate our index tokens for the board, they will never change in number
-        let mut index_tokens: Vec<Vec<IndexToken>> = vec![];
+        let mut index_tokens: Vec<Vec<QuadReference>> = vec![];
         for x in 0..MAP_X_SIZE {
             index_tokens.push(vec![]);
             for y in 0..MAP_X_SIZE {
@@ -43,6 +42,7 @@ impl System {
                     Vector3::new(x as f32 * 10.0, y as f32 * 10.0, 0f32),
                     Vector2::new(10.0, 10.0),
                     color::PURPLE,
+                    DEFAULT_TEXTURE,
                 ));
             }
         }
@@ -114,7 +114,7 @@ impl System {
     pub fn update_cell_color(
         x: usize,
         y: usize,
-        index_token: IndexToken,
+        index_token: QuadReference,
         render: &mut RenderMessenger,
         cell_value: bool,
     ) {
@@ -131,6 +131,7 @@ impl System {
             Vector3::new(x as f32 * 10.0, y as f32 * 10.0, 0f32),
             Vector2::new(10.0, 10.0),
             use_color,
+            DEFAULT_TEXTURE,
         );
     }
 

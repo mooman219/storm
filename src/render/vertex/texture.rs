@@ -48,12 +48,12 @@ impl Vertex for TextureVertex {
         // Color
         enable_vertex_attrib_array(2);
         vertex_attrib_pointer(
-            2,                                        // Index
-            0x80E1,                                   // Count (gl::BGRA = 0x80E1)
-            AttributeType::UnsignedInt2_10_10_10_Rev, // Type
-            true,                                     // Normalized
-            Self::VERTEX_SIZE as i32,                 // Stride
-            (5 * 4) as *const _,                      // Offset
+            2,                           // Index
+            4,                           // Count
+            AttributeType::UnsignedByte, // Type
+            true,                        // Normalized
+            Self::VERTEX_SIZE as i32,    // Stride
+            (5 * 4) as *const _,         // Offset
         );
     }
 }

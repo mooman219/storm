@@ -3,7 +3,6 @@ use rand::distributions::{Range, Sample};
 use std::io;
 use storm::cgmath::{Vector2, Vector3};
 use storm::render::message::*;
-use storm::utility::indexmap::*;
 use tactics::overworldmap::map_tile::{MapTile, TileType};
 
 const MAP_X_SIZE: usize = 10;
@@ -28,7 +27,7 @@ pub struct OverworldMap {
     map: Vec<Vec<MapTile>>,    //this is the actual tiles that handle all logic with one tiles
     map_state: Vec<Vec<char>>, //this is a record of the previous printed state of the map
     //if this differs between two calls of layout, we must redraw the map
-    tile_index_tokens: Vec<Vec<IndexToken>>, //this is the list of index token for drawing the map
+    tile_index_tokens: Vec<Vec<QuadReference>>, //this is the list of index token for drawing the map
     //we allocate them at the start of the game
     //and then use them to update on a draw that triggers when the map_state was updated
     party_position_on_map: Vector2<usize>,
@@ -45,7 +44,7 @@ impl OverworldMap {
     }
 
     //this will genreate a 2d array made up of Vectors, with map tiles
-    pub fn generate_maps(render: &mut RenderMessenger) -> (Vec<Vec<MapTile>>, Vec<Vec<char>>, Vec<Vec<IndexToken>>) {
+    pub fn generate_maps(render: &mut RenderMessenger) -> (Vec<Vec<MapTile>>, Vec<Vec<char>>, Vec<Vec<QuadReference>>) {
         let mut map = vec![];
         let mut map_state = vec![];
         let mut index_tokens = vec![];
@@ -97,12 +96,14 @@ impl OverworldMap {
                         Vector3::new(i as f32 * 10.0, j as f32 * 10.0, 0f32),
                         Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32),
                         tag_color,
+                        DEFAULT_TEXTURE,
                     )); //we create a rect for it
                 } else {
                     index_tokens[i].push(render.quad_create(
                         Vector3::new(i as f32 * 10.0, j as f32 * 10.0, 0f32),
                         Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32),
                         tag_color,
+                        DEFAULT_TEXTURE,
                     )); //we create a rect for it
                 }
             }
@@ -316,6 +317,7 @@ impl OverworldMap {
                         ),
                         Vector2::new(MAP_TILE_WIDTH as f32, MAP_TILE_HEIGHT as f32),
                         self.map[x][y].color(),
+                        DEFAULT_TEXTURE,
                     );
                 }
             }

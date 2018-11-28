@@ -26,12 +26,14 @@ pub enum RenderMessage {
         pos: Vector3<f32>,
         size: Vector2<f32>,
         color: Color,
+        texture: usize,
     },
     QuadUpdate {
         id: usize,
         pos: Vector3<f32>,
         size: Vector2<f32>,
         color: Color,
+        texture: usize,
     },
     QuadRemove {
         id: usize,
@@ -61,6 +63,22 @@ pub enum RenderMessage {
 }
 
 // ////////////////////////////////////////////////////////
+// Reference
+// ////////////////////////////////////////////////////////
+
+pub const DEFAULT_TEXTURE: TextureReference = TextureReference { id: 0 };
+
+#[derive(Copy, Clone, Debug)]
+pub struct TextureReference {
+    id: usize,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub struct QuadReference {
+    id: IndexToken,
+}
+
+// ////////////////////////////////////////////////////////
 // Messenger
 // ////////////////////////////////////////////////////////
 
@@ -68,7 +86,7 @@ pub struct RenderMessenger {
     render_producer: Producer<RenderFrame>,
     frame: RenderFrame,
     map_rect: IndexMap,
-    map_texture: IndexMap,
+    map_texture: usize,
     last_translation: Vector2<f32>,
     last_scale: f32,
 }
@@ -79,7 +97,7 @@ impl RenderMessenger {
             render_producer: render_producer,
             frame: RenderFrame::new(),
             map_rect: IndexMap::new(),
-            map_texture: IndexMap::new(),
+            map_texture: 0,
             last_translation: Vector2::zero(),
             last_scale: 1f32,
         }
@@ -87,29 +105,46 @@ impl RenderMessenger {
 
     // Quad Functions
 
-    pub fn quad_create(&mut self, pos: Vector3<f32>, size: Vector2<f32>, color: Color) -> IndexToken {
+    pub fn quad_create(
+        &mut self,
+        pos: Vector3<f32>,
+        size: Vector2<f32>,
+        color: Color,
+        texture: TextureReference,
+    ) -> QuadReference {
         let message = RenderMessage::QuadCreate {
             pos: pos,
             size: size,
             color: color,
+            texture: texture.id,
         };
         self.frame.messages.push(message);
-        self.map_rect.add()
+        QuadReference {
+            id: self.map_rect.add(),
+        }
     }
 
-    pub fn quad_update(&mut self, token: IndexToken, pos: Vector3<f32>, size: Vector2<f32>, color: Color) {
+    pub fn quad_update(
+        &mut self,
+        reference: QuadReference,
+        pos: Vector3<f32>,
+        size: Vector2<f32>,
+        color: Color,
+        texture: TextureReference,
+    ) {
         let message = RenderMessage::QuadUpdate {
-            id: self.map_rect.get(token),
+            id: self.map_rect.get(reference.id),
             pos: pos,
             size: size,
             color: color,
+            texture: texture.id,
         };
         self.frame.messages.push(message);
     }
 
-    pub fn quad_remove(&mut self, token: IndexToken) {
+    pub fn quad_remove(&mut self, reference: QuadReference) {
         let message = RenderMessage::QuadRemove {
-            id: self.map_rect.remove(token),
+            id: self.map_rect.remove(reference.id),
         };
         self.frame.messages.push(message);
     }
@@ -122,12 +157,17 @@ impl RenderMessenger {
 
     // Texture Functions
 
-    pub fn texture_create(&mut self, path: &str) -> IndexToken {
+    pub fn texture_default(&self) -> TextureReference {
+        DEFAULT_TEXTURE
+    }
+
+    pub fn texture_create(&mut self, path: &str) -> TextureReference {
         let message = RenderMessage::TextureCreate {
             path: String::from(path),
         };
         self.frame.messages.push(message);
-        self.map_texture.add()
+        self.map_texture += 1;
+        TextureReference { id: self.map_texture }
     }
 
     // Scene Functions

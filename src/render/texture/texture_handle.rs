@@ -1,5 +1,7 @@
-use image::DynamicImage;
 use render::raw::*;
+use render::texture::*;
+
+static DEFAULT: [u8; 4] = [255u8, 255u8, 255u8, 255u8];
 
 pub struct TextureHandle {
     id: u32,
@@ -11,20 +13,19 @@ impl TextureHandle {
         let id = gen_texture();
         let unit = texture_unit;
         let texture = TextureHandle { id: id, unit: unit };
-        texture.set_raw(1, 1, [255u8, 255u8, 255u8, 255u8].to_vec());
+        texture.set_raw(1, 1, (&DEFAULT).as_ptr());
         texture
     }
 
-    pub fn set_image(&self, image: DynamicImage) {
-        // Some Image -> RGBA Image
-        let rgba_image = image.to_rgba();
-        let width = rgba_image.width() as i32;
-        let height = rgba_image.height() as i32;
-        // RGBA Image -> Vec<u8> -> *const u8
-        self.set_raw(width, height, rgba_image.into_raw());
+    pub fn set_texture(&self, texture: &Texture) {
+        self.set_raw(
+            texture.width() as i32,
+            texture.height() as i32,
+            texture.as_ptr() as *const u8,
+        );
     }
 
-    pub fn set_raw(&self, width: i32, height: i32, buffer: Vec<u8>) {
+    fn set_raw(&self, width: i32, height: i32, buffer: *const u8) {
         active_texture(self.unit);
         bind_texture(TextureBindingTarget::Texture2D, self.id);
         tex_image_2D(
@@ -35,7 +36,7 @@ impl TextureHandle {
             PixelInternalFormat::RGBA,
             PixelFormat::RGBA,
             PixelType::UnsignedByte,
-            buffer.as_ptr() as *const _,
+            buffer as *const _,
         );
         tex_parameter_wrap_s(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
         tex_parameter_wrap_t(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);

@@ -14,21 +14,19 @@ impl AABB2D {
         }
     }
 
-    pub fn assign(&mut self, other: &AABB2D) {
-        self.min.x = other.min.x;
-        self.min.y = other.min.y;
-        self.max.x = other.max.x;
-        self.max.y = other.max.y;
+    #[inline(always)]
+    pub fn intersects(&self, other: &AABB2D) -> bool {
+        self.min.x <= other.max.x && self.max.x >= other.min.x && self.min.y <= other.max.y && self.max.y >= other.min.y
     }
 
-    pub fn intersects(&self, other: &AABB2D) -> bool {
-        if self.max.x < other.min.x || self.min.x > other.max.x {
-            return false;
-        }
-        if self.max.y < other.min.y || self.min.y > other.max.y {
-            return false;
-        }
-        true
+    #[inline(always)]
+    pub fn contains(&self, other: &AABB2D) -> bool {
+        self.min.x <= other.min.x && self.max.x >= other.max.x && self.min.y <= other.min.y && self.max.y >= other.max.y
+    }
+
+    #[inline(always)]
+    pub fn contains_point(&self, point: &Vector2<f32>) -> bool {
+        self.min.x <= point.x && self.max.x >= point.x && self.max.y <= point.y && self.min.y >= point.y
     }
 
     pub fn slide(&mut self, mov: &Vector2<f32>, others: &Vec<AABB2D>) {

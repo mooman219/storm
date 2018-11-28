@@ -39,24 +39,14 @@ impl<T: Vertex> Geometry for Quad<T> {
 // Default implementations
 // ////////////////////////////////////////////////////////
 
-impl Quad<ColorVertex> {
-    pub fn color_rect(pos: Vector3<f32>, size: Vector2<f32>, color: Color) -> Quad<ColorVertex> {
-        Self::new(
-            ColorVertex::new(pos.x, pos.y + size.y, pos.z, color),
-            ColorVertex::new(pos.x, pos.y, pos.z, color),
-            ColorVertex::new(pos.x + size.x, pos.y + size.y, pos.z, color),
-            ColorVertex::new(pos.x + size.x, pos.y, pos.z, color),
-        )
-    }
-}
-
 impl Quad<TextureVertex> {
-    pub fn texture_rect(pos: Vector3<f32>, size: Vector2<f32>, color: Color) -> Quad<TextureVertex> {
+    pub fn texture_rect(pos: Vector3<f32>, size: Vector2<f32>, uv: Vector4<f32>, color: Color) -> Quad<TextureVertex> {
+        // UV Layout: X:LEFT Y:RIGHT Z:BOTTOM W:TOP
         Self::new(
-            TextureVertex::new(pos.x, pos.y + size.y, pos.z, 0f32, 0f32, color),
-            TextureVertex::new(pos.x, pos.y, pos.z, 0f32, 1f32, color),
-            TextureVertex::new(pos.x + size.x, pos.y + size.y, pos.z, 1f32, 0f32, color),
-            TextureVertex::new(pos.x + size.x, pos.y, pos.z, 1f32, 1f32, color),
+            TextureVertex::new(pos.x, pos.y + size.y, pos.z, uv.x, uv.z, color),
+            TextureVertex::new(pos.x, pos.y, pos.z, uv.x, uv.w, color),
+            TextureVertex::new(pos.x + size.x, pos.y + size.y, pos.z, uv.y, uv.z, color),
+            TextureVertex::new(pos.x + size.x, pos.y, pos.z, uv.y, uv.w, color),
         )
     }
 }

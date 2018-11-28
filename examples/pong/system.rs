@@ -4,7 +4,6 @@ use storm::input::message::InputFrame::{KeyPressed, KeyReleased};
 use storm::input::message::*;
 use storm::render::color;
 use storm::render::message::*;
-use storm::utility::indexmap::*;
 
 use pong::Ball;
 use pong::Player;
@@ -23,8 +22,8 @@ pub struct System {
     player_a: Player,
     player_a_direction: f32,
     player_b: Player,
-    player_a_scores: Vec<IndexToken>,
-    player_b_scores: Vec<IndexToken>,
+    player_a_scores: Vec<QuadReference>,
+    player_b_scores: Vec<QuadReference>,
     ball: Ball,
     ball_velocity: Vector3<f32>,
     count: f32,
@@ -35,31 +34,34 @@ impl System {
     pub fn new(render: &mut RenderMessenger) -> System {
         let player_a_position = Vector3::new(-2.5, -0.5, 0.0);
         let player_a_shape = Vector2::new(0.5, 0.5);
-        let player_a_token = render.quad_create(player_a_position, player_a_shape, color::PURPLE);
+        let player_a_token = render.quad_create(player_a_position, player_a_shape, color::PURPLE, DEFAULT_TEXTURE);
         let player_a = Player::new(player_a_token, player_a_position, player_a_shape, color::PURPLE);
 
         let player_b_position = Vector3::new(2.0, -0.5, 0.0);
         let player_b_shape = Vector2::new(0.5, 0.5);
-        let player_b_token = render.quad_create(player_b_position, player_b_shape, color::ORANGE);
+        let player_b_token = render.quad_create(player_b_position, player_b_shape, color::ORANGE, DEFAULT_TEXTURE);
         let player_b = Player::new(player_b_token, player_b_position, player_b_shape, color::ORANGE);
 
         let ball_postion = Vector3::new(0.0, -0.0, 0.0);
         let ball_shape = Vector2::new(0.1, 0.1);
-        let ball_token = render.quad_create(ball_postion, ball_shape, color::RED);
+        let ball_token = render.quad_create(ball_postion, ball_shape, color::RED, DEFAULT_TEXTURE);
         let ball = Ball::new(ball_token, ball_postion, ball_shape);
 
         let mut player_a_scores = vec![];
-//        let mut player_b_scores = vec![];
+        //        let mut player_b_scores = vec![];
         let y_height = 2.5;
 
         for _ in 0..5 {
-
-            let a_score = render.quad_create(Vector3::new(0.0, y_height, 0.0), Vector2::new(0.2, 0.2), color::GREEN);
-//            let b_score = render.quad_create();
+            let a_score = render.quad_create(
+                Vector3::new(0.0, y_height, 0.0),
+                Vector2::new(0.2, 0.2),
+                color::GREEN,
+                DEFAULT_TEXTURE,
+            );
+            //            let b_score = render.quad_create();
             player_a_scores.push(a_score);
-//            player_b_scores.push(b_score);
+            //            player_b_scores.push(b_score);
         }
-
 
         render.send();
 
@@ -99,8 +101,7 @@ impl System {
             //if it is coming at the second player
             if self.ball.ball_position.y > self.player_b.box_position.y {
                 self.player_b.box_position += Vector3::new(0.0, PLAYER_Y_SPEED, 0.0);
-            }
-            else if self.ball.ball_position.y < self.player_b.box_position.y {
+            } else if self.ball.ball_position.y < self.player_b.box_position.y {
                 self.player_b.box_position += Vector3::new(0.0, -PLAYER_Y_SPEED, 0.0);
             }
         }
@@ -132,7 +133,7 @@ impl System {
     }
 
     fn check_for_out_of_bounds(&mut self) {
-       if self.ball.ball_position.y <= -2.5 || self.ball.ball_position.y >= 2.5 {
+        if self.ball.ball_position.y <= -2.5 || self.ball.ball_position.y >= 2.5 {
             self.ball_velocity.y = self.ball_velocity.y * -1.0;
         }
 
@@ -146,7 +147,7 @@ impl System {
         if result.is_some() {
             let result = result.unwrap();
             self.direction = -1.0 * self.direction;
-            self.ball.ball_position += self.ball_velocity ;//* -5.0;
+            self.ball.ball_position += self.ball_velocity; //* -5.0;
             let use_player: &Player;
             match result {
                 PlayerType::A => {
@@ -175,6 +176,7 @@ impl System {
             self.ball.ball_position,
             self.ball.ball_shape,
             color::RED,
+            DEFAULT_TEXTURE,
         );
         self.player_a.render(render);
         self.player_b.render(render);

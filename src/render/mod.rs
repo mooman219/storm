@@ -11,7 +11,6 @@ pub mod vertex;
 use cgmath::*;
 use channel::bounded_spsc;
 use channel::consume_spsc;
-use image::*;
 use render::buffer::geometry::*;
 use render::display::*;
 use render::geometry::*;
@@ -31,6 +30,7 @@ struct RenderState {
     quad_texture: GeometryBuffer<Quad<TextureVertex>>,
     texture_packer: TexturePacker,
     texture_atlas: TextureHandle,
+    texture_uv: Vec<Vector4<f32>>,
 }
 
 pub fn start(
@@ -54,14 +54,24 @@ pub fn start(
             texture_padding: 0,
         }),
         texture_atlas: TextureHandle::new(TextureUnit::Atlas),
+        texture_uv: Vec::new(),
     };
 
+    // Default texture setup
+    {
+        let texture = Texture::from_default(color::WHITE, 8, 8);
+        let uv = state.texture_packer.pack(&texture);
+        state.texture_uv.push(uv);
+        let new_atlas = state.texture_packer.export();
+        state.texture_atlas.set_texture(&new_atlas);
+    }
+
     // Setup cabilities.
-    enable(Capability::DepthTest);
     enable(Capability::CullFace);
     enable(Capability::Multisample);
+    enable(Capability::Blend);
+    blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
     clear_color(0.0, 0.0, 0.2, 1.0);
-    depth_func(DepthTest::LessEqual);
     cull_face(CullFace::Back);
 
     // Set the default texture.
@@ -103,12 +113,25 @@ impl RenderState {
                 //
                 // Quad
                 //
-                RenderMessage::QuadCreate { pos, size, color } => {
-                    let quad = Quad::texture_rect(pos, size, color);
+                RenderMessage::QuadCreate {
+                    pos,
+                    size,
+                    color,
+                    texture,
+                } => {
+                    let uv = self.texture_uv[texture];
+                    let quad = Quad::texture_rect(pos, size, uv, color);
                     self.quad_texture.add(quad);
                 },
-                RenderMessage::QuadUpdate { id, pos, size, color } => {
-                    let quad = Quad::texture_rect(pos, size, color);
+                RenderMessage::QuadUpdate {
+                    id,
+                    pos,
+                    size,
+                    color,
+                    texture,
+                } => {
+                    let uv = self.texture_uv[texture];
+                    let quad = Quad::texture_rect(pos, size, uv, color);
                     self.quad_texture.update(id, quad);
                 },
                 RenderMessage::QuadRemove { id } => {
@@ -120,13 +143,16 @@ impl RenderState {
                 //
                 // Texture
                 //
-                RenderMessage::TextureCreate { path } => match open(Path::new(&path)) {
-                    Ok(image) => {
-                        self.texture_atlas.set_image(image);
-                    },
-                    Err(..) => {
-                        panic!("Unable to set image as atlas: {}", &path);
-                    },
+                RenderMessage::TextureCreate { path } => {
+                    let uv = self.texture_packer.pack_path(Path::new(&path));
+                    self.texture_uv.push(uv);
+                    let new_atlas = self.texture_packer.export();
+                    self.texture_atlas.set_texture(&new_atlas);
+
+                    // TODO: Temp debug output
+                    let exporter = new_atlas.to_dynamic_image().unwrap();
+                    let mut file = std::fs::File::create("examples/testgame/output.png").unwrap();
+                    exporter.write_to(&mut file, image::PNG).unwrap();
                 },
                 //
                 // Scene

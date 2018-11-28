@@ -1,14 +1,14 @@
 use image::{DynamicImage, ImageBuffer, Rgba};
-use render::texture::*;
+use render::color::*;
 
 pub struct Texture {
-    pixels: Vec<RGBA8>,
+    pixels: Vec<Color>,
     width: u32,
     height: u32,
 }
 
 impl Texture {
-    pub fn from_default(default: RGBA8, width: u32, height: u32) -> Texture {
+    pub fn from_default(default: Color, width: u32, height: u32) -> Texture {
         if width == 0 || height == 0 {
             panic!("Neither width or height can be 0.");
         }
@@ -23,13 +23,20 @@ impl Texture {
         }
     }
 
+    pub fn from_image(image: DynamicImage) -> Texture {
+        let rgba_image = image.to_rgba();
+        let width = rgba_image.width();
+        let height = rgba_image.height();
+        Texture::from_raw(rgba_image.into_raw().as_slice(), width, height)
+    }
+
     pub fn from_raw(buf: &[u8], width: u32, height: u32) -> Texture {
         if width == 0 || height == 0 {
             panic!("Neither width or height can be 0.");
         }
         let mut pixels = Vec::new();
         for pixel in buf.chunks(4) {
-            pixels.push(RGBA8 {
+            pixels.push(Color {
                 r: pixel[0],
                 g: pixel[1],
                 b: pixel[2],
@@ -56,11 +63,15 @@ impl Texture {
         self.height
     }
 
-    pub fn get(&self, x: u32, y: u32) -> RGBA8 {
+    pub fn as_ptr(&self) -> *const Color {
+        self.pixels.as_ptr()
+    }
+
+    pub fn get(&self, x: u32, y: u32) -> Color {
         self.pixels[self.index_for(x, y)]
     }
 
-    pub fn set(&mut self, x: u32, y: u32, val: RGBA8) {
+    pub fn set(&mut self, x: u32, y: u32, val: Color) {
         let index = self.index_for(x, y);
         self.pixels[index] = val;
     }

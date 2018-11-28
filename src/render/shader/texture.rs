@@ -33,7 +33,7 @@ out vec4 a_color;
 layout(location = 0) uniform sampler2D atlas;
 
 void main() {
-    a_color = texture(atlas, v_uv).rgba * v_color.rgba;
+    a_color = texture(atlas, v_uv) * v_color;
 }
 "#;
 

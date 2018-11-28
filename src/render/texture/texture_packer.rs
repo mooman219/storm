@@ -1,6 +1,54 @@
+use render::color::*;
 use render::texture::*;
 use std;
 use std::cmp::max;
+
+#[derive(Copy, Clone, Debug)]
+struct Rect {
+    pub x: u32,
+    pub y: u32,
+    pub w: u32,
+    pub h: u32,
+}
+
+impl Rect {
+    pub fn new(x: u32, y: u32, w: u32, h: u32) -> Rect {
+        Rect { x: x, y: y, w: w, h: h }
+    }
+
+    #[inline(always)]
+    pub fn top(&self) -> u32 {
+        self.y
+    }
+
+    #[inline(always)]
+    pub fn bottom(&self) -> u32 {
+        self.y + self.h - 1
+    }
+
+    #[inline(always)]
+    pub fn left(&self) -> u32 {
+        self.x
+    }
+
+    #[inline(always)]
+    pub fn right(&self) -> u32 {
+        self.x + self.w - 1
+    }
+
+    #[inline(always)]
+    pub fn contains(&self, other: &Rect) -> bool {
+        self.left() <= other.left()
+            && self.right() >= other.right()
+            && self.top() <= other.top()
+            && self.bottom() >= other.bottom()
+    }
+
+    #[inline(always)]
+    pub fn contains_point(&self, x: u32, y: u32) -> bool {
+        self.left() <= x && self.right() >= x && self.top() <= y && self.bottom() >= y
+    }
+}
 
 struct Skyline {
     pub x: u32,
@@ -51,7 +99,7 @@ impl TexturePacker {
             config: config,
             border: Rect::new(0, 0, config.max_width, config.max_height),
             skylines: skylines,
-            texture: Texture::from_default(RGBA8 { r: 0, g: 0, b: 0, a: 0 }, config.max_width, config.max_height),
+            texture: Texture::from_default(WHITE, config.max_width, config.max_height),
         }
     }
 
@@ -148,7 +196,7 @@ impl Packer for TexturePacker {
         self.texture.clone()
     }
 
-    fn pack(&mut self, texture: &Texture) -> Rect {
+    fn pack(&mut self, texture: &Texture) -> Vector4<f32> {
         let mut width = texture.width();
         let mut height = texture.height();
 
@@ -164,7 +212,16 @@ impl Packer for TexturePacker {
 
             self.texture.set_texture(rect.x, rect.y, texture);
 
-            rect
+            // UV Layout: X:LEFT Y:RIGHT Z:BOTTOM W:TOP
+            let vector = Vector4::new(
+                (rect.x as f32) / (self.config.max_height as f32),
+                ((rect.x + rect.w) as f32) / (self.config.max_height as f32),
+                (rect.y as f32) / (self.config.max_width as f32),
+                ((rect.y + rect.h) as f32) / (self.config.max_width as f32),
+            );
+            info!("TEXTURE: {:?}", vector);
+            info!("TEXTURE: {:?}", rect);
+            vector
         } else {
             panic!("Unable to find space for the texture.");
         }

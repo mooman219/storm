@@ -60,6 +60,30 @@ pub enum CullFace {
     FrontBack = gl::FRONT_AND_BACK,
 }
 
+#[repr(u32)]
+#[derive(Copy, Clone)]
+pub enum BlendFactor {
+    Zero = gl::ZERO,
+    One = gl::ONE,
+    SrcColor = gl::SRC_COLOR,
+    OneMinusSrcColor = gl::ONE_MINUS_SRC_COLOR,
+    DstColor = gl::DST_COLOR,
+    OneMinusDstColor = gl::ONE_MINUS_DST_COLOR,
+    SrcAlpha = gl::SRC_ALPHA,
+    OneMinusSrcAlpha = gl::ONE_MINUS_SRC_ALPHA,
+    DstAlpha = gl::DST_ALPHA,
+    OneMinusDstAlpha = gl::ONE_MINUS_DST_ALPHA,
+    ConstantColor = gl::CONSTANT_COLOR,
+    OneMinusConstantColor = gl::ONE_MINUS_CONSTANT_COLOR,
+    ConstantAlpha = gl::CONSTANT_ALPHA,
+    OneMinusConstantAlpha = gl::ONE_MINUS_CONSTANT_ALPHA,
+    SrcAlphaSaturate = gl::SRC_ALPHA_SATURATE,
+    Src1Color = gl::SRC1_COLOR,
+    OneMinusSrc1Color = gl::ONE_MINUS_SRC1_COLOR,
+    Src1Alpha = gl::SRC1_ALPHA,
+    OneMinusSrc1Alpha = gl::ONE_MINUS_SRC1_ALPHA,
+}
+
 /// Specify the value used for depth buffer comparisons.
 ///
 /// # Arguments
@@ -141,5 +165,18 @@ pub fn clear(mask: u32) {
 pub fn clear_color(red: f32, green: f32, blue: f32, alpha: f32) {
     unsafe {
         gl::ClearColor(red, green, blue, alpha);
+    }
+}
+
+/// Specify pixel arithmetic.
+///
+/// # Arguments
+///
+/// `sfactor` - Specifies how the red, green, blue, and alpha source blending factors are computed.
+/// `dfactor` - Specifies how the red, green, blue, and alpha destination blending factors are computed.
+#[inline]
+pub fn blend_func(sfactor: BlendFactor, dfactor: BlendFactor) {
+    unsafe {
+        gl::BlendFunc(sfactor as u32, dfactor as u32);
     }
 }

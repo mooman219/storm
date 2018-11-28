@@ -2,12 +2,11 @@ use storm::cgmath::{Vector2, Vector3};
 use storm::math::aabb::AABB2D;
 use storm::render::color;
 use storm::render::message::*;
-use storm::utility::indexmap::*;
 
 use pong::Ball;
 //Writing this for record keepign
 pub struct Player {
-    pub box_token: IndexToken,
+    pub box_token: QuadReference,
     pub box_position: Vector3<f32>,
     pub box_shape: Vector2<f32>,
     pub col: color::Color,
@@ -15,7 +14,7 @@ pub struct Player {
 
 impl Player {
     pub fn new(
-        box_token: IndexToken,
+        box_token: QuadReference,
         box_position: Vector3<f32>,
         box_shape: Vector2<f32>,
         col: color::Color,
@@ -47,6 +46,12 @@ impl Player {
     }
 
     pub fn render(&self, render: &mut RenderMessenger) {
-        render.quad_update(self.box_token, self.box_position, self.box_shape, self.col);
+        render.quad_update(
+            self.box_token,
+            self.box_position,
+            self.box_shape,
+            self.col,
+            DEFAULT_TEXTURE,
+        );
     }
 }

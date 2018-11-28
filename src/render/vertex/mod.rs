@@ -1,8 +1,6 @@
-mod color;
 mod texture;
 mod vertex_array;
 
-pub use render::vertex::color::*;
 pub use render::vertex::texture::*;
 pub use render::vertex::vertex_array::*;
 

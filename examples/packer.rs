@@ -9,8 +9,8 @@ use storm::render::texture::*;
 /// Run with: cargo run --example packer --release
 fn main() {
     let mut packer = TexturePacker::new(TexturePackerConfig {
-        max_width: 1024,
-        max_height: 1024,
+        max_width: 256,
+        max_height: 256,
         texture_padding: 0,
     });
 
