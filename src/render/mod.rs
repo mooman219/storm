@@ -148,11 +148,6 @@ impl RenderState {
                     self.texture_uv.push(uv);
                     let new_atlas = self.texture_packer.export();
                     self.texture_atlas.set_texture(&new_atlas);
-
-                    // TODO: Temp debug output
-                    let exporter = new_atlas.to_dynamic_image().unwrap();
-                    let mut file = std::fs::File::create("examples/testgame/output.png").unwrap();
-                    exporter.write_to(&mut file, image::PNG).unwrap();
                 },
                 //
                 // Scene

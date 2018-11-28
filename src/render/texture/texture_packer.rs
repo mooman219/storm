@@ -99,7 +99,7 @@ impl TexturePacker {
             config: config,
             border: Rect::new(0, 0, config.max_width, config.max_height),
             skylines: skylines,
-            texture: Texture::from_default(WHITE, config.max_width, config.max_height),
+            texture: Texture::from_default(TRANSPARENT, config.max_width, config.max_height),
         }
     }
 
@@ -219,8 +219,8 @@ impl Packer for TexturePacker {
                 (rect.y as f32) / (self.config.max_width as f32),
                 ((rect.y + rect.h) as f32) / (self.config.max_width as f32),
             );
-            info!("TEXTURE: {:?}", vector);
-            info!("TEXTURE: {:?}", rect);
+            info!("TEXTURE PACK: {:?}", vector);
+            info!("TEXTURE PACK: {:?}", rect);
             vector
         } else {
             panic!("Unable to find space for the texture.");
