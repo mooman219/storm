@@ -5,8 +5,11 @@ use storm::game::*;
 use storm::input::message::*;
 use storm::log::LevelFilter;
 use storm::render::color;
+use storm::render::color::*;
 use storm::render::message::*;
 use storm::time::clock::*;
+
+const BLOCK_SCALE: f32 = 0.15;
 
 /// Run with: cargo run --example testgame --release
 fn main() {
@@ -14,90 +17,113 @@ fn main() {
     storm::run::<Tetris>();
 }
 
+
+
+pub struct Textures {
+    main: TextureReference,
+}
+
 pub struct Tetris {
     render: RenderMessenger,
+    textures: Textures,
     clock: Clock,
     translation: Vector2<f32>,
-    square: MoveableSquare,
+    tetris_board: Vec<Vec<MoveableSquare>>,
+    tetris_live_board: Vec<Vec<color::Color>>,
+    live_cluster: Vec<Vector2<usize>>,
+    internal_timer: u64
 }
 
 impl Tetris {
-    pub fn generate_world(&mut self) {
-        for x in -16..16 {
-            let offset = x as f32;
-            self.render.quad_create(
-                Vector3::new(-1f32 + offset, 0f32, 0f32),
-                Vector2::new(0.5f32, 0.5f32),
-                color::ORANGE,
-                DEFAULT_TEXTURE,
-            );
-            self.render.quad_create(
-                Vector3::new(-0.5f32 + offset, 0.5f32, 0f32),
-                Vector2::new(0.5f32, 0.5f32),
-                color::RED,
-                DEFAULT_TEXTURE,
-            );
-            self.render.quad_create(
-                Vector3::new(0f32 + offset, 1f32, 0f32),
-                Vector2::new(0.5f32, 0.5f32),
-                color::PURPLE,
-                DEFAULT_TEXTURE,
-            );
-            self.render.quad_create(
-                Vector3::new(0.5f32 + offset, 1.5f32, 0f32),
-                Vector2::new(0.5f32, 0.5f32),
-                color::BLUE,
-                DEFAULT_TEXTURE,
-            );
+
+    //will return true if the cluster has stopped(end of the board/into another cluster)
+    pub fn update_live_cluster(&mut self) -> bool {
+        let new_live_cluster = vec![self.live_cluster[0] - Vector2::new(0, 1),
+                                        self.live_cluster[1] - Vector2::new(0, 1),
+                                        self.live_cluster[2] - Vector2::new(0, 1)];
+        self.live_cluster = new_live_cluster;
+        return false;
+    }
+
+    pub fn update(&mut self) {
+        self.internal_timer += 1;
+        if self.internal_timer % 100 == 0 {
+            for point in &self.live_cluster {
+                self.tetris_live_board[point.y][point.x] = color::TRANSPARENT;
+            }
+            let _ = self.update_live_cluster();
+            for point in &self.live_cluster {
+                self.tetris_live_board[point.y][point.x] = color::RED;
+            }
         }
     }
 }
 
+
 impl Game for Tetris {
     fn new(mut render: RenderMessenger) -> Self {
-        let square = MoveableSquare::new(&mut render);
+          let textures = Textures {
+            main: render.texture_create("./examples/tetris/block.png"),
+        };
+
+        let mut test_sqaure = vec![];
+        for y in 0..28 {
+            test_sqaure.push(vec![]);
+            for x in 0..10 {
+                test_sqaure[y].push(
+                        MoveableSquare::new(
+                            &mut render, Vector3::new((BLOCK_SCALE * x as f32) - 1.0 , (BLOCK_SCALE * y as f32) - 2.0, 0.0),
+                            textures.main
+                            )
+                    );
+            }
+        }
+
+        let mut tetris_live_board = vec![];
+        for y in 0..28 {
+            tetris_live_board.push(vec![]);
+            for _ in 0..10 {
+                tetris_live_board[y].push(
+                    color::TRANSPARENT
+                );
+            }
+        }
+
+        tetris_live_board[27][0] = color::ORANGE;
+        tetris_live_board[26][0] = color::ORANGE;
+        tetris_live_board[27][1] = color::ORANGE;
+        
+
         let mut game = Tetris {
             render: render,
             clock: Clock::new(144),
+            textures,
             translation: Vector2::new(0f32, 0f32),
-            square: square,
+            tetris_board: test_sqaure,
+            tetris_live_board,
+            live_cluster: vec![Vector2::new(0, 27), Vector2::new(0, 26), Vector2::new(1, 27)],
+            internal_timer: 0
         };
         game.render.texture_create("./examples/tetris/block.png");
         game.render.window_title("Tetris");
-        //     game.generate_world();
         game.render.send();
         game
     }
 
-    fn input(&mut self, event: InputFrame) {
-        let speed = 2f32;
-        match event {
-            InputFrame::KeyPressed(Key::C) => {
-                self.render.quad_clear();
-                self.square.generate_index(&mut self.render);
-            },
-            InputFrame::KeyPressed(Key::V) => {
-                self.generate_world();
-            },
-            InputFrame::KeyPressed(Key::W) => self.square.velocity.y += speed,
-            InputFrame::KeyReleased(Key::W) => self.square.velocity.y -= speed,
-            InputFrame::KeyPressed(Key::A) => self.square.velocity.x -= speed,
-            InputFrame::KeyReleased(Key::A) => self.square.velocity.x += speed,
-            InputFrame::KeyPressed(Key::S) => self.square.velocity.y -= speed,
-            InputFrame::KeyReleased(Key::S) => self.square.velocity.y += speed,
-            InputFrame::KeyPressed(Key::D) => self.square.velocity.x += speed,
-            InputFrame::KeyReleased(Key::D) => self.square.velocity.x -= speed,
-            _ => {},
-        }
+    fn input(&mut self, _event: InputFrame) {
+      
     }
 
     fn tick(&mut self) {
         let delta = self.clock.get_delta();
-        self.square.update(delta, &mut self.render);
 
-        // Center the square
-        self.translation.x = -self.square.pos.x - 0.5f32;
-        self.translation.y = -self.square.pos.y - 0.5f32;
+        self.update();
+ 
+        for y in 0..28 {
+            for x in 0..10 {
+                self.tetris_board[y][x].update(delta, &mut self.render, &self.tetris_live_board[y][x]);
+            }
+        }
         self.render.translate(self.translation);
 
         self.render.send();
@@ -108,29 +134,33 @@ impl Game for Tetris {
 pub struct MoveableSquare {
     pos: Vector3<f32>,
     size: Vector2<f32>,
-    velocity: Vector2<f32>,
     index: QuadReference,
+    texture: TextureReference,
 }
 
 impl MoveableSquare {
-    pub fn new(render: &mut RenderMessenger) -> MoveableSquare {
-        let pos = Vector3::new(-0.5f32, -0.5f32, 0.125f32);
-        let size = Vector2::new(1.0f32, 1.0f32);
-        let index = render.quad_create(pos, size, color::WHITE, DEFAULT_TEXTURE);
+    pub fn new(render: &mut RenderMessenger, pos: Vector3<f32>, texture: TextureReference) -> MoveableSquare {
+//        let pos = Vector3::new(-0.5f32, -0.5f32, 0.125f32);
+        let size = Vector2::new(BLOCK_SCALE, BLOCK_SCALE);
+        let index = render.quad_create(pos, size, color::ORANGE, DEFAULT_TEXTURE);
         MoveableSquare {
             pos: pos,
             size: size,
-            velocity: Vector2::zero(),
             index: index,
+            texture
         }
     }
 
     pub fn generate_index(&mut self, render: &mut RenderMessenger) {
-        self.index = render.quad_create(self.pos, self.size, color::WHITE, DEFAULT_TEXTURE);
     }
 
-    pub fn update(&mut self, delta: f32, render: &mut RenderMessenger) {
-        self.pos += (self.velocity * delta).extend(0f32);
-        render.quad_update(self.index, self.pos, self.size, color::WHITE, DEFAULT_TEXTURE);
+    pub fn update(&mut self, delta: f32, render: &mut RenderMessenger, render_color: &color::Color) {
+        render.quad_update(
+            self.index,
+            self.pos,
+            self.size,
+            *render_color,
+            self.texture,
+        );
     }
 }
