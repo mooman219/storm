@@ -1,3 +1,6 @@
+#![feature(rustc_private)]
+extern crate rand;
+
 extern crate storm;
 
 use storm::cgmath::*;
@@ -5,9 +8,13 @@ use storm::game::*;
 use storm::input::message::*;
 use storm::log::LevelFilter;
 use storm::render::color;
-use storm::render::color::*;
 use storm::render::message::*;
 use storm::time::clock::*;
+
+use rand::{
+    distributions::{Distribution, Standard},
+    Rng,
+};
 
 const BLOCK_SCALE: f32 = 0.15;
 
@@ -17,11 +24,34 @@ fn main() {
     storm::run::<Tetris>();
 }
 
+#[derive(Clone)]
+enum TetrisBlock {
+    S = 0,
+    Z = 1,
+    L = 2,
+    ReL = 3,
+    Sqaure = 4,
+    Line = 5
+}
+
+impl Distribution<TetrisBlock> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> TetrisBlock {
+         match rng.gen_range(0, 6) {
+            0 => TetrisBlock::S,
+            1 => TetrisBlock::Z,
+            2 => TetrisBlock::L,
+            3 => TetrisBlock::ReL,
+            4 => TetrisBlock::Sqaure,
+            _ => TetrisBlock::Line
+        }
+    }
+}
 
 
 pub struct Textures {
     main: TextureReference,
 }
+
 
 pub struct Tetris {
     render: RenderMessenger,
@@ -31,29 +61,89 @@ pub struct Tetris {
     tetris_board: Vec<Vec<MoveableSquare>>,
     tetris_live_board: Vec<Vec<color::Color>>,
     live_cluster: Vec<Vector2<usize>>,
-    internal_timer: u64
+    internal_timer: u64,
+    blocks: Vec<Vec<Vector2<usize>>>,
+    block_colors: Vec<color::Color>,
+    current_block: TetrisBlock,
+    draw_color: color::Color
 }
 
 impl Tetris {
 
+    pub fn spawn_new_live_cluster(&mut self) {
+        //this is what I want to do 
+        let new_block_type : TetrisBlock = rand::random();
+        self.draw_color = self.block_colors[new_block_type.clone() as usize].clone();
+        self.live_cluster = self.blocks[new_block_type.clone() as usize].clone();
+        self.current_block = new_block_type;
+    }
+
     //will return true if the cluster has stopped(end of the board/into another cluster)
-    pub fn update_live_cluster(&mut self) -> bool {
+    fn update_live_cluster(&mut self) -> bool {
+
         let new_live_cluster = vec![self.live_cluster[0] - Vector2::new(0, 1),
-                                        self.live_cluster[1] - Vector2::new(0, 1),
-                                        self.live_cluster[2] - Vector2::new(0, 1)];
+                                    self.live_cluster[1] - Vector2::new(0, 1),
+                                    self.live_cluster[2] - Vector2::new(0, 1),
+                                    self.live_cluster[3] - Vector2::new(0, 1)];
+
+        let result = self.is_live_cluster_overlapping(&new_live_cluster);
+        //if we do overlap, bail without updating the clusters positions
+        if result {
+            return true;
+        }
+
+
+        //we are not overlapping with another cluster
+        //but we could be at the bottom of the board
+        let mut one_is_zero = false;
+        for point in &new_live_cluster {
+            if point.y == 0 {
+                one_is_zero = true;
+            }
+        }
+
+        //we always update the to the new cluster at this point
         self.live_cluster = new_live_cluster;
+
+        //but if we happen to be at the bottom we need to kick off new cluster
+        if one_is_zero {
+            return true;
+        }
+
+        //else just be like, time to move on
         return false;
+    }
+
+    //we call this before we set the new positions, but after we have erased the old ones
+    //to see if any of the positions on the board are already occupied
+    //if this is the case we stop
+    fn is_live_cluster_overlapping(&mut self, new_positions: &Vec<Vector2<usize>>) -> bool {
+        let mut any_overlap = false;
+        for position in new_positions {
+            if self.tetris_live_board[position.y][position.x] != color::TRANSPARENT {
+                any_overlap = true;
+            }            
+        }
+        return any_overlap;
     }
 
     pub fn update(&mut self) {
         self.internal_timer += 1;
-        if self.internal_timer % 100 == 0 {
+        if self.internal_timer % 30 == 0 {
+            
+            //this is a really cheap way of making sure that we do not collide with ourselves during our checks
             for point in &self.live_cluster {
                 self.tetris_live_board[point.y][point.x] = color::TRANSPARENT;
             }
-            let _ = self.update_live_cluster();
+
+            let result = self.update_live_cluster();
+
+            //we undo the rease before
             for point in &self.live_cluster {
-                self.tetris_live_board[point.y][point.x] = color::RED;
+                self.tetris_live_board[point.y][point.x] = self.draw_color;
+            }
+            if result {
+                self.spawn_new_live_cluster();
             }
         }
     }
@@ -89,10 +179,23 @@ impl Game for Tetris {
             }
         }
 
-        tetris_live_board[27][0] = color::ORANGE;
-        tetris_live_board[26][0] = color::ORANGE;
-        tetris_live_board[27][1] = color::ORANGE;
-        
+        let mut block_types = vec![];
+
+        //WOULD LOVE TO DO THIS IN A DIFFERENT WAY
+        //S
+        block_types.push(vec![Vector2::new(5, 25), Vector2::new(6, 25), Vector2::new(6, 26), Vector2::new(7, 26)]);
+        //Z
+        block_types.push(vec![Vector2::new(5, 26), Vector2::new(6, 26), Vector2::new(6, 25), Vector2::new(7, 25)]);
+        //L
+        block_types.push(vec![Vector2::new(5, 27), Vector2::new(5, 26), Vector2::new(5, 25), Vector2::new(6, 25)]);
+        //Reverse L
+        block_types.push(vec![Vector2::new(5, 27), Vector2::new(5, 26), Vector2::new(5, 25), Vector2::new(4, 25)]);
+        //Sqaure
+        block_types.push(vec![Vector2::new(5, 27), Vector2::new(4, 27), Vector2::new(5, 26), Vector2::new(4, 26)]);
+        //Line
+        block_types.push(vec![Vector2::new(5, 27), Vector2::new(5, 26), Vector2::new(5, 25), Vector2::new(5, 24)]);
+
+        let block_colors = vec![color::BLUE, color::RED, color::PURPLE, color::GREEN, color::YELLOW, color::ORANGE];
 
         let mut game = Tetris {
             render: render,
@@ -101,9 +204,15 @@ impl Game for Tetris {
             translation: Vector2::new(0f32, 0f32),
             tetris_board: test_sqaure,
             tetris_live_board,
-            live_cluster: vec![Vector2::new(0, 27), Vector2::new(0, 26), Vector2::new(1, 27)],
-            internal_timer: 0
+            live_cluster: vec![],
+            internal_timer: 0,
+            blocks: block_types,
+            block_colors: block_colors,
+            current_block: TetrisBlock::Sqaure,
+            draw_color: color::TRANSPARENT
         };
+
+        game.spawn_new_live_cluster();
         game.render.texture_create("./examples/tetris/block.png");
         game.render.window_title("Tetris");
         game.render.send();
