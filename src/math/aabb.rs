@@ -29,12 +29,13 @@ impl AABB2D {
         self.min.x <= point.x && self.max.x >= point.x && self.max.y <= point.y && self.min.y >= point.y
     }
 
-    pub fn slide(&mut self, mov: &Vector2<f32>, others: &Vec<AABB2D>) {
-        if mov.x == 0f32 && mov.y == 0f32 {
-            return;
-        }
+    pub fn slide(&mut self, mov: &Vector2<f32>, others: &Vec<AABB2D>) -> bool {
 
-        let mut res = *mov; // Copy
+        if mov.x == 0f32 && mov.y == 0f32 {
+            return false;
+        }
+        let mut result = false;
+        let mut res = *mov; // Copy/
         let mut aabb = *self; // Copy
 
         // Y movement
@@ -44,6 +45,7 @@ impl AABB2D {
                 if aabb.max.x > other.min.x && aabb.min.x < other.max.x && other.max.y <= aabb.min.y {
                     let min = other.max.y - aabb.min.y;
                     if min > res.y {
+                        result = true;
                         res.y = min;
                     }
                 }
@@ -55,6 +57,7 @@ impl AABB2D {
                 if aabb.max.x > other.min.x && aabb.min.x < other.max.x && other.min.y >= aabb.max.y {
                     let max = other.min.y - aabb.max.y;
                     if max < res.y {
+                        result = true;
                         res.y = max;
                     }
                 }
@@ -71,6 +74,7 @@ impl AABB2D {
                 if aabb.max.y > other.min.y && aabb.min.y < other.max.y && other.max.x <= aabb.min.x {
                     let min = other.max.x - aabb.min.x;
                     if min > res.x {
+                        result = true;
                         res.x = min;
                     }
                 }
@@ -82,6 +86,7 @@ impl AABB2D {
                 if aabb.max.y > other.min.y && aabb.min.y < other.max.y && other.min.x >= aabb.max.x {
                     let max = other.min.x - aabb.max.x;
                     if max < res.x {
+                        result = true;
                         res.x = max;
                     }
                 }
@@ -91,5 +96,7 @@ impl AABB2D {
         aabb.min.x += res.x;
         aabb.max.x += res.x;
         *self = aabb;
+
+        return result;
     }
 }

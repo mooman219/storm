@@ -1,27 +1,18 @@
 extern crate storm;
 
-use storm::cgmath::*;
 use storm::game::*;
 use storm::input::message::*;
 use storm::log::LevelFilter;
-use storm::render::color;
-use storm::render::color::*;
 use storm::render::message::*;
 use storm::time::clock::*;
-use storm::math::aabb::*;
 
 mod smb_lib;
-use smb_lib::{World, Player};
+use smb_lib::World;
  
 /// Run with: cargo run --example smb --release
 fn main() {
-    storm::log::set_max_level(LevelFilter::Trace);
+    storm::log::set_max_level(LevelFilter::Off);
     storm::run::<TestGame>();
-}
-
-pub struct Textures {
-    main: TextureReference,
-    other: TextureReference,
 }
 
 pub struct TestGame {
@@ -49,16 +40,7 @@ impl Game for TestGame {
     }
 
     fn input(&mut self, event: InputFrame) {
-        let speed = 2f32;
-        /*
-        match event {
-            InputFrame::KeyPressed(Key::A) => self.square.velocity.x -= speed,
-            InputFrame::KeyReleased(Key::A) => self.square.velocity.x += speed,
-            InputFrame::KeyPressed(Key::D) => self.square.velocity.x += speed,
-            InputFrame::KeyReleased(Key::D) => self.square.velocity.x -= speed,
-            _ => {},
-        }
-        */
+        self.world.input(event);
     }
 
     fn tick(&mut self) {
