@@ -60,7 +60,7 @@ impl IndexMap {
         self.free_len = self.table.len();
     }
 
-    pub fn contains(&self, token: IndexToken) -> bool {
+    pub fn contains(&self, token: &IndexToken) -> bool {
         if token.index < self.data_len {
             token.version == self.table[token.index].version
         } else {
@@ -98,7 +98,7 @@ impl IndexMap {
     }
 
     /// Returns the index that was removed.
-    pub fn remove(&mut self, token: IndexToken) -> usize {
+    pub fn remove(&mut self, token: &IndexToken) -> usize {
         let index = token.index as usize;
         // Token validation.
         if token.version != self.table[index].version {
@@ -124,7 +124,7 @@ impl IndexMap {
         data_index
     }
 
-    pub fn get(&self, token: IndexToken) -> usize {
+    pub fn get(&self, token: &IndexToken) -> usize {
         let index = token.index as usize;
         // Token validation
         if token.version != self.table[index].version {

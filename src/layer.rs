@@ -3,8 +3,8 @@ use std::cmp::Ordering;
 
 #[derive(Copy, Clone, Debug, Eq)]
 pub struct LayerReference {
-    pub(crate) depth: usize,
-    pub(crate) key: usize,
+    depth: usize,
+    key: usize,
 }
 
 impl Ord for LayerReference {
@@ -26,6 +26,20 @@ impl PartialOrd for LayerReference {
 impl PartialEq for LayerReference {
     fn eq(&self, other: &LayerReference) -> bool {
         self.depth == other.depth && self.key == other.key
+    }
+}
+
+impl LayerReference {
+    pub(crate) fn new(depth: usize, key: usize) -> LayerReference {
+        LayerReference { depth: depth, key: key }
+    }
+
+    pub(crate) fn depth(&self) -> usize {
+        self.depth
+    }
+
+    pub(crate) fn key(&self) -> usize {
+        self.key
     }
 }
 

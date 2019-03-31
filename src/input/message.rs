@@ -1,6 +1,5 @@
 use cgmath::*;
 use channel::bounded_spsc::Consumer;
-use game::*;
 
 // Re-exports.
 pub use glutin::MouseButton as CursorButton;
@@ -37,18 +36,6 @@ impl InputMessenger {
     pub fn new(input_consumer: Consumer<InputFrame>) -> InputMessenger {
         InputMessenger {
             input_consumer: input_consumer,
-        }
-    }
-
-    pub fn tick<G: Game>(&mut self, game: &mut G) {
-        // Frame processing
-        loop {
-            match self.input_consumer.try_pop() {
-                Some(frame) => {
-                    game.input(frame);
-                },
-                None => return,
-            }
         }
     }
 }

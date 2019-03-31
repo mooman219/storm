@@ -54,13 +54,11 @@ impl StateManager {
             sprites: IndexMap::new(),
         };
         self.layers.insert(lookup, slot);
-        (
-            RenderMessage::LayerCreate {
-                layer: lookup,
-                desc: *desc,
-            },
-            layer,
-        )
+        let message = RenderMessage::LayerCreate {
+            layer: lookup,
+            desc: *desc,
+        };
+        (message, layer)
     }
 
     pub fn layer_update(&mut self, layer: &LayerReference, desc: &LayerDescription) -> RenderMessage {
@@ -108,9 +106,9 @@ impl StateManager {
     }
 
     pub fn sprite_update(&mut self, sprite: &SpriteReference, desc: &SpriteDescription) -> RenderMessage {
-        let lookup = self.layer_get(&sprite.layer);
+        let lookup = self.layer_get(sprite.layer());
         let mut sprites = self.layers[lookup].sprites;
-        let key = sprites.get(sprite.key);
+        let key = sprites.get(sprite.key());
         RenderMessage::SpriteUpdate {
             layer: lookup,
             sprite: key,
@@ -119,10 +117,10 @@ impl StateManager {
     }
 
     pub fn sprite_remove(&mut self, sprite: &SpriteReference) -> RenderMessage {
-        let lookup = self.layer_get(&sprite.layer);
+        let lookup = self.layer_get(sprite.layer());
         let mut sprites = self.layers[lookup].sprites;
-        let key = sprites.get(sprite.key);
-        sprites.remove(sprite.key);
+        let key = sprites.get(sprite.key());
+        sprites.remove(sprite.key());
         RenderMessage::SpriteRemove {
             layer: lookup,
             sprite: key,

@@ -6,8 +6,22 @@ use utility::indexmap::*;
 
 #[derive(Copy, Clone, Debug)]
 pub struct SpriteReference {
-    pub(crate) key: IndexToken,
-    pub(crate) layer: LayerReference,
+    key: IndexToken,
+    layer: LayerReference,
+}
+
+impl SpriteReference {
+    pub(crate) fn new(key: IndexToken, layer: LayerReference) -> SpriteReference {
+        SpriteReference { key: key, layer: layer }
+    }
+
+    pub(crate) fn key(&self) -> &IndexToken {
+        &self.key
+    }
+
+    pub(crate) fn layer(&self) -> &LayerReference {
+        &self.layer
+    }
 }
 
 #[derive(Copy, Clone, Debug)]

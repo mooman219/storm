@@ -10,6 +10,7 @@ pub mod vertex;
 use cgmath::*;
 use channel::bounded_spsc;
 use channel::consume_spsc;
+use layer::*;
 use message::*;
 use render::buffer::geometry::*;
 use render::display::*;
@@ -18,15 +19,22 @@ use render::raw::*;
 use render::shader::*;
 use render::texture::*;
 use render::vertex::*;
+use sprite::*;
 use std::path::Path;
 use std::thread::sleep;
 use std::time::Duration;
 use time::timer::*;
 
+struct Layer {
+    desc: LayerDescription,
+    // Quad::new_geometry_buffer(1024),
+    sprites: GeometryBuffer<Quad<TextureVertex>>,
+}
+
 struct RenderState {
     display: Display,
     shader_texture: TextureShader,
-    quad_texture: GeometryBuffer<Quad<TextureVertex>>,
+    layers: Vec<Layer>,
     texture_packer: TexturePacker,
     texture_atlas: TextureHandle,
     texture_uv: Vec<Vector4<f32>>,
@@ -46,7 +54,7 @@ pub fn start(
     let mut state = RenderState {
         display: display,
         shader_texture: TextureShader::new(),
-        quad_texture: Quad::new_geometry_buffer(1000),
+        layers: Vec::new(),
         texture_packer: TexturePacker::new(TexturePackerConfig {
             max_width: 2048,
             max_height: 2048,
@@ -109,9 +117,7 @@ impl RenderState {
     fn handle_messages(&mut self, messages: &mut Vec<RenderMessage>) {
         for message in messages.drain(..) {
             match message {
-                //
                 // Quad
-                //
                 RenderMessage::SpriteCreate { layer, desc } => {
                     let uv = self.texture_uv[texture];
                     let quad = Quad::texture_rect(pos, size, uv, color);
@@ -125,9 +131,8 @@ impl RenderState {
                 RenderMessage::SpriteRemove { quad } => {
                     self.quad_texture.remove(id);
                 },
-                //
+
                 // Texture
-                //
                 RenderMessage::TextureLoad { path } => {
                     let uv = self.texture_packer.pack_path(Path::new(&path));
                     self.texture_uv.push(uv);
@@ -135,18 +140,16 @@ impl RenderState {
                     self.texture_atlas.set_texture(&new_atlas);
                 },
                 RenderMessage::TextureCreate { raw, height, width } => {},
-                //
+
                 // Scene
-                //
                 RenderMessage::Translate { pos } => {
                     self.shader_texture.set_translation(pos);
                 },
                 RenderMessage::Scale { factor } => {
                     self.shader_texture.set_scale(factor);
                 },
-                //
+
                 // Window
-                //
                 RenderMessage::WindowTitle { title } => {
                     self.display.set_title(title.as_str());
                 },

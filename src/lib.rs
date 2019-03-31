@@ -11,7 +11,6 @@ pub extern crate cgmath;
 pub extern crate log;
 
 pub mod channel;
-pub mod game;
 pub mod input;
 pub mod layer;
 pub mod manager;
@@ -31,7 +30,6 @@ use cgmath::*;
 use channel::bounded_spsc;
 use channel::consume_spsc;
 use channel::replace_spsc;
-use game::*;
 use glutin::dpi::*;
 use layer::*;
 use logger::*;

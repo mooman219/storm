@@ -21,21 +21,6 @@ pub enum InputMessage {
 }
 
 pub(crate) enum RenderMessage {
-    // Sprite
-    SpriteCreate {
-        layer: usize,
-        desc: SpriteDescription,
-    },
-    SpriteUpdate {
-        layer: usize,
-        sprite: usize,
-        desc: SpriteDescription,
-    },
-    SpriteRemove {
-        layer: usize,
-        sprite: usize,
-    },
-
     // Layer
     LayerCreate {
         layer: usize,
@@ -50,6 +35,21 @@ pub(crate) enum RenderMessage {
     },
     LayerClear {
         layer: usize,
+    },
+
+    // Sprite
+    SpriteCreate {
+        layer: usize,
+        desc: SpriteDescription,
+    },
+    SpriteUpdate {
+        layer: usize,
+        sprite: usize,
+        desc: SpriteDescription,
+    },
+    SpriteRemove {
+        layer: usize,
+        sprite: usize,
     },
 
     // Texture
