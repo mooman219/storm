@@ -131,10 +131,6 @@ impl StateManager {
     // Texture
     // ////////////////////////////////////////////////////////
 
-    pub fn texture_lookup(&self, texture: TextureReference) -> usize {
-        texture.key
-    }
-
     pub fn texture_create(&mut self) -> TextureReference {
         self.texture_count += 1;
         TextureReference {

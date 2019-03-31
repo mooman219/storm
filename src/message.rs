@@ -56,11 +56,6 @@ pub(crate) enum RenderMessage {
     TextureLoad {
         path: String,
     },
-    TextureCreate {
-        raw: Vec<u8>,
-        height: usize,
-        width: usize,
-    },
 
     // Window
     WindowTitle {

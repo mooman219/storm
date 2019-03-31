@@ -62,7 +62,7 @@ pub fn run<T: FnOnce(Engine) + Send + 'static>(game: T) {
     let (render_producer_pipe, render_consumer_pipe) = bounded_spsc::make(4);
     let (input_producer_pipe, input_consumer_pipe) = bounded_spsc::make(512);
     let (resize_producer, resize_consumer) = consume_spsc::make();
-    let (cursor_producer, _cursor_consumer) = replace_spsc::make(Vector2::zero());
+    // let (cursor_producer, _cursor_consumer) = replace_spsc::make(Vector2::zero());
 
     // Game thread (daemon)
     thread::spawn(move || {
@@ -176,15 +176,6 @@ impl Engine {
     pub fn texture_load(&mut self, path: &str) -> TextureReference {
         self.render_batch.push(RenderMessage::TextureLoad {
             path: String::from(path),
-        });
-        self.state_manager.texture_create()
-    }
-
-    pub fn texture_create(&mut self, raw: Vec<u8>, height: usize, width: usize) -> TextureReference {
-        self.render_batch.push(RenderMessage::TextureCreate {
-            raw: raw,
-            height: height,
-            width: width,
         });
         self.state_manager.texture_create()
     }

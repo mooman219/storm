@@ -27,7 +27,6 @@ use time::timer::*;
 
 struct Layer {
     desc: LayerDescription,
-    // Quad::new_geometry_buffer(1024),
     sprites: GeometryBuffer<Quad<TextureVertex>>,
 }
 
@@ -64,25 +63,8 @@ pub fn start(
         texture_uv: Vec::new(),
     };
 
-    // Default texture setup
-    {
-        let texture = Texture::from_default(color::WHITE, 8, 8);
-        let uv = state.texture_packer.pack(&texture);
-        state.texture_uv.push(uv);
-        let new_atlas = state.texture_packer.export();
-        state.texture_atlas.set_texture(&new_atlas);
-    }
-
-    // Setup cabilities.
-    enable(Capability::CullFace);
-    enable(Capability::Multisample);
-    enable(Capability::Blend);
-    blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
-    clear_color(0.0, 0.0, 0.2, 1.0);
-    cull_face(CullFace::Back);
-
-    // Set the default texture.
-    state.shader_texture.set_texture_unit(TextureUnit::Atlas);
+    // Initial setup of the render state.
+    state.setup();
 
     // Log render timings.
     let mut timer_render = Timer::new("[R] Frame");
@@ -114,22 +96,64 @@ pub fn start(
 }
 
 impl RenderState {
+    fn setup(&mut self) {
+        // Default texture setup
+        {
+            let texture = Texture::from_default(color::WHITE, 8, 8);
+            let uv = self.texture_packer.pack(&texture);
+            self.texture_uv.push(uv);
+            let new_atlas = self.texture_packer.export();
+            self.texture_atlas.set_texture(&new_atlas);
+        }
+
+        // Setup cabilities.
+        {
+            enable(Capability::CullFace);
+            enable(Capability::Multisample);
+            enable(Capability::Blend);
+            blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
+            clear_color(0.0, 0.0, 0.2, 1.0);
+            cull_face(CullFace::Back);
+        }
+
+        // Setup the default texture.
+        self.shader_texture.set_texture_unit(TextureUnit::Atlas);
+    }
+
     fn handle_messages(&mut self, messages: &mut Vec<RenderMessage>) {
         for message in messages.drain(..) {
             match message {
-                // Quad
+                // Layer
+                RenderMessage::LayerCreate { layer, desc } => self.layers.insert(
+                    layer,
+                    Layer {
+                        desc: desc,
+                        sprites: Quad::new_geometry_buffer(1024),
+                    },
+                ),
+                RenderMessage::LayerUpdate { layer, desc } => {
+                    self.layers[layer].desc = desc;
+                },
+                RenderMessage::LayerRemove { layer } => {
+                    self.layers.remove(layer);
+                },
+                RenderMessage::LayerClear { layer } => {
+                    self.layers[layer].sprites.clear();
+                },
+
+                // Sprite
                 RenderMessage::SpriteCreate { layer, desc } => {
-                    let uv = self.texture_uv[texture];
-                    let quad = Quad::texture_rect(pos, size, uv, color);
-                    self.quad_texture.add(quad);
+                    let uv = self.texture_uv[desc.texture.key()];
+                    let quad = Quad::texture_rect(desc.pos, desc.size, uv, desc.color);
+                    self.layers[layer].sprites.add(quad);
                 },
-                RenderMessage::SpriteUpdate { quad, desc } => {
-                    let uv = self.texture_uv[texture];
-                    let quad = Quad::texture_rect(pos, size, uv, color);
-                    self.quad_texture.update(id, quad);
+                RenderMessage::SpriteUpdate { layer, sprite, desc } => {
+                    let uv = self.texture_uv[desc.texture.key()];
+                    let quad = Quad::texture_rect(desc.pos, desc.size, uv, desc.color);
+                    self.layers[layer].sprites.update(sprite, quad);
                 },
-                RenderMessage::SpriteRemove { quad } => {
-                    self.quad_texture.remove(id);
+                RenderMessage::SpriteRemove { layer, sprite } => {
+                    self.layers[layer].sprites.remove(sprite);
                 },
 
                 // Texture
@@ -138,15 +162,7 @@ impl RenderState {
                     self.texture_uv.push(uv);
                     let new_atlas = self.texture_packer.export();
                     self.texture_atlas.set_texture(&new_atlas);
-                },
-                RenderMessage::TextureCreate { raw, height, width } => {},
-
-                // Scene
-                RenderMessage::Translate { pos } => {
-                    self.shader_texture.set_translation(pos);
-                },
-                RenderMessage::Scale { factor } => {
-                    self.shader_texture.set_scale(factor);
+                    // todo: Performance improvement by marking textures as dirty and setting it last.
                 },
 
                 // Window
@@ -155,7 +171,11 @@ impl RenderState {
                 },
             }
         }
-        self.quad_texture.sync();
+        for layer in &self.layers {
+            if layer.desc.visible {
+                layer.sprites.sync();
+            }
+        }
         self.shader_texture.sync();
     }
 
