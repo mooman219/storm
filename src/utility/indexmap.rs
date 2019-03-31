@@ -1,7 +1,7 @@
 #[derive(Copy, Clone, Debug)]
 pub struct IndexToken {
-    index: u32,
-    version: u32,
+    index: usize,
+    version: usize,
 }
 
 impl IndexToken {
@@ -20,7 +20,7 @@ impl Default for IndexToken {
 struct Slot {
     to_data: usize,
     to_map: usize,
-    version: u32,
+    version: usize,
 }
 
 pub struct IndexMap {
@@ -60,6 +60,14 @@ impl IndexMap {
         self.free_len = self.table.len();
     }
 
+    pub fn contains(&self, token: IndexToken) -> bool {
+        if token.index < self.data_len {
+            token.version == self.table[token.index].version
+        } else {
+            false
+        }
+    }
+
     pub fn add(&mut self) -> IndexToken {
         // Calculate the index that we're inserting the new index at
         let (index, version) = if self.free_len > 0 {
@@ -84,7 +92,7 @@ impl IndexMap {
         self.data_len += 1;
         // Return the token
         IndexToken {
-            index: index as u32,
+            index: index,
             version: version,
         }
     }

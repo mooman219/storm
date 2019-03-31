@@ -2,7 +2,6 @@ pub mod buffer;
 pub mod color;
 pub mod display;
 pub mod geometry;
-pub mod message;
 pub mod raw;
 pub mod shader;
 pub mod texture;
@@ -11,10 +10,10 @@ pub mod vertex;
 use cgmath::*;
 use channel::bounded_spsc;
 use channel::consume_spsc;
+use message::*;
 use render::buffer::geometry::*;
 use render::display::*;
 use render::geometry::*;
-use render::message::*;
 use render::raw::*;
 use render::shader::*;
 use render::texture::*;
@@ -35,7 +34,7 @@ struct RenderState {
 
 pub fn start(
     display: Display,
-    render_consumer: bounded_spsc::Consumer<RenderFrame>,
+    render_consumer: bounded_spsc::Consumer<Vec<RenderMessage>>,
     resize_consumer: consume_spsc::Consumer<Vector2<f64>>,
 ) {
     // Initialize the display. The display is bound in the thread we're going to be making opengl
@@ -47,7 +46,7 @@ pub fn start(
     let mut state = RenderState {
         display: display,
         shader_texture: TextureShader::new(),
-        quad_texture: Quad::new_geometry_buffer(2500),
+        quad_texture: Quad::new_geometry_buffer(1000),
         texture_packer: TexturePacker::new(TexturePackerConfig {
             max_width: 2048,
             max_height: 2048,
@@ -82,7 +81,7 @@ pub fn start(
     loop {
         // Frame processing.
         match render_consumer.try_pop().as_mut() {
-            Some(f) => {
+            Some(mut messages) => {
                 // Start timing.
                 timer_render.start();
                 // Clear the screen.
@@ -90,7 +89,7 @@ pub fn start(
                 // Resizing.
                 state.resize(resize_consumer.consume());
                 // Message handling.
-                state.handle_messages(&mut f.messages);
+                state.handle_messages(&mut messages);
                 // Draw shapes.
                 state.shader_texture.bind();
                 state.quad_texture.draw();
@@ -113,42 +112,29 @@ impl RenderState {
                 //
                 // Quad
                 //
-                RenderMessage::QuadCreate {
-                    pos,
-                    size,
-                    color,
-                    texture,
-                } => {
+                RenderMessage::SpriteCreate { layer, desc } => {
                     let uv = self.texture_uv[texture];
                     let quad = Quad::texture_rect(pos, size, uv, color);
                     self.quad_texture.add(quad);
                 },
-                RenderMessage::QuadUpdate {
-                    id,
-                    pos,
-                    size,
-                    color,
-                    texture,
-                } => {
+                RenderMessage::SpriteUpdate { quad, desc } => {
                     let uv = self.texture_uv[texture];
                     let quad = Quad::texture_rect(pos, size, uv, color);
                     self.quad_texture.update(id, quad);
                 },
-                RenderMessage::QuadRemove { id } => {
+                RenderMessage::SpriteRemove { quad } => {
                     self.quad_texture.remove(id);
-                },
-                RenderMessage::QuadClear {} => {
-                    self.quad_texture.clear();
                 },
                 //
                 // Texture
                 //
-                RenderMessage::TextureCreate { path } => {
+                RenderMessage::TextureLoad { path } => {
                     let uv = self.texture_packer.pack_path(Path::new(&path));
                     self.texture_uv.push(uv);
                     let new_atlas = self.texture_packer.export();
                     self.texture_atlas.set_texture(&new_atlas);
                 },
+                RenderMessage::TextureCreate { raw, height, width } => {},
                 //
                 // Scene
                 //

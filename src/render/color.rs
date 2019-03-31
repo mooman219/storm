@@ -9,8 +9,7 @@ pub const WHITE: Color = Color::new_raw(255, 255, 255, 255);
 pub const BLACK: Color = Color::new_raw(0, 0, 0, 255);
 pub const TRANSPARENT: Color = Color::new_raw(0, 0, 0, 0);
 
-
-use std::cmp::{PartialEq, Eq};
+use std::cmp::{Eq, PartialEq};
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]

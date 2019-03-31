@@ -5,7 +5,7 @@ use storm::game::*;
 use storm::input::message::*;
 use storm::log::LevelFilter;
 use storm::render::color;
-use storm::render::color::*;
+use storm::render::color::Color;
 use storm::render::message::*;
 use storm::time::clock::*;
 
@@ -17,12 +17,22 @@ fn main() {
 
 pub struct Textures {
     main: TextureReference,
-    other: TextureReference,
+    plank: TextureReference,
+}
+
+pub struct Descriptions {
+    main: QuadDescription,
+    plank_white: QuadDescription,
+    plank_orange: QuadDescription,
+    plank_purple: QuadDescription,
+    plank_red: QuadDescription,
+    plain_blue: QuadDescription,
 }
 
 pub struct TestGame {
     render: RenderMessenger,
     textures: Textures,
+    quads: Descriptions,
     clock: Clock,
     translation: Vector2<f32>,
     square: MoveableSquare,
@@ -32,30 +42,14 @@ impl TestGame {
     pub fn generate_world(&mut self) {
         for x in -16..16 {
             let offset = x as f32;
-            self.render.quad_create(
-                Vector3::new(-1f32 + offset, 0f32, 0f32),
-                Vector2::new(0.5f32, 0.5f32),
-                color::ORANGE,
-                self.textures.other,
-            );
-            self.render.quad_create(
-                Vector3::new(-0.5f32 + offset, 0.5f32, 0f32),
-                Vector2::new(0.5f32, 0.5f32),
-                color::RED,
-                self.textures.other,
-            );
-            self.render.quad_create(
-                Vector3::new(0f32 + offset, 1f32, 0f32),
-                Vector2::new(0.5f32, 0.5f32),
-                color::PURPLE,
-                self.textures.other,
-            );
-            self.render.quad_create(
-                Vector3::new(0.5f32 + offset, 1.5f32, 0f32),
-                Vector2::new(0.5f32, 0.5f32),
-                Color::new(0f32, 0f32, 1f32, 0.75f32),
-                DEFAULT_TEXTURE,
-            );
+            self.render
+                .quad_create(Vector3::new(-1f32 + offset, 0f32, 0f32), self.quads.plank_orange);
+            self.render
+                .quad_create(Vector3::new(-0.5f32 + offset, 0.5f32, 0f32), self.quads.plank_red);
+            self.render
+                .quad_create(Vector3::new(0f32 + offset, 1f32, 0f32), self.quads.plank_purple);
+            self.render
+                .quad_create(Vector3::new(0.5f32 + offset, 1.5f32, 0f32), self.quads.plain_blue);
         }
     }
 }
@@ -64,20 +58,46 @@ impl Game for TestGame {
     fn new(mut render: RenderMessenger) -> Self {
         let textures = Textures {
             main: render.texture_create("./examples/testgame/1.png"),
-            other: render.texture_create("./examples/testgame/2.png"),
-            // other: DEFAULT_TEXTURE,
+            plank: render.texture_create("./examples/testgame/2.png"),
         };
-        render.quad_create(
-            Vector3::new(0.5f32, 1.5f32, 0f32),
-            Vector2::new(0.5f32, 0.5f32),
-            Color::new(1f32, 1f32, 1f32, 1f32),
-            // DEFAULT_TEXTURE,
-            textures.other,
-        );
-        let square = MoveableSquare::new(&mut render, textures.main);
+        let quads = Descriptions {
+            main: QuadDescription {
+                size: Vector2::new(1f32, 1f32),
+                color: color::WHITE,
+                texture: textures.main,
+            },
+            plank_white: QuadDescription {
+                size: Vector2::new(0.5f32, 0.5f32),
+                color: color::WHITE,
+                texture: textures.plank,
+            },
+            plank_orange: QuadDescription {
+                size: Vector2::new(0.5f32, 0.5f32),
+                color: color::ORANGE,
+                texture: textures.plank,
+            },
+            plank_purple: QuadDescription {
+                size: Vector2::new(0.5f32, 0.5f32),
+                color: color::PURPLE,
+                texture: textures.plank,
+            },
+            plank_red: QuadDescription {
+                size: Vector2::new(0.5f32, 0.5f32),
+                color: color::RED,
+                texture: textures.plank,
+            },
+            plain_blue: QuadDescription {
+                size: Vector2::new(0.5f32, 0.5f32),
+                color: Color::new(0f32, 0f32, 1f32, 0.75f32),
+                texture: textures.plank,
+            },
+        };
+        render.quad_create(Vector3::new(0.5f32, 1.5f32, 0f32), quads.plank_white);
+        let square = MoveableSquare::new(&mut render, quads.main);
         let mut game = TestGame {
             render: render,
             textures: textures,
+            quads: quads,
             clock: Clock::new(144),
             translation: Vector2::new(0f32, 0f32),
             square: square,
@@ -125,39 +145,30 @@ impl Game for TestGame {
 }
 
 pub struct MoveableSquare {
-    pos: Vector3<f32>,
-    size: Vector2<f32>,
-    velocity: Vector2<f32>,
     index: QuadReference,
-    texture: TextureReference,
+    pos: Vector3<f32>,
+    velocity: Vector2<f32>,
+    desc: QuadDescription,
 }
 
 impl MoveableSquare {
-    pub fn new(render: &mut RenderMessenger, texture: TextureReference) -> MoveableSquare {
+    pub fn new(render: &mut RenderMessenger, desc: QuadDescription) -> MoveableSquare {
         let pos = Vector3::new(-0.5f32, -0.5f32, -0.125f32);
-        let size = Vector2::new(1f32, 1f32);
-        let index = render.quad_create(pos, size, color::YELLOW, texture);
+        let index = render.quad_create(pos, desc);
         MoveableSquare {
-            pos: pos,
-            size: size,
-            velocity: Vector2::zero(),
             index: index,
-            texture: texture,
+            pos: pos,
+            velocity: Vector2::zero(),
+            desc: desc,
         }
     }
 
     pub fn generate_index(&mut self, render: &mut RenderMessenger) {
-        self.index = render.quad_create(self.pos, self.size, color::YELLOW, self.texture);
+        self.index = render.quad_create(self.pos, self.desc);
     }
 
     pub fn update(&mut self, delta: f32, render: &mut RenderMessenger) {
         self.pos += (self.velocity * delta).extend(0f32);
-        render.quad_update(
-            self.index,
-            self.pos,
-            self.size,
-            Color::new(1f32, 1f32, 1f32, 1.0f32),
-            self.texture,
-        );
+        render.quad_update(self.index, self.pos, self.desc);
     }
 }

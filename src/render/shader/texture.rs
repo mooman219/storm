@@ -43,6 +43,7 @@ const UNIFORM_ATLAS: i32 = 0;
 pub struct TextureShader {
     program: ShaderProgram,
     dirty: bool,
+    // todo: Precompute the ortho multiplication.
     ortho: Matrix4<f32>,
     ortho_translation: Matrix4<f32>,
     ortho_scale: Matrix4<f32>,

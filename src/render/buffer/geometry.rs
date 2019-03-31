@@ -1,5 +1,4 @@
 use render::buffer::dynamic::*;
-use render::buffer::immutable::*;
 use render::buffer::*;
 use render::geometry::*;
 use render::raw::*;
@@ -7,7 +6,7 @@ use render::vertex::*;
 use std::ptr;
 
 pub struct GeometryBuffer<T: Geometry> {
-    element_buffer: ImmutableBuffer<T::IndiceType>,
+    element_buffer: DynamicBuffer<T::IndiceType>,
     vertex_buffer: DynamicBuffer<T>,
     vertex_array: VertexArray<T::VertexType>,
 }
@@ -21,10 +20,7 @@ impl<T: Geometry> GeometryBuffer<T> {
         // Vertex Array Object
         let vertex_array = VertexArray::new();
         // Element Buffer Object
-        let element_buffer = ImmutableBuffer::from_vec(
-            BufferBindingTarget::ElementArrayBuffer,
-            T::generate_indice_list(capacity as u16),
-        );
+        let element_buffer = DynamicBuffer::new(BufferBindingTarget::ElementArrayBuffer, capacity);
         // Return
         GeometryBuffer {
             element_buffer: element_buffer,
@@ -34,7 +30,11 @@ impl<T: Geometry> GeometryBuffer<T> {
     }
 
     pub fn add(&mut self, element: T) -> usize {
-        self.vertex_buffer.add(element)
+        let length = self.vertex_buffer.add(element);
+        if length > self.element_buffer.len() {
+            self.element_buffer.add(T::generate_indice(length as u16));
+        }
+        length
     }
 
     pub fn remove(&mut self, index: usize) {
@@ -51,6 +51,7 @@ impl<T: Geometry> GeometryBuffer<T> {
 
     pub fn sync(&mut self) {
         self.vertex_buffer.sync();
+        self.element_buffer.sync();
     }
 
     pub fn draw(&mut self) {
