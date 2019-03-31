@@ -9,7 +9,6 @@ pub mod vertex;
 
 use cgmath::*;
 use channel::bounded_spsc;
-use channel::consume_spsc;
 use layer::*;
 use message::*;
 use render::buffer::geometry::*;
@@ -19,7 +18,6 @@ use render::raw::*;
 use render::shader::*;
 use render::texture::*;
 use render::vertex::*;
-use sprite::*;
 use std::path::Path;
 use std::thread::sleep;
 use std::time::Duration;
@@ -37,19 +35,17 @@ struct RenderState {
     texture_packer: TexturePacker,
     texture_atlas: TextureHandle,
     texture_uv: Vec<Vector4<f32>>,
+    current_size: Vector2<f64>,
 }
 
-pub fn start(
-    display: Display,
-    render_consumer: bounded_spsc::Consumer<Vec<RenderMessage>>,
-    resize_consumer: consume_spsc::Consumer<Vector2<f64>>,
-) {
+pub fn start(display: Display, render_consumer: bounded_spsc::Consumer<Vec<RenderMessage>>) {
     // Initialize the display. The display is bound in the thread we're going to be making opengl
     // calls in. Behavior is undefined is the display is bound outside of the thread and usually
     // segfaults.
     display.bind();
 
     // Create the render state.
+    let current_size = display.get_size();
     let mut state = RenderState {
         display: display,
         shader_texture: TextureShader::new(),
@@ -61,6 +57,7 @@ pub fn start(
         }),
         texture_atlas: TextureHandle::new(TextureUnit::Atlas),
         texture_uv: Vec::new(),
+        current_size: current_size,
     };
 
     // Initial setup of the render state.
@@ -72,20 +69,21 @@ pub fn start(
         // Frame processing.
         match render_consumer.try_pop().as_mut() {
             Some(mut messages) => {
-                // Start timing.
                 timer_render.start();
-                // Clear the screen.
                 clear(ClearBit::ColorBuffer | ClearBit::DepthBuffer);
-                // Resizing.
-                state.resize(resize_consumer.consume());
-                // Message handling.
+                state.resize();
                 state.handle_messages(&mut messages);
-                // Draw shapes.
-                state.shader_texture.bind();
-                state.quad_texture.draw();
-                // Finish.
+
+                for layer in &mut state.layers {
+                    if layer.desc.visible {
+                        state.shader_texture.set_scale(layer.desc.scale);
+                        state.shader_texture.set_translation(layer.desc.translation);
+                        state.shader_texture.sync_ortho();
+                        layer.sprites.draw();
+                    }
+                }
+
                 state.display.swap_buffers();
-                // Finish timing.
                 timer_render.stop();
             },
             None => {},
@@ -117,20 +115,22 @@ impl RenderState {
         }
 
         // Setup the default texture.
-        self.shader_texture.set_texture_unit(TextureUnit::Atlas);
+        self.shader_texture.bind();
+        self.shader_texture.sync_ortho();
+        self.shader_texture.sync_atlas();
     }
 
     fn handle_messages(&mut self, messages: &mut Vec<RenderMessage>) {
         for message in messages.drain(..) {
             match message {
                 // Layer
-                RenderMessage::LayerCreate { layer, desc } => self.layers.insert(
-                    layer,
-                    Layer {
+                RenderMessage::LayerCreate { layer, desc } => {
+                    let slot = Layer {
                         desc: desc,
                         sprites: Quad::new_geometry_buffer(1024),
-                    },
-                ),
+                    };
+                    self.layers.insert(layer, slot)
+                },
                 RenderMessage::LayerUpdate { layer, desc } => {
                     self.layers[layer].desc = desc;
                 },
@@ -171,21 +171,19 @@ impl RenderState {
                 },
             }
         }
-        for layer in &self.layers {
+        for layer in &mut self.layers {
             if layer.desc.visible {
                 layer.sprites.sync();
             }
         }
-        self.shader_texture.sync();
     }
 
-    fn resize(&mut self, message: Option<Vector2<f64>>) {
-        match message {
-            Some(msg) => {
-                self.display.resize(msg);
-                self.shader_texture.set_bounds(msg.x as f32, msg.y as f32);
-            },
-            None => {},
+    fn resize(&mut self) {
+        let new_size = self.display.get_size();
+        if self.current_size != new_size {
+            self.current_size = new_size;
+            self.display.resize(new_size);
+            self.shader_texture.set_bounds(new_size.x as f32, new_size.y as f32);
         }
     }
 }

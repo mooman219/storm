@@ -1,12 +1,13 @@
-use log::*;
+use storm::log::*;
 
 static LOGGER: SimpleLogger = SimpleLogger;
 
 pub struct SimpleLogger;
 
 impl SimpleLogger {
-    pub fn init() {
+    pub fn init(level_filter: LevelFilter) {
         set_logger(&LOGGER).expect("Unable to setup logging for storm-engine.");
+        set_max_level(level_filter);
     }
 }
 

@@ -13,8 +13,8 @@ fn bench_indexmap_cycle(bench: &mut Bencher) {
 
     bench.iter(|| {
         let a = map.add();
-        black_box(map.get(a));
-        black_box(map.remove(a));
+        black_box(map.get(&a));
+        black_box(map.remove(&a));
     });
 }
 
@@ -24,6 +24,6 @@ fn bench_indexmap_get(bench: &mut Bencher) {
     let a = map.add();
 
     bench.iter(|| {
-        black_box(map.get(a));
+        black_box(map.get(&a));
     });
 }

@@ -52,6 +52,11 @@ impl Display {
         self.window.set_always_on_top(always_on_top);
     }
 
+    pub fn get_size(&self) -> Vector2<f64> {
+        let logical_size = self.window.get_inner_size().expect("Window no longer exists.");
+        Vector2::new(logical_size.width, logical_size.height)
+    }
+
     // Buffer
 
     /// Swaps the buffers in case of double or triple buffering.

@@ -31,7 +31,7 @@ impl<T: Geometry> GeometryBuffer<T> {
 
     pub fn add(&mut self, element: T) -> usize {
         let length = self.vertex_buffer.add(element);
-        if length > self.element_buffer.len() {
+        if length >= self.element_buffer.len() {
             self.element_buffer.add(T::generate_indice(length as u16));
         }
         length

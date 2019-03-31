@@ -42,7 +42,6 @@ const UNIFORM_ATLAS: i32 = 0;
 
 pub struct TextureShader {
     program: ShaderProgram,
-    dirty: bool,
     // todo: Precompute the ortho multiplication.
     ortho: Matrix4<f32>,
     ortho_translation: Matrix4<f32>,
@@ -55,7 +54,6 @@ impl TextureShader {
         let program = ShaderProgram::new(VERTEX, FRAGMENT);
         TextureShader {
             program: program,
-            dirty: true,
             ortho: ortho(-2.5f32, 2.5f32, -2.5f32, 2.5f32, -1f32, 1f32),
             ortho_translation: Matrix4::from_translation(Vector3::new(0f32, 0f32, 0f32)),
             ortho_scale: Matrix4::from_scale(1f32),
@@ -68,34 +66,29 @@ impl TextureShader {
     }
 
     pub fn set_bounds(&mut self, width: f32, height: f32) {
-        self.dirty = true;
         let nw = width / 200f32;
         let nh = height / 200f32;
         self.ortho = ortho(-nw, nw, -nh, nh, -1f32, 1f32);
     }
 
     pub fn set_translation(&mut self, translation: Vector2<f32>) {
-        self.dirty = true;
         self.ortho_translation = Matrix4::from_translation(Vector3::new(translation.x, translation.y, 0f32));
     }
 
     pub fn set_scale(&mut self, scale: f32) {
-        self.dirty = true;
         self.ortho_scale = Matrix4::from_scale(scale);
     }
 
     pub fn set_texture_unit(&mut self, unit: TextureUnit) {
-        self.dirty = true;
         self.atlas = unit as i32;
     }
 
-    pub fn sync(&mut self) {
-        if self.dirty {
-            self.dirty = false;
-            let matrix = self.ortho * self.ortho_translation * self.ortho_scale;
-            self.program.bind();
-            uniform_matrix_4fv(UNIFORM_ORTHO, 1, false, matrix.as_ptr());
-            uniform_1i(UNIFORM_ATLAS, self.atlas);
-        }
+    pub fn sync_ortho(&mut self) {
+        let matrix = self.ortho * self.ortho_translation * self.ortho_scale;
+        uniform_matrix_4fv(UNIFORM_ORTHO, 1, false, matrix.as_ptr());
+    }
+
+    pub fn sync_atlas(&mut self) {
+        uniform_1i(UNIFORM_ATLAS, self.atlas);
     }
 }

@@ -11,7 +11,6 @@ pub extern crate cgmath;
 pub extern crate log;
 
 pub mod channel;
-pub mod input;
 pub mod layer;
 pub mod manager;
 pub mod math;
@@ -22,17 +21,15 @@ pub mod texture;
 pub mod time;
 pub mod utility;
 
-mod logger;
 #[cfg(test)]
 mod test;
 
-use cgmath::*;
 use channel::bounded_spsc;
 use channel::consume_spsc;
 use channel::replace_spsc;
 use glutin::dpi::*;
+use glutin::EventsLoop;
 use layer::*;
-use logger::*;
 use manager::*;
 use message::*;
 use render::display::*;
@@ -41,60 +38,55 @@ use std::mem;
 use std::thread;
 use texture::*;
 
-/// Creates and runs a game. Threads for input, rendering, and game logic are created along with
-/// communication channels between them. The game is then instantiated. This function blocks until
-/// the game window is closed.
-pub fn run<T: FnOnce(Engine) + Send + 'static>(game: T) {
-    // Initialze logging.
-    SimpleLogger::init();
-
-    // Winow creation
-    let event_loop = glutin::EventsLoop::new();
-    let display = Display::new(
-        glutin::WindowBuilder::new()
-            .with_title("Storm Engine")
-            .with_dimensions(LogicalSize::from((500, 500))),
-        glutin::ContextBuilder::new().with_multisampling(2),
-        &event_loop,
-    );
-
-    // Inter-thread message queues for input and rendering
-    let (render_producer_pipe, render_consumer_pipe) = bounded_spsc::make(4);
-    let (input_producer_pipe, input_consumer_pipe) = bounded_spsc::make(512);
-    let (resize_producer, resize_consumer) = consume_spsc::make();
-    // let (cursor_producer, _cursor_consumer) = replace_spsc::make(Vector2::zero());
-
-    // Game thread (daemon)
-    thread::spawn(move || {
-        game(Engine::new(render_producer_pipe, input_consumer_pipe));
-    });
-
-    // Render thread (daemon)
-    thread::spawn(move || {
-        render::start(display, render_consumer_pipe, resize_consumer);
-    });
-
-    // Input thread (main)
-    // input::start(event_loop, input_producer_pipe, resize_producer, cursor_producer);
-}
-
 pub struct Engine {
     render_batch: Vec<RenderMessage>,
     render_pipe: bounded_spsc::Producer<Vec<RenderMessage>>,
-    input_pipe: bounded_spsc::Consumer<InputMessage>,
     state_manager: StateManager,
+    event_loop: EventsLoop,
 }
 
 impl Engine {
-    fn new(
-        render_pipe: bounded_spsc::Producer<Vec<RenderMessage>>,
-        input_pipe: bounded_spsc::Consumer<InputMessage>,
-    ) -> Engine {
+    /// Creates and runs a game. Threads for input, rendering, and game logic are created along with
+    /// communication channels between them. The game is then instantiated. This function blocks until
+    /// the game window is closed.
+    pub fn new() -> Engine {
+        // Winow creation
+        let event_loop = glutin::EventsLoop::new();
+        let display = Display::new(
+            glutin::WindowBuilder::new()
+                .with_title("Storm Engine")
+                .with_dimensions(LogicalSize::from((500, 500))),
+            glutin::ContextBuilder::new().with_multisampling(2),
+            &event_loop,
+        );
+
+        // Inter-thread message queues for input and rendering
+        let (render_producer_pipe, render_consumer_pipe) = bounded_spsc::make(4);
+        // let (input_producer_pipe, input_consumer_pipe) = bounded_spsc::make(512);
+        // let (cursor_producer, _cursor_consumer) = replace_spsc::make(Vector2::zero());
+
+        // Render thread (daemon)
+        thread::spawn(move || {
+            render::start(display, render_consumer_pipe);
+        });
+
+        // Input thread (main)
+        // input::start(event_loop, input_producer_pipe, resize_producer, cursor_producer);
+
         Engine {
             render_batch: Vec::new(),
-            render_pipe: render_pipe,
-            input_pipe: input_pipe,
+            render_pipe: render_producer_pipe,
             state_manager: StateManager::new(),
+            event_loop: event_loop,
+        }
+    }
+
+    pub fn test(&mut self) {
+        loop {
+            self.event_loop.poll_events(|event| match event {
+                _ => (),
+            });
+            // self.window_commit();
         }
     }
 
@@ -120,9 +112,9 @@ impl Engine {
     // Input
     // ////////////////////////////////////////////////////////
 
-    pub fn input_poll(&mut self) -> Option<InputMessage> {
-        self.input_pipe.try_pop()
-    }
+    // pub fn input_poll(&mut self) -> Option<InputMessage> {
+    //     self.input_pipe.try_pop()
+    // }
 
     // ////////////////////////////////////////////////////////
     // Layer

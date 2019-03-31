@@ -11,6 +11,6 @@ impl TextureReference {
     }
 
     pub fn key(&self) -> usize {
-        self.key()
+        self.key
     }
 }

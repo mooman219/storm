@@ -20,7 +20,7 @@ pub enum InputMessage {
     CursorEntered,
 }
 
-pub(crate) enum RenderMessage {
+pub enum RenderMessage {
     // Layer
     LayerCreate {
         layer: usize,

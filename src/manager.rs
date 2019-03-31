@@ -41,12 +41,9 @@ impl StateManager {
 
     pub fn layer_create(&mut self, depth: usize, desc: &LayerDescription) -> (RenderMessage, LayerReference) {
         self.layer_count += 1;
-        let layer = LayerReference {
-            depth: depth,
-            key: self.layer_count,
-        };
+        let layer = LayerReference::new(depth, self.layer_count);
         let lookup = match self.layer_search(&layer) {
-            Ok(index) => panic!("Given layer already exists."),
+            Ok(_) => panic!("Given layer already exists."),
             Err(index) => index,
         };
         let slot = LayerSlot {
@@ -77,7 +74,7 @@ impl StateManager {
 
     pub fn layer_clear(&mut self, layer: &LayerReference) -> RenderMessage {
         let lookup = self.layer_get(layer);
-        let mut sprites = self.layers[lookup].sprites;
+        let sprites = &mut self.layers[lookup].sprites;
         sprites.clear();
         RenderMessage::LayerClear { layer: lookup }
     }
@@ -92,12 +89,9 @@ impl StateManager {
         desc: &SpriteDescription,
     ) -> (RenderMessage, SpriteReference) {
         let lookup = self.layer_get(layer);
-        let mut sprites = self.layers[lookup].sprites;
+        let sprites = &mut self.layers[lookup].sprites;
         let key = sprites.add();
-        let sprite = SpriteReference {
-            key: key,
-            layer: *layer,
-        };
+        let sprite = SpriteReference::new(key, *layer);
         let message = RenderMessage::SpriteCreate {
             layer: lookup,
             desc: *desc,
@@ -107,7 +101,7 @@ impl StateManager {
 
     pub fn sprite_update(&mut self, sprite: &SpriteReference, desc: &SpriteDescription) -> RenderMessage {
         let lookup = self.layer_get(sprite.layer());
-        let mut sprites = self.layers[lookup].sprites;
+        let sprites = &mut self.layers[lookup].sprites;
         let key = sprites.get(sprite.key());
         RenderMessage::SpriteUpdate {
             layer: lookup,
@@ -118,7 +112,7 @@ impl StateManager {
 
     pub fn sprite_remove(&mut self, sprite: &SpriteReference) -> RenderMessage {
         let lookup = self.layer_get(sprite.layer());
-        let mut sprites = self.layers[lookup].sprites;
+        let sprites = &mut self.layers[lookup].sprites;
         let key = sprites.get(sprite.key());
         sprites.remove(sprite.key());
         RenderMessage::SpriteRemove {
@@ -133,8 +127,6 @@ impl StateManager {
 
     pub fn texture_create(&mut self) -> TextureReference {
         self.texture_count += 1;
-        TextureReference {
-            key: self.texture_count,
-        }
+        TextureReference::new(self.texture_count)
     }
 }
