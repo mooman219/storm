@@ -1,9 +1,10 @@
 use cgmath::*;
+use color::*;
 use layer::*;
-use render::color::*;
 use texture::*;
 use utility::indexmap::*;
 
+/// Handle to reference an uploaded sprite with.
 #[derive(Copy, Clone, Debug)]
 pub struct SpriteReference {
     key: IndexToken,
@@ -24,6 +25,7 @@ impl SpriteReference {
     }
 }
 
+/// Configuration description for a sprite.
 #[derive(Copy, Clone, Debug)]
 pub struct SpriteDescription {
     pub pos: Vector3<f32>,

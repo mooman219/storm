@@ -1,6 +1,7 @@
 use cgmath::*;
 use std::cmp::Ordering;
 
+/// Handle to reference a layer with.
 #[derive(Copy, Clone, Debug, Eq)]
 pub struct LayerReference {
     depth: usize,
@@ -43,6 +44,7 @@ impl LayerReference {
     }
 }
 
+/// Configuration description for a sprite.
 #[derive(Copy, Clone, Debug)]
 pub struct LayerDescription {
     pub translation: Vector2<f32>,

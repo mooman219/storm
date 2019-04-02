@@ -1,5 +1,5 @@
+use color::*;
 use image::{DynamicImage, ImageBuffer, Rgba};
-use render::color::*;
 
 pub struct Texture {
     pixels: Vec<Color>,

@@ -1,4 +1,4 @@
-use render::color::*;
+use color::*;
 use render::texture::*;
 use std;
 use std::cmp::max;

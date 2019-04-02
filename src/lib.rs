@@ -5,39 +5,41 @@ extern crate core;
 extern crate gl;
 extern crate glutin;
 extern crate image;
+#[macro_use]
+extern crate log;
 
 pub extern crate cgmath;
-#[macro_use]
-pub extern crate log;
 
 pub mod channel;
-pub mod layer;
-pub mod manager;
 pub mod math;
-pub mod message;
-pub mod render;
-pub mod sprite;
-pub mod texture;
 pub mod time;
 pub mod utility;
 
+mod color;
+mod input;
+mod layer;
+mod manager;
+mod render;
+mod sprite;
 #[cfg(test)]
 mod test;
+mod texture;
+
+pub use color::*;
+pub use input::*;
+pub use layer::*;
+pub use sprite::*;
+pub use texture::*;
 
 use channel::bounded_spsc;
-use channel::consume_spsc;
-use channel::replace_spsc;
 use glutin::dpi::*;
 use glutin::EventsLoop;
-use layer::*;
 use manager::*;
-use message::*;
-use render::display::*;
-use sprite::*;
+use render::*;
 use std::mem;
 use std::thread;
-use texture::*;
 
+/// The main entry point into the Storm engine.
 pub struct Engine {
     render_batch: Vec<RenderMessage>,
     render_pipe: bounded_spsc::Producer<Vec<RenderMessage>>,
@@ -46,9 +48,8 @@ pub struct Engine {
 }
 
 impl Engine {
-    /// Creates and runs a game. Threads for input, rendering, and game logic are created along with
-    /// communication channels between them. The game is then instantiated. This function blocks until
-    /// the game window is closed.
+    /// Creates and runs an instance of the engine. This creates a window on
+    /// another thread which listens for messages from the engine.
     pub fn new() -> Engine {
         // Winow creation
         let event_loop = glutin::EventsLoop::new();
@@ -62,16 +63,11 @@ impl Engine {
 
         // Inter-thread message queues for input and rendering
         let (render_producer_pipe, render_consumer_pipe) = bounded_spsc::make(4);
-        // let (input_producer_pipe, input_consumer_pipe) = bounded_spsc::make(512);
-        // let (cursor_producer, _cursor_consumer) = replace_spsc::make(Vector2::zero());
 
         // Render thread (daemon)
         thread::spawn(move || {
             render::start(display, render_consumer_pipe);
         });
-
-        // Input thread (main)
-        // input::start(event_loop, input_producer_pipe, resize_producer, cursor_producer);
 
         Engine {
             render_batch: Vec::new(),
@@ -93,11 +89,6 @@ impl Engine {
     // ////////////////////////////////////////////////////////
     // Engine
     // ////////////////////////////////////////////////////////
-
-    // pub fn engine_input_alive() -> bool {
-    //     // todo
-    //     false
-    // }
 
     // pub fn engine_render_alive() -> bool {
     //     // todo

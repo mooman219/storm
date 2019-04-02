@@ -1,4 +1,6 @@
-pub mod aabb;
+mod aabb;
+
+pub use math::aabb::*;
 
 const PI: f32 = 3.141592653589793238f32;
 const PI_2: f32 = 1.570796326794896619f32;

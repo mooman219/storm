@@ -1,5 +1,5 @@
 use layer::*;
-use message::*;
+use render::*;
 use sprite::*;
 use texture::*;
 use utility::indexmap::*;

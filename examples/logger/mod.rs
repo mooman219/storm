@@ -1,4 +1,4 @@
-use storm::log::*;
+use log::*;
 
 static LOGGER: SimpleLogger = SimpleLogger;
 

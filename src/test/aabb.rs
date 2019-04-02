@@ -1,5 +1,5 @@
 use cgmath::Vector2;
-use math::aabb::*;
+use math::*;
 
 #[test]
 fn test_slide() {

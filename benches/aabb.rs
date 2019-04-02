@@ -5,7 +5,7 @@ extern crate storm;
 extern crate test;
 
 use cgmath::Vector2;
-use storm::math::aabb::*;
+use storm::math::*;
 use storm::utility::benching::black_box;
 use test::Bencher;
 

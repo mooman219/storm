@@ -1,17 +1,10 @@
+extern crate log;
 extern crate storm;
 
 mod logger;
+use log::LevelFilter;
 use logger::*;
-use storm::log::LevelFilter;
 
-use std::thread::sleep;
-use std::time::Duration;
-use storm::cgmath::*;
-use storm::layer::*;
-use storm::render::color;
-use storm::render::color::Color;
-use storm::sprite::*;
-use storm::time::clock::*;
 use storm::*;
 
 /// Run with: cargo run --example testgame --release

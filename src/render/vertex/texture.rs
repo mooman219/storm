@@ -1,5 +1,5 @@
 use cgmath::*;
-use render::color::*;
+use color::*;
 use render::raw::*;
 use render::vertex::*;
 use std::mem;

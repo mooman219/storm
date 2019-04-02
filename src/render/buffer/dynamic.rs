@@ -3,7 +3,7 @@ use render::raw::*;
 use std::cmp;
 use std::mem;
 use std::ptr;
-use time::timer::*;
+use time::*;
 
 pub struct DynamicBuffer<T> {
     vbo: u32,

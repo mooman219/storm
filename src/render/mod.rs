@@ -1,18 +1,20 @@
-pub mod buffer;
-pub mod color;
-pub mod display;
-pub mod geometry;
-pub mod raw;
-pub mod shader;
-pub mod texture;
-pub mod vertex;
+mod buffer;
+mod display;
+mod geometry;
+mod message;
+mod raw;
+mod shader;
+mod texture;
+mod vertex;
+
+pub use render::display::*;
+pub use render::message::*;
 
 use cgmath::*;
 use channel::bounded_spsc;
+use color;
 use layer::*;
-use message::*;
 use render::buffer::geometry::*;
-use render::display::*;
 use render::geometry::*;
 use render::raw::*;
 use render::shader::*;
@@ -21,7 +23,7 @@ use render::vertex::*;
 use std::path::Path;
 use std::thread::sleep;
 use std::time::Duration;
-use time::timer::*;
+use time::*;
 
 struct Layer {
     desc: LayerDescription,
@@ -121,6 +123,7 @@ impl RenderState {
     }
 
     fn handle_messages(&mut self, messages: &mut Vec<RenderMessage>) {
+        let mut texture_dirty = false;
         for message in messages.drain(..) {
             match message {
                 // Layer
@@ -160,9 +163,7 @@ impl RenderState {
                 RenderMessage::TextureLoad { path } => {
                     let uv = self.texture_packer.pack_path(Path::new(&path));
                     self.texture_uv.push(uv);
-                    let new_atlas = self.texture_packer.export();
-                    self.texture_atlas.set_texture(&new_atlas);
-                    // todo: Performance improvement by marking textures as dirty and setting it last.
+                    texture_dirty = true;
                 },
 
                 // Window
@@ -171,6 +172,13 @@ impl RenderState {
                 },
             }
         }
+
+        // Sync textures if updated.
+        if texture_dirty {
+            let new_atlas = self.texture_packer.export();
+            self.texture_atlas.set_texture(&new_atlas);
+        }
+        // Sync visible layers.
         for layer in &mut self.layers {
             if layer.desc.visible {
                 layer.sprites.sync();
