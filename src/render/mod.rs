@@ -1,6 +1,7 @@
 mod buffer;
 mod display;
 mod geometry;
+mod manager;
 mod message;
 mod raw;
 mod shader;
@@ -8,6 +9,7 @@ mod texture;
 mod vertex;
 
 pub use render::display::*;
+pub use render::manager::*;
 pub use render::message::*;
 
 use cgmath::*;
@@ -90,6 +92,7 @@ pub fn start(display: Display, render_consumer: bounded_spsc::Consumer<Vec<Rende
             },
             None => {},
         }
+        // todo: Use Condvar and wait until alerterd to start rendering.
         // Sleep to avoid pegging a core.
         sleep(Duration::new(0, 100));
     }
@@ -110,9 +113,11 @@ impl RenderState {
         {
             enable(Capability::CullFace);
             enable(Capability::Multisample);
-            enable(Capability::Blend);
-            blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
+            // enable(Capability::Blend);
+            enable(Capability::DepthTest);
+            // blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
             clear_color(0.0, 0.0, 0.2, 1.0);
+            depth_func(DepthTest::Less);
             cull_face(CullFace::Back);
         }
 

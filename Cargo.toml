@@ -1,11 +1,11 @@
 [package]
 name = "storm"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Joe Cumbo <mooman219@gmail.com>"]
 
 [dependencies]
-gl = "0.10"
-glutin = "0.18"
+gl = "0.12"
+glutin = "0.20"
 cgmath = "0.15"
 log = "0.4"
 image = "0.19"

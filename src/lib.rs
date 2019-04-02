@@ -18,7 +18,6 @@ pub mod utility;
 mod color;
 mod input;
 mod layer;
-mod manager;
 mod render;
 mod sprite;
 #[cfg(test)]
@@ -27,14 +26,14 @@ mod texture;
 
 pub use color::*;
 pub use input::*;
+pub use input::*;
 pub use layer::*;
 pub use sprite::*;
 pub use texture::*;
 
 use channel::bounded_spsc;
 use glutin::dpi::*;
-use glutin::EventsLoop;
-use manager::*;
+use input::manager::*;
 use render::*;
 use std::mem;
 use std::thread;
@@ -43,8 +42,8 @@ use std::thread;
 pub struct Engine {
     render_batch: Vec<RenderMessage>,
     render_pipe: bounded_spsc::Producer<Vec<RenderMessage>>,
-    state_manager: StateManager,
-    event_loop: EventsLoop,
+    render_manager: RenderManager,
+    input_manager: InputManager,
 }
 
 impl Engine {
@@ -72,17 +71,8 @@ impl Engine {
         Engine {
             render_batch: Vec::new(),
             render_pipe: render_producer_pipe,
-            state_manager: StateManager::new(),
-            event_loop: event_loop,
-        }
-    }
-
-    pub fn test(&mut self) {
-        loop {
-            self.event_loop.poll_events(|event| match event {
-                _ => (),
-            });
-            // self.window_commit();
+            render_manager: RenderManager::new(),
+            input_manager: InputManager::new(event_loop),
         }
     }
 
@@ -103,32 +93,34 @@ impl Engine {
     // Input
     // ////////////////////////////////////////////////////////
 
-    // pub fn input_poll(&mut self) -> Option<InputMessage> {
-    //     self.input_pipe.try_pop()
-    // }
+    /// Fetches all the events that are pending, calls the callback function for
+    /// each of them, and returns.
+    pub fn input_poll(&mut self, callback: impl FnMut(InputMessage)) {
+        self.input_manager.poll(callback);
+    }
 
     // ////////////////////////////////////////////////////////
     // Layer
     // ////////////////////////////////////////////////////////
 
     pub fn layer_create(&mut self, depth: usize, desc: &LayerDescription) -> LayerReference {
-        let (message, layer) = self.state_manager.layer_create(depth, desc);
+        let (message, layer) = self.render_manager.layer_create(depth, desc);
         self.render_batch.push(message);
         layer
     }
 
     pub fn layer_update(&mut self, layer: &LayerReference, desc: &LayerDescription) {
-        let message = self.state_manager.layer_update(layer, desc);
+        let message = self.render_manager.layer_update(layer, desc);
         self.render_batch.push(message);
     }
 
     pub fn layer_remove(&mut self, layer: &LayerReference) {
-        let message = self.state_manager.layer_remove(layer);
+        let message = self.render_manager.layer_remove(layer);
         self.render_batch.push(message);
     }
 
     pub fn layer_clear(&mut self, layer: &LayerReference) {
-        let message = self.state_manager.layer_clear(layer);
+        let message = self.render_manager.layer_clear(layer);
         self.render_batch.push(message);
     }
 
@@ -137,18 +129,18 @@ impl Engine {
     // ////////////////////////////////////////////////////////
 
     pub fn sprite_create(&mut self, layer: &LayerReference, desc: &SpriteDescription) -> SpriteReference {
-        let (message, sprite) = self.state_manager.sprite_create(layer, desc);
+        let (message, sprite) = self.render_manager.sprite_create(layer, desc);
         self.render_batch.push(message);
         sprite
     }
 
     pub fn sprite_update(&mut self, sprite: &SpriteReference, desc: &SpriteDescription) {
-        let message = self.state_manager.sprite_update(sprite, desc);
+        let message = self.render_manager.sprite_update(sprite, desc);
         self.render_batch.push(message);
     }
 
     pub fn sprite_remove(&mut self, sprite: &SpriteReference) {
-        let message = self.state_manager.sprite_remove(sprite);
+        let message = self.render_manager.sprite_remove(sprite);
         self.render_batch.push(message);
     }
 
@@ -156,13 +148,15 @@ impl Engine {
     // Texture
     // ////////////////////////////////////////////////////////
 
+    /// Loads a new texture.
     pub fn texture_load(&mut self, path: &str) -> TextureReference {
         self.render_batch.push(RenderMessage::TextureLoad {
             path: String::from(path),
         });
-        self.state_manager.texture_create()
+        self.render_manager.texture_create()
     }
 
+    /// Gets the default texture reference.
     pub fn texture_default() -> TextureReference {
         DEFAULT_TEXTURE
     }
@@ -199,6 +193,7 @@ impl Engine {
     // Window
     // ////////////////////////////////////////////////////////
 
+    /// Sets the title of the window.
     pub fn window_title(&mut self, title: &str) {
         self.render_batch.push(RenderMessage::WindowTitle {
             title: String::from(title),
@@ -209,6 +204,8 @@ impl Engine {
     //     // todo
     // }
 
+    /// Commits the queued window related changes to the renderer. This may block
+    /// if the renderer is getting changes faster than it can process.
     pub fn window_commit(&mut self) {
         let mut batch = Vec::new();
         mem::swap(&mut batch, &mut self.render_batch);

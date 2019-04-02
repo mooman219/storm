@@ -11,7 +11,7 @@ pub const TRANSPARENT: Color = Color::new_raw(0, 0, 0, 0);
 
 use std::cmp::{Eq, PartialEq};
 
-// Simple RGBA8 color type to represent colors.
+/// Simple RGBA8 color type to represent colors.
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct Color {

@@ -1,11 +1,11 @@
 use cgmath::*;
 use glutin;
 use glutin::dpi::*;
-use glutin::GlContext;
+use glutin::ContextTrait;
 use render::raw::*;
 
 pub struct Display {
-    window: glutin::GlWindow,
+    window: glutin::WindowedContext,
 }
 
 // Mark the display as send. In some systems, glutin::GlWindow isn't send so we
@@ -18,13 +18,14 @@ impl Display {
         context_builder: glutin::ContextBuilder,
         events_loop: &glutin::EventsLoop,
     ) -> Display {
-        let gl_window = glutin::GlWindow::new(window_builder, context_builder, &events_loop).unwrap();
-        Display { window: gl_window }
+        Display {
+            window: context_builder.build_windowed(window_builder, events_loop).unwrap(),
+        }
     }
 
     pub fn bind(&self) {
         unsafe {
-            self.window.make_current().unwrap();
+            self.window.context().make_current().unwrap();
         }
         load_with(|symbol| self.window.get_proc_address(symbol) as *const _);
         info!("Render: OpenGL version {}", get_string(StringTarget::Version));

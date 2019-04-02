@@ -9,15 +9,15 @@ struct LayerSlot {
     sprites: IndexMap,
 }
 
-pub struct StateManager {
+pub struct RenderManager {
     layers: Vec<LayerSlot>,
     texture_count: usize,
     layer_count: usize,
 }
 
-impl StateManager {
-    pub fn new() -> StateManager {
-        StateManager {
+impl RenderManager {
+    pub fn new() -> RenderManager {
+        RenderManager {
             layers: Vec::new(),
             texture_count: 0,
             layer_count: 0,
