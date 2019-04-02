@@ -33,7 +33,9 @@ impl InputManager {
         self.event_loop.poll_events(|event| match event {
             Event::WindowEvent { event, .. } => match event {
                 // Window
-                WindowEvent::CloseRequested => {},
+                WindowEvent::CloseRequested => {
+                    callback(InputMessage::CloseRequested);
+                },
 
                 // Keyboard
                 WindowEvent::KeyboardInput { input, .. } => match input.virtual_keycode {

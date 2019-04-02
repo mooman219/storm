@@ -8,6 +8,8 @@ pub use glutin::VirtualKeyCode as KeyboardButton;
 /// ordering when stored in a vector and read sequentially.
 #[derive(Copy, Clone)]
 pub enum InputMessage {
+    /// The window has requested it close.
+    CloseRequested,
     /// Keyboard press event.
     KeyPressed(KeyboardButton),
     /// Keyboard release event.
