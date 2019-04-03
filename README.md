@@ -24,7 +24,7 @@ fn main() {
     // Create a layer to draw on.
     let layer = engine.layer_create(0, &LayerDescription::default());
     // Add a sprite to that layer (a white square).
-    engine.sprite_create(&layer, SpriteDescription::default());
+    engine.sprite_create(&layer, &SpriteDescription::default());
 
     let mut is_active = true;
     while is_active {
