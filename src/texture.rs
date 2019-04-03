@@ -8,11 +8,11 @@ pub struct TextureReference {
 }
 
 impl TextureReference {
-    pub fn new(key: usize) -> TextureReference {
+    pub(crate) fn new(key: usize) -> TextureReference {
         TextureReference { key: key }
     }
 
-    pub fn key(&self) -> usize {
+    pub(crate) fn key(&self) -> usize {
         self.key
     }
 }

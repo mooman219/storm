@@ -7,6 +7,7 @@ extern crate glutin;
 extern crate image;
 #[macro_use]
 extern crate log;
+extern crate parking_lot;
 
 pub extern crate cgmath;
 
@@ -32,6 +33,7 @@ pub use sprite::*;
 pub use texture::*;
 
 use channel::bounded_spsc;
+use channel::control;
 use glutin::dpi::*;
 use input::manager::*;
 use render::*;
@@ -43,6 +45,7 @@ pub struct Engine {
     render_batch: Vec<RenderMessage>,
     render_pipe: bounded_spsc::Producer<Vec<RenderMessage>>,
     render_manager: RenderManager,
+    render_control: control::Producer,
     input_manager: InputManager,
 }
 
@@ -56,22 +59,24 @@ impl Engine {
             glutin::WindowBuilder::new()
                 .with_title("Storm Engine")
                 .with_dimensions(LogicalSize::from((500, 500))),
-            glutin::ContextBuilder::new().with_multisampling(2),
+            glutin::ContextBuilder::new(),
             &event_loop,
         );
 
-        // Inter-thread message queues for input and rendering
+        // Inter-thread messaging for rendering
+        let (render_producer_control, render_consumer_control) = control::make();
         let (render_producer_pipe, render_consumer_pipe) = bounded_spsc::make(4);
 
         // Render thread (daemon)
         thread::spawn(move || {
-            render::start(display, render_consumer_pipe);
+            render::start(display, render_consumer_pipe, render_consumer_control);
         });
 
         Engine {
             render_batch: Vec::new(),
             render_pipe: render_producer_pipe,
             render_manager: RenderManager::new(),
+            render_control: render_producer_control,
             input_manager: InputManager::new(event_loop),
         }
     }
@@ -210,5 +215,6 @@ impl Engine {
         let mut batch = Vec::new();
         mem::swap(&mut batch, &mut self.render_batch);
         self.render_pipe.push(batch);
+        self.render_control.notify();
     }
 }

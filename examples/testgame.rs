@@ -5,12 +5,14 @@ mod logger;
 
 use log::LevelFilter;
 use logger::*;
+use storm::time::*;
 use storm::*;
 
 /// Run with: cargo run --example testgame --release
 fn main() {
     SimpleLogger::init(LevelFilter::Trace);
 
+    let mut clock = Clock::new(144);
     let mut engine = Engine::new();
     let texture = engine.texture_load("./examples/resources/2.png");
     let layer = engine.layer_create(0, &LayerDescription::default());
@@ -32,5 +34,6 @@ fn main() {
         });
 
         engine.window_commit();
+        clock.tick();
     }
 }

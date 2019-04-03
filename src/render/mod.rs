@@ -13,6 +13,7 @@ pub use render::message::*;
 
 use cgmath::*;
 use channel::bounded_spsc;
+use channel::control;
 use color;
 use layer::*;
 use render::buffer::geometry::*;
@@ -21,8 +22,6 @@ use render::shader::*;
 use render::texture::*;
 use render::vertex::*;
 use std::path::Path;
-use std::thread::sleep;
-use std::time::Duration;
 use time::*;
 
 struct Layer {
@@ -40,7 +39,11 @@ struct RenderState {
     current_size: Vector2<f64>,
 }
 
-pub fn start(display: Display, render_consumer: bounded_spsc::Consumer<Vec<RenderMessage>>) {
+pub fn start(
+    display: Display,
+    render_consumer: bounded_spsc::Consumer<Vec<RenderMessage>>,
+    render_control: control::Consumer,
+) {
     // Initialize the display. The display is bound in the thread we're going to be making opengl
     // calls in. Behavior is undefined is the display is bound outside of the thread and usually
     // segfaults.
@@ -88,11 +91,10 @@ pub fn start(display: Display, render_consumer: bounded_spsc::Consumer<Vec<Rende
                 state.display.swap_buffers();
                 timer_render.stop();
             },
-            None => {},
+            None => {
+                render_control.wait();
+            },
         }
-        // todo: Use Condvar and wait until alerterd to start rendering.
-        // Sleep to avoid pegging a core.
-        sleep(Duration::new(0, 100));
     }
 }
 
@@ -111,9 +113,7 @@ impl RenderState {
         {
             enable(Capability::CullFace);
             enable(Capability::Multisample);
-            // enable(Capability::Blend);
             enable(Capability::DepthTest);
-            // blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
             clear_color(0.0, 0.0, 0.2, 1.0);
             depth_func(DepthTest::Less);
             cull_face(CullFace::Back);
@@ -151,7 +151,6 @@ impl RenderState {
                 RenderMessage::SpriteCreate { layer, desc } => {
                     let uv = self.texture_uv[desc.texture.key()];
                     let quad = TextureVertex::new(desc.pos, desc.size, uv, desc.color);
-                    trace!("{:?}", quad);
                     self.layers[layer].sprites.add(quad);
                 },
                 RenderMessage::SpriteUpdate { layer, sprite, desc } => {
