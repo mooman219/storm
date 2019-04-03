@@ -12,8 +12,11 @@ fn main() {
     SimpleLogger::init(LevelFilter::Trace);
 
     let mut engine = Engine::new();
+    let texture = engine.texture_load("./examples/resources/2.png");
     let layer = engine.layer_create(0, &LayerDescription::default());
-    engine.sprite_create(&layer, &SpriteDescription::default());
+    let mut sprite = SpriteDescription::default();
+    sprite.texture = texture;
+    engine.sprite_create(&layer, &sprite);
 
     let mut is_active = true;
     while is_active {

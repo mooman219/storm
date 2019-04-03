@@ -101,3 +101,16 @@ pub fn vertex_attrib_pointer(
         gl::VertexAttribPointer(index, size, attribute as u32, bool_to_enum(normalized), stride, pointer);
     }
 }
+
+/// Modify the rate at which generic vertex attributes advance during instanced rendering.
+///
+/// # Arguments
+///
+/// `index` - Specify the index of the generic vertex attribute.
+/// `divisor` - Specify the number of instances that will pass between updates of the generic attribute at slot index.
+#[inline]
+pub fn vertex_attrib_divisor(index: u32, divisor: u32) {
+    unsafe {
+        gl::VertexAttribDivisor(index, divisor);
+    }
+}

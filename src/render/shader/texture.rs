@@ -7,18 +7,40 @@ static VERTEX: &str = r#"
 #extension GL_ARB_explicit_uniform_location : enable
 #extension GL_ARB_explicit_attrib_location : enable
 
-layout(location = 0) in vec3 a_pos;
-layout(location = 1) in vec2 a_uv;
-layout(location = 2) in vec4 a_color;
+layout(location = 0) in float a_pos_z;
+layout(location = 1) in vec4 a_pos;
+layout(location = 2) in vec4 a_uv;
+layout(location = 3) in vec4 a_color;
 out vec2 v_uv;
 out vec4 v_color;
 
 layout(location = 1) uniform mat4 ortho;
 
 void main() {
-    gl_Position = ortho * vec4(a_pos, 1.0);
-    v_uv = a_uv;
+    // (x:left, y:right, z:bottom, w:top)
+    vec2 pos = vec2(0.0);
+
+    switch (gl_VertexID) {
+        case 0:
+            pos = vec2(a_pos.x, a_pos.w); // left top
+            v_uv = vec2(a_uv.x, a_uv.z); // left bottom
+            break;
+        case 1:
+            pos = vec2(a_pos.x, a_pos.z); // left bottom
+            v_uv = vec2(a_uv.x, a_uv.w); // left top
+            break;
+        case 2:
+            pos = vec2(a_pos.y, a_pos.w); // right top
+            v_uv = vec2(a_uv.y, a_uv.z); /// right bottom
+            break;
+        case 3:
+            pos = vec2(a_pos.y, a_pos.z); // right bottom
+            v_uv = vec2(a_uv.y, a_uv.w); // right top
+            break;
+    }
+
     v_color = a_color;
+    gl_Position = ortho * vec4(pos, a_pos_z, 1.0);
 }
 "#;
 static FRAGMENT: &str = r#"

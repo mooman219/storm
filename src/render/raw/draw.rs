@@ -47,3 +47,18 @@ pub fn draw_elements_base_vertex(
         gl::DrawElementsBaseVertex(mode as u32, count, indice_type as u32, indices, base_vertex);
     }
 }
+
+/// Draw multiple instances of a range of elements.
+///
+/// # Arguments
+///
+/// `mode` - Specifies what kind of primitives to render.
+/// `first` - Specifies the starting index in the enabled arrays.
+/// `count` - Specifies the number of indices to be rendered.
+/// `primcount` - Specifies the number of instances of the specified range of indices to be rendered.
+#[inline]
+pub fn draw_arrays_instanced(mode: DrawMode, first: i32, count: i32, primcount: i32) {
+    unsafe {
+        gl::DrawArraysInstanced(mode as u32, first, count, primcount);
+    }
+}

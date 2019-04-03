@@ -1,6 +1,5 @@
 mod buffer;
 mod display;
-mod geometry;
 mod manager;
 mod message;
 mod raw;
@@ -17,7 +16,6 @@ use channel::bounded_spsc;
 use color;
 use layer::*;
 use render::buffer::geometry::*;
-use render::geometry::*;
 use render::raw::*;
 use render::shader::*;
 use render::texture::*;
@@ -29,7 +27,7 @@ use time::*;
 
 struct Layer {
     desc: LayerDescription,
-    sprites: GeometryBuffer<Quad<TextureVertex>>,
+    sprites: GeometryBuffer<TextureVertex>,
 }
 
 struct RenderState {
@@ -135,7 +133,7 @@ impl RenderState {
                 RenderMessage::LayerCreate { layer, desc } => {
                     let slot = Layer {
                         desc: desc,
-                        sprites: Quad::new_geometry_buffer(1024),
+                        sprites: GeometryBuffer::new(1024),
                     };
                     self.layers.insert(layer, slot)
                 },
@@ -152,12 +150,13 @@ impl RenderState {
                 // Sprite
                 RenderMessage::SpriteCreate { layer, desc } => {
                     let uv = self.texture_uv[desc.texture.key()];
-                    let quad = Quad::texture_rect(desc.pos, desc.size, uv, desc.color);
+                    let quad = TextureVertex::new(desc.pos, desc.size, uv, desc.color);
+                    trace!("{:?}", quad);
                     self.layers[layer].sprites.add(quad);
                 },
                 RenderMessage::SpriteUpdate { layer, sprite, desc } => {
                     let uv = self.texture_uv[desc.texture.key()];
-                    let quad = Quad::texture_rect(desc.pos, desc.size, uv, desc.color);
+                    let quad = TextureVertex::new(desc.pos, desc.size, uv, desc.color);
                     self.layers[layer].sprites.update(sprite, quad);
                 },
                 RenderMessage::SpriteRemove { layer, sprite } => {
