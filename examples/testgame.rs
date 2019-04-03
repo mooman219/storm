@@ -15,10 +15,21 @@ fn main() {
     let mut clock = Clock::new(144);
     let mut engine = Engine::new();
     let texture = engine.texture_load("./examples/resources/2.png");
-    let layer = engine.layer_create(0, &LayerDescription::default());
+
+    let back_layer = engine.layer_create(0, &LayerDescription::default());
+    let front_layer = engine.layer_create(1, &LayerDescription::default());
+
     let mut sprite = SpriteDescription::default();
+    sprite.pos.z = 1.0f32;
     sprite.texture = texture;
-    engine.sprite_create(&layer, &sprite);
+    sprite.color = RED;
+    engine.sprite_create(&back_layer, &sprite);
+
+    sprite.pos.z = -1.0f32;
+    sprite.pos.y -= 0.5f32;
+    sprite.pos.x -= 0.5f32;
+    sprite.color = ORANGE;
+    engine.sprite_create(&front_layer, &sprite);
 
     let mut is_active = true;
     while is_active {

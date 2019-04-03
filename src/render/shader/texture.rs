@@ -72,7 +72,7 @@ impl TextureShader {
         let program = ShaderProgram::new(VERTEX, FRAGMENT);
         TextureShader {
             program: program,
-            ortho: ortho(-2.5f32, 2.5f32, -2.5f32, 2.5f32, -1f32, 1f32),
+            ortho: ortho(-2.5f32, 2.5f32, -2.5f32, 2.5f32, std::f32::MIN, std::f32::MAX),
             ortho_translation: Matrix4::from_translation(Vector3::new(0f32, 0f32, 0f32)),
             ortho_scale: Matrix4::from_scale(1f32),
             atlas: TextureUnit::Atlas as i32,
@@ -86,7 +86,7 @@ impl TextureShader {
     pub fn set_bounds(&mut self, width: f32, height: f32) {
         let nw = width / 200f32;
         let nh = height / 200f32;
-        self.ortho = ortho(-nw, nw, -nh, nh, -1f32, 1f32);
+        self.ortho = ortho(-nw, nw, -nh, nh, std::f32::MIN, std::f32::MAX);
     }
 
     pub fn set_translation(&mut self, translation: Vector2<f32>) {
