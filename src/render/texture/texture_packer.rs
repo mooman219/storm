@@ -213,11 +213,13 @@ impl Packer for TexturePacker {
             self.texture.set_texture(rect.x, rect.y, texture);
 
             // UV Layout: X:LEFT Y:RIGHT Z:BOTTOM W:TOP
+            let height_half_pixel = 0.5 / self.config.max_height as f32;
+            let width_half_pixel = 0.5 / self.config.max_width as f32;
             let vector = Vector4::new(
-                (rect.x as f32) / (self.config.max_height as f32),
-                ((rect.x + rect.w) as f32) / (self.config.max_height as f32),
-                (rect.y as f32) / (self.config.max_width as f32),
-                ((rect.y + rect.h) as f32) / (self.config.max_width as f32),
+                (rect.x as f32) / (self.config.max_width as f32) + width_half_pixel,
+                ((rect.x + rect.w) as f32) / (self.config.max_width as f32) - width_half_pixel,
+                (rect.y as f32) / (self.config.max_height as f32) + height_half_pixel,
+                ((rect.y + rect.h) as f32) / (self.config.max_height as f32) - height_half_pixel,
             );
             info!("TEXTURE PACK: {:?}", vector);
             info!("TEXTURE PACK: {:?}", rect);

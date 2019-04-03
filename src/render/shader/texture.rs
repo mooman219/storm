@@ -4,8 +4,6 @@ use render::shader::shader_program::*;
 
 static VERTEX: &str = r#"
 #version 400 core
-#extension GL_ARB_explicit_uniform_location : enable
-#extension GL_ARB_explicit_attrib_location : enable
 
 layout(location = 0) in float a_pos_z;
 layout(location = 1) in vec4 a_pos;
@@ -14,7 +12,7 @@ layout(location = 3) in vec4 a_color;
 out vec2 v_uv;
 out vec4 v_color;
 
-layout(location = 1) uniform mat4 ortho;
+uniform mat4 ortho;
 
 void main() {
     // (x:left, y:right, z:bottom, w:top)
@@ -45,14 +43,12 @@ void main() {
 "#;
 static FRAGMENT: &str = r#"
 #version 400 core
-#extension GL_ARB_explicit_uniform_location : enable
-#extension GL_ARB_explicit_attrib_location : enable
 
 in vec2 v_uv;
 in vec4 v_color;
 out vec4 a_color;
 
-layout(location = 0) uniform sampler2D atlas;
+uniform sampler2D atlas;
 
 void main() {
     a_color = texture(atlas, v_uv) * v_color;

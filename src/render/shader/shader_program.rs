@@ -33,6 +33,11 @@ impl ShaderProgram {
         }
     }
 
+    pub fn get_uniform_location(&self, uniform: &str) -> i32 {
+        let c_uniform = CString::new(uniform).unwrap();
+        unsafe { gl::GetUniformLocation(self.id, c_uniform.as_ptr()) }
+    }
+
     pub fn bind(&self) {
         unsafe {
             gl::UseProgram(self.id);
