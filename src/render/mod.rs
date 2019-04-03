@@ -75,12 +75,13 @@ pub fn start(
         match render_consumer.try_pop().as_mut() {
             Some(mut messages) => {
                 timer_render.start();
-                clear(ClearBit::ColorBuffer | ClearBit::DepthBuffer);
+                clear(ClearBit::ColorBuffer);
                 state.resize();
                 state.handle_messages(&mut messages);
 
                 for layer in &mut state.layers {
                     if layer.desc.visible {
+                        clear(ClearBit::DepthBuffer);
                         state.shader_texture.set_scale(layer.desc.scale);
                         state.shader_texture.set_translation(layer.desc.translation);
                         state.shader_texture.sync_ortho();
