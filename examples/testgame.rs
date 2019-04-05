@@ -20,21 +20,21 @@ fn main() {
     let mut sprite = SpriteDescription::default();
     sprite.pos.z = 1.0f32;
     sprite.texture = texture;
-    sprite.color = RED;
+    sprite.color = color::RED;
     engine.sprite_create(&layer, &sprite);
 
     let layer = engine.layer_create(1, &LayerDescription::default());
     sprite.pos.z = -1.0f32;
     sprite.pos.y -= 0.5f32;
     sprite.pos.x -= 0.5f32;
-    sprite.color = ORANGE;
+    sprite.color = color::ORANGE;
     engine.sprite_create(&layer, &sprite);
 
     let layer = engine.layer_create(2, &LayerDescription::default());
     sprite.pos.z = -2.0f32;
     sprite.pos.y -= 0.5f32;
     sprite.pos.x -= 0.5f32;
-    sprite.color = GREEN;
+    sprite.color = color::GREEN;
     engine.sprite_create(&layer, &sprite);
 
     let mut is_active = true;

@@ -9,10 +9,8 @@ pub struct Producer {
 impl Producer {
     pub fn notify(&self) {
         let &(ref lock, ref cvar) = &*self.cvar;
-        let mut status = lock.lock();
-        *status = true;
+        let _ = lock.lock();
         cvar.notify_all();
-        *status = false;
     }
 }
 

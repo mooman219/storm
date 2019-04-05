@@ -3,7 +3,7 @@ use render::raw::*;
 use render::shader::shader_program::*;
 
 static VERTEX: &str = r#"
-#version 400 core
+#version 330
 
 layout(location = 0) in float a_pos_z;
 layout(location = 1) in vec4 a_pos;
@@ -42,7 +42,7 @@ void main() {
 }
 "#;
 static FRAGMENT: &str = r#"
-#version 400 core
+#version 330
 
 in vec2 v_uv;
 in vec4 v_color;
@@ -55,11 +55,10 @@ void main() {
 }
 "#;
 
-const UNIFORM_ORTHO: i32 = 1;
-const UNIFORM_ATLAS: i32 = 0;
-
 pub struct TextureShader {
     program: ShaderProgram,
+    uniform_ortho: i32,
+    uniform_atlas: i32,
     // todo: Precompute the ortho multiplication.
     ortho: Matrix4<f32>,
     ortho_translation: Matrix4<f32>,
@@ -70,8 +69,12 @@ pub struct TextureShader {
 impl TextureShader {
     pub fn new() -> TextureShader {
         let program = ShaderProgram::new(VERTEX, FRAGMENT);
+        let uniform_ortho = program.get_uniform_location("ortho");
+        let uniform_atlas = program.get_uniform_location("atlas");
         TextureShader {
             program: program,
+            uniform_ortho: uniform_ortho,
+            uniform_atlas: uniform_atlas,
             ortho: ortho(-2.5f32, 2.5f32, -2.5f32, 2.5f32, std::f32::MIN, std::f32::MAX),
             ortho_translation: Matrix4::from_translation(Vector3::new(0f32, 0f32, 0f32)),
             ortho_scale: Matrix4::from_scale(1f32),
@@ -103,10 +106,10 @@ impl TextureShader {
 
     pub fn sync_ortho(&mut self) {
         let matrix = self.ortho * self.ortho_translation * self.ortho_scale;
-        uniform_matrix_4fv(UNIFORM_ORTHO, 1, false, matrix.as_ptr());
+        uniform_matrix_4fv(self.uniform_ortho, 1, false, matrix.as_ptr());
     }
 
     pub fn sync_atlas(&mut self) {
-        uniform_1i(UNIFORM_ATLAS, self.atlas);
+        uniform_1i(self.uniform_atlas, self.atlas);
     }
 }

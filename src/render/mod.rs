@@ -50,23 +50,7 @@ pub fn start(
     display.bind();
 
     // Create the render state.
-    let current_size = display.get_size();
-    let mut state = RenderState {
-        display: display,
-        shader_texture: TextureShader::new(),
-        layers: Vec::new(),
-        texture_packer: TexturePacker::new(TexturePackerConfig {
-            max_width: 2048,
-            max_height: 2048,
-            texture_padding: 0,
-        }),
-        texture_atlas: TextureHandle::new(TextureUnit::Atlas),
-        texture_uv: Vec::new(),
-        current_size: current_size,
-    };
-
-    // Initial setup of the render state.
-    state.setup();
+    let mut state = RenderState::new(display);
 
     // Log render timings.
     let mut timer_render = Timer::new("[R] Frame");
@@ -100,14 +84,29 @@ pub fn start(
 }
 
 impl RenderState {
-    fn setup(&mut self) {
+    fn new(display: Display) -> RenderState {
+        let current_size = display.get_size();
+        let mut state = RenderState {
+            display: display,
+            shader_texture: TextureShader::new(),
+            layers: Vec::new(),
+            texture_packer: TexturePacker::new(TexturePackerConfig {
+                max_width: 2048,
+                max_height: 2048,
+                texture_padding: 0,
+            }),
+            texture_atlas: TextureHandle::new(TextureUnit::Atlas),
+            texture_uv: Vec::new(),
+            current_size: current_size,
+        };
+
         // Default texture setup
         {
             let texture = Texture::from_default(color::WHITE, 8, 8);
-            let uv = self.texture_packer.pack(&texture);
-            self.texture_uv.push(uv);
-            let new_atlas = self.texture_packer.export();
-            self.texture_atlas.set_texture(&new_atlas);
+            let uv = state.texture_packer.pack(&texture);
+            state.texture_uv.push(uv);
+            let new_atlas = state.texture_packer.export();
+            state.texture_atlas.set_texture(&new_atlas);
         }
 
         // Setup cabilities.
@@ -121,9 +120,11 @@ impl RenderState {
         }
 
         // Setup the default texture.
-        self.shader_texture.bind();
-        self.shader_texture.sync_ortho();
-        self.shader_texture.sync_atlas();
+        state.shader_texture.bind();
+        state.shader_texture.sync_ortho();
+        state.shader_texture.sync_atlas();
+
+        state
     }
 
     fn handle_messages(&mut self, messages: &mut Vec<RenderMessage>) {

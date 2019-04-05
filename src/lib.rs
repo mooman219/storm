@@ -12,11 +12,11 @@ extern crate parking_lot;
 pub extern crate cgmath;
 
 pub mod channel;
+pub mod color;
 pub mod math;
 pub mod time;
 pub mod utility;
 
-mod color;
 mod input;
 mod layer;
 mod render;
@@ -25,7 +25,6 @@ mod sprite;
 mod test;
 mod texture;
 
-pub use color::*;
 pub use input::*;
 pub use input::*;
 pub use layer::*;
