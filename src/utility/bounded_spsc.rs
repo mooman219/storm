@@ -69,17 +69,6 @@ impl<T> Buffer<T> {
     /// If the buffer is empty, this method will not block.  Instead, it will return `None`
     /// signifying the buffer was empty.  The caller may then decide what to do next (e.g. spin-wait,
     /// sleep, process something else, etc)
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// // Attempt to pop off a value
-    /// let t = buffer.try_pop();
-    /// match t {
-    ///   Some(v) => {}, // Got a value
-    ///   None => {}     // Buffer empty, try again later
-    /// }
-    /// ```
     pub fn try_pop(&self) -> Option<T> {
         let current_head = self.head.load(Ordering::Relaxed);
 
@@ -125,13 +114,6 @@ impl<T> Buffer<T> {
     /// spin-wait and will repeatedly call `try_pop()` until a value is available.  If you do not
     /// want a spin-wait burning CPU, you should call `try_pop()` directly and implement a different
     /// waiting strategy.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// // Block until a value is ready
-    /// let t = buffer.pop();
-    /// ```
     pub fn pop(&self) -> T {
         loop {
             match self.try_pop() {
@@ -146,17 +128,6 @@ impl<T> Buffer<T> {
     /// If the buffer is full, this method will not block.  Instead, it will return `Some(v)`, where
     /// `v` was the value attempting to be pushed onto the buffer.  If the value was successfully
     /// pushed onto the buffer, `None` will be returned signifying success.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// // Attempt to push a value onto the buffer
-    /// let t = buffer.try_push(123);
-    /// match t {
-    ///   Some(v) => {}, // Buffer was full, try again later
-    ///   None => {}     // Value was successfully pushed onto the buffer
-    /// }
-    /// ```
     pub fn try_push(&self, v: T) -> Option<T> {
         let current_tail = self.tail.load(Ordering::Relaxed);
 
@@ -180,13 +151,6 @@ impl<T> Buffer<T> {
     /// spin-wait and will repeatedly call `try_push()` until the value can be added.  If you do not
     /// want a spin-wait burning CPU, you should call `try_push()` directly and implement a different
     /// waiting strategy.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// // Block until we can push this value onto the buffer
-    /// buffer.try_push(123);
-    /// ```
     pub fn push(&self, v: T) {
         let mut t = v;
         loop {
@@ -250,45 +214,9 @@ impl<T> Drop for Buffer<T> {
 /// power of two sizes are more efficient to operate on (can use a bitwise AND to index
 /// into the ring instead of a more expensive modulo operator).
 ///
-/// # Examples
-///
-/// Here is a simple usage of make, using the queue within the same thread:
-///
-/// ```
-/// // Create a queue with capacity to hold 100 values
-/// let (p, c) = make(100);
-///
-/// // Push `123` onto the queue
-/// p.push(123);
-///
-/// // Pop the value back off
-/// let t = c.pop();
-/// assert!(t == 123);
-/// ```
-///
 /// Of course, a SPSC queue is really only useful if you plan to use it in a multi-threaded
 /// environment.  The Producer and Consumer can both be sent to a thread, providing a fast, bounded
-/// one-way communication channel between those threads:
-///
-/// ```
-/// use std::thread;
-///
-/// let (p, c) = make(500);
-///
-/// // Spawn a new thread and move the Producer into it
-/// thread::spawn(move|| {
-///   for i in 0..100000 {
-///     p.push(i as u32);
-///   }
-/// });
-///
-/// // Back in the first thread, start Pop'ing values off the queue
-/// for i in 0..100000 {
-///   let t = c.pop();
-///   assert!(t == i);
-/// }
-///
-/// ```
+/// one-way communication channel between those threads.
 ///
 /// # Panics
 ///
@@ -339,15 +267,6 @@ impl<T> Producer<T> {
     /// this method will block until the buffer is non-full.  The waiting strategy is a simple
     /// spin-wait. If you do not want a spin-wait burning CPU, you should call `try_push()`
     /// directly and implement a different waiting strategy.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let (producer, _) = make(100);
-    ///
-    /// // Block until we can push this value onto the queue
-    /// producer.push(123);
-    /// ```
     pub fn push(&self, v: T) {
         (*self.buffer).push(v);
     }
@@ -357,18 +276,6 @@ impl<T> Producer<T> {
     /// This method does not block.  If the queue is not full, the value will be added to the
     /// queue and the method will return `None`, signifying success.  If the queue is full,
     /// this method will return `Some(v)``, where `v` is your original value.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let (producer, _) = make(100);
-    ///
-    /// // Attempt to add this value to the queue
-    /// match producer.try push(123) {
-    ///     Some(v) => {}, // Queue full, try again later
-    ///     None => {}     // Value added to queue
-    /// }
-    /// ```
     pub fn try_push(&self, v: T) -> Option<T> {
         (*self.buffer).try_push(v)
     }
@@ -377,16 +284,6 @@ impl<T> Producer<T> {
     ///
     /// This value represents the total capacity of the queue when it is full.  It does not
     /// represent the current usage.  For that, call `size()`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let (producer, _) = make(100);
-    ///
-    /// assert!(producer.capacity() == 100);
-    /// producer.push(123);
-    /// assert!(producer.capacity() == 100);
-    /// ```
     pub fn capacity(&self) -> usize {
         (*self.buffer).capacity
     }
@@ -395,16 +292,6 @@ impl<T> Producer<T> {
     ///
     /// This value represents the current size of the queue.  This value can be from 0-`capacity`
     /// inclusive.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let (producer, _) = make(100);
-    ///
-    /// assert!(producer.size() == 0);
-    /// producer.push(123);
-    /// assert!(producer.size() == 1);
-    /// ```
     pub fn size(&self) -> usize {
         (*self.buffer).tail.load(Ordering::Acquire) - (*self.buffer).head.load(Ordering::Acquire)
     }
@@ -413,16 +300,6 @@ impl<T> Producer<T> {
     ///
     /// This value represents the number of items that can be pushed onto the queue before it
     /// becomes full.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let (producer, _) = make(100);
-    ///
-    /// assert!(producer.free_space() == 100);
-    /// producer.push(123);
-    /// assert!(producer.free_space() == 99);
-    /// ```
     pub fn free_space(&self) -> usize {
         self.capacity() - self.size()
     }
@@ -435,15 +312,6 @@ impl<T> Consumer<T> {
     /// If the buffer is empty, this method will block until a value becomes available.  The
     /// waiting strategy is a simple spin-wait. If you do not want a spin-wait burning CPU, you
     /// should call `try_push()` directly and implement a different waiting strategy.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let (_, consumer) = make(100);
-    ///
-    /// // Block until a value becomes available
-    /// let t = consumer.pop();
-    /// ```
     pub fn pop(&self) -> T {
         (*self.buffer).pop()
     }
@@ -453,21 +321,6 @@ impl<T> Consumer<T> {
     /// This method does not block.  If the queue is empty, the method will return `None`.  If
     /// there is a value available, the method will return `Some(v)`, where `v` is the value
     /// being popped off the queue.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use bounded_spsc_queue::*;
-    ///
-    /// let (_, consumer) = make(100);
-    ///
-    /// // Attempt to pop a value off the queue
-    /// let t = consumer.try_pop();
-    /// match t {
-    ///     Some(v) => {},      // Successfully popped a value
-    ///     None => {}          // Queue empty, try again later
-    /// }
-    /// ```
     pub fn try_pop(&self) -> Option<T> {
         (*self.buffer).try_pop()
     }
@@ -481,17 +334,6 @@ impl<T> Consumer<T> {
     /// *WARNING:* This will leak at most `n` values from the buffer, i.e. the destructors of the
     /// objects skipped over will not be called. This function is intended to be used on buffers that
     /// contain non-`Drop` data, such as a `Buffer<f32>`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use bounded_spsc_queue::*;
-    ///
-    /// let (_, consumer) = make(100);
-    ///
-    /// let mut read_position = 0; // current buffer index
-    /// read_position += consumer.skip_n(512); // try to skip at most 512 elements
-    /// ```
     pub fn skip_n(&self, n: usize) -> usize {
         (*self.buffer).skip_n(n)
     }
@@ -499,16 +341,6 @@ impl<T> Consumer<T> {
     ///
     /// This value represents the total capacity of the queue when it is full.  It does not
     /// represent the current usage.  For that, call `size()`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let (_, consumer) = make(100);
-    ///
-    /// assert!(consumer.capacity() == 100);
-    /// let t = consumer.pop();
-    /// assert!(producer.capacity() == 100);
-    /// ```
     pub fn capacity(&self) -> usize {
         (*self.buffer).capacity
     }
@@ -517,18 +349,6 @@ impl<T> Consumer<T> {
     ///
     /// This value represents the current size of the queue.  This value can be from 0-`capacity`
     /// inclusive.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let (_, consumer) = make(100);
-    ///
-    /// //... producer pushes somewhere ...
-    ///
-    /// assert!(consumer.size() == 10);
-    /// consumer.pop();
-    /// assert!(producer.size() == 9);
-    /// ```
     pub fn size(&self) -> usize {
         (*self.buffer).tail.load(Ordering::Acquire) - (*self.buffer).head.load(Ordering::Acquire)
     }

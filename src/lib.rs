@@ -33,17 +33,13 @@ pub use texture::*;
 
 use glutin::dpi::*;
 use render::*;
-use std::mem;
 use std::thread;
 use utility::bounded_spsc;
 use utility::control;
 
 /// The main entry point into the Storm engine.
 pub struct Engine {
-    render_batch: Vec<RenderMessage>,
-    render_pipe: bounded_spsc::Producer<Vec<RenderMessage>>,
-    render_manager: RenderManager,
-    render_control: control::Producer,
+    render_client: RenderClient,
     input_client: InputClient,
 }
 
@@ -76,10 +72,7 @@ impl Engine {
         });
 
         Engine {
-            render_batch: Vec::new(),
-            render_pipe: render_producer_pipe,
-            render_manager: RenderManager::new(),
-            render_control: render_producer_control,
+            render_client: RenderClient::new(render_producer_pipe, render_producer_control),
             input_client: InputClient::new(input_consumer_pipe),
         }
     }
@@ -112,24 +105,19 @@ impl Engine {
     // ////////////////////////////////////////////////////////
 
     pub fn layer_create(&mut self, depth: usize, desc: &LayerDescription) -> LayerReference {
-        let (message, layer) = self.render_manager.layer_create(depth, desc);
-        self.render_batch.push(message);
-        layer
+        self.render_client.layer_create(depth, desc)
     }
 
     pub fn layer_update(&mut self, layer: &LayerReference, desc: &LayerDescription) {
-        let message = self.render_manager.layer_update(layer, desc);
-        self.render_batch.push(message);
+        self.render_client.layer_update(layer, desc)
     }
 
     pub fn layer_remove(&mut self, layer: &LayerReference) {
-        let message = self.render_manager.layer_remove(layer);
-        self.render_batch.push(message);
+        self.render_client.layer_remove(layer)
     }
 
     pub fn layer_clear(&mut self, layer: &LayerReference) {
-        let message = self.render_manager.layer_clear(layer);
-        self.render_batch.push(message);
+        self.render_client.layer_clear(layer)
     }
 
     // ////////////////////////////////////////////////////////
@@ -137,19 +125,15 @@ impl Engine {
     // ////////////////////////////////////////////////////////
 
     pub fn sprite_create(&mut self, layer: &LayerReference, desc: &SpriteDescription) -> SpriteReference {
-        let (message, sprite) = self.render_manager.sprite_create(layer, desc);
-        self.render_batch.push(message);
-        sprite
+        self.render_client.sprite_create(layer, desc)
     }
 
     pub fn sprite_update(&mut self, sprite: &SpriteReference, desc: &SpriteDescription) {
-        let message = self.render_manager.sprite_update(sprite, desc);
-        self.render_batch.push(message);
+        self.render_client.sprite_update(sprite, desc)
     }
 
     pub fn sprite_remove(&mut self, sprite: &SpriteReference) {
-        let message = self.render_manager.sprite_remove(sprite);
-        self.render_batch.push(message);
+        self.render_client.sprite_remove(sprite)
     }
 
     // ////////////////////////////////////////////////////////
@@ -158,10 +142,7 @@ impl Engine {
 
     /// Loads a new texture.
     pub fn texture_load(&mut self, path: &str) -> TextureReference {
-        self.render_batch.push(RenderMessage::TextureLoad {
-            path: String::from(path),
-        });
-        self.render_manager.texture_create()
+        self.render_client.texture_create(path)
     }
 
     /// Gets the default texture reference.
@@ -177,9 +158,9 @@ impl Engine {
     //     // todo
     // }
 
-    // pub fn font_default(&mut self) {
-    //     // todo
-    // }
+    pub fn font_default(&mut self) -> FontReference {
+        DEFAULT_FONT
+    }
 
     // ////////////////////////////////////////////////////////
     // Text
@@ -203,9 +184,7 @@ impl Engine {
 
     /// Sets the title of the window.
     pub fn window_title(&mut self, title: &str) {
-        self.render_batch.push(RenderMessage::WindowTitle {
-            title: String::from(title),
-        });
+        self.render_client.window_title(title)
     }
 
     // pub fn window_size(&mut self) {
@@ -215,9 +194,6 @@ impl Engine {
     /// Commits the queued window related changes to the renderer. This may block
     /// if the renderer is getting changes faster than it can process.
     pub fn window_commit(&mut self) {
-        let mut batch = Vec::new();
-        mem::swap(&mut batch, &mut self.render_batch);
-        self.render_pipe.push(batch);
-        self.render_control.notify();
+        self.render_client.commit()
     }
 }

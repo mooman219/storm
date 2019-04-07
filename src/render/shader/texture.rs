@@ -51,7 +51,11 @@ out vec4 a_color;
 uniform sampler2D atlas;
 
 void main() {
-    a_color = texture(atlas, v_uv) * v_color;
+    vec4 color = texture(atlas, v_uv) * v_color;
+    if (color.w <= 0) {
+        discard;
+    }
+    a_color = color;
 }
 "#;
 

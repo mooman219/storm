@@ -1,41 +1,98 @@
+#![allow(dead_code)]
+
 extern crate log;
 extern crate storm;
 
 mod logger;
 
+use cgmath::*;
 use log::LevelFilter;
 use logger::*;
+use storm::color::*;
 use storm::time::*;
 use storm::*;
+
+struct Sprite {
+    layer: LayerReference,
+    key: Option<SpriteReference>,
+    desc: SpriteDescription,
+    velocity: Vector2<f32>,
+    dirty: bool,
+}
+
+impl Sprite {
+    pub fn new(layer: &LayerReference) -> Sprite {
+        Sprite {
+            layer: *layer,
+            key: None,
+            desc: SpriteDescription::default(),
+            velocity: Vector2::zero(),
+            dirty: true,
+        }
+    }
+
+    pub fn sync(&mut self, engine: &mut Engine) {
+        if self.dirty {
+            self.dirty = false;
+            match self.key {
+                Some(key) => {
+                    engine.sprite_update(&key, &self.desc);
+                },
+                None => {
+                    self.key = Some(engine.sprite_create(&self.layer, &self.desc));
+                },
+            }
+        }
+    }
+
+    pub fn size(&mut self, size: Vector2<f32>) {
+        self.dirty = true;
+        self.desc.size = size;
+    }
+
+    pub fn texture(&mut self, texture: &TextureReference) {
+        self.dirty = true;
+        self.desc.texture = *texture;
+    }
+
+    pub fn color(&mut self, color: Color) {
+        self.dirty = true;
+        self.desc.color = color;
+    }
+
+    pub fn velocity(&mut self, velocity: Vector2<f32>) {
+        self.velocity += velocity;
+    }
+
+    pub fn update(&mut self, delta: f32) {
+        self.dirty = true;
+        self.desc.pos += (self.velocity * delta).extend(0f32);
+    }
+}
 
 /// Run with: cargo run --example testgame --release
 fn main() {
     SimpleLogger::init(LevelFilter::Trace);
 
-    let mut clock = Clock::new(60);
+    let mut clock = Clock::new(144);
     let mut engine = Engine::new();
     let texture = engine.texture_load("./examples/resources/2.png");
 
-    let layer = engine.layer_create(0, &LayerDescription::default());
-    let mut sprite = SpriteDescription::default();
-    sprite.pos.z = 1.0f32;
-    sprite.texture = texture;
-    sprite.color = color::RED;
-    engine.sprite_create(&layer, &sprite);
-
-    let layer = engine.layer_create(1, &LayerDescription::default());
-    sprite.pos.z = -1.0f32;
-    sprite.pos.y -= 0.5f32;
-    sprite.pos.x -= 0.5f32;
-    sprite.color = color::ORANGE;
-    engine.sprite_create(&layer, &sprite);
-
-    let layer = engine.layer_create(2, &LayerDescription::default());
-    sprite.pos.z = -2.0f32;
-    sprite.pos.y -= 0.5f32;
-    sprite.pos.x -= 0.5f32;
-    sprite.color = color::GREEN;
-    engine.sprite_create(&layer, &sprite);
+    let layer_bg = engine.layer_create(0, &LayerDescription::default());
+    let layer_fg = engine.layer_create(1, &LayerDescription::default());
+    for x in -10..11 {
+        for y in -10..11 {
+            let sprite = SpriteDescription {
+                pos: Vector3::new(x as f32, y as f32, 0.0f32),
+                size: Vector2::new(1.0f32, 1.0f32),
+                color: color::WHITE,
+                texture: texture,
+            };
+            engine.sprite_create(&layer_bg, &sprite);
+        }
+    }
+    let speed = 2f32;
+    let mut sprite = Sprite::new(&layer_fg);
 
     let mut is_active = true;
     while is_active {
@@ -43,15 +100,26 @@ fn main() {
             match message {
                 InputMessage::CloseRequested => is_active = false,
                 InputMessage::KeyPressed(key) => match key {
-                    KeyboardButton::Escape => {
-                        is_active = false;
-                    },
+                    KeyboardButton::Escape => is_active = false,
+                    KeyboardButton::W => sprite.velocity(Vector2::new(0f32, speed)),
+                    KeyboardButton::S => sprite.velocity(Vector2::new(0f32, -speed)),
+                    KeyboardButton::A => sprite.velocity(Vector2::new(-speed, 0f32)),
+                    KeyboardButton::D => sprite.velocity(Vector2::new(speed, 0f32)),
+                    _ => {},
+                },
+                InputMessage::KeyReleased(key) => match key {
+                    KeyboardButton::W => sprite.velocity(Vector2::new(0f32, -speed)),
+                    KeyboardButton::S => sprite.velocity(Vector2::new(0f32, speed)),
+                    KeyboardButton::A => sprite.velocity(Vector2::new(speed, 0f32)),
+                    KeyboardButton::D => sprite.velocity(Vector2::new(-speed, 0f32)),
                     _ => {},
                 },
                 _ => {},
             }
         }
 
+        sprite.update(clock.get_delta());
+        sprite.sync(&mut engine);
         engine.window_commit();
         clock.tick();
     }

@@ -86,17 +86,6 @@ impl<T: Copy> Producer<T> {
     /// If the buffer is non-full, the operation will execute immediately. If the buffer is
     /// populated, this operation overwrites the stored value. If the buffer is contested by a
     /// read from the consumer, it will spin until the read is finished.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// extern crate storm;
-    /// use storm::channel::consume_spsc::*;
-    ///
-    /// let (producer, _) = make();
-    ///
-    /// producer.set(123);
-    /// ```
     pub fn set(&self, value: T) {
         (*self.buffer).write(value);
     }
@@ -108,22 +97,6 @@ impl<T: Copy> Consumer<T> {
     /// This method does not block.  If the buffer is empty, the method will return `None`. If
     /// there is a value available, the method will return `Some(v)`, where `v` is the value being
     /// consumed from the buffer.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// extern crate storm;
-    /// use storm::channel::consume_spsc::*;
-    ///
-    /// let (_, consumer) = make();
-    ///
-    /// // Attempt to pop a value from the buffer.
-    /// let t: Option<u32> = consumer.consume();
-    /// match t {
-    ///     Some(v) => {},      // Successfully popped a value
-    ///     None => {}          // Buffer empty, try again later
-    /// }
-    /// ```
     pub fn consume(&self) -> Option<T> {
         (*self.buffer).read()
     }
