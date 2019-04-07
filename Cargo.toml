@@ -6,7 +6,7 @@ authors = ["Joe Cumbo <mooman219@gmail.com>"]
 [dependencies]
 gl = "0.12"
 glutin = "0.20"
-cgmath = "0.15"
+cgmath = "0.17"
 log = "0.4"
 image = "0.19"
 parking_lot = "0.7"

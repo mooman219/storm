@@ -1,13 +1,18 @@
-#![feature(test)]
+#![feature(test, asm)]
+#![allow(dead_code)]
 
 extern crate cgmath;
+extern crate core;
+extern crate parking_lot;
 extern crate storm;
 extern crate test;
 
+mod utility;
+
 use cgmath::Vector2;
 use storm::math::*;
-use storm::utility::benching::black_box;
 use test::Bencher;
+use utility::benching::black_box;
 
 #[bench]
 fn bench_slide(b: &mut Bencher) {

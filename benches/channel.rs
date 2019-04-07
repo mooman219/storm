@@ -1,14 +1,20 @@
-#![feature(test)]
+#![feature(test, asm)]
+#![allow(dead_code)]
 
+extern crate cgmath;
+extern crate core;
+extern crate parking_lot;
 extern crate storm;
 extern crate test;
 
+mod utility;
+
 use std::sync::mpsc::sync_channel;
-use storm::channel::consume_spsc;
-use storm::channel::bounded_spsc;
-use storm::channel::replace_spsc;
-use storm::utility::benching::black_box;
 use test::Bencher;
+use utility::benching::black_box;
+use utility::bounded_spsc;
+use utility::consume_spsc;
+use utility::replace_spsc;
 
 const ITERATIONS: usize = 1000;
 

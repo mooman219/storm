@@ -1,11 +1,17 @@
-#![feature(test)]
+#![feature(test, asm)]
+#![allow(dead_code)]
 
+extern crate cgmath;
+extern crate core;
+extern crate parking_lot;
 extern crate storm;
 extern crate test;
 
+mod utility;
+
 use storm::math::*;
-use storm::utility::benching::black_box;
 use test::Bencher;
+use utility::benching::black_box;
 
 const MIN_ATAN2: f32 = -3f32;
 const MAX_ATAN2: f32 = 3f32;

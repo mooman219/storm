@@ -1,5 +1,5 @@
-#![feature(asm, const_fn)]
-#![allow(dead_code, non_camel_case_types, non_snake_case)]
+#![feature(const_fn)]
+#![allow(dead_code, non_camel_case_types, non_snake_case, intra_doc_link_resolution_failure)]
 
 extern crate core;
 extern crate gl;
@@ -11,12 +11,11 @@ extern crate parking_lot;
 
 pub extern crate cgmath;
 
-pub mod channel;
 pub mod color;
 pub mod math;
 pub mod time;
-pub mod utility;
 
+mod font;
 mod input;
 mod layer;
 mod render;
@@ -24,20 +23,20 @@ mod sprite;
 #[cfg(test)]
 mod test;
 mod texture;
+mod utility;
 
-pub use input::*;
+pub use font::*;
 pub use input::*;
 pub use layer::*;
 pub use sprite::*;
 pub use texture::*;
 
-use channel::bounded_spsc;
-use channel::control;
 use glutin::dpi::*;
-use input::manager::*;
 use render::*;
 use std::mem;
 use std::thread;
+use utility::bounded_spsc;
+use utility::control;
 
 /// The main entry point into the Storm engine.
 pub struct Engine {
@@ -45,30 +44,35 @@ pub struct Engine {
     render_pipe: bounded_spsc::Producer<Vec<RenderMessage>>,
     render_manager: RenderManager,
     render_control: control::Producer,
-    input_manager: InputManager,
+    input_client: InputClient,
 }
 
 impl Engine {
     /// Creates and runs an instance of the engine. This creates a window on
     /// another thread which listens for messages from the engine.
     pub fn new() -> Engine {
-        // Winow creation
-        let event_loop = glutin::EventsLoop::new();
-        let display = Display::new(
-            glutin::WindowBuilder::new()
-                .with_title("Storm Engine")
-                .with_dimensions(LogicalSize::from((500, 500))),
-            glutin::ContextBuilder::new(),
-            &event_loop,
-        );
-
         // Inter-thread messaging for rendering
         let (render_producer_control, render_consumer_control) = control::make();
+        let (input_producer_pipe, input_consumer_pipe) = bounded_spsc::make(1000);
         let (render_producer_pipe, render_consumer_pipe) = bounded_spsc::make(4);
 
-        // Render thread (daemon)
+        // Input and rendering
         thread::spawn(move || {
-            render::start(display, render_consumer_pipe, render_consumer_control);
+            // Winow creation
+            let event_loop = glutin::EventsLoop::new();
+            let display = Display::new(
+                glutin::WindowBuilder::new()
+                    .with_title("Storm Engine")
+                    .with_dimensions(LogicalSize::from((500, 500))),
+                glutin::ContextBuilder::new(),
+                &event_loop,
+            );
+
+            thread::spawn(move || {
+                render::start(display, render_consumer_pipe, render_consumer_control);
+            });
+
+            input::start(event_loop, input_producer_pipe);
         });
 
         Engine {
@@ -76,7 +80,7 @@ impl Engine {
             render_pipe: render_producer_pipe,
             render_manager: RenderManager::new(),
             render_control: render_producer_control,
-            input_manager: InputManager::new(event_loop),
+            input_client: InputClient::new(input_consumer_pipe),
         }
     }
 
@@ -99,8 +103,8 @@ impl Engine {
 
     /// Fetches all the events that are pending, calls the callback function for
     /// each of them, and returns.
-    pub fn input_poll(&mut self, callback: impl FnMut(InputMessage)) {
-        self.input_manager.poll(callback);
+    pub fn input_poll(&mut self) -> Option<InputMessage> {
+        self.input_client.poll()
     }
 
     // ////////////////////////////////////////////////////////

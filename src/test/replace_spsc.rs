@@ -1,4 +1,4 @@
-use channel::replace_spsc;
+use utility::replace_spsc;
 
 #[test]
 fn test_replace_spsc() {

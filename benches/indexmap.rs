@@ -1,11 +1,17 @@
-#![feature(test)]
+#![feature(test, asm)]
+#![allow(dead_code)]
 
+extern crate cgmath;
+extern crate core;
+extern crate parking_lot;
 extern crate storm;
 extern crate test;
 
-use storm::utility::benching::black_box;
-use storm::utility::indexmap::*;
+mod utility;
+
 use test::Bencher;
+use utility::benching::black_box;
+use utility::indexmap::*;
 
 #[bench]
 fn bench_indexmap_cycle(bench: &mut Bencher) {

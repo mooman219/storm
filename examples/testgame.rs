@@ -12,7 +12,7 @@ use storm::*;
 fn main() {
     SimpleLogger::init(LevelFilter::Trace);
 
-    let mut clock = Clock::new(144);
+    let mut clock = Clock::new(60);
     let mut engine = Engine::new();
     let texture = engine.texture_load("./examples/resources/2.png");
 
@@ -39,16 +39,18 @@ fn main() {
 
     let mut is_active = true;
     while is_active {
-        engine.input_poll(|message| match message {
-            InputMessage::CloseRequested => is_active = false,
-            InputMessage::KeyPressed(key) => match key {
-                KeyboardButton::Escape => {
-                    is_active = false;
+        while let Some(message) = engine.input_poll() {
+            match message {
+                InputMessage::CloseRequested => is_active = false,
+                InputMessage::KeyPressed(key) => match key {
+                    KeyboardButton::Escape => {
+                        is_active = false;
+                    },
+                    _ => {},
                 },
                 _ => {},
-            },
-            _ => {},
-        });
+            }
+        }
 
         engine.window_commit();
         clock.tick();

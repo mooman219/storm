@@ -12,8 +12,6 @@ pub use render::manager::*;
 pub use render::message::*;
 
 use cgmath::*;
-use channel::bounded_spsc;
-use channel::control;
 use color;
 use layer::*;
 use render::buffer::geometry::*;
@@ -23,6 +21,8 @@ use render::texture::*;
 use render::vertex::*;
 use std::path::Path;
 use time::*;
+use utility::bounded_spsc;
+use utility::control;
 
 struct Layer {
     desc: LayerDescription,
