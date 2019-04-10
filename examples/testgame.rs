@@ -17,7 +17,6 @@ struct Sprite {
     key: Option<SpriteReference>,
     desc: SpriteDescription,
     velocity: Vector2<f32>,
-    dirty: bool,
 }
 
 impl Sprite {
@@ -27,36 +26,29 @@ impl Sprite {
             key: None,
             desc: SpriteDescription::default(),
             velocity: Vector2::zero(),
-            dirty: true,
         }
     }
 
     pub fn sync(&mut self, engine: &mut Engine) {
-        if self.dirty {
-            self.dirty = false;
-            match self.key {
-                Some(key) => {
-                    engine.sprite_update(&key, &self.desc);
-                },
-                None => {
-                    self.key = Some(engine.sprite_create(&self.layer, &self.desc));
-                },
-            }
+        match self.key {
+            Some(key) => {
+                engine.sprite_update(&key, &self.desc);
+            },
+            None => {
+                self.key = Some(engine.sprite_create(&self.layer, &self.desc));
+            },
         }
     }
 
     pub fn size(&mut self, size: Vector2<f32>) {
-        self.dirty = true;
         self.desc.size = size;
     }
 
     pub fn texture(&mut self, texture: &TextureReference) {
-        self.dirty = true;
         self.desc.texture = *texture;
     }
 
     pub fn color(&mut self, color: Color) {
-        self.dirty = true;
         self.desc.color = color;
     }
 
@@ -65,7 +57,6 @@ impl Sprite {
     }
 
     pub fn update(&mut self, delta: f32) {
-        self.dirty = true;
         self.desc.pos += (self.velocity * delta).extend(0f32);
     }
 }
@@ -91,7 +82,7 @@ fn main() {
             engine.sprite_create(&layer_bg, &sprite);
         }
     }
-    let speed = 2f32;
+    let speed = 2.5f32;
     let mut sprite = Sprite::new(&layer_fg);
 
     let mut is_active = true;

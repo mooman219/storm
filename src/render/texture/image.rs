@@ -27,24 +27,26 @@ impl Texture {
         let rgba_image = image.to_rgba();
         let width = rgba_image.width();
         let height = rgba_image.height();
-        Texture::from_raw(rgba_image.into_raw().as_slice(), width, height)
-    }
-
-    pub fn from_raw(buf: &[u8], width: u32, height: u32) -> Texture {
         if width == 0 || height == 0 {
             panic!("Neither width or height can be 0.");
         }
         let mut pixels = Vec::new();
-        for pixel in buf.chunks(4) {
-            pixels.push(Color {
-                r: pixel[0],
-                g: pixel[1],
-                b: pixel[2],
-                a: pixel[3],
-            });
+        for pixel in rgba_image.into_raw().as_slice().chunks(4) {
+            pixels.push(Color::new_raw(pixel[0], pixel[1], pixel[2], pixel[3]));
         }
         Texture {
             pixels: pixels,
+            width: width,
+            height: height,
+        }
+    }
+
+    pub fn from_color_Vec(buf: &Vec<Color>, width: u32, height: u32) -> Texture {
+        if width == 0 || height == 0 {
+            panic!("Neither width or height can be 0.");
+        }
+        Texture {
+            pixels: buf.clone(),
             width: width,
             height: height,
         }
@@ -77,19 +79,16 @@ impl Texture {
     }
 
     pub fn set_texture(&mut self, offset_x: u32, offset_y: u32, tex: &Texture) {
-        let max = (self.width * self.height) as usize;
         for x in 0..tex.width {
             for y in 0..tex.height {
                 let index_self = self.index_for(x + offset_x, y + offset_y);
-                if index_self < max {
-                    let index_tex = tex.index_for(x, y);
-                    self.pixels[index_self] = tex.pixels[index_tex];
-                }
+                let index_tex = tex.index_for(x, y);
+                self.pixels[index_self] = tex.pixels[index_tex];
             }
         }
     }
 
-    pub fn to_dynamic_image(&self) -> Result<DynamicImage, &str> {
+    pub fn save_png(&self, path: &str) {
         let width = self.width;
         let height = self.height;
         let mut pixels = Vec::new();
@@ -99,10 +98,11 @@ impl Texture {
             pixels.push(pixel.b);
             pixels.push(pixel.a);
         }
-        match ImageBuffer::<Rgba<u8>, Vec<u8>>::from_raw(width, height, pixels) {
-            Some(image_buffer) => Ok(DynamicImage::ImageRgba8(image_buffer)),
-            None => Err("Can't export texture"),
-        }
+        let image = match ImageBuffer::<Rgba<u8>, Vec<u8>>::from_raw(width, height, pixels) {
+            Some(image_buffer) => DynamicImage::ImageRgba8(image_buffer),
+            None => panic!("Can't export texture"),
+        };
+        image.save(path).unwrap();
     }
 }
 

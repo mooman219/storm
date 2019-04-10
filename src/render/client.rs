@@ -2,6 +2,7 @@ use layer::*;
 use render::*;
 use sprite::*;
 use std::mem;
+use text::*;
 use texture::*;
 use utility::indexmap::*;
 
@@ -17,6 +18,7 @@ pub struct RenderClient {
     layers: Vec<LayerSlot>,
     layer_count: usize,
     texture_count: usize,
+    font_count: usize,
 }
 
 impl RenderClient {
@@ -31,6 +33,7 @@ impl RenderClient {
             layers: Vec::new(),
             layer_count: 0,
             texture_count: 0,
+            font_count: 0,
         }
     }
 
@@ -111,6 +114,7 @@ impl RenderClient {
     }
 
     pub fn sprite_update(&mut self, sprite: &SpriteReference, desc: &SpriteDescription) {
+        // TODO: Only update if the sprite actually changed.
         let lookup = self.layer_get(sprite.layer());
         let sprites = &mut self.layers[lookup].sprites;
         let key = sprites.get(sprite.key());
@@ -148,6 +152,18 @@ impl RenderClient {
     }
 
     // ////////////////////////////////////////////////////////
+    // Text
+    // ////////////////////////////////////////////////////////
+
+    pub fn font_create(&mut self, path: &str) -> FontReference {
+        self.font_count += 1;
+        self.render_batch.push(RenderMessage::FontLoad {
+            path: String::from(path),
+        });
+        FontReference::new(self.font_count)
+    }
+
+    // ////////////////////////////////////////////////////////
     // Window
     // ////////////////////////////////////////////////////////
 
@@ -158,9 +174,13 @@ impl RenderClient {
     }
 
     pub fn commit(&mut self) {
-        let mut batch = Vec::new();
-        mem::swap(&mut batch, &mut self.render_batch);
-        self.render_producer.push(batch);
+        // Only send a frame if there's actually frame data to send. The
+        // notify happens either way to accommodate resizing.
+        if self.render_batch.len() > 0 {
+            let mut batch = Vec::new();
+            mem::swap(&mut batch, &mut self.render_batch);
+            self.render_producer.push(batch);
+        }
         self.render_control.notify();
     }
 }

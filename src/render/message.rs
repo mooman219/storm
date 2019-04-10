@@ -38,6 +38,11 @@ pub enum RenderMessage {
         path: String,
     },
 
+    // Text
+    FontLoad {
+        path: String,
+    },
+
     // Window
     WindowTitle {
         title: String,

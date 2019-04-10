@@ -7,7 +7,10 @@ extern crate glutin;
 extern crate image;
 #[macro_use]
 extern crate log;
+extern crate hashbrown;
 extern crate parking_lot;
+extern crate rusttype;
+extern crate unicode_normalization;
 
 pub extern crate cgmath;
 
@@ -15,20 +18,20 @@ pub mod color;
 pub mod math;
 pub mod time;
 
-mod font;
 mod input;
 mod layer;
 mod render;
 mod sprite;
 #[cfg(test)]
 mod test;
+mod text;
 mod texture;
 mod utility;
 
-pub use font::*;
 pub use input::*;
 pub use layer::*;
 pub use sprite::*;
+pub use text::*;
 pub use texture::*;
 
 use glutin::dpi::*;
@@ -44,6 +47,7 @@ pub struct Engine {
 }
 
 impl Engine {
+    // TODO: Allow for assigning window setting on initial creation
     /// Creates and runs an instance of the engine. This creates a window on
     /// another thread which listens for messages from the engine.
     pub fn new() -> Engine {
@@ -56,16 +60,19 @@ impl Engine {
         thread::spawn(move || {
             // Winow creation
             let event_loop = glutin::EventsLoop::new();
-            let display = Display::new(
-                glutin::WindowBuilder::new()
-                    .with_title("Storm Engine")
-                    .with_dimensions(LogicalSize::from((500, 500))),
-                glutin::ContextBuilder::new(),
-                &event_loop,
+            let window = Window::new(
+                glutin::ContextBuilder::new()
+                    .build_windowed(
+                        glutin::WindowBuilder::new()
+                            .with_title("Storm Engine")
+                            .with_dimensions(LogicalSize::from((500, 500))),
+                        &event_loop,
+                    )
+                    .expect("Unable to build the window."),
             );
 
             thread::spawn(move || {
-                render::start(display, render_consumer_pipe, render_consumer_control);
+                render::start(window, render_consumer_pipe, render_consumer_control);
             });
 
             input::start(event_loop, input_producer_pipe);
@@ -81,14 +88,12 @@ impl Engine {
     // Engine
     // ////////////////////////////////////////////////////////
 
+    // TODO: Engine inspection
     // pub fn engine_render_alive() -> bool {
-    //     // todo
     //     false
     // }
 
-    // pub fn engine_shutdow(&mut self) {
-    //     // todo
-    // }
+    // pub fn engine_shutdow(&mut self) {}
 
     // ////////////////////////////////////////////////////////
     // Input
@@ -151,32 +156,27 @@ impl Engine {
     }
 
     // ////////////////////////////////////////////////////////
-    // Font
+    // Text
     // ////////////////////////////////////////////////////////
 
-    // pub fn font_load(&mut self) {
-    //     // todo
-    // }
+    pub fn font_load(&mut self, path: &str) -> FontReference {
+        self.render_client.font_create(path)
+    }
 
     pub fn font_default(&mut self) -> FontReference {
         DEFAULT_FONT
     }
 
-    // ////////////////////////////////////////////////////////
-    // Text
-    // ////////////////////////////////////////////////////////
+    // TODO: Text api
 
     // ////////////////////////////////////////////////////////
     // Audio
     // ////////////////////////////////////////////////////////
 
-    // pub fn audio_load(&mut self) {
-    //     // todo
-    // }
+    // TODO: Audio
+    // pub fn audio_load(&mut self) {}
 
-    // pub fn audio_play(&mut self) {
-    //     // todo
-    // }
+    // pub fn audio_play(&mut self) {}
 
     // ////////////////////////////////////////////////////////
     // Window
@@ -186,10 +186,6 @@ impl Engine {
     pub fn window_title(&mut self, title: &str) {
         self.render_client.window_title(title)
     }
-
-    // pub fn window_size(&mut self) {
-    //     // todo
-    // }
 
     /// Commits the queued window related changes to the renderer. This may block
     /// if the renderer is getting changes faster than it can process.

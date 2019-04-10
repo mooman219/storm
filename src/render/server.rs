@@ -1,60 +1,96 @@
 use cgmath::*;
 use color;
-use layer::*;
-use render::buffer::geometry::*;
+use glutin;
+use glutin::dpi::*;
+use glutin::ContextTrait;
+use render::manager::*;
 use render::raw::*;
-use render::shader::*;
 use render::texture::*;
 use render::vertex::*;
 use render::*;
-use std::path::Path;
 use time::*;
 use utility::bounded_spsc;
 use utility::control;
 
-struct Layer {
-    desc: LayerDescription,
-    sprites: GeometryBuffer<TextureVertex>,
+pub struct Window {
+    inner: glutin::WindowedContext,
+}
+
+// Mark the display as send. In some systems, glutin::GlWindow isn't send so we
+// make it as such. This might be a problem later, but not today.
+unsafe impl Send for Window {}
+
+impl Window {
+    pub fn new(window: glutin::WindowedContext) -> Window {
+        Window { inner: window }
+    }
+
+    /// Initialize the display. The display is bound in the thread we're going
+    /// to be making opengl calls in. Behavior is undefined is the display is
+    /// bound outside of the thread and usually segfaults.
+    pub fn bind(&self) {
+        unsafe {
+            self.inner.context().make_current().unwrap();
+        }
+        load_with(|symbol| self.inner.get_proc_address(symbol) as *const _);
+        info!("Render: OpenGL version {}", get_string(StringTarget::Version));
+    }
+
+    pub fn get_logical_size(&self) -> Vector2<f64> {
+        let logical_size = self.inner.get_inner_size().expect("Window no longer exists.");
+        Vector2::new(logical_size.width, logical_size.height)
+    }
+
+    /// Resizes the window context using logical dimensions (unscaled by
+    /// hidpi).
+    pub fn resize(&self, dimensions: &Vector2<f64>) {
+        let dimensions = self.to_physical_size(dimensions);
+        self.inner.resize(PhysicalSize::from((dimensions.x, dimensions.y)));
+    }
+
+    /// Swaps the buffers in case of double or triple buffering. You should
+    /// call this function every time you have finished rendering, or the
+    /// image may not be displayed on the screen.
+    pub fn swap_buffers(&self) {
+        self.inner.swap_buffers().expect("Error while swapping buffers.");
+    }
+
+    /// Converts logical window dimensions into physical window dimensions.
+    pub fn to_physical_size(&self, dimensions: &Vector2<f64>) -> Vector2<f64> {
+        dimensions * self.inner.get_hidpi_factor()
+    }
 }
 
 pub struct RenderServer {
-    display: Display,
+    window: Window,
     render_consumer: bounded_spsc::Consumer<Vec<RenderMessage>>,
     render_control: control::Consumer,
 
-    shader_texture: TextureShader,
-    layers: Vec<Layer>,
-    texture_packer: TexturePacker,
-    texture_atlas: TextureHandle,
-    texture_uv: Vec<Vector4<f32>>,
+    scene: SceneManager,
+    texture: TextureManager,
+    text: TextManager,
     current_size: Vector2<f64>,
 }
 
 impl RenderServer {
     pub fn new(
-        display: Display,
+        window: Window,
         render_consumer: bounded_spsc::Consumer<Vec<RenderMessage>>,
         render_control: control::Consumer,
     ) -> RenderServer {
         // Initialize the display. The display is bound in the thread we're going to be making opengl
         // calls in. Behavior is undefined is the display is bound outside of the thread and usually
         // segfaults.
-        display.bind();
+        window.bind();
 
-        let current_size = display.get_size();
+        let current_size = window.get_logical_size();
         let mut state = RenderServer {
-            display: display,
+            window: window,
             render_consumer: render_consumer,
             render_control: render_control,
-            shader_texture: TextureShader::new(),
-            layers: Vec::new(),
-            texture_packer: TexturePacker::new(TexturePackerConfig {
-                max_width: 2048,
-                max_height: 2048,
-                texture_padding: 0,
-            }),
-            texture_atlas: TextureHandle::new(TextureUnit::Atlas),
-            texture_uv: Vec::new(),
+            scene: SceneManager::new(&current_size),
+            texture: TextureManager::new(),
+            text: TextManager::new(),
             current_size: current_size,
         };
 
@@ -66,53 +102,25 @@ impl RenderServer {
         depth_func(DepthTest::Less);
         cull_face(CullFace::Back);
 
-        // Default texture setup
-        state.texture_add(Texture::from_default(color::WHITE, 8, 8));
-        state.texture_sync();
-
-        // Setup the default texture.
-        state.shader_texture.bind();
-        state.shader_texture.sync_ortho();
-        state.shader_texture.sync_atlas();
+        // Default texture/font setup
+        state.texture.add(Texture::from_default(color::WHITE, 8, 8));
+        state.texture.sync();
+        state.text.add_font_path("./src/render/texture/font/unscii-16.ttf");
+        state.text.sync();
 
         state
     }
 
-    pub fn texture_add(&mut self, texture: Texture) {
-        let uv = self.texture_packer.pack(&texture);
-        self.texture_uv.push(uv);
-    }
-
-    pub fn texture_add_path(&mut self, path: String) {
-        let uv = self.texture_packer.pack_path(Path::new(&path));
-        self.texture_uv.push(uv);
-    }
-
-    pub fn texture_sync(&mut self) {
-        let new_atlas = self.texture_packer.export();
-        self.texture_atlas.set_texture(&new_atlas);
-    }
-
-    pub fn draw(&mut self) {
-        clear(ClearBit::ColorBuffer);
-        for layer in &mut self.layers {
-            if layer.desc.visible {
-                clear(ClearBit::DepthBuffer);
-                self.shader_texture.set_scale(layer.desc.scale);
-                self.shader_texture.set_translation(layer.desc.translation);
-                self.shader_texture.sync_ortho();
-                layer.sprites.draw();
-            }
-        }
-        self.display.swap_buffers();
-    }
-
     pub fn resize(&mut self) {
-        let new_size = self.display.get_size();
+        let new_size = self.window.get_logical_size();
         if self.current_size != new_size {
             self.current_size = new_size;
-            self.display.resize(new_size);
-            self.shader_texture.set_bounds(new_size.x as f32, new_size.y as f32);
+            self.scene.resize(&new_size);
+            self.window.resize(&new_size);
+
+            // The viewport function takes in physical dimensions.
+            let dimensions = self.window.to_physical_size(&new_size);
+            viewport(0, 0, dimensions.x as i32, dimensions.y as i32);
         }
     }
 
@@ -124,7 +132,8 @@ impl RenderServer {
                     timer_render.start();
                     self.resize();
                     self.handle_messages(&mut messages);
-                    self.draw();
+                    self.scene.draw();
+                    self.window.swap_buffers();
                     timer_render.stop();
                 },
                 None => {
@@ -135,64 +144,57 @@ impl RenderServer {
     }
 
     fn handle_messages(&mut self, messages: &mut Vec<RenderMessage>) {
-        let mut texture_dirty = false;
         for message in messages.drain(..) {
             match message {
                 // Layer
                 RenderMessage::LayerCreate { layer, desc } => {
-                    let slot = Layer {
-                        desc: desc,
-                        sprites: GeometryBuffer::new(1024),
-                    };
-                    self.layers.insert(layer, slot)
+                    self.scene.layer_create(layer, &desc);
                 },
                 RenderMessage::LayerUpdate { layer, desc } => {
-                    self.layers[layer].desc = desc;
+                    self.scene.layer_update(layer, &desc);
                 },
                 RenderMessage::LayerRemove { layer } => {
-                    self.layers.remove(layer);
+                    self.scene.layer_remove(layer);
                 },
                 RenderMessage::LayerClear { layer } => {
-                    self.layers[layer].sprites.clear();
+                    self.scene.layer_clear(layer);
                 },
 
                 // Sprite
                 RenderMessage::SpriteCreate { layer, desc } => {
-                    let uv = self.texture_uv[desc.texture.key()];
+                    let uv = self.texture.get_uv(&desc.texture);
                     let quad = TextureVertex::new(desc.pos, desc.size, uv, desc.color);
-                    self.layers[layer].sprites.add(quad);
+                    self.scene.sprite_create(layer, &quad);
                 },
                 RenderMessage::SpriteUpdate { layer, sprite, desc } => {
-                    let uv = self.texture_uv[desc.texture.key()];
+                    let uv = self.texture.get_uv(&desc.texture);
                     let quad = TextureVertex::new(desc.pos, desc.size, uv, desc.color);
-                    self.layers[layer].sprites.update(sprite, quad);
+                    self.scene.sprite_update(layer, sprite, &quad);
                 },
                 RenderMessage::SpriteRemove { layer, sprite } => {
-                    self.layers[layer].sprites.remove(sprite);
+                    self.scene.sprite_remove(layer, sprite);
                 },
 
                 // Texture
                 RenderMessage::TextureLoad { path } => {
-                    self.texture_add_path(path);
-                    texture_dirty = true;
+                    self.texture.add_path(&path);
+                },
+
+                // Text
+                RenderMessage::FontLoad { path } => {
+                    self.text.add_font_path(&path);
                 },
 
                 // Window
                 RenderMessage::WindowTitle { title } => {
-                    self.display.set_title(title.as_str());
+                    self.window.inner.set_title(title.as_str());
                 },
             }
         }
 
-        // Sync textures if updated.
-        if texture_dirty {
-            self.texture_sync();
-        }
-        // Sync visible layers.
-        for layer in &mut self.layers {
-            if layer.desc.visible {
-                layer.sprites.sync();
-            }
-        }
+        // Re-sync our managers after handling state changes.
+        self.texture.sync();
+        self.text.sync();
+        self.scene.sync();
     }
 }

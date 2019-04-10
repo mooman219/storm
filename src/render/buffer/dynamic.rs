@@ -3,7 +3,6 @@ use render::raw::*;
 use std::cmp;
 use std::mem;
 use std::ptr;
-use time::*;
 
 pub struct DynamicBuffer<T> {
     vbo: u32,
@@ -13,7 +12,6 @@ pub struct DynamicBuffer<T> {
     capacity: usize,
     buffer_type: BufferBindingTarget,
     items: Vec<T>,
-    timer_sync: Timer,
 }
 
 impl<T> DynamicBuffer<T> {
@@ -49,7 +47,6 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
             capacity: capacity,
             buffer_type: buffer_type,
             items: items,
-            timer_sync: Timer::new("[R] Dynamic Sync"),
         }
     }
 
@@ -71,10 +68,12 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
     }
 
     fn clear(&mut self) {
-        let length = self.items.len();
-        self.mark(0);
-        self.mark(length);
-        self.items.clear();
+        self.dirty = true;
+        self.dirty_min = 0;
+        self.dirty_max = self.items.len();
+        unsafe {
+            self.items.set_len(0);
+        }
     }
 
     fn len(&self) -> usize {
@@ -87,9 +86,6 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
 
     fn sync(&mut self) {
         if self.dirty {
-            // Timing start.
-            self.timer_sync.start();
-            // Sync state.
             self.dirty = false;
             bind_buffer(self.buffer_type, self.vbo);
             if self.capacity < self.items.capacity() {
@@ -103,8 +99,6 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
                 let data = unsafe { self.items.as_ptr().offset(self.dirty_min as isize) as *const _ };
                 buffer_sub_data(self.buffer_type, start, length, data);
             }
-            // Timing finish.
-            self.timer_sync.stop();
         }
     }
 }
