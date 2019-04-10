@@ -1,7 +1,5 @@
 pub mod dynamic;
-pub mod fixed;
 pub mod geometry;
-pub mod immutable;
 
 use render::raw::*;
 
