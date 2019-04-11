@@ -24,7 +24,7 @@ pub struct TextureManager {
 
 impl TextureManager {
     pub fn new() -> TextureManager {
-        TextureManager {
+        let mut manager = TextureManager {
             packer: TexturePacker::new(TexturePackerConfig {
                 max_width: 2048,
                 max_height: 2048,
@@ -33,7 +33,10 @@ impl TextureManager {
             atlas: TextureHandle::new(TextureUnit::Atlas),
             uv: Vec::new(),
             dirty: false,
-        }
+        };
+        manager.add(Texture::from_default(color::WHITE, 8, 8));
+        manager.sync();
+        manager
     }
 
     pub fn add(&mut self, texture: Texture) {
@@ -67,19 +70,30 @@ impl TextureManager {
 struct TextCacheKey {
     font: usize,
     character: char,
+    scale: u32,
+}
+
+#[derive(Debug, Copy, Clone)]
+struct TextCacheValue {
+    visible: bool,
+    uv: Vector4<f32>,
+    size: Vector2<f32>,
+    advance_width: f32,
 }
 
 pub struct TextManager {
     packer: TexturePacker,
-    cache: HashMap<TextCacheKey, Vector4<f32>>,
+    cache: HashMap<TextCacheKey, TextCacheValue>,
     atlas: TextureHandle,
     fonts: Vec<Font<'static>>,
     dirty: bool,
 }
 
+const TEXT_SCALE: f32 = 1.0 / 64.0;
+
 impl TextManager {
     pub fn new() -> TextManager {
-        TextManager {
+        let mut manager = TextManager {
             packer: TexturePacker::new(TexturePackerConfig {
                 max_width: 2048,
                 max_height: 2048,
@@ -89,7 +103,15 @@ impl TextManager {
             atlas: TextureHandle::new(TextureUnit::Font),
             fonts: Vec::new(),
             dirty: true,
-        }
+        };
+        manager.add_font_bytes(include_bytes!("./font/PressStart2P.ttf") as &[u8]);
+        manager.sync();
+        manager
+    }
+
+    pub fn add_font_bytes(&mut self, bytes: &'static [u8]) {
+        self.fonts.push(Font::from_bytes(bytes).expect("Unable to parse font"));
+        trace!("Loaded raw font");
     }
 
     pub fn add_font_path(&mut self, path: &str) {
@@ -97,8 +119,7 @@ impl TextManager {
         let mut file = BufReader::new(file);
         let mut bytes = Vec::new();
         file.read_to_end(&mut bytes).expect("Unable to read bytes");
-        let font: Font<'static> = Font::from_bytes(bytes).expect("Unable to parse font");
-        self.fonts.push(font);
+        self.fonts.push(Font::from_bytes(bytes).expect("Unable to parse font"));
         trace!("Loaded font {}", path);
     }
 
@@ -114,41 +135,54 @@ impl TextManager {
         let mut vertices = Vec::new();
         let mut buffer = Vec::new();
         let font = self.fonts.get(desc.font.key()).expect("Unknown font reference");
+        let mut caret = desc.pos;
         // TODO: Parallelize this
         for c in text.nfc() {
             let key = TextCacheKey {
                 font: desc.font.key(),
                 character: c,
-                // TODO: Add scale
+                scale: desc.scale,
             };
             let entry = self.cache.get(&key).cloned();
-            let uv = match entry {
-                Some(uv) => uv,
+            let value = match entry {
+                Some(value) => value,
                 None => {
-                    self.dirty = true;
-                    let glyph = font.glyph(c).scaled(Scale::uniform(16.0)).positioned(point(0.0, 0.0));
-                    // TODO: Replace the glyph with a blank zero width one if
-                    // the bounding box is missing.
-                    let bounding_box = glyph
-                        .pixel_bounding_box()
-                        .expect("Why are we missing a pixel bounding box");
-                    let width = bounding_box.width() as u32;
-                    let height = bounding_box.height() as u32;
-                    buffer.resize((width * height) as usize, color::BLACK);
-                    glyph.draw(|x, y, v| {
-                        let index = x + y * width;
-                        buffer[index as usize] = color::Color::new(1.0 * v, 1.0 * v, 1.0 * v, v)
-                    });
-                    let texture = Texture::from_color_Vec(&buffer, width, height);
-                    let uv = self.packer.pack(&texture);
-                    self.cache.insert(key, uv);
-                    trace!("Cached character {} at {:?}", c, uv);
-                    uv
+                    let mut value = TextCacheValue {
+                        visible: false,
+                        uv: Vector4::zero(),
+                        size: Vector2::zero(),
+                        advance_width: 1.0,
+                    };
+                    let glyph = font.glyph(c).scaled(Scale::uniform(desc.scale as f32));
+                    value.advance_width = glyph.h_metrics().advance_width * TEXT_SCALE;
+                    let glyph = glyph.positioned(point(0.0, 0.0));
+
+                    let rect = glyph.pixel_bounding_box();
+                    if let Some(rect) = rect {
+                        if rect.width() > 0 && rect.height() > 0 {
+                            value.size = Vector2::new(rect.width() as f32, rect.height() as f32) * TEXT_SCALE;
+                            let size = Vector2::new(rect.width() as u32, rect.height() as u32);
+                            buffer.resize((size.x * size.y) as usize, color::BLACK);
+                            glyph.draw(|x, y, v| {
+                                buffer[(x + y * size.x) as usize] = color::Color::new(1.0, 1.0, 1.0, v)
+                            });
+                            let texture = Texture::from_color_Vec(&buffer, size.x, size.y);
+                            value.uv = self.packer.pack(&texture);
+                            value.visible = true;
+                            self.dirty = true;
+                        }
+                    }
+
+                    trace!("Cached {:?} {:?}", key, value);
+                    self.cache.insert(key, value);
+                    value
                 },
             };
-            // uvs.push(uv);
+            caret.x += value.advance_width;
+            if value.visible {
+                vertices.push(TextureVertex::new(caret, value.size, value.uv, desc.color));
+            }
         }
-        // TODO: Actually generate vertices
         vertices
     }
 }

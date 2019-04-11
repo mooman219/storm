@@ -88,6 +88,12 @@ impl SceneManager {
         self.layers[layer_index].sprites.remove(sprite_index);
     }
 
+    pub fn text_create(&mut self, layer_index: usize, vertices: Vec<TextureVertex>) {
+        for v in vertices {
+            self.layers[layer_index].text.add(v);
+        }
+    }
+
     pub fn resize(&mut self, bounds: &Vector2<f64>) {
         self.matrix_bounds = matrix_from_bounds(bounds);
         for layer in &mut self.layers {

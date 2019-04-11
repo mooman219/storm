@@ -8,6 +8,7 @@ use render::raw::*;
 use render::texture::*;
 use render::vertex::*;
 use render::*;
+use text::*;
 use time::*;
 use utility::bounded_spsc;
 use utility::control;
@@ -88,7 +89,7 @@ impl RenderServer {
         window.bind();
 
         let current_size = window.get_logical_size();
-        let mut state = RenderServer {
+        let server = RenderServer {
             window: window,
             render_consumer: render_consumer,
             render_control: render_control,
@@ -100,19 +101,14 @@ impl RenderServer {
 
         // Setup cabilities.
         enable(Capability::CullFace);
-        enable(Capability::Multisample);
+        enable(Capability::Blend);
         enable(Capability::DepthTest);
         clear_color(0.0, 0.0, 0.2, 1.0);
         depth_func(DepthTest::Less);
+        blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
         cull_face(CullFace::Back);
 
-        // Default texture/font setup
-        state.texture.add(Texture::from_default(color::WHITE, 8, 8));
-        state.texture.sync();
-        state.text.add_font_path("./src/render/texture/font/unscii-16.ttf");
-        state.text.sync();
-
-        state
+        server
     }
 
     pub fn run_forever(&mut self) {
@@ -155,6 +151,18 @@ impl RenderServer {
                 // Layer
                 RenderMessage::LayerCreate { layer, desc } => {
                     self.scene.layer_create(layer, &desc);
+                    self.scene.text_create(
+                        layer,
+                        self.text.rasterize(
+                            "Yeet test.",
+                            &TextDescription {
+                                pos: Vector3::new(-1.0, 0.0, 1.0),
+                                scale: 16,
+                                color: color::RED,
+                                font: DEFAULT_FONT,
+                            },
+                        ),
+                    );
                 },
                 RenderMessage::LayerUpdate { layer, desc } => {
                     self.scene.layer_update(layer, &desc);
