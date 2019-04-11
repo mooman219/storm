@@ -267,6 +267,7 @@ impl<T> Producer<T> {
     /// this method will block until the buffer is non-full.  The waiting strategy is a simple
     /// spin-wait. If you do not want a spin-wait burning CPU, you should call `try_push()`
     /// directly and implement a different waiting strategy.
+    #[inline]
     pub fn push(&self, v: T) {
         (*self.buffer).push(v);
     }
@@ -276,6 +277,7 @@ impl<T> Producer<T> {
     /// This method does not block.  If the queue is not full, the value will be added to the
     /// queue and the method will return `None`, signifying success.  If the queue is full,
     /// this method will return `Some(v)``, where `v` is your original value.
+    #[inline]
     pub fn try_push(&self, v: T) -> Option<T> {
         (*self.buffer).try_push(v)
     }
@@ -312,6 +314,7 @@ impl<T> Consumer<T> {
     /// If the buffer is empty, this method will block until a value becomes available.  The
     /// waiting strategy is a simple spin-wait. If you do not want a spin-wait burning CPU, you
     /// should call `try_push()` directly and implement a different waiting strategy.
+    #[inline]
     pub fn pop(&self) -> T {
         (*self.buffer).pop()
     }
@@ -321,6 +324,7 @@ impl<T> Consumer<T> {
     /// This method does not block.  If the queue is empty, the method will return `None`.  If
     /// there is a value available, the method will return `Some(v)`, where `v` is the value
     /// being popped off the queue.
+    #[inline]
     pub fn try_pop(&self) -> Option<T> {
         (*self.buffer).try_pop()
     }

@@ -28,7 +28,7 @@ impl Window {
     /// Initialize the display. The display is bound in the thread we're going
     /// to be making opengl calls in. Behavior is undefined is the display is
     /// bound outside of the thread and usually segfaults.
-    pub fn bind(&self) {
+    fn bind(&self) {
         unsafe {
             self.inner.context().make_current().unwrap();
         }
@@ -36,14 +36,16 @@ impl Window {
         info!("Render: OpenGL version {}", get_string(StringTarget::Version));
     }
 
-    pub fn get_logical_size(&self) -> Vector2<f64> {
+    #[inline]
+    fn get_logical_size(&self) -> Vector2<f64> {
         let logical_size = self.inner.get_inner_size().expect("Window no longer exists.");
         Vector2::new(logical_size.width, logical_size.height)
     }
 
     /// Resizes the window context using logical dimensions (unscaled by
     /// hidpi).
-    pub fn resize(&self, dimensions: &Vector2<f64>) {
+    #[inline]
+    fn resize(&self, dimensions: &Vector2<f64>) {
         let dimensions = self.to_physical_size(dimensions);
         self.inner.resize(PhysicalSize::from((dimensions.x, dimensions.y)));
     }
@@ -51,12 +53,14 @@ impl Window {
     /// Swaps the buffers in case of double or triple buffering. You should
     /// call this function every time you have finished rendering, or the
     /// image may not be displayed on the screen.
-    pub fn swap_buffers(&self) {
+    #[inline]
+    fn swap_buffers(&self) {
         self.inner.swap_buffers().expect("Error while swapping buffers.");
     }
 
     /// Converts logical window dimensions into physical window dimensions.
-    pub fn to_physical_size(&self, dimensions: &Vector2<f64>) -> Vector2<f64> {
+    #[inline]
+    fn to_physical_size(&self, dimensions: &Vector2<f64>) -> Vector2<f64> {
         dimensions * self.inner.get_hidpi_factor()
     }
 }
@@ -111,19 +115,6 @@ impl RenderServer {
         state
     }
 
-    pub fn resize(&mut self) {
-        let new_size = self.window.get_logical_size();
-        if self.current_size != new_size {
-            self.current_size = new_size;
-            self.scene.resize(&new_size);
-            self.window.resize(&new_size);
-
-            // The viewport function takes in physical dimensions.
-            let dimensions = self.window.to_physical_size(&new_size);
-            viewport(0, 0, dimensions.x as i32, dimensions.y as i32);
-        }
-    }
-
     pub fn run_forever(&mut self) {
         let mut timer_render = Timer::new("[R] Frame");
         loop {
@@ -143,6 +134,21 @@ impl RenderServer {
         }
     }
 
+    #[inline]
+    fn resize(&mut self) {
+        let new_size = self.window.get_logical_size();
+        if self.current_size != new_size {
+            self.current_size = new_size;
+            self.scene.resize(&new_size);
+            self.window.resize(&new_size);
+
+            // The viewport function takes in physical dimensions.
+            let dimensions = self.window.to_physical_size(&new_size);
+            viewport(0, 0, dimensions.x as i32, dimensions.y as i32);
+        }
+    }
+
+    #[inline]
     fn handle_messages(&mut self, messages: &mut Vec<RenderMessage>) {
         for message in messages.drain(..) {
             match message {

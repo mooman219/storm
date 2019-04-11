@@ -20,10 +20,12 @@ impl Timer {
         }
     }
 
+    #[inline]
     pub fn start(&mut self) {
         self.start = Instant::now();
     }
 
+    #[inline]
     pub fn stop(&mut self) {
         self.duration += as_nanoseconds(&self.start.elapsed());
         self.invocations += 1;

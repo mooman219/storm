@@ -26,6 +26,7 @@ impl Clock {
         }
     }
 
+    #[inline]
     fn duration_to_delta(duration: &Duration) -> f32 {
         (as_nanoseconds(duration) as f64 / NANOS_PER_SEC as f64) as f32
     }
@@ -35,6 +36,7 @@ impl Clock {
         self.target = Clock::tps_to_target(tps);
     }
 
+    #[inline]
     pub fn get_delta(&self) -> f32 {
         self.delta
     }

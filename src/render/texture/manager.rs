@@ -110,14 +110,14 @@ impl TextManager {
         }
     }
 
-    pub fn rasterize(&mut self, text: &str, font_ref: &FontReference, desc: &TextDescription) -> Vec<TextureVertex> {
+    pub fn rasterize(&mut self, text: &str, desc: &TextDescription) -> Vec<TextureVertex> {
         let mut vertices = Vec::new();
         let mut buffer = Vec::new();
-        let font = self.fonts.get(font_ref.key()).expect("Unknown font reference");
+        let font = self.fonts.get(desc.font.key()).expect("Unknown font reference");
         // TODO: Parallelize this
         for c in text.nfc() {
             let key = TextCacheKey {
-                font: font_ref.key(),
+                font: desc.font.key(),
                 character: c,
                 // TODO: Add scale
             };
