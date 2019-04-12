@@ -1,6 +1,7 @@
 use cgmath::*;
 use color;
 use hashbrown::HashMap;
+use rayon::prelude::*;
 use render::raw::*;
 use render::texture::handle::*;
 use render::texture::packer::*;
@@ -18,18 +19,14 @@ use unicode_normalization::UnicodeNormalization;
 pub struct TextureManager {
     packer: TexturePacker,
     atlas: TextureHandle,
-    uv: Vec<Vector4<f32>>,
+    uv: Vec<Vector4<u16>>,
     dirty: bool,
 }
 
 impl TextureManager {
     pub fn new() -> TextureManager {
         let mut manager = TextureManager {
-            packer: TexturePacker::new(TexturePackerConfig {
-                max_width: 2048,
-                max_height: 2048,
-                texture_padding: 0,
-            }),
+            packer: TexturePacker::new(),
             atlas: TextureHandle::new(TextureUnit::Atlas),
             uv: Vec::new(),
             dirty: false,
@@ -61,7 +58,7 @@ impl TextureManager {
         }
     }
 
-    pub fn get_uv(&self, reference: &TextureReference) -> Vector4<f32> {
+    pub fn get_uv(&self, reference: &TextureReference) -> Vector4<u16> {
         self.uv[reference.key()]
     }
 }
@@ -76,7 +73,7 @@ struct TextCacheKey {
 #[derive(Debug, Copy, Clone)]
 struct TextCacheValue {
     visible: bool,
-    uv: Vector4<f32>,
+    uv: Vector4<u16>,
     size: Vector2<f32>,
     advance_width: f32,
 }
@@ -94,11 +91,7 @@ const TEXT_SCALE: f32 = 1.0 / 64.0;
 impl TextManager {
     pub fn new() -> TextManager {
         let mut manager = TextManager {
-            packer: TexturePacker::new(TexturePackerConfig {
-                max_width: 2048,
-                max_height: 2048,
-                texture_padding: 0,
-            }),
+            packer: TexturePacker::new(),
             cache: HashMap::new(),
             atlas: TextureHandle::new(TextureUnit::Font),
             fonts: Vec::new(),
@@ -137,6 +130,7 @@ impl TextManager {
         let font = self.fonts.get(desc.font.key()).expect("Unknown font reference");
         let mut caret = desc.pos;
         // TODO: Parallelize this
+        // text.nfc().into_iter().par_iter().map();
         for c in text.nfc() {
             let key = TextCacheKey {
                 font: desc.font.key(),
@@ -173,7 +167,7 @@ impl TextManager {
                         }
                     }
 
-                    trace!("Cached {:?} {:?}", key, value);
+                    // trace!("Cached {:?} {:?}", key, value);
                     self.cache.insert(key, value);
                     value
                 },

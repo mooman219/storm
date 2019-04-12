@@ -71,25 +71,24 @@ impl Skyline {
     }
 }
 
+const MAX: u32 = 65535;
+const SIZE: u32 = 2048;
+const FULL_PIXEL: u32 = 32;
+const HALF_PIXEL: u32 = 16;
+
 struct SkylinePacker {
-    config: TexturePackerConfig,
     border: Rect,
     // The skylines are sorted by their `x` position.
     skylines: Vec<Skyline>,
 }
 
 impl SkylinePacker {
-    fn new(config: TexturePackerConfig) -> SkylinePacker {
+    fn new() -> SkylinePacker {
         let mut skylines = Vec::new();
-        skylines.push(Skyline {
-            x: 0,
-            y: 0,
-            w: config.max_width,
-        });
+        skylines.push(Skyline { x: 0, y: 0, w: SIZE });
 
         SkylinePacker {
-            config: config,
-            border: Rect::new(0, 0, config.max_width, config.max_height),
+            border: Rect::new(0, 0, SIZE, SIZE),
             skylines: skylines,
         }
     }
@@ -181,32 +180,15 @@ impl SkylinePacker {
         }
     }
 
-    fn pack(&mut self, mut width: u32, mut height: u32) -> Rect {
-        width += self.config.texture_padding;
-        height += self.config.texture_padding;
-
-        if let Some((i, mut rect)) = self.find_skyline(width, height) {
+    fn pack(&mut self, width: u32, height: u32) -> Rect {
+        if let Some((i, rect)) = self.find_skyline(width, height) {
             self.split(i, &rect);
             self.merge();
-
-            rect.w -= self.config.texture_padding;
-            rect.h -= self.config.texture_padding;
-
             rect
         } else {
             panic!("Unable to find space for the texture.");
         }
     }
-}
-
-#[derive(Copy, Clone)]
-pub struct TexturePackerConfig {
-    /// Max width of the packed image.
-    pub max_width: u32,
-    /// Max height of the packed image.
-    pub max_height: u32,
-    /// Size of the padding between frames in pixel.
-    pub texture_padding: u32,
 }
 
 pub struct TexturePacker {
@@ -215,31 +197,29 @@ pub struct TexturePacker {
 }
 
 impl TexturePacker {
-    pub fn new(config: TexturePackerConfig) -> TexturePacker {
+    pub fn new() -> TexturePacker {
         TexturePacker {
-            packer: SkylinePacker::new(config),
-            texture: Texture::from_default(TRANSPARENT, config.max_width, config.max_height),
+            packer: SkylinePacker::new(),
+            texture: Texture::from_default(TRANSPARENT, SIZE, SIZE),
         }
     }
 
-    pub fn pack(&mut self, texture: &Texture) -> Vector4<f32> {
+    pub fn pack(&mut self, texture: &Texture) -> Vector4<u16> {
         let rect = self.packer.pack(texture.width(), texture.height());
         self.texture.set_texture(rect.x, rect.y, texture);
 
         // UV Layout: X:LEFT Y:RIGHT Z:BOTTOM W:TOP
-        let height_half_pixel = 0.5 / self.packer.config.max_height as f32;
-        let width_half_pixel = 0.5 / self.packer.config.max_width as f32;
         let vector = Vector4::new(
-            (rect.x as f32) / (self.packer.config.max_width as f32) + width_half_pixel,
-            ((rect.x + rect.w) as f32) / (self.packer.config.max_width as f32) - width_half_pixel,
-            (rect.y as f32) / (self.packer.config.max_height as f32) + height_half_pixel,
-            ((rect.y + rect.h) as f32) / (self.packer.config.max_height as f32) - height_half_pixel,
+            (rect.x * FULL_PIXEL + HALF_PIXEL) as u16,
+            ((rect.x + rect.w) * FULL_PIXEL - HALF_PIXEL) as u16,
+            (rect.y * FULL_PIXEL + HALF_PIXEL) as u16,
+            ((rect.y + rect.h) * FULL_PIXEL - HALF_PIXEL) as u16,
         );
-        trace!("Packing rect: {:?}", rect);
+        trace!("Packing rect: {:?} -> {:?}", rect, vector);
         vector
     }
 
-    pub fn pack_path(&mut self, path: &Path) -> Vector4<f32> {
+    pub fn pack_path(&mut self, path: &Path) -> Vector4<u16> {
         let texture = match image::open(path) {
             Ok(img) => img,
             Err(msg) => panic!("Unable to open image: {}", msg),

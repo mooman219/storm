@@ -9,6 +9,7 @@ extern crate image;
 extern crate log;
 extern crate hashbrown;
 extern crate parking_lot;
+extern crate rayon;
 extern crate rusttype;
 extern crate unicode_normalization;
 
