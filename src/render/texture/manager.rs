@@ -132,6 +132,9 @@ impl TextManager {
         }
     }
 
+    /// This does _most_ of the calculated needed to layout a glyph. Caching
+    /// the glyph, packing the glyph texture, setting the glyph's UV, and
+    /// making the manager as dirty is required still.
     fn calculate_glpyh(&self, c: char, scale: u32, font: &Font, font_index: usize) -> GlyphState {
         let key = TextCacheKey {
             font: font_index,
