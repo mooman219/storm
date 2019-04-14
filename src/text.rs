@@ -24,6 +24,7 @@ impl FontReference {
 #[derive(Copy, Clone, Debug)]
 pub struct TextDescription {
     pub pos: Vector3<f32>,
+    pub max_width: Option<f32>,
     pub scale: u32,
     pub color: Color,
     pub font: FontReference,
@@ -33,7 +34,8 @@ impl Default for TextDescription {
     fn default() -> TextDescription {
         TextDescription {
             pos: Vector3::new(0f32, 0f32, 0f32),
-            scale: 10,
+            max_width: None,
+            scale: 24,
             color: BLACK,
             font: DEFAULT_FONT,
         }

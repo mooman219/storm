@@ -103,7 +103,7 @@ impl RenderServer {
         enable(Capability::CullFace);
         enable(Capability::Blend);
         enable(Capability::DepthTest);
-        clear_color(0.0, 0.0, 0.2, 1.0);
+        clear_color(1.0, 1.0, 1.0, 1.0);
         depth_func(DepthTest::Less);
         blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
         cull_face(CullFace::Back);
@@ -151,14 +151,16 @@ impl RenderServer {
                 // Layer
                 RenderMessage::LayerCreate { layer, desc } => {
                     self.scene.layer_create(layer, &desc);
+                    trace!("Yeet");
                     self.scene.text_create(
                         layer,
                         self.text.rasterize(
-                            "Yeet test.",
+                            "That's it! Please, help me #1.",
                             &TextDescription {
                                 pos: Vector3::new(-1.0, 0.0, 1.0),
-                                scale: 16,
-                                color: color::RED,
+                                max_width: Some(5.0),
+                                scale: 24,
+                                color: color::BLACK,
                                 font: DEFAULT_FONT,
                             },
                         ),
