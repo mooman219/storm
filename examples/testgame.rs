@@ -65,9 +65,9 @@ impl Sprite {
 fn main() {
     SimpleLogger::init(LevelFilter::Trace);
 
-    let mut clock = Clock::new(144);
+    let mut clock = Clock::new(10000);
     let mut engine = Engine::new();
-    let texture = engine.texture_load("./examples/resources/2.png");
+    // let texture = engine.texture_load("./examples/resources/2.png");
 
     // let layer_bg = engine.layer_create(0, &LayerDescription::default());
     let layer_fg = engine.layer_create(1, &LayerDescription::default());
@@ -82,10 +82,11 @@ fn main() {
     //         engine.sprite_create(&layer_bg, &sprite);
     //     }
     // }
-    let speed = 2.5f32;
+    let speed = 200f32;
     let mut sprite = Sprite::new(&layer_fg);
+    sprite.size(Vector2::new(100.0, 100.0));
     sprite.color(color::BLACK);
-    sprite.texture(&texture);
+    // sprite.texture(&texture);
 
     let mut is_active = true;
     while is_active {

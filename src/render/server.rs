@@ -151,14 +151,13 @@ impl RenderServer {
                 // Layer
                 RenderMessage::LayerCreate { layer, desc } => {
                     self.scene.layer_create(layer, &desc);
-                    trace!("Yeet");
                     self.scene.text_create(
                         layer,
                         self.text.rasterize(
-                            "That's it! Please, help me #1.",
+                            "Test. ><` a's #z $ 123",
                             &TextDescription {
-                                pos: Vector3::new(-1.0, 0.0, 1.0),
-                                max_width: Some(5.0),
+                                pos: Vector3::new(0.0, 0.0, 1.0),
+                                max_width: Some(500.0),
                                 scale: 24,
                                 color: color::BLACK,
                                 font: DEFAULT_FONT,

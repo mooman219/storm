@@ -93,8 +93,6 @@ enum GlyphState {
     InsertGlyph(TextCacheKey, TextCacheValue, Texture),
 }
 
-const TEXT_SCALE: f32 = 1.0 / 100.0;
-
 impl TextManager {
     pub fn new() -> TextManager {
         let mut manager = TextManager {
@@ -104,7 +102,7 @@ impl TextManager {
             fonts: Vec::new(),
             dirty: true,
         };
-        manager.add_font_bytes(include_bytes!("./font/DejaVuSansMono.ttf") as &[u8]);
+        manager.add_font_bytes(include_bytes!("./font/RobotoMono-Regular.ttf") as &[u8]);
         manager.sync();
         manager
     }
@@ -149,24 +147,24 @@ impl TextManager {
                     uv: Vector4::zero(),
                     size: Vector2::zero(),
                     offset_height: 0.0,
-                    advance_width: 0.1,
+                    advance_width: 2.0,
                 };
                 let glyph = font.glyph(c).scaled(Scale::uniform(scale as f32));
-                value.advance_width = glyph.h_metrics().advance_width * TEXT_SCALE;
+                value.advance_width = glyph.h_metrics().advance_width;
                 let glyph = glyph.positioned(point(0.0, 0.0));
 
                 let rect = glyph.pixel_bounding_box();
                 if let Some(rect) = rect {
                     if rect.width() > 0 && rect.height() > 0 {
                         value.visible = true;
-                        value.offset_height = (rect.max.y as f32) * TEXT_SCALE;
-                        value.size = Vector2::new(rect.width() as f32, rect.height() as f32) * TEXT_SCALE;
+                        value.offset_height = rect.max.y as f32;
+                        value.size = Vector2::new(rect.width() as f32, rect.height() as f32);
 
                         let size = Vector2::new(rect.width() as u32, rect.height() as u32);
                         let mut buffer = vec![color::BLACK; (size.x * size.y) as usize];
                         glyph.draw(|x, y, v| {
                             let v = (v * 255.0).round().max(0.0).min(255.0) as u8;
-                            buffer[(x + y * size.x) as usize] = color::Color::new_raw(v, v, v, v);
+                            buffer[(x + y * size.x) as usize] = color::Color::new_raw(255, 255, 255, v);
                         });
                         let texture = Texture::from_color_Vec(&buffer, size.x, size.y);
                         return GlyphState::InsertGlyph(key, value, texture);
@@ -185,7 +183,7 @@ impl TextManager {
 
         // Needed for vertex layout.
         let v_metrics = font.v_metrics(Scale::uniform(desc.scale as f32));
-        let advance_height = (v_metrics.ascent - v_metrics.descent + v_metrics.line_gap) * TEXT_SCALE;
+        let advance_height = v_metrics.ascent - v_metrics.descent + v_metrics.line_gap;
         let max_width = desc.max_width.unwrap_or(std::f32::MAX);
         let mut vertices = Vec::new();
         let mut caret = Vector2::zero();
@@ -193,8 +191,8 @@ impl TextManager {
         let glyphs = text
             .nfc()
             .collect::<Vec<char>>()
-            .into_par_iter()
-            .map(|c| self.calculate_glpyh(c, scale, font, font_index))
+            .par_iter()
+            .map(|c| self.calculate_glpyh(*c, scale, font, font_index))
             .collect::<Vec<GlyphState>>();
 
         for state in glyphs {
