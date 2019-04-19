@@ -51,32 +51,28 @@ fn bench_atan2_default(b: &mut Bencher) {
     });
 }
 
-const MIN_SIN: f32 = -9f32;
-const MAX_SIN: f32 = 9f32;
-const INC_SIN: f32 = 0.01f32;
+const SIN_START: f32 = -5f32;
+const SIN_INCREMENT: f32 = 0.01f32;
+const SIN_ITERATIONS: usize = 1000;
 
 #[bench]
 fn bench_sin(b: &mut Bencher) {
     b.iter(|| {
-        let mut sum = black_box(0f32);
-        let mut x = MIN_SIN;
-        while x < MAX_SIN {
-            sum += sin_rad(x);
-            x += INC_SIN;
+        let mut x = SIN_START;
+        for _ in 0..SIN_ITERATIONS {
+            black_box(sin_rad(x));
+            x += SIN_INCREMENT;
         }
-        black_box(sum)
     });
 }
 
 #[bench]
 fn bench_sin_default(b: &mut Bencher) {
     b.iter(|| {
-        let mut sum = black_box(0f32);
-        let mut x = MIN_SIN;
-        while x < MAX_SIN {
-            sum += x.sin();
-            x += INC_SIN;
+        let mut x = SIN_START;
+        for _ in 0..SIN_ITERATIONS {
+            black_box(x.sin());
+            x += SIN_INCREMENT;
         }
-        black_box(sum)
     });
 }

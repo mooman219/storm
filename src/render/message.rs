@@ -42,6 +42,13 @@ pub enum RenderMessage {
     FontLoad {
         path: String,
     },
+    // TextCreate {
+    //     text: String,
+    // },
+    // TextUpdate {
+    //     text: String,
+    // },
+    // TextRemove {},
 
     // Window
     WindowTitle {

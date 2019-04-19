@@ -1,4 +1,4 @@
-#![feature(const_fn)]
+#![feature(const_fn, asm, test)]
 #![allow(dead_code, non_camel_case_types, non_snake_case, intra_doc_link_resolution_failure)]
 
 extern crate core;
@@ -11,6 +11,7 @@ extern crate hashbrown;
 extern crate parking_lot;
 extern crate rayon;
 extern crate rusttype;
+extern crate test;
 extern crate unicode_normalization;
 
 pub extern crate cgmath;
@@ -24,7 +25,7 @@ mod layer;
 mod render;
 mod sprite;
 #[cfg(test)]
-mod test;
+mod testing;
 mod text;
 mod texture;
 mod utility;

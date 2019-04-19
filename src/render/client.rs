@@ -4,11 +4,11 @@ use sprite::*;
 use std::mem;
 use text::*;
 use texture::*;
-use utility::indexmap::*;
+use utility::indexed_empty_map::*;
 
 struct LayerSlot {
     reference: LayerReference,
-    sprites: IndexMap,
+    sprites: IndexedEmptyMap,
 }
 
 pub struct RenderClient {
@@ -61,7 +61,7 @@ impl RenderClient {
         };
         let slot = LayerSlot {
             reference: layer,
-            sprites: IndexMap::new(),
+            sprites: IndexedEmptyMap::new(),
         };
         self.layers.insert(lookup, slot);
 
