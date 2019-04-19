@@ -89,3 +89,49 @@ impl<T: Copy> Consumer<T> {
         (*self.buffer).read()
     }
 }
+
+// ////////////////////////////////////////////////////////////////////////////
+// Tests
+// ////////////////////////////////////////////////////////////////////////////
+
+#[cfg(test)]
+mod tests {
+    #![allow(unused_imports)]
+    use super::*;
+    use test::black_box;
+    use test::Bencher;
+
+    #[test]
+    fn cycle() {
+        let (producer, consumer) = make(1u32);
+
+        assert_eq!(consumer.get(), 1u32);
+
+        producer.set(2u32);
+        assert_eq!(consumer.get(), 2u32);
+        assert_eq!(consumer.get(), 2u32);
+
+        producer.set(3u32);
+        producer.set(4u32);
+        assert_eq!(consumer.get(), 4u32);
+        assert_eq!(consumer.get(), 4u32);
+    }
+
+    // ////////////////////////////////////////////////////////////////////////////
+    // Benches
+    // ////////////////////////////////////////////////////////////////////////////
+
+    const ITERATIONS: usize = 1000;
+
+    #[bench]
+    fn bench_cycle(bench: &mut Bencher) {
+        let (p, c) = make(1);
+
+        bench.iter(|| {
+            for x in 0..ITERATIONS {
+                black_box(p.set(x));
+                black_box(c.get());
+            }
+        });
+    }
+}

@@ -357,3 +357,175 @@ impl<T> Consumer<T> {
         (*self.buffer).tail.load(Ordering::Acquire) - (*self.buffer).head.load(Ordering::Acquire)
     }
 }
+
+// ////////////////////////////////////////////////////////////////////////////
+// Tests
+// ////////////////////////////////////////////////////////////////////////////
+
+#[cfg(test)]
+mod tests {
+    #![allow(unused_imports)]
+    use super::*;
+    use std::sync::mpsc::sync_channel;
+    use std::thread;
+    use test::black_box;
+    use test::Bencher;
+
+    #[test]
+    fn buffer_size() {
+        assert_eq!(::std::mem::size_of::<Buffer<()>>(), 3 * CACHELINE_LEN);
+    }
+
+    #[test]
+    fn producer_push() {
+        let (p, _) = super::make(10);
+
+        for i in 0..9 {
+            p.push(i);
+            assert!(p.capacity() == 10);
+            assert!(p.size() == i + 1);
+        }
+    }
+
+    #[test]
+    fn consumer_pop() {
+        let (p, c) = super::make(10);
+
+        for i in 0..9 {
+            p.push(i);
+            assert!(p.capacity() == 10);
+            assert!(p.size() == i + 1);
+        }
+
+        for i in 0..9 {
+            assert!(c.size() == 9 - i);
+            let t = c.pop();
+            assert!(c.capacity() == 10);
+            assert!(c.size() == 9 - i - 1);
+            assert!(t == i);
+        }
+    }
+
+    #[test]
+    fn consumer_skip() {
+        let (p, c) = super::make(10);
+
+        for i in 0..9 {
+            p.push(i);
+            assert!(p.capacity() == 10);
+            assert!(p.size() == i + 1);
+        }
+        assert!(c.size() == 9);
+        assert!(c.skip_n(5) == 5);
+        assert!(c.size() == 4);
+        for i in 0..4 {
+            assert!(c.size() == 4 - i);
+            let t = c.pop();
+            assert!(c.capacity() == 10);
+            assert!(c.size() == 4 - i - 1);
+            assert!(t == i + 5);
+        }
+        assert!(c.size() == 0);
+        assert!(c.skip_n(5) == 0);
+    }
+
+    #[test]
+    fn consumer_skip_whole_buf() {
+        let (p, c) = super::make(9);
+
+        for i in 0..9 {
+            p.push(i);
+            assert!(p.capacity() == 9);
+            assert!(p.size() == i + 1);
+        }
+        assert!(c.size() == 9);
+        assert!(c.skip_n(9) == 9);
+        assert!(c.size() == 0);
+    }
+
+    #[test]
+    fn try_push() {
+        let (p, _) = super::make(10);
+
+        for i in 0..10 {
+            p.push(i);
+            assert!(p.capacity() == 10);
+            assert!(p.size() == i + 1);
+        }
+
+        match p.try_push(10) {
+            Some(v) => {
+                assert!(v == 10);
+            },
+            None => assert!(false, "Queue should not have accepted another write!"),
+        }
+    }
+
+    #[test]
+    fn try_poll() {
+        let (p, c) = super::make(10);
+
+        match c.try_pop() {
+            Some(_) => assert!(false, "Queue was empty but a value was read!"),
+            None => {},
+        }
+
+        p.push(123);
+
+        match c.try_pop() {
+            Some(v) => assert!(v == 123),
+            None => assert!(false, "Queue was not empty but poll() returned nothing!"),
+        }
+
+        match c.try_pop() {
+            Some(_) => assert!(false, "Queue was empty but a value was read!"),
+            None => {},
+        }
+    }
+
+    #[test]
+    fn threaded() {
+        let (p, c) = super::make(500);
+
+        thread::spawn(move || {
+            for i in 0..100000 {
+                p.push(i);
+            }
+        });
+
+        for i in 0..100000 {
+            let t = c.pop();
+            assert!(t == i);
+        }
+    }
+
+    // ////////////////////////////////////////////////////////////////////////////
+    // Benches
+    // ////////////////////////////////////////////////////////////////////////////
+
+    const ITERATIONS: usize = 1000;
+
+    #[bench]
+    fn bench_cycle(bench: &mut Bencher) {
+        let (p, c) = make(ITERATIONS);
+
+        bench.iter(|| {
+            for x in 0..ITERATIONS {
+                black_box(p.push(x));
+                black_box(c.pop());
+            }
+        });
+    }
+
+    #[bench]
+    fn bench_cycle_default(bench: &mut Bencher) {
+        let (tx, rx) = sync_channel(ITERATIONS);
+
+        bench.iter(|| {
+            for x in 0..ITERATIONS {
+                black_box(tx.send(x).unwrap());
+                black_box(rx.recv().unwrap());
+            }
+        });
+    }
+}

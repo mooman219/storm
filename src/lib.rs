@@ -24,8 +24,6 @@ mod input;
 mod layer;
 mod render;
 mod sprite;
-#[cfg(test)]
-mod testing;
 mod text;
 mod texture;
 mod utility;
