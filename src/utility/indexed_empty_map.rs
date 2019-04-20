@@ -1,13 +1,13 @@
 #[derive(Copy, Clone, Debug)]
 pub struct EmptyKey {
     index: u32,
-    version: u32,
+    version: u16,
 }
 
 #[derive(Copy, Clone, Debug)]
 struct EmptySlot {
     a_index: u32,
-    a_version: u32,
+    a_version: u16,
     b_index: u32,
 }
 
@@ -40,7 +40,7 @@ impl IndexedEmptyMap {
 
     pub fn add(&mut self) -> EmptyKey {
         let index: u32;
-        let version: u32;
+        let version: u16;
         if self.free > 0 {
             self.free -= 1;
             {
@@ -251,12 +251,14 @@ mod tests {
     // Benches
     // ////////////////////////////////////////////////////////////////////////////
 
+    const ITERATIONS: usize = 1000;
+
     #[bench]
     fn bench_cycle(bench: &mut Bencher) {
         let mut map = IndexedEmptyMap::new();
 
         bench.iter(|| {
-            for _ in 0..10 {
+            for _ in 0..ITERATIONS {
                 let a = map.add();
                 black_box(map.get(a));
                 black_box(map.remove(a));
@@ -270,8 +272,19 @@ mod tests {
         let a = map.add();
 
         bench.iter(|| {
-            for _ in 0..10 {
+            for _ in 0..ITERATIONS {
                 black_box(map.get(a));
+            }
+        });
+    }
+
+    #[bench]
+    fn bench_add(bench: &mut Bencher) {
+        let mut map = IndexedEmptyMap::new();
+
+        bench.iter(|| {
+            for _ in 0..ITERATIONS {
+                black_box(map.add());
             }
         });
     }
