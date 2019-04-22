@@ -10,9 +10,9 @@ use std::sync::Arc;
 const BUFFER_SIZE: usize = 32;
 
 /// The internal memory buffer used by the replace spsc. It's unlikely, but during a read, a write
-/// could happen inbetween the atomic load and the dereference. This is unlikely because BUFFER_SIZE writes
-/// would have to happen during that time. If a write it timed properly, there's a chance that the
-/// written value could be returned at most twice.
+/// could happen inbetween the atomic load and the dereference. This is unlikely because BUFFER_SIZE
+/// writes would have to happen during that time. If a write it timed properly, there's a chance
+/// that the written value could be returned at most twice.
 struct Buffer<T: Copy> {
     is_empty: AtomicBool,
     read: AtomicPtr<T>,
@@ -60,7 +60,14 @@ impl<T: Copy> Buffer<T> {
 pub fn make<T: Copy>() -> (Producer<T>, Consumer<T>) {
     // This is the only place where a buffer is created.
     let arc = Arc::new(Buffer::new());
-    (Producer { buffer: arc.clone() }, Consumer { buffer: arc.clone() })
+    (
+        Producer {
+            buffer: arc.clone(),
+        },
+        Consumer {
+            buffer: arc.clone(),
+        },
+    )
 }
 
 // ////////////////////////////////////////////////////////

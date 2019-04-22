@@ -67,8 +67,8 @@ impl<T> Buffer<T> {
     /// Attempt to pop a value off the buffer.
     ///
     /// If the buffer is empty, this method will not block.  Instead, it will return `None`
-    /// signifying the buffer was empty.  The caller may then decide what to do next (e.g. spin-wait,
-    /// sleep, process something else, etc)
+    /// signifying the buffer was empty.  The caller may then decide what to do next (e.g.
+    /// spin-wait, sleep, process something else, etc)
     pub fn try_pop(&self) -> Option<T> {
         let current_head = self.head.load(Ordering::Relaxed);
 
@@ -91,8 +91,8 @@ impl<T> Buffer<T> {
     /// # Safety
     ///
     /// *WARNING:* This will leak at most `n` values from the buffer, i.e. the destructors of the
-    /// objects skipped over will not be called. This function is intended to be used on buffers that
-    /// contain non-`Drop` data, such as a `Buffer<f32>`.
+    /// objects skipped over will not be called. This function is intended to be used on buffers
+    /// that contain non-`Drop` data, such as a `Buffer<f32>`.
     pub fn skip_n(&self, n: usize) -> usize {
         let current_head = self.head.load(Ordering::Relaxed);
 
@@ -149,8 +149,8 @@ impl<T> Buffer<T> {
     ///
     /// This method will block until the buffer is non-full.  The waiting strategy is a simple
     /// spin-wait and will repeatedly call `try_push()` until the value can be added.  If you do not
-    /// want a spin-wait burning CPU, you should call `try_push()` directly and implement a different
-    /// waiting strategy.
+    /// want a spin-wait burning CPU, you should call `try_push()` directly and implement a
+    /// different waiting strategy.
     pub fn push(&self, v: T) {
         let mut t = v;
         loop {
@@ -201,7 +201,8 @@ impl<T> Drop for Buffer<T> {
 
         unsafe {
             let layout =
-                Layout::from_size_align(self.allocated_size * mem::size_of::<T>(), mem::align_of::<T>()).unwrap();
+                Layout::from_size_align(self.allocated_size * mem::size_of::<T>(), mem::align_of::<T>())
+                    .unwrap();
             alloc::dealloc(self.buffer as *mut u8, layout);
         }
     }
@@ -241,15 +242,20 @@ pub fn make<T>(capacity: usize) -> (Producer<T>, Consumer<T>) {
         _padding3: [0; cacheline_pad!(2)],
     });
 
-    (Producer { buffer: arc.clone() }, Consumer { buffer: arc.clone() })
+    (
+        Producer {
+            buffer: arc.clone(),
+        },
+        Consumer {
+            buffer: arc.clone(),
+        },
+    )
 }
 
 /// Allocates a memory buffer on the heap and returns a pointer to it
 unsafe fn allocate_buffer<T>(capacity: usize) -> *mut T {
     let adjusted_size = capacity.next_power_of_two();
-    let size = adjusted_size
-        .checked_mul(mem::size_of::<T>())
-        .expect("capacity overflow");
+    let size = adjusted_size.checked_mul(mem::size_of::<T>()).expect("capacity overflow");
 
     let layout = Layout::from_size_align(size, mem::align_of::<T>()).unwrap();
     let ptr = alloc::alloc(layout);
@@ -336,8 +342,8 @@ impl<T> Consumer<T> {
     /// # Safety
     ///
     /// *WARNING:* This will leak at most `n` values from the buffer, i.e. the destructors of the
-    /// objects skipped over will not be called. This function is intended to be used on buffers that
-    /// contain non-`Drop` data, such as a `Buffer<f32>`.
+    /// objects skipped over will not be called. This function is intended to be used on buffers
+    /// that contain non-`Drop` data, such as a `Buffer<f32>`.
     pub fn skip_n(&self, n: usize) -> usize {
         (*self.buffer).skip_n(n)
     }

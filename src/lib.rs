@@ -167,6 +167,23 @@ impl Engine {
         DEFAULT_FONT
     }
 
+    pub fn text_create(
+        &mut self,
+        layer: &LayerReference,
+        text: &str,
+        desc: &TextDescription,
+    ) -> TextReference {
+        self.render_client.text_create(layer, text, desc)
+    }
+
+    pub fn text_update(&mut self, text_ref: &TextReference, text: &str, desc: &TextDescription) {
+        self.render_client.text_update(text_ref, text, desc);
+    }
+
+    pub fn text_remove(&mut self, text_ref: &TextReference) {
+        self.render_client.text_remove(text_ref);
+    }
+
     // TODO: Text api
 
     // ////////////////////////////////////////////////////////

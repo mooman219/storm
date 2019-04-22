@@ -1,6 +1,7 @@
 use cgmath::*;
 use layer::*;
 use render::buffer::geometry::*;
+use render::buffer::grouped::*;
 use render::raw::*;
 use render::shader::*;
 use render::vertex::*;
@@ -8,7 +9,7 @@ use render::vertex::*;
 struct Layer {
     desc: LayerDescription,
     sprites: GeometryBuffer<TextureVertex>,
-    text: GeometryBuffer<TextureVertex>,
+    text: GroupedBuffer<TextureVertex>,
     matrix_translate_scaled: Matrix4<f32>,
     matrix_full: Matrix4<f32>,
 }
@@ -49,8 +50,8 @@ impl SceneManager {
         let matrix_full = self.matrix_bounds * matrix_translate_scaled;
         let slot = Layer {
             desc: *desc,
-            sprites: GeometryBuffer::new(512),
-            text: GeometryBuffer::new(1024),
+            sprites: GeometryBuffer::new(),
+            text: GroupedBuffer::new(),
             matrix_translate_scaled: matrix_translate_scaled,
             matrix_full: matrix_full,
         };
@@ -77,7 +78,7 @@ impl SceneManager {
     }
 
     pub fn sprite_create(&mut self, layer_index: usize, vertex: &TextureVertex) {
-        self.layers[layer_index].sprites.add(*vertex);
+        self.layers[layer_index].sprites.push(*vertex);
     }
 
     pub fn sprite_update(&mut self, layer_index: usize, sprite_index: usize, vertex: &TextureVertex) {
@@ -85,13 +86,19 @@ impl SceneManager {
     }
 
     pub fn sprite_remove(&mut self, layer_index: usize, sprite_index: usize) {
-        self.layers[layer_index].sprites.remove(sprite_index);
+        self.layers[layer_index].sprites.swap_remove(sprite_index);
     }
 
     pub fn text_create(&mut self, layer_index: usize, vertices: Vec<TextureVertex>) {
-        for v in vertices {
-            self.layers[layer_index].text.add(v);
-        }
+        self.layers[layer_index].text.push(vertices);
+    }
+
+    pub fn text_update(&mut self, layer_index: usize, text_index: usize, vertices: Vec<TextureVertex>) {
+        self.layers[layer_index].text.update(text_index, vertices);
+    }
+
+    pub fn text_remove(&mut self, layer_index: usize, text_index: usize) {
+        self.layers[layer_index].text.swap_remove(text_index);
     }
 
     pub fn resize(&mut self, bounds: &Vector2<f64>) {
@@ -101,10 +108,8 @@ impl SceneManager {
         }
     }
 
-    // TODO: Text api
-
-    /// Sync the state of the layers with their respective vertex buffers.
-    /// Call this after layer/sprite modifications for the frame.
+    /// Sync the state of the layers with their respective vertex buffers. Call this after
+    /// layer/sprite modifications for the frame.
     pub fn sync(&mut self) {
         for layer in &mut self.layers {
             if layer.desc.visible {
@@ -114,8 +119,8 @@ impl SceneManager {
         }
     }
 
-    /// Draw the last synced layer state to the screen. This clears the color
-    /// and depth buffers. This does not swap the frame buffer.
+    /// Draw the last synced layer state to the screen. This clears the color and depth buffers.
+    /// This does not swap the frame buffer.
     pub fn draw(&mut self) {
         clear(ClearBit::ColorBuffer);
         for layer in &mut self.layers {

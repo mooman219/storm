@@ -1,5 +1,6 @@
 use layer::*;
 use sprite::*;
+use text::*;
 
 pub enum RenderMessage {
     // Layer
@@ -42,13 +43,21 @@ pub enum RenderMessage {
     FontLoad {
         path: String,
     },
-    // TextCreate {
-    //     text: String,
-    // },
-    // TextUpdate {
-    //     text: String,
-    // },
-    // TextRemove {},
+    TextCreate {
+        layer_index: usize,
+        text: String,
+        desc: TextDescription,
+    },
+    TextUpdate {
+        layer_index: usize,
+        text_index: usize,
+        text: String,
+        desc: TextDescription,
+    },
+    TextRemove {
+        layer_index: usize,
+        text_index: usize,
+    },
 
     // Window
     WindowTitle {

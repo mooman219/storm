@@ -65,12 +65,13 @@ impl Sprite {
 fn main() {
     SimpleLogger::init(LevelFilter::Trace);
 
-    let mut clock = Clock::new(10000);
+    let mut clock = Clock::new(144);
     let mut engine = Engine::new();
     // let texture = engine.texture_load("./examples/resources/2.png");
 
     // let layer_bg = engine.layer_create(0, &LayerDescription::default());
     let layer_fg = engine.layer_create(1, &LayerDescription::default());
+    engine.text_create(&layer_fg, "Storm Engine", &TextDescription::default());
     // for x in -10..11 {
     //     for y in -10..11 {
     //         let sprite = SpriteDescription {

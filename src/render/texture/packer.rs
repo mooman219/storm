@@ -16,7 +16,12 @@ struct Rect {
 
 impl Rect {
     fn new(x: u32, y: u32, w: u32, h: u32) -> Rect {
-        Rect { x: x, y: y, w: w, h: h }
+        Rect {
+            x: x,
+            y: y,
+            w: w,
+            h: h,
+        }
     }
 
     #[inline(always)]
@@ -84,7 +89,11 @@ struct SkylinePacker {
 impl SkylinePacker {
     fn new() -> SkylinePacker {
         let mut skylines = Vec::new();
-        skylines.push(Skyline { x: 0, y: 0, w: SIZE });
+        skylines.push(Skyline {
+            x: 0,
+            y: 0,
+            w: SIZE,
+        });
 
         SkylinePacker {
             border: Rect::new(0, 0, SIZE, SIZE),

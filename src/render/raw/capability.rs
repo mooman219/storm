@@ -88,7 +88,9 @@ pub enum BlendFactor {
 ///
 /// # Arguments
 ///
-/// `func` - Specifies the depth comparison function. Symbolic constants GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, and GL_ALWAYS are accepted. The initial value is GL_LESS.
+/// `func` - Specifies the depth comparison function. Symbolic constants GL_NEVER, GL_LESS,
+/// GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, and GL_ALWAYS are accepted. The initial
+/// value is GL_LESS.
 #[inline]
 pub fn depth_func(func: DepthTest) {
     unsafe {
@@ -100,7 +102,8 @@ pub fn depth_func(func: DepthTest) {
 ///
 /// # Arguments
 ///
-/// `mode` - Specifies whether front- or back-facing facets are candidates for culling. Symbolic constants GL_FRONT, GL_BACK, and GL_FRONT_AND_BACK are accepted. The initial value is GL_BACK.
+/// `mode` - Specifies whether front- or back-facing facets are candidates for culling. Symbolic
+/// constants GL_FRONT, GL_BACK, and GL_FRONT_AND_BACK are accepted. The initial value is GL_BACK.
 #[inline]
 pub fn cull_face(mode: CullFace) {
     unsafe {
@@ -136,7 +139,8 @@ pub fn disable(cap: Capability) {
 ///
 /// # Arguments
 ///
-/// `depth` - Specifies the depth value used when the depth buffer is cleared. The initial value is 1.
+/// `depth` - Specifies the depth value used when the depth buffer is cleared. The initial value is
+/// 1.
 #[inline]
 pub fn clear_depth_f(depth: f32) {
     unsafe {
@@ -148,7 +152,8 @@ pub fn clear_depth_f(depth: f32) {
 ///
 /// # Arguments
 ///
-/// `mask` - Bitwise OR of masks that indicate the buffers to be cleared. The three masks are GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, and GL_STENCIL_BUFFER_BIT.
+/// `mask` - Bitwise OR of masks that indicate the buffers to be cleared. The three masks are
+/// GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, and GL_STENCIL_BUFFER_BIT.
 #[inline]
 pub fn clear(mask: u32) {
     unsafe {
@@ -160,7 +165,8 @@ pub fn clear(mask: u32) {
 ///
 /// # Arguments
 ///
-/// `red, green, blue, alpha` - Specify the red, green, blue, and alpha values used when the color buffers are cleared. The initial values are all 0.
+/// `red, green, blue, alpha` - Specify the red, green, blue, and alpha values used when the color
+/// buffers are cleared. The initial values are all 0.
 #[inline]
 pub fn clear_color(red: f32, green: f32, blue: f32, alpha: f32) {
     unsafe {
@@ -173,7 +179,8 @@ pub fn clear_color(red: f32, green: f32, blue: f32, alpha: f32) {
 /// # Arguments
 ///
 /// `sfactor` - Specifies how the red, green, blue, and alpha source blending factors are computed.
-/// `dfactor` - Specifies how the red, green, blue, and alpha destination blending factors are computed.
+/// `dfactor` - Specifies how the red, green, blue, and alpha destination blending factors are
+/// computed.
 #[inline]
 pub fn blend_func(sfactor: BlendFactor, dfactor: BlendFactor) {
     unsafe {

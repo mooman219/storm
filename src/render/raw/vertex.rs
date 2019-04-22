@@ -86,8 +86,11 @@ pub fn disable_vertex_attrib_array(index: u32) {
 /// `size` - Specifies the number of components per generic vertex attribute.
 /// `attribute` - Specifies the data type of each component in the array.
 /// `normalized` - Specifies whether fixed-point data values should be normalized.
-/// `stride` - Specifies the byte offset between consecutive generic vertex attributes. If stride is 0, the generic vertex attributes are understood to be tightly packed in the array. The initial value is 0.
-/// `pointer` - Specifies a offset of the first component of the first generic vertex attribute in the array in the data store of the buffer currently bound to the array buffer target. The initial value is 0.
+/// `stride` - Specifies the byte offset between consecutive generic vertex attributes. If stride is
+/// 0, the generic vertex attributes are understood to be tightly packed in the array. The initial
+/// value is 0. `pointer` - Specifies a offset of the first component of the first generic vertex
+/// attribute in the array in the data store of the buffer currently bound to the array buffer
+/// target. The initial value is 0.
 #[inline]
 pub fn vertex_attrib_pointer(
     index: u32,
@@ -107,7 +110,8 @@ pub fn vertex_attrib_pointer(
 /// # Arguments
 ///
 /// `index` - Specify the index of the generic vertex attribute.
-/// `divisor` - Specify the number of instances that will pass between updates of the generic attribute at slot index.
+/// `divisor` - Specify the number of instances that will pass between updates of the generic
+/// attribute at slot index.
 #[inline]
 pub fn vertex_attrib_divisor(index: u32, divisor: u32) {
     unsafe {

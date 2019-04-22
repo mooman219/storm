@@ -9,19 +9,31 @@ pub struct AABB2D {
 impl AABB2D {
     pub fn new(minx: f32, miny: f32, maxx: f32, maxy: f32) -> AABB2D {
         AABB2D {
-            min: Vector2 { x: minx, y: miny },
-            max: Vector2 { x: maxx, y: maxy },
+            min: Vector2 {
+                x: minx,
+                y: miny,
+            },
+            max: Vector2 {
+                x: maxx,
+                y: maxy,
+            },
         }
     }
 
     #[inline(always)]
     pub fn intersects(&self, other: &AABB2D) -> bool {
-        self.min.x <= other.max.x && self.max.x >= other.min.x && self.min.y <= other.max.y && self.max.y >= other.min.y
+        self.min.x <= other.max.x
+            && self.max.x >= other.min.x
+            && self.min.y <= other.max.y
+            && self.max.y >= other.min.y
     }
 
     #[inline(always)]
     pub fn contains(&self, other: &AABB2D) -> bool {
-        self.min.x <= other.min.x && self.max.x >= other.max.x && self.min.y <= other.min.y && self.max.y >= other.max.y
+        self.min.x <= other.min.x
+            && self.max.x >= other.max.x
+            && self.min.y <= other.min.y
+            && self.max.y >= other.max.y
     }
 
     #[inline(always)]

@@ -29,7 +29,9 @@ impl ShaderProgram {
             check_link_status(program_id);
 
             // Return the program
-            ShaderProgram { id: program_id }
+            ShaderProgram {
+                id: program_id,
+            }
         }
     }
 
@@ -84,10 +86,7 @@ fn check_link_status(program_id: u32) {
             // Subtract 1 to skip the trailing null character
             buf.set_len((len as usize) - 1);
             gl::GetProgramInfoLog(program_id, len, ptr::null_mut(), buf.as_mut_ptr() as *mut GLchar);
-            panic!(
-                "Link Status: {}",
-                str::from_utf8(&buf).ok().expect("ProgramInfoLog not valid utf8",)
-            );
+            panic!("Link Status: {}", str::from_utf8(&buf).ok().expect("ProgramInfoLog not valid utf8",));
         }
     }
 }
@@ -105,10 +104,7 @@ fn check_compile_status(shader_id: u32) {
             let mut buf = Vec::with_capacity(len as usize);
             buf.set_len((len as usize) - 1); // subtract 1 to skip the trailing null character
             gl::GetShaderInfoLog(shader_id, len, ptr::null_mut(), buf.as_mut_ptr() as *mut GLchar);
-            panic!(
-                "Compile Status: {}",
-                str::from_utf8(&buf).ok().expect("ShaderInfoLog not valid utf8",)
-            );
+            panic!("Compile Status: {}", str::from_utf8(&buf).ok().expect("ShaderInfoLog not valid utf8",));
         }
     }
 }

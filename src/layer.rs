@@ -32,7 +32,10 @@ impl PartialEq for LayerReference {
 
 impl LayerReference {
     pub(crate) fn new(depth: usize, key: usize) -> LayerReference {
-        LayerReference { depth: depth, key: key }
+        LayerReference {
+            depth: depth,
+            key: key,
+        }
     }
 
     pub(crate) fn depth(&self) -> usize {

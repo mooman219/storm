@@ -1,5 +1,4 @@
 use cgmath::*;
-use color;
 use glutin;
 use glutin::dpi::*;
 use glutin::ContextTrait;
@@ -8,7 +7,6 @@ use render::raw::*;
 use render::texture::*;
 use render::vertex::*;
 use render::*;
-use text::*;
 use time::*;
 use utility::bounded_spsc;
 use utility::control;
@@ -23,7 +21,9 @@ unsafe impl Send for Window {}
 
 impl Window {
     pub fn new(window: glutin::WindowedContext) -> Window {
-        Window { inner: window }
+        Window {
+            inner: window,
+        }
     }
 
     /// Initialize the display. The display is bound in the thread we're going
@@ -83,9 +83,9 @@ impl RenderServer {
         render_consumer: bounded_spsc::Consumer<Vec<RenderMessage>>,
         render_control: control::Consumer,
     ) -> RenderServer {
-        // Initialize the display. The display is bound in the thread we're going to be making opengl
-        // calls in. Behavior is undefined is the display is bound outside of the thread and usually
-        // segfaults.
+        // Initialize the display. The display is bound in the thread we're going to be making
+        // opengl calls in. Behavior is undefined is the display is bound outside of the
+        // thread and usually segfaults.
         window.bind();
 
         let current_size = window.get_logical_size();
@@ -149,59 +149,93 @@ impl RenderServer {
         for message in messages.drain(..) {
             match message {
                 // Layer
-                RenderMessage::LayerCreate { layer, desc } => {
+                RenderMessage::LayerCreate {
+                    layer,
+                    desc,
+                } => {
                     self.scene.layer_create(layer, &desc);
-                    self.scene.text_create(
-                        layer,
-                        self.text.rasterize(
-                            "Test. ><` a's #z $ 123",
-                            &TextDescription {
-                                pos: Vector3::new(0.0, 0.0, 1.0),
-                                max_width: Some(500.0),
-                                scale: 24,
-                                color: color::BLACK,
-                                font: DEFAULT_FONT,
-                            },
-                        ),
-                    );
                 },
-                RenderMessage::LayerUpdate { layer, desc } => {
+                RenderMessage::LayerUpdate {
+                    layer,
+                    desc,
+                } => {
                     self.scene.layer_update(layer, &desc);
                 },
-                RenderMessage::LayerRemove { layer } => {
+                RenderMessage::LayerRemove {
+                    layer,
+                } => {
                     self.scene.layer_remove(layer);
                 },
-                RenderMessage::LayerClear { layer } => {
+                RenderMessage::LayerClear {
+                    layer,
+                } => {
                     self.scene.layer_clear(layer);
                 },
 
                 // Sprite
-                RenderMessage::SpriteCreate { layer, desc } => {
+                RenderMessage::SpriteCreate {
+                    layer,
+                    desc,
+                } => {
                     let uv = self.texture.get_uv(&desc.texture);
                     let quad = TextureVertex::new(desc.pos, desc.size, uv, desc.color);
                     self.scene.sprite_create(layer, &quad);
                 },
-                RenderMessage::SpriteUpdate { layer, sprite, desc } => {
+                RenderMessage::SpriteUpdate {
+                    layer,
+                    sprite,
+                    desc,
+                } => {
                     let uv = self.texture.get_uv(&desc.texture);
                     let quad = TextureVertex::new(desc.pos, desc.size, uv, desc.color);
                     self.scene.sprite_update(layer, sprite, &quad);
                 },
-                RenderMessage::SpriteRemove { layer, sprite } => {
+                RenderMessage::SpriteRemove {
+                    layer,
+                    sprite,
+                } => {
                     self.scene.sprite_remove(layer, sprite);
                 },
 
                 // Texture
-                RenderMessage::TextureLoad { path } => {
+                RenderMessage::TextureLoad {
+                    path,
+                } => {
                     self.texture.add_path(&path);
                 },
 
                 // Text
-                RenderMessage::FontLoad { path } => {
+                RenderMessage::FontLoad {
+                    path,
+                } => {
                     self.text.add_font_path(&path);
+                },
+                RenderMessage::TextCreate {
+                    layer_index,
+                    text,
+                    desc,
+                } => {
+                    self.scene.text_create(layer_index, self.text.rasterize(&text, &desc));
+                },
+                RenderMessage::TextUpdate {
+                    layer_index,
+                    text_index,
+                    text,
+                    desc,
+                } => {
+                    self.scene.text_update(layer_index, text_index, self.text.rasterize(&text, &desc));
+                },
+                RenderMessage::TextRemove {
+                    layer_index,
+                    text_index,
+                } => {
+                    self.scene.text_remove(layer_index, text_index);
                 },
 
                 // Window
-                RenderMessage::WindowTitle { title } => {
+                RenderMessage::WindowTitle {
+                    title,
+                } => {
                     self.window.inner.set_title(title.as_str());
                 },
             }

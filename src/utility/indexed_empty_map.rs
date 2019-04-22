@@ -1,24 +1,28 @@
+use std::marker::PhantomData;
+
 #[derive(Copy, Clone, Debug)]
-pub struct EmptyKey {
+pub struct Key<T> {
     index: u32,
     version: u16,
+    phantom: PhantomData<T>,
 }
 
 #[derive(Copy, Clone, Debug)]
-struct EmptySlot {
+struct Slot<T> {
     a_index: u32,
     a_version: u16,
     b_index: u32,
+    phantom: PhantomData<T>,
 }
 
-pub struct IndexedEmptyMap {
-    slots: Vec<EmptySlot>,
+pub struct IndexedEmptyMap<T> {
+    slots: Vec<Slot<T>>,
     len: u32,
     free: u32,
 }
 
-impl IndexedEmptyMap {
-    pub fn new() -> IndexedEmptyMap {
+impl<T> IndexedEmptyMap<T> {
+    pub fn new() -> IndexedEmptyMap<T> {
         IndexedEmptyMap {
             slots: Vec::with_capacity(64),
             len: 0,
@@ -38,7 +42,7 @@ impl IndexedEmptyMap {
         self.free = self.slots.len() as u32;
     }
 
-    pub fn add(&mut self) -> EmptyKey {
+    pub fn add(&mut self) -> Key<T> {
         let index: u32;
         let version: u16;
         if self.free > 0 {
@@ -54,22 +58,24 @@ impl IndexedEmptyMap {
                 slot.a_index = self.len;
             }
         } else {
-            self.slots.push(EmptySlot {
+            self.slots.push(Slot {
                 a_index: self.len,
                 a_version: 1,
                 b_index: self.len,
+                phantom: PhantomData,
             });
             index = self.len;
             version = 1;
         };
         self.len += 1;
-        EmptyKey {
+        Key {
             index: index,
             version: version,
+            phantom: PhantomData,
         }
     }
 
-    pub fn remove(&mut self, key: EmptyKey) -> usize {
+    pub fn remove(&mut self, key: Key<T>) -> usize {
         if key.version != self.slots[key.index as usize].a_version {
             panic!("Unable to remove: token version does not match.");
         }
@@ -88,7 +94,7 @@ impl IndexedEmptyMap {
         a_index as usize
     }
 
-    pub fn get(&self, key: EmptyKey) -> usize {
+    pub fn get(&self, key: Key<T>) -> usize {
         let index = key.index as usize;
         if key.version != self.slots[index].a_version {
             panic!("Unable to get: key version does not match.");
@@ -110,7 +116,7 @@ mod tests {
 
     #[test]
     fn add_get() {
-        let mut map = IndexedEmptyMap::new();
+        let mut map = IndexedEmptyMap::<usize>::new();
         let first = map.add();
 
         assert_eq!(map.get(first), 0);
@@ -120,7 +126,7 @@ mod tests {
 
     #[test]
     fn add_clear() {
-        let mut map = IndexedEmptyMap::new();
+        let mut map = IndexedEmptyMap::<usize>::new();
         let _first = map.add();
         map.clear();
 
@@ -130,7 +136,7 @@ mod tests {
 
     #[test]
     fn add_twice_get_second() {
-        let mut map = IndexedEmptyMap::new();
+        let mut map = IndexedEmptyMap::<usize>::new();
         let _first = map.add();
         let second = map.add();
 
@@ -141,7 +147,7 @@ mod tests {
 
     #[test]
     fn add_twice_get_first() {
-        let mut map = IndexedEmptyMap::new();
+        let mut map = IndexedEmptyMap::<usize>::new();
         let first = map.add();
         let _second = map.add();
 
@@ -152,7 +158,7 @@ mod tests {
 
     #[test]
     fn add_remove() {
-        let mut map = IndexedEmptyMap::new();
+        let mut map = IndexedEmptyMap::<usize>::new();
         let first = map.add();
         let index = map.remove(first);
 
@@ -164,7 +170,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn add_remove_old_key_panic() {
-        let mut map = IndexedEmptyMap::new();
+        let mut map = IndexedEmptyMap::<usize>::new();
         let first = map.add();
         map.remove(first);
 
@@ -176,7 +182,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn add_get_old_key_panic() {
-        let mut map = IndexedEmptyMap::new();
+        let mut map = IndexedEmptyMap::<usize>::new();
         let first = map.add();
         map.remove(first);
 
@@ -187,7 +193,7 @@ mod tests {
 
     #[test]
     fn add_twice_remove_second() {
-        let mut map = IndexedEmptyMap::new();
+        let mut map = IndexedEmptyMap::<usize>::new();
         let _first = map.add();
         let second = map.add();
         let index = map.remove(second);
@@ -199,7 +205,7 @@ mod tests {
 
     #[test]
     fn add_twice_remove_first() {
-        let mut map = IndexedEmptyMap::new();
+        let mut map = IndexedEmptyMap::<usize>::new();
         let first = map.add();
         let _second = map.add();
         let index = map.remove(first);
@@ -211,7 +217,7 @@ mod tests {
 
     #[test]
     fn add_twice_remove_first_swaps() {
-        let mut map = IndexedEmptyMap::new();
+        let mut map = IndexedEmptyMap::<usize>::new();
         let first = map.add();
         let second = map.add();
         map.remove(first);
@@ -223,7 +229,7 @@ mod tests {
 
     #[test]
     fn add_thrice_remove_first_swaps_ignores_second() {
-        let mut map = IndexedEmptyMap::new();
+        let mut map = IndexedEmptyMap::<usize>::new();
         let first = map.add();
         let second = map.add();
         let _third = map.add();
@@ -236,7 +242,7 @@ mod tests {
 
     #[test]
     fn add_twice_remove_first_add() {
-        let mut map = IndexedEmptyMap::new();
+        let mut map = IndexedEmptyMap::<usize>::new();
         let first = map.add();
         let _second = map.add();
         map.remove(first);
@@ -255,7 +261,7 @@ mod tests {
 
     #[bench]
     fn bench_cycle(bench: &mut Bencher) {
-        let mut map = IndexedEmptyMap::new();
+        let mut map = IndexedEmptyMap::<usize>::new();
 
         bench.iter(|| {
             for _ in 0..ITERATIONS {
@@ -268,7 +274,7 @@ mod tests {
 
     #[bench]
     fn bench_get(bench: &mut Bencher) {
-        let mut map = IndexedEmptyMap::new();
+        let mut map = IndexedEmptyMap::<usize>::new();
         let a = map.add();
 
         bench.iter(|| {
@@ -280,7 +286,7 @@ mod tests {
 
     #[bench]
     fn bench_add(bench: &mut Bencher) {
-        let mut map = IndexedEmptyMap::new();
+        let mut map = IndexedEmptyMap::<usize>::new();
 
         bench.iter(|| {
             for _ in 0..ITERATIONS {

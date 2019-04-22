@@ -1,8 +1,12 @@
 use cgmath::*;
 use color::*;
+use layer::*;
+use utility::indexed_empty_map::*;
 
 /// A default font reference for a basic white square.
-pub const DEFAULT_FONT: FontReference = FontReference { key: 0 };
+pub const DEFAULT_FONT: FontReference = FontReference {
+    key: 0,
+};
 
 /// Handle to reference an uploaded font with.
 #[derive(Copy, Clone, Debug)]
@@ -12,11 +16,37 @@ pub struct FontReference {
 
 impl FontReference {
     pub(crate) fn new(key: usize) -> FontReference {
-        FontReference { key: key }
+        FontReference {
+            key: key,
+        }
     }
 
     pub(crate) fn key(&self) -> usize {
         self.key
+    }
+}
+
+/// Handle to reference an text with.
+#[derive(Copy, Clone, Debug)]
+pub struct TextReference {
+    key: Key<TextReference>,
+    layer: LayerReference,
+}
+
+impl TextReference {
+    pub(crate) fn new(key: Key<TextReference>, layer: LayerReference) -> TextReference {
+        TextReference {
+            key: key,
+            layer: layer,
+        }
+    }
+
+    pub(crate) fn key(&self) -> Key<TextReference> {
+        self.key
+    }
+
+    pub(crate) fn layer(&self) -> &LayerReference {
+        &self.layer
     }
 }
 

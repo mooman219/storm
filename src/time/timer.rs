@@ -33,13 +33,7 @@ impl Timer {
             self.last_display = Instant::now();
             let average = (self.duration as f32) / (self.invocations as f32);
             let max_tps = NANOS_PER_SEC / (average as u64);
-            trace!(
-                "{:16}: {:4} / {:7} tps | {:7.0} ns",
-                self.label,
-                self.invocations,
-                max_tps,
-                average
-            );
+            trace!("{:16}: {:4} / {:7} tps | {:7.0} ns", self.label, self.invocations, max_tps, average);
             self.duration = 0;
             self.invocations = 0;
         }

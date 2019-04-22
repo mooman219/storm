@@ -20,8 +20,9 @@ use gl;
 ///
 /// # Arguments
 ///
-/// `x, y` - Specify the lower left corner of the viewport rectangle, in pixels. The initial value is (0,0).
-/// `width, height` - Specify the width and height of the viewport. When a GL context is first attached to a window, width and height are set to the dimensions of that window.
+/// `x, y` - Specify the lower left corner of the viewport rectangle, in pixels. The initial value
+/// is (0,0). `width, height` - Specify the width and height of the viewport. When a GL context is
+/// first attached to a window, width and height are set to the dimensions of that window.
 #[inline]
 pub fn viewport(x: i32, y: i32, width: i32, height: i32) {
     unsafe {

@@ -1,10 +1,9 @@
-use render::buffer::*;
 use render::raw::*;
 use std::cmp;
 use std::mem;
 use std::ptr;
 
-pub struct DynamicBuffer<T> {
+pub struct DynamicBuffer<T: Copy> {
     vbo: u32,
     dirty: bool,
     dirty_min: usize,
@@ -14,7 +13,9 @@ pub struct DynamicBuffer<T> {
     items: Vec<T>,
 }
 
-impl<T> DynamicBuffer<T> {
+const DEFAULT_CAPACITY: usize = 512;
+
+impl<T: Copy> DynamicBuffer<T> {
     fn mark(&mut self, index: usize) {
         if self.dirty {
             self.dirty_min = cmp::min(self.dirty_min, index);
@@ -25,12 +26,10 @@ impl<T> DynamicBuffer<T> {
             self.dirty_max = index + 1;
         }
     }
-}
 
-impl<T> RawBuffer<T> for DynamicBuffer<T> {
-    fn new(buffer_type: BufferBindingTarget, capacity: usize) -> DynamicBuffer<T> {
-        let items: Vec<T> = Vec::<T>::with_capacity(capacity);
-        let default_size = (mem::size_of::<T>() * capacity) as isize;
+    pub fn new(buffer_type: BufferBindingTarget) -> DynamicBuffer<T> {
+        let items: Vec<T> = Vec::<T>::with_capacity(DEFAULT_CAPACITY);
+        let default_size = (mem::size_of::<T>() * DEFAULT_CAPACITY) as isize;
         let vbo = gen_buffer();
         bind_buffer(buffer_type, vbo);
         buffer_data(
@@ -44,47 +43,60 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
             dirty: false,
             dirty_min: 0,
             dirty_max: 0,
-            capacity: capacity,
+            capacity: DEFAULT_CAPACITY,
             buffer_type: buffer_type,
             items: items,
         }
     }
 
-    fn add(&mut self, item: T) -> usize {
+    pub fn set_flattened(&mut self, items: &Vec<Vec<T>>) {
+        self.clear();
+        self.items.extend(items.iter().flatten());
+        self.dirty = true;
+        self.dirty_min = 0;
+        self.dirty_max = self.items.len();
+    }
+
+    pub fn set(&mut self, items: &Vec<T>) {
+        self.clear();
+        self.items.extend(items.iter());
+        self.dirty = true;
+        self.dirty_min = 0;
+        self.dirty_max = self.items.len();
+    }
+
+    pub fn push(&mut self, item: T) {
         let index = self.items.len();
         self.items.push(item);
         self.mark(index);
-        index
     }
 
-    fn remove(&mut self, index: usize) {
+    pub fn swap_remove(&mut self, index: usize) {
         self.items.swap_remove(index);
         self.mark(index);
     }
 
-    fn update(&mut self, index: usize, item: T) {
+    pub fn update(&mut self, index: usize, item: T) {
         self.items[index] = item;
         self.mark(index);
     }
 
-    fn clear(&mut self) {
-        self.dirty = true;
-        self.dirty_min = 0;
-        self.dirty_max = self.items.len();
+    pub fn clear(&mut self) {
+        self.dirty = false;
         unsafe {
             self.items.set_len(0);
         }
     }
 
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.items.len()
     }
 
-    fn bind(&self) {
+    pub fn bind(&self) {
         bind_buffer(self.buffer_type, self.vbo);
     }
 
-    fn sync(&mut self) {
+    pub fn sync(&mut self) {
         if self.dirty {
             self.dirty = false;
             bind_buffer(self.buffer_type, self.vbo);
@@ -103,7 +115,7 @@ impl<T> RawBuffer<T> for DynamicBuffer<T> {
     }
 }
 
-impl<T> Drop for DynamicBuffer<T> {
+impl<T: Copy> Drop for DynamicBuffer<T> {
     fn drop(&mut self) {
         delete_buffer(self.vbo);
     }

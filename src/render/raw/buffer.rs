@@ -40,8 +40,10 @@ pub enum BufferUsage {
 ///
 /// `target` - Specifies the target to which the buffer object is bound.
 /// `size` - Specifies the size in bytes of the buffer object's new data store.
-/// `data` - Specifies a pointer to data that will be copied into the data store for initialization, or NULL if no data is to be copied.
-/// `usage` - Bitwise OR of masks that indicate the buffers to be cleared. The three masks are GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, and GL_STENCIL_BUFFER_BIT.
+/// `data` - Specifies a pointer to data that will be copied into the data store for initialization,
+/// or NULL if no data is to be copied. `usage` - Bitwise OR of masks that indicate the buffers to
+/// be cleared. The three masks are GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, and
+/// GL_STENCIL_BUFFER_BIT.
 #[inline]
 pub fn buffer_data(target: BufferBindingTarget, size: isize, data: *const c_void, usage: BufferUsage) {
     unsafe {
@@ -54,9 +56,10 @@ pub fn buffer_data(target: BufferBindingTarget, size: isize, data: *const c_void
 /// # Arguments
 ///
 /// `target` - Specifies the target to which the buffer object is bound.
-/// `offset` - Specifies the offset into the buffer object's data store where data replacement will begin, measured in bytes.
-/// `size` - Specifies the size in bytes of the buffer object's new data store.
-/// `data` - Specifies a pointer to data that will be copied into the data store for initialization, or NULL if no data is to be copied.
+/// `offset` - Specifies the offset into the buffer object's data store where data replacement will
+/// begin, measured in bytes. `size` - Specifies the size in bytes of the buffer object's new data
+/// store. `data` - Specifies a pointer to data that will be copied into the data store for
+/// initialization, or NULL if no data is to be copied.
 #[inline]
 pub fn buffer_sub_data(target: BufferBindingTarget, offset: isize, size: isize, data: *const c_void) {
     unsafe {

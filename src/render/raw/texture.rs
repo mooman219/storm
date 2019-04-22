@@ -237,7 +237,8 @@ pub fn gen_texture() -> u32 {
 ///
 /// # Arguments
 ///
-/// `texture` - Specifies which texture unit to make active. The number of texture units is implementation dependent, but must be at least 80.
+/// `texture` - Specifies which texture unit to make active. The number of texture units is
+/// implementation dependent, but must be at least 80.
 #[inline]
 pub fn active_texture(texture: TextureUnit) {
     unsafe {
@@ -275,10 +276,13 @@ pub fn delete_texture(name: u32) {
 /// # Arguments
 ///
 /// `target` - Specifies the target texture.
-/// `level` - Specifies the level-of-detail number. Level 0 is the base image level. Level n is the nth mipmap reduction image.
-/// `width` - Specifies the width of the texture image. All implementations support texture images that are at least 1024 texels wide.
-/// `height` - Specifies the height of the texture image, or the number of layers in a texture array, in the case of the GL_TEXTURE_1D_ARRAY and GL_PROXY_TEXTURE_1D_ARRAY targets. All implementations support 2D texture images that are at least 1024 texels high, and texture arrays that are at least 256 layers deep.
-/// `internal_format` - Specifies the number of color components in the texture.
+/// `level` - Specifies the level-of-detail number. Level 0 is the base image level. Level n is the
+/// nth mipmap reduction image. `width` - Specifies the width of the texture image. All
+/// implementations support texture images that are at least 1024 texels wide. `height` - Specifies
+/// the height of the texture image, or the number of layers in a texture array, in the case of the
+/// GL_TEXTURE_1D_ARRAY and GL_PROXY_TEXTURE_1D_ARRAY targets. All implementations support 2D
+/// texture images that are at least 1024 texels high, and texture arrays that are at least 256
+/// layers deep. `internal_format` - Specifies the number of color components in the texture.
 /// `format` - Specifies the format of the pixel data.
 /// `pixel_type` - Specifies the data type of the pixel data.
 /// `data` - Specifies a pointer to the image data in memory.
@@ -347,7 +351,8 @@ pub fn tex_parameter_wrap_r(target: TextureParameterTarget, param: TextureWrapVa
     }
 }
 
-/// The texture minifying function is used whenever the level-of-detail function used when sampling from the texture determines that the texture should be minified.
+/// The texture minifying function is used whenever the level-of-detail function used when sampling
+/// from the texture determines that the texture should be minified.
 ///
 /// # Arguments
 ///
@@ -360,7 +365,8 @@ pub fn tex_parameter_min_filter(target: TextureParameterTarget, param: TextureMi
     }
 }
 
-/// The texture magnification function is used whenever the level-of-detail function used when sampling from the texture determines that the texture should be magified.
+/// The texture magnification function is used whenever the level-of-detail function used when
+/// sampling from the texture determines that the texture should be magified.
 ///
 /// # Arguments
 ///

@@ -37,5 +37,12 @@ impl Clone for Consumer {
 pub fn make() -> (Producer, Consumer) {
     // This is the only place where a buffer is created.
     let arc = Arc::new((Mutex::new(false), Condvar::new()));
-    (Producer { cvar: arc.clone() }, Consumer { cvar: arc.clone() })
+    (
+        Producer {
+            cvar: arc.clone(),
+        },
+        Consumer {
+            cvar: arc.clone(),
+        },
+    )
 }

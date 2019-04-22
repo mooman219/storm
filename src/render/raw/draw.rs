@@ -34,7 +34,8 @@ pub enum DrawMode {
 /// `count` - Specifies the number of elements to be rendered.
 /// `type` - Specifies the type of the values in indices.
 /// `indices` - Specifies a pointer to the location where the indices are stored.
-/// `basevertex` - Specifies a constant that should be added to each element of indices when chosing elements from the enabled vertex arrays.
+/// `basevertex` - Specifies a constant that should be added to each element of indices when chosing
+/// elements from the enabled vertex arrays.
 #[inline]
 pub fn draw_elements_base_vertex(
     mode: DrawMode,
@@ -55,7 +56,8 @@ pub fn draw_elements_base_vertex(
 /// `mode` - Specifies what kind of primitives to render.
 /// `first` - Specifies the starting index in the enabled arrays.
 /// `count` - Specifies the number of indices to be rendered.
-/// `primcount` - Specifies the number of instances of the specified range of indices to be rendered.
+/// `primcount` - Specifies the number of instances of the specified range of indices to be
+/// rendered.
 #[inline]
 pub fn draw_arrays_instanced(mode: DrawMode, first: i32, count: i32, primcount: i32) {
     unsafe {

@@ -12,17 +12,16 @@ impl TextureHandle {
     pub fn new(texture_unit: TextureUnit) -> TextureHandle {
         let id = gen_texture();
         let unit = texture_unit;
-        let texture = TextureHandle { id: id, unit: unit };
+        let texture = TextureHandle {
+            id: id,
+            unit: unit,
+        };
         texture.set_raw(1, 1, (&DEFAULT).as_ptr());
         texture
     }
 
     pub fn set_texture(&self, texture: &Texture) {
-        self.set_raw(
-            texture.width() as i32,
-            texture.height() as i32,
-            texture.as_ptr() as *const u8,
-        );
+        self.set_raw(texture.width() as i32, texture.height() as i32, texture.as_ptr() as *const u8);
     }
 
     fn set_raw(&self, width: i32, height: i32, buffer: *const u8) {

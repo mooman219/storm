@@ -36,14 +36,20 @@ impl InputServer {
         // https://docs.rs/winit/0.19.0/winit/enum.Event.html
         self.event_loop.run_forever(|event| {
             match event {
-                Event::WindowEvent { event, .. } => match event {
+                Event::WindowEvent {
+                    event,
+                    ..
+                } => match event {
                     // Window
                     WindowEvent::CloseRequested => {
                         state.input_producer.push(InputMessage::CloseRequested);
                     },
 
                     // Keyboard
-                    WindowEvent::KeyboardInput { input, .. } => match input.virtual_keycode {
+                    WindowEvent::KeyboardInput {
+                        input,
+                        ..
+                    } => match input.virtual_keycode {
                         Some(key) => {
                             let index = input.scancode as usize;
                             match input.state {
@@ -65,13 +71,20 @@ impl InputServer {
                     },
 
                     // Cursor
-                    WindowEvent::CursorEntered { .. } => {
+                    WindowEvent::CursorEntered {
+                        ..
+                    } => {
                         state.input_producer.push(InputMessage::CursorEntered);
                     },
-                    WindowEvent::CursorLeft { .. } => {
+                    WindowEvent::CursorLeft {
+                        ..
+                    } => {
                         state.input_producer.push(InputMessage::CursorLeft);
                     },
-                    WindowEvent::CursorMoved { position, .. } => {
+                    WindowEvent::CursorMoved {
+                        position,
+                        ..
+                    } => {
                         let (x, y) = position.into();
                         state.cursos_pos = Vector2::new(x, y);
                     },

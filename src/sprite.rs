@@ -7,16 +7,19 @@ use utility::indexed_empty_map::*;
 /// Handle to reference an uploaded sprite with.
 #[derive(Copy, Clone, Debug)]
 pub struct SpriteReference {
-    key: EmptyKey,
+    key: Key<SpriteReference>,
     layer: LayerReference,
 }
 
 impl SpriteReference {
-    pub(crate) fn new(key: EmptyKey, layer: LayerReference) -> SpriteReference {
-        SpriteReference { key: key, layer: layer }
+    pub(crate) fn new(key: Key<SpriteReference>, layer: LayerReference) -> SpriteReference {
+        SpriteReference {
+            key: key,
+            layer: layer,
+        }
     }
 
-    pub(crate) fn key(&self) -> EmptyKey {
+    pub(crate) fn key(&self) -> Key<SpriteReference> {
         self.key
     }
 
