@@ -18,6 +18,8 @@ pub enum InputMessage {
     CursorPressed(CursorButton, Vector2<f64>),
     /// Cursor release event.
     CursorReleased(CursorButton, Vector2<f64>),
+    /// Cursor moved event.
+    CursorMoved(Vector2<f64>),
     /// Cursor left the bounds of the window event.
     CursorLeft,
     /// Cursor entered the bounds of the window event.

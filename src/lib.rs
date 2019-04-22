@@ -43,7 +43,7 @@ use utility::control;
 /// The main entry point into the Storm engine.
 pub struct Engine {
     render_client: RenderClient,
-    input_client: InputClient,
+    input_manager: InputManager,
 }
 
 impl Engine {
@@ -53,34 +53,29 @@ impl Engine {
     pub fn new() -> Engine {
         // Inter-thread messaging for rendering
         let (render_producer_control, render_consumer_control) = control::make();
-        let (input_producer_pipe, input_consumer_pipe) = bounded_spsc::make(1000);
         let (render_producer_pipe, render_consumer_pipe) = bounded_spsc::make(4);
 
-        // Input and rendering
+        // Winow creation
+        let event_loop = glutin::EventsLoop::new();
+        let window = Window::new(
+            glutin::ContextBuilder::new()
+                .build_windowed(
+                    glutin::WindowBuilder::new()
+                        .with_title("Storm Engine")
+                        .with_dimensions(LogicalSize::from((500, 500))),
+                    &event_loop,
+                )
+                .expect("Unable to build the window."),
+        );
+
+        // Rendering
         thread::spawn(move || {
-            // Winow creation
-            let event_loop = glutin::EventsLoop::new();
-            let window = Window::new(
-                glutin::ContextBuilder::new()
-                    .build_windowed(
-                        glutin::WindowBuilder::new()
-                            .with_title("Storm Engine")
-                            .with_dimensions(LogicalSize::from((500, 500))),
-                        &event_loop,
-                    )
-                    .expect("Unable to build the window."),
-            );
-
-            thread::spawn(move || {
-                render::start(window, render_consumer_pipe, render_consumer_control);
-            });
-
-            input::start(event_loop, input_producer_pipe);
+            render::start(window, render_consumer_pipe, render_consumer_control);
         });
 
         Engine {
             render_client: RenderClient::new(render_producer_pipe, render_producer_control),
-            input_client: InputClient::new(input_consumer_pipe),
+            input_manager: InputManager::new(event_loop),
         }
     }
 
@@ -101,8 +96,8 @@ impl Engine {
 
     /// Fetches all the events that are pending, calls the callback function for
     /// each of them, and returns.
-    pub fn input_poll(&mut self) -> Option<InputMessage> {
-        self.input_client.poll()
+    pub fn input_poll(&mut self, callback: impl FnMut(InputMessage)) {
+        self.input_manager.poll(callback);
     }
 
     // ////////////////////////////////////////////////////////
