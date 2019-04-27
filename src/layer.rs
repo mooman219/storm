@@ -1,48 +1,20 @@
 use cgmath::*;
-use std::cmp::Ordering;
+use utility::ordered_tracker::*;
 
 /// Handle to reference a layer with.
-#[derive(Copy, Clone, Debug, Eq)]
+#[derive(Copy, Clone, Debug)]
 pub struct LayerReference {
-    depth: usize,
-    key: usize,
-}
-
-impl Ord for LayerReference {
-    fn cmp(&self, other: &LayerReference) -> Ordering {
-        let mut ordering = self.depth.cmp(&other.depth);
-        if ordering == Ordering::Equal {
-            ordering = self.key.cmp(&other.key);
-        }
-        ordering
-    }
-}
-
-impl PartialOrd for LayerReference {
-    fn partial_cmp(&self, other: &LayerReference) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl PartialEq for LayerReference {
-    fn eq(&self, other: &LayerReference) -> bool {
-        self.depth == other.depth && self.key == other.key
-    }
+    key: Key<LayerReference>,
 }
 
 impl LayerReference {
-    pub(crate) fn new(depth: usize, key: usize) -> LayerReference {
+    pub(crate) fn new(key: Key<LayerReference>) -> LayerReference {
         LayerReference {
-            depth: depth,
             key: key,
         }
     }
 
-    pub(crate) fn depth(&self) -> usize {
-        self.depth
-    }
-
-    pub(crate) fn key(&self) -> usize {
+    pub(crate) fn key(&self) -> Key<LayerReference> {
         self.key
     }
 }

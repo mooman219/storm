@@ -4,20 +4,21 @@ use sprite::*;
 use std::mem;
 use text::*;
 use texture::*;
-use utility::indexed_empty_map::*;
+use utility::ordered_tracker::*;
+use utility::unordered_tracker::*;
 
 struct LayerSlot {
-    reference: LayerReference,
-    sprite: IndexedEmptyMap<SpriteReference>,
-    text: IndexedEmptyMap<TextReference>,
+    depth: usize,
+    sprite: UnorderedTracker<SpriteReference>,
+    text: UnorderedTracker<TextReference>,
 }
 
 pub struct RenderClient {
     render_batch: Vec<RenderMessage>,
     render_producer: bounded_spsc::Producer<Vec<RenderMessage>>,
     render_control: control::Producer,
+    layer_tracker: OrderedTracker<LayerReference>,
     layers: Vec<LayerSlot>,
-    layer_count: usize,
     texture_count: usize,
     font_count: usize,
 }
@@ -31,8 +32,8 @@ impl RenderClient {
             render_batch: Vec::new(),
             render_producer: render_producer,
             render_control: render_control,
+            layer_tracker: OrderedTracker::new(),
             layers: Vec::new(),
-            layer_count: 0,
             texture_count: 0,
             font_count: 0,
         }
@@ -42,36 +43,32 @@ impl RenderClient {
     // Layer
     // ////////////////////////////////////////////////////////
 
-    fn layer_search(&self, layer: &LayerReference) -> Result<usize, usize> {
-        self.layers.binary_search_by(|slot| slot.reference.cmp(layer))
+    fn layer_search(&self, depth: usize) -> Result<usize, usize> {
+        self.layers.binary_search_by(|slot| slot.depth.cmp(&depth))
     }
 
     fn layer_get(&self, layer: &LayerReference) -> usize {
-        match self.layer_search(layer) {
-            Ok(index) => index,
-            _ => panic!("Given layer does not exist."),
-        }
+        self.layer_tracker.get(layer.key())
     }
 
     pub fn layer_create(&mut self, depth: usize, desc: &LayerDescription) -> LayerReference {
-        self.layer_count += 1;
-        let layer = LayerReference::new(depth, self.layer_count);
-        let lookup = match self.layer_search(&layer) {
-            Ok(_) => panic!("Given layer already exists."),
+        let insert = match self.layer_search(depth) {
+            Ok(index) => index,
             Err(index) => index,
         };
-        let slot = LayerSlot {
-            reference: layer,
-            sprite: IndexedEmptyMap::new(),
-            text: IndexedEmptyMap::new(),
-        };
-        self.layers.insert(lookup, slot);
-
+        self.layers.insert(
+            insert,
+            LayerSlot {
+                depth: depth,
+                sprite: UnorderedTracker::new(),
+                text: UnorderedTracker::new(),
+            },
+        );
         self.render_batch.push(RenderMessage::LayerCreate {
-            layer: lookup,
+            layer: insert,
             desc: *desc,
         });
-        layer
+        LayerReference::new(self.layer_tracker.insert(insert))
     }
 
     pub fn layer_update(&mut self, layer_ref: &LayerReference, desc: &LayerDescription) {

@@ -2,7 +2,7 @@ use cgmath::*;
 use color::*;
 use layer::*;
 use texture::*;
-use utility::indexed_empty_map::*;
+use utility::unordered_tracker::*;
 
 /// Handle to reference an uploaded sprite with.
 #[derive(Copy, Clone, Debug)]
@@ -41,8 +41,8 @@ impl Default for SpriteDescription {
     fn default() -> SpriteDescription {
         SpriteDescription {
             pos: Vector3::new(0f32, 0f32, 0f32),
-            size: Vector2::new(1f32, 1f32),
-            color: WHITE,
+            size: Vector2::new(100f32, 100f32),
+            color: BLACK,
             texture: DEFAULT_TEXTURE,
         }
     }

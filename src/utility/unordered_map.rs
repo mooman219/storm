@@ -1,14 +1,14 @@
-use utility::indexed_empty_map::*;
+use utility::unordered_tracker::*;
 
-pub struct IndexedMap<T> {
-    map: IndexedEmptyMap<T>,
+pub struct UnorderedMap<T> {
+    map: UnorderedTracker<T>,
     values: Vec<T>,
 }
 
-impl<T> IndexedMap<T> {
-    pub fn new() -> IndexedMap<T> {
-        IndexedMap {
-            map: IndexedEmptyMap::new(),
+impl<T> UnorderedMap<T> {
+    pub fn new() -> UnorderedMap<T> {
+        UnorderedMap {
+            map: UnorderedTracker::new(),
             values: Vec::with_capacity(64),
         }
     }
@@ -55,7 +55,7 @@ mod tests {
 
     #[test]
     fn add_get() {
-        let mut map = IndexedMap::new();
+        let mut map = UnorderedMap::new();
         let first = map.add('a');
 
         assert_eq!(map.get(first), (0, &'a'));
@@ -64,7 +64,7 @@ mod tests {
 
     #[test]
     fn add_clear() {
-        let mut map = IndexedMap::new();
+        let mut map = UnorderedMap::new();
         let _first = map.add('a');
         map.clear();
 
@@ -73,7 +73,7 @@ mod tests {
 
     #[test]
     fn add_twice_get_second() {
-        let mut map = IndexedMap::new();
+        let mut map = UnorderedMap::new();
         let _first = map.add('a');
         let second = map.add('b');
 
@@ -83,7 +83,7 @@ mod tests {
 
     #[test]
     fn add_twice_get_first() {
-        let mut map = IndexedMap::new();
+        let mut map = UnorderedMap::new();
         let first = map.add('a');
         let _second = map.add('b');
 
@@ -93,7 +93,7 @@ mod tests {
 
     #[test]
     fn add_remove() {
-        let mut map = IndexedMap::new();
+        let mut map = UnorderedMap::new();
         let first = map.add('a');
         let (index, _value) = map.remove(first);
 
@@ -104,7 +104,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn add_remove_old_key_panic() {
-        let mut map = IndexedMap::new();
+        let mut map = UnorderedMap::new();
         let first = map.add('a');
         map.remove(first);
 
@@ -115,7 +115,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn add_get_old_key_panic() {
-        let mut map = IndexedMap::new();
+        let mut map = UnorderedMap::new();
         let first = map.add('a');
         map.remove(first);
 
@@ -125,7 +125,7 @@ mod tests {
 
     #[test]
     fn add_twice_remove_second() {
-        let mut map = IndexedMap::new();
+        let mut map = UnorderedMap::new();
         let _first = map.add('a');
         let second = map.add('b');
         let (index, _value) = map.remove(second);
@@ -136,7 +136,7 @@ mod tests {
 
     #[test]
     fn add_twice_remove_first() {
-        let mut map = IndexedMap::new();
+        let mut map = UnorderedMap::new();
         let first = map.add('a');
         let _second = map.add('b');
         let (index, _value) = map.remove(first);
@@ -147,7 +147,7 @@ mod tests {
 
     #[test]
     fn add_twice_remove_first_swaps() {
-        let mut map = IndexedMap::new();
+        let mut map = UnorderedMap::new();
         let first = map.add('a');
         let second = map.add('b');
         map.remove(first);
@@ -158,7 +158,7 @@ mod tests {
 
     #[test]
     fn add_thrice_remove_first_swaps_ignores_second() {
-        let mut map = IndexedMap::new();
+        let mut map = UnorderedMap::new();
         let first = map.add('a');
         let second = map.add('b');
         let _third = map.add('c');
@@ -170,7 +170,7 @@ mod tests {
 
     #[test]
     fn add_twice_remove_first_add() {
-        let mut map = IndexedMap::new();
+        let mut map = UnorderedMap::new();
         let first = map.add('a');
         let _second = map.add('b');
         map.remove(first);
@@ -188,7 +188,7 @@ mod tests {
 
     #[bench]
     fn bench_cycle(bench: &mut Bencher) {
-        let mut map = IndexedMap::new();
+        let mut map = UnorderedMap::new();
 
         bench.iter(|| {
             for _ in 0..ITERATIONS {
@@ -201,7 +201,7 @@ mod tests {
 
     #[bench]
     fn bench_get(bench: &mut Bencher) {
-        let mut map = IndexedMap::new();
+        let mut map = UnorderedMap::new();
         let a = map.add('a');
 
         bench.iter(|| {
@@ -213,7 +213,7 @@ mod tests {
 
     #[bench]
     fn bench_add(bench: &mut Bencher) {
-        let mut map = IndexedMap::new();
+        let mut map = UnorderedMap::new();
 
         bench.iter(|| {
             for _ in 0..ITERATIONS {

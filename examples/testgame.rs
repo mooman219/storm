@@ -16,10 +16,10 @@ use storm::*;
 fn main() {
     SimpleLogger::init(LevelFilter::Trace);
 
-    let mut clock = Clock::new(144);
+    let mut clock = Clock::new(20000);
     let mut engine = Engine::new();
     let layer_fg = engine.layer_create(1, &LayerDescription::default());
-    engine.text_create(&layer_fg, "Storm Engine", &TextDescription::default());
+    engine.text_create(&layer_fg, "A Storm Engine", &TextDescription::default());
     let speed = 200f32;
     let mut sprite = Sprite::new(&layer_fg);
     sprite.size(Vector2::new(100.0, 100.0));

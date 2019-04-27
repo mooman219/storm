@@ -15,15 +15,15 @@ struct Slot<T> {
     phantom: PhantomData<T>,
 }
 
-pub struct IndexedEmptyMap<T> {
+pub struct UnorderedTracker<T> {
     slots: Vec<Slot<T>>,
     len: u32,
     free: u32,
 }
 
-impl<T> IndexedEmptyMap<T> {
-    pub fn new() -> IndexedEmptyMap<T> {
-        IndexedEmptyMap {
+impl<T> UnorderedTracker<T> {
+    pub fn new() -> UnorderedTracker<T> {
+        UnorderedTracker {
             slots: Vec::with_capacity(64),
             len: 0,
             free: 0,
@@ -43,20 +43,14 @@ impl<T> IndexedEmptyMap<T> {
     }
 
     pub fn add(&mut self) -> Key<T> {
-        let index: u32;
-        let version: u16;
+        let b_index: u32;
+        let a_version: u16;
         if self.free > 0 {
             self.free -= 1;
-            {
-                let slot = unsafe { self.slots.get_unchecked_mut(self.len as usize) };
-                index = slot.b_index;
-                slot.b_index = index;
-            }
-            {
-                let slot = unsafe { self.slots.get_unchecked_mut(index as usize) };
-                version = slot.a_version;
-                slot.a_index = self.len;
-            }
+            b_index = self.slots[self.len as usize].b_index;
+            let slot = unsafe { self.slots.get_unchecked_mut(b_index as usize) };
+            a_version = slot.a_version;
+            slot.a_index = self.len;
         } else {
             self.slots.push(Slot {
                 a_index: self.len,
@@ -64,13 +58,13 @@ impl<T> IndexedEmptyMap<T> {
                 b_index: self.len,
                 phantom: PhantomData,
             });
-            index = self.len;
-            version = 1;
+            b_index = self.len;
+            a_version = 1;
         };
         self.len += 1;
         Key {
-            index: index,
-            version: version,
+            index: b_index,
+            version: a_version,
             phantom: PhantomData,
         }
     }
@@ -99,7 +93,7 @@ impl<T> IndexedEmptyMap<T> {
         if key.version != self.slots[index].a_version {
             panic!("Unable to get: key version does not match.");
         }
-        unsafe { self.slots.get_unchecked(index).a_index as usize }
+        self.slots[index].a_index as usize
     }
 }
 
@@ -116,7 +110,7 @@ mod tests {
 
     #[test]
     fn add_get() {
-        let mut map = IndexedEmptyMap::<usize>::new();
+        let mut map = UnorderedTracker::<usize>::new();
         let first = map.add();
 
         assert_eq!(map.get(first), 0);
@@ -126,7 +120,7 @@ mod tests {
 
     #[test]
     fn add_clear() {
-        let mut map = IndexedEmptyMap::<usize>::new();
+        let mut map = UnorderedTracker::<usize>::new();
         let _first = map.add();
         map.clear();
 
@@ -136,7 +130,7 @@ mod tests {
 
     #[test]
     fn add_twice_get_second() {
-        let mut map = IndexedEmptyMap::<usize>::new();
+        let mut map = UnorderedTracker::<usize>::new();
         let _first = map.add();
         let second = map.add();
 
@@ -147,7 +141,7 @@ mod tests {
 
     #[test]
     fn add_twice_get_first() {
-        let mut map = IndexedEmptyMap::<usize>::new();
+        let mut map = UnorderedTracker::<usize>::new();
         let first = map.add();
         let _second = map.add();
 
@@ -158,7 +152,7 @@ mod tests {
 
     #[test]
     fn add_remove() {
-        let mut map = IndexedEmptyMap::<usize>::new();
+        let mut map = UnorderedTracker::<usize>::new();
         let first = map.add();
         let index = map.remove(first);
 
@@ -170,7 +164,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn add_remove_old_key_panic() {
-        let mut map = IndexedEmptyMap::<usize>::new();
+        let mut map = UnorderedTracker::<usize>::new();
         let first = map.add();
         map.remove(first);
 
@@ -182,7 +176,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn add_get_old_key_panic() {
-        let mut map = IndexedEmptyMap::<usize>::new();
+        let mut map = UnorderedTracker::<usize>::new();
         let first = map.add();
         map.remove(first);
 
@@ -193,7 +187,7 @@ mod tests {
 
     #[test]
     fn add_twice_remove_second() {
-        let mut map = IndexedEmptyMap::<usize>::new();
+        let mut map = UnorderedTracker::<usize>::new();
         let _first = map.add();
         let second = map.add();
         let index = map.remove(second);
@@ -205,7 +199,7 @@ mod tests {
 
     #[test]
     fn add_twice_remove_first() {
-        let mut map = IndexedEmptyMap::<usize>::new();
+        let mut map = UnorderedTracker::<usize>::new();
         let first = map.add();
         let _second = map.add();
         let index = map.remove(first);
@@ -217,7 +211,7 @@ mod tests {
 
     #[test]
     fn add_twice_remove_first_swaps() {
-        let mut map = IndexedEmptyMap::<usize>::new();
+        let mut map = UnorderedTracker::<usize>::new();
         let first = map.add();
         let second = map.add();
         map.remove(first);
@@ -229,7 +223,7 @@ mod tests {
 
     #[test]
     fn add_thrice_remove_first_swaps_ignores_second() {
-        let mut map = IndexedEmptyMap::<usize>::new();
+        let mut map = UnorderedTracker::<usize>::new();
         let first = map.add();
         let second = map.add();
         let _third = map.add();
@@ -242,7 +236,7 @@ mod tests {
 
     #[test]
     fn add_twice_remove_first_add() {
-        let mut map = IndexedEmptyMap::<usize>::new();
+        let mut map = UnorderedTracker::<usize>::new();
         let first = map.add();
         let _second = map.add();
         map.remove(first);
@@ -261,7 +255,7 @@ mod tests {
 
     #[bench]
     fn bench_cycle(bench: &mut Bencher) {
-        let mut map = IndexedEmptyMap::<usize>::new();
+        let mut map = UnorderedTracker::<usize>::new();
 
         bench.iter(|| {
             for _ in 0..ITERATIONS {
@@ -274,7 +268,7 @@ mod tests {
 
     #[bench]
     fn bench_get(bench: &mut Bencher) {
-        let mut map = IndexedEmptyMap::<usize>::new();
+        let mut map = UnorderedTracker::<usize>::new();
         let a = map.add();
 
         bench.iter(|| {
@@ -286,7 +280,7 @@ mod tests {
 
     #[bench]
     fn bench_add(bench: &mut Bencher) {
-        let mut map = IndexedEmptyMap::<usize>::new();
+        let mut map = UnorderedTracker::<usize>::new();
 
         bench.iter(|| {
             for _ in 0..ITERATIONS {

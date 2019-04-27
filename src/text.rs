@@ -1,7 +1,7 @@
 use cgmath::*;
 use color::*;
 use layer::*;
-use utility::indexed_empty_map::*;
+use utility::unordered_tracker::*;
 
 /// A default font reference for a basic white square.
 pub const DEFAULT_FONT: FontReference = FontReference {
