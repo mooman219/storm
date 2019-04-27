@@ -16,29 +16,19 @@ uniform mat4 ortho;
 
 void main() {
     // (x:left, y:right, z:bottom, w:top)
-    vec2 pos = vec2(0.0);
-
-    switch (gl_VertexID) {
-        case 0:
-            pos = vec2(a_pos.x, a_pos.w); // left top
-            v_uv = vec2(a_uv.x, a_uv.z); // left bottom
-            break;
-        case 1:
-            pos = vec2(a_pos.x, a_pos.z); // left bottom
-            v_uv = vec2(a_uv.x, a_uv.w); // left top
-            break;
-        case 2:
-            pos = vec2(a_pos.y, a_pos.w); // right top
-            v_uv = vec2(a_uv.y, a_uv.z); /// right bottom
-            break;
-        case 3:
-            pos = vec2(a_pos.y, a_pos.z); // right bottom
-            v_uv = vec2(a_uv.y, a_uv.w); // right top
-            break;
-    }
-
+    vec2 pos[4];
+    vec2 uv[4];
+    pos[0] = vec2(a_pos.x, a_pos.w); // left top
+    pos[1] = vec2(a_pos.x, a_pos.z); // left bottom
+    pos[2] = vec2(a_pos.y, a_pos.w); // right top
+    pos[3] = vec2(a_pos.y, a_pos.z); // right bottom
+    uv[0] = vec2(a_uv.x, a_uv.z); // left bottom
+    uv[1] = vec2(a_uv.x, a_uv.w); // left top
+    uv[2] = vec2(a_uv.y, a_uv.z); // right bottom
+    uv[3] = vec2(a_uv.y, a_uv.w); // right top
+    v_uv = uv[gl_VertexID];
     v_color = a_color;
-    gl_Position = ortho * vec4(pos, a_pos_z, 1.0);
+    gl_Position = ortho * vec4(pos[gl_VertexID], a_pos_z, 1.0);
 }
 "#;
 static FRAGMENT: &str = r#"
@@ -51,11 +41,10 @@ out vec4 a_color;
 uniform sampler2D tex;
 
 void main() {
-    vec4 color = texture(tex, v_uv) * v_color;
-    if (color.w <= 0.0) {
+    a_color = texture(tex, v_uv) * v_color;
+    if (a_color.a <= 0.0) {
         discard;
     }
-    a_color = color;
 }
 "#;
 
