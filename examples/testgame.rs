@@ -18,6 +18,33 @@ fn main() {
 
     let mut clock = Clock::new(20000);
     let mut engine = Engine::new();
+    let layer_bg = engine.layer_create(0, &LayerDescription::default());
+    for x in -500..500 {
+        for y in -500..500 {
+            let color = if x & 1 != 0 {
+                if y & 1 != 0 {
+                    ORANGE
+                } else {
+                    BLUE
+                }
+            } else {
+                if y & 1 != 0 {
+                    GREEN
+                } else {
+                    RED
+                }
+            };
+            engine.sprite_create(
+                &layer_bg,
+                &SpriteDescription {
+                    pos: Vector3::new(x as f32 * 2.0, y as f32 * 2.0, 0f32),
+                    size: Vector2::new(2.0, 2.0),
+                    color: color,
+                    texture: DEFAULT_TEXTURE,
+                },
+            );
+        }
+    }
     let layer_fg = engine.layer_create(1, &LayerDescription::default());
     engine.text_create(&layer_fg, "A Storm Engine", &TextDescription::default());
     let speed = 200f32;
