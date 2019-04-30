@@ -96,7 +96,7 @@ impl TextManager {
             dirty: true,
             // timer: Timer::new("[R] Text"), // DEBUG
         };
-        manager.add_font_bytes(include_bytes!("./font/RobotoMono-Regular.ttf") as &[u8]);
+        manager.add_font_bytes(include_bytes!("./resources/RobotoMono-Regular.ttf") as &[u8]);
         manager.sync();
         manager
     }
