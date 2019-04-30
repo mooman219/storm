@@ -195,8 +195,6 @@ impl<T> Drop for Buffer<T> {
         // Pop the rest of the values off the queue.  By moving them into this scope,
         // we implicitly call their destructor
 
-        // TODO: this could be optimized to avoid the atomic operations / book-keeping...but
-        // since this is the destructor, there shouldn't be any contention... so meh?
         while let Some(_) = self.try_pop() {}
 
         unsafe {
