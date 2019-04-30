@@ -19,7 +19,7 @@ fn main() {
     let mut clock = Clock::new(20000);
     let mut engine = Engine::new();
     let layer_bg = engine.layer_create(0, &LayerDescription::default());
-    for x in -500..500 {
+    for x in 0..1000 {
         for y in -500..500 {
             let color = if x & 1 != 0 {
                 if y & 1 != 0 {
@@ -37,8 +37,8 @@ fn main() {
             engine.sprite_create(
                 &layer_bg,
                 &SpriteDescription {
-                    pos: Vector3::new(x as f32 * 2.0, y as f32 * 2.0, 0f32),
-                    size: Vector2::new(2.0, 2.0),
+                    pos: Vector3::new(x as f32 * 1.0, y as f32 * 1.0, 0f32),
+                    size: Vector2::new(1.0, 1.0),
                     color: color,
                     texture: DEFAULT_TEXTURE,
                 },
@@ -46,7 +46,11 @@ fn main() {
         }
     }
     let layer_fg = engine.layer_create(1, &LayerDescription::default());
-    engine.text_create(&layer_fg, "A Storm Engine", &TextDescription::default());
+    let text = engine.text_create(
+        &layer_fg,
+        "A Storm Engine",
+        &TextDescription::default().pos(Vector3::new(-250.0, 0.0, 0.0)),
+    );
     let speed = 200f32;
     let mut sprite = Sprite::new(&layer_fg);
     sprite.size(Vector2::new(100.0, 100.0));
@@ -73,7 +77,9 @@ fn main() {
             },
             _ => {},
         });
-
+        let fps = (1.0 / clock.get_delta()) as u32;
+        let string = format!("{}fps A lot of text starts with writing the text and what not. Whatever.", fps);
+        engine.text_update(&text, &string, &TextDescription::default().pos(Vector3::new(-250.0, 0.0, 0.0)));
         sprite.update(clock.get_delta());
         sprite.sync(&mut engine);
         engine.window_commit();

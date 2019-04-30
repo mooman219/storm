@@ -223,7 +223,7 @@ impl RenderClient {
         // Only send a frame if there's actually frame data to send. The notify happens either way to
         // accommodate resizing.
         if self.render_batch.len() > 0 {
-            let mut batch = Vec::new();
+            let mut batch = Vec::new(); // TODO: Remove this and replace with a custom buffer
             mem::swap(&mut batch, &mut self.render_batch);
             self.render_producer.push(batch);
         }
