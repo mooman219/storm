@@ -71,3 +71,30 @@ impl Default for TextDescription {
         }
     }
 }
+
+impl TextDescription {
+    pub fn pos(&mut self, pos: Vector3<f32>) -> &mut TextDescription {
+        self.pos = pos;
+        self
+    }
+
+    pub fn max_width(&mut self, max_width: Option<f32>) -> &mut TextDescription {
+        self.max_width = max_width;
+        self
+    }
+
+    pub fn scale(&mut self, scale: u32) -> &mut TextDescription {
+        self.scale = scale;
+        self
+    }
+
+    pub fn color(&mut self, color: Color) -> &mut TextDescription {
+        self.color = color;
+        self
+    }
+
+    pub fn font(&mut self, font: FontReference) -> &mut TextDescription {
+        self.font = font;
+        self
+    }
+}

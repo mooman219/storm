@@ -47,3 +47,25 @@ impl Default for SpriteDescription {
         }
     }
 }
+
+impl SpriteDescription {
+    pub fn pos(&mut self, pos: Vector3<f32>) -> &mut SpriteDescription {
+        self.pos = pos;
+        self
+    }
+
+    pub fn size(&mut self, size: Vector2<f32>) -> &mut SpriteDescription {
+        self.size = size;
+        self
+    }
+
+    pub fn color(&mut self, color: Color) -> &mut SpriteDescription {
+        self.color = color;
+        self
+    }
+
+    pub fn texture(&mut self, texture: TextureReference) -> &mut SpriteDescription {
+        self.texture = texture;
+        self
+    }
+}

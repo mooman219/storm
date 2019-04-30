@@ -36,3 +36,20 @@ impl Default for LayerDescription {
         }
     }
 }
+
+impl LayerDescription {
+    pub fn translation(&mut self, translation: Vector2<f32>) -> &mut LayerDescription {
+        self.translation = translation;
+        self
+    }
+
+    pub fn scale(&mut self, scale: f32) -> &mut LayerDescription {
+        self.scale = scale;
+        self
+    }
+
+    pub fn visible(&mut self, visible: bool) -> &mut LayerDescription {
+        self.visible = visible;
+        self
+    }
+}
