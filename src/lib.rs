@@ -20,6 +20,7 @@ pub mod color;
 pub mod math;
 pub mod time;
 
+mod font;
 mod input;
 mod layer;
 mod render;
