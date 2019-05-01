@@ -187,6 +187,8 @@ impl<T> Producer<T> {
 mod tests {
     #![allow(unused_imports)]
     use super::*;
+    use test::black_box;
+    use test::Bencher;
 
     #[test]
     fn buffer_size() {
@@ -236,5 +238,23 @@ mod tests {
             assert!(c.capacity() == 1);
             assert!(c.size() == 0);
         }
+    }
+
+    // ////////////////////////////////////////////////////////////////////////////
+    // Benches
+    // ////////////////////////////////////////////////////////////////////////////
+
+    const ITERATIONS: usize = 1000;
+
+    #[bench]
+    fn bench_cycle(bench: &mut Bencher) {
+        let (p, c) = super::make::<usize>(10);
+
+        bench.iter(|| {
+            for _ in 0..ITERATIONS {
+                black_box(p.try_next());
+                black_box(c.try_next());
+            }
+        });
     }
 }
