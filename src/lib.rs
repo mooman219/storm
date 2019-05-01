@@ -38,7 +38,7 @@ pub use texture::*;
 use glutin::dpi::*;
 use render::*;
 use std::thread;
-use utility::bounded_spsc;
+use utility::bucket_spsc;
 use utility::control;
 
 /// The main entry point into the Storm engine.
@@ -54,7 +54,7 @@ impl Engine {
     pub fn new() -> Engine {
         // Inter-thread messaging for rendering
         let (render_producer_control, render_consumer_control) = control::make();
-        let (render_producer_pipe, render_consumer_pipe) = bounded_spsc::make(2);
+        let (render_producer_pipe, render_consumer_pipe) = bucket_spsc::make(2);
 
         // Winow creation
         let event_loop = glutin::EventsLoop::new();

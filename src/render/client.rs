@@ -1,9 +1,10 @@
 use layer::*;
 use render::*;
 use sprite::*;
-use std::mem;
 use text::*;
 use texture::*;
+use utility::bucket_spsc;
+use utility::control;
 use utility::ordered_tracker::*;
 use utility::unordered_tracker::*;
 
@@ -15,7 +16,7 @@ struct LayerSlot {
 
 pub struct RenderClient {
     render_batch: Vec<RenderMessage>,
-    render_producer: bounded_spsc::Producer<Vec<RenderMessage>>,
+    render_producer: bucket_spsc::Producer<RenderMessage>,
     render_control: control::Producer,
     layer_tracker: OrderedTracker<LayerReference>,
     layers: Vec<LayerSlot>,
@@ -25,7 +26,7 @@ pub struct RenderClient {
 
 impl RenderClient {
     pub fn new(
-        render_producer: bounded_spsc::Producer<Vec<RenderMessage>>,
+        render_producer: bucket_spsc::Producer<RenderMessage>,
         render_control: control::Producer,
     ) -> RenderClient {
         RenderClient {
@@ -64,7 +65,7 @@ impl RenderClient {
                 text: UnorderedTracker::new(),
             },
         );
-        self.render_batch.push(RenderMessage::LayerCreate {
+        self.render_producer.get().push(RenderMessage::LayerCreate {
             layer: insert,
             desc: *desc,
         });
@@ -74,7 +75,7 @@ impl RenderClient {
     pub fn layer_update(&mut self, layer_ref: &LayerReference, desc: &LayerDescription) {
         let layer_index = self.layer_get(layer_ref);
 
-        self.render_batch.push(RenderMessage::LayerUpdate {
+        self.render_producer.get().push(RenderMessage::LayerUpdate {
             layer: layer_index,
             desc: *desc,
         });
@@ -84,7 +85,7 @@ impl RenderClient {
         let layer_index = self.layer_get(layer_ref);
         self.layers.remove(layer_index);
 
-        self.render_batch.push(RenderMessage::LayerRemove {
+        self.render_producer.get().push(RenderMessage::LayerRemove {
             layer: layer_index,
         });
     }
@@ -94,7 +95,7 @@ impl RenderClient {
         let sprites = &mut self.layers[layer_index].sprite;
         sprites.clear();
 
-        self.render_batch.push(RenderMessage::LayerClear {
+        self.render_producer.get().push(RenderMessage::LayerClear {
             layer: layer_index,
         });
     }
@@ -109,7 +110,7 @@ impl RenderClient {
         let sprite_index = sprites.add();
         let sprite = SpriteReference::new(sprite_index, *layer);
 
-        self.render_batch.push(RenderMessage::SpriteCreate {
+        self.render_producer.get().push(RenderMessage::SpriteCreate {
             layer: layer_index,
             desc: *desc,
         });
@@ -122,7 +123,7 @@ impl RenderClient {
         let sprites = &mut self.layers[layer_index].sprite;
         let sprite_index = sprites.get(sprite.key());
 
-        self.render_batch.push(RenderMessage::SpriteUpdate {
+        self.render_producer.get().push(RenderMessage::SpriteUpdate {
             layer: layer_index,
             sprite: sprite_index,
             desc: *desc,
@@ -134,7 +135,7 @@ impl RenderClient {
         let sprites = &mut self.layers[layer_index].sprite;
         let sprite_index = sprites.remove(sprite_ref.key());
 
-        self.render_batch.push(RenderMessage::SpriteRemove {
+        self.render_producer.get().push(RenderMessage::SpriteRemove {
             layer: layer_index,
             sprite: sprite_index,
         });
@@ -147,7 +148,7 @@ impl RenderClient {
     pub fn texture_create(&mut self, path: &str) -> TextureReference {
         self.texture_count += 1;
 
-        self.render_batch.push(RenderMessage::TextureLoad {
+        self.render_producer.get().push(RenderMessage::TextureLoad {
             path: String::from(path),
         });
         TextureReference::new(self.texture_count)
@@ -159,7 +160,7 @@ impl RenderClient {
 
     pub fn font_create(&mut self, path: &str) -> FontReference {
         self.font_count += 1;
-        self.render_batch.push(RenderMessage::FontLoad {
+        self.render_producer.get().push(RenderMessage::FontLoad {
             path: String::from(path),
         });
         FontReference::new(self.font_count)
@@ -176,7 +177,7 @@ impl RenderClient {
         let text_index = texts.add();
         let sprite = TextReference::new(text_index, *layer_ref);
 
-        self.render_batch.push(RenderMessage::TextCreate {
+        self.render_producer.get().push(RenderMessage::TextCreate {
             layer_index: layer_index,
             text: String::from(text),
             desc: *desc,
@@ -190,7 +191,7 @@ impl RenderClient {
         let texts = &mut self.layers[layer_index].text;
         let text_index = texts.get(text_ref.key());
 
-        self.render_batch.push(RenderMessage::TextUpdate {
+        self.render_producer.get().push(RenderMessage::TextUpdate {
             layer_index: layer_index,
             text_index: text_index,
             text: String::from(text),
@@ -203,7 +204,7 @@ impl RenderClient {
         let texts = &mut self.layers[layer_index].text;
         let text_index = texts.remove(text_ref.key());
 
-        self.render_batch.push(RenderMessage::TextRemove {
+        self.render_producer.get().push(RenderMessage::TextRemove {
             layer_index: layer_index,
             text_index: text_index,
         });
@@ -214,19 +215,13 @@ impl RenderClient {
     // ////////////////////////////////////////////////////////
 
     pub fn window_title(&mut self, title: &str) {
-        self.render_batch.push(RenderMessage::WindowTitle {
+        self.render_producer.get().push(RenderMessage::WindowTitle {
             title: String::from(title),
         });
     }
 
     pub fn commit(&mut self) {
-        // Only send a frame if there's actually frame data to send. The notify happens either way to
-        // accommodate resizing.
-        if self.render_batch.len() > 0 {
-            let mut batch = Vec::new(); // TODO: Remove this and replace with a custom buffer
-            mem::swap(&mut batch, &mut self.render_batch);
-            self.render_producer.push(batch);
-        }
+        self.render_producer.spin_next();
         self.render_control.notify();
     }
 }

@@ -16,7 +16,7 @@ use storm::*;
 fn main() {
     SimpleLogger::init(LevelFilter::Trace);
 
-    let mut clock = Clock::new(20000);
+    let mut clock = Clock::new(144);
     let mut engine = Engine::new();
     let layer_bg = engine.layer_create(0, &LayerDescription::default());
     for x in 0..1000 {

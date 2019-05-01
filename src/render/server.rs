@@ -8,7 +8,7 @@ use render::texture::*;
 use render::vertex::*;
 use render::*;
 use time::*;
-use utility::bounded_spsc;
+use utility::bucket_spsc;
 use utility::control;
 
 pub struct Window {
@@ -68,7 +68,7 @@ impl Window {
 
 pub struct RenderServer {
     window: Window,
-    render_consumer: bounded_spsc::Consumer<Vec<RenderMessage>>,
+    render_consumer: bucket_spsc::Consumer<RenderMessage>,
     render_control: control::Consumer,
 
     scene: SceneManager,
@@ -80,7 +80,7 @@ pub struct RenderServer {
 impl RenderServer {
     pub fn new(
         window: Window,
-        render_consumer: bounded_spsc::Consumer<Vec<RenderMessage>>,
+        render_consumer: bucket_spsc::Consumer<RenderMessage>,
         render_control: control::Consumer,
     ) -> RenderServer {
         // Initialize the display. The display is bound in the thread we're going to be making
@@ -114,18 +114,15 @@ impl RenderServer {
     pub fn run_forever(&mut self) {
         let mut timer_render = Timer::new("[R] Frame");
         loop {
-            match self.render_consumer.try_pop().as_mut() {
-                Some(mut messages) => {
-                    timer_render.start();
-                    self.resize();
-                    self.handle_messages(&mut messages);
-                    self.scene.draw();
-                    self.window.swap_buffers();
-                    timer_render.stop();
-                },
-                None => {
-                    self.render_control.wait();
-                },
+            if self.render_consumer.try_next() {
+                timer_render.start();
+                self.resize();
+                self.handle_messages();
+                self.scene.draw();
+                self.window.swap_buffers();
+                timer_render.stop();
+            } else {
+                self.render_control.wait();
             }
         }
     }
@@ -145,8 +142,9 @@ impl RenderServer {
     }
 
     #[inline]
-    fn handle_messages(&mut self, messages: &mut Vec<RenderMessage>) {
-        for message in messages.drain(..) {
+    fn handle_messages(&mut self) {
+        for message in self.render_consumer.get().drain(..) {
+            // TODO: Also trim the buffer
             match message {
                 // Layer
                 RenderMessage::LayerCreate {
