@@ -68,7 +68,7 @@ impl Window {
 
 pub struct RenderServer {
     window: Window,
-    render_consumer: bucket_spsc::Consumer<RenderMessage>,
+    render_consumer: bucket_spsc::Consumer<Vec<RenderMessage>>,
     render_control: control::Consumer,
 
     scene: SceneManager,
@@ -80,7 +80,7 @@ pub struct RenderServer {
 impl RenderServer {
     pub fn new(
         window: Window,
-        render_consumer: bucket_spsc::Consumer<RenderMessage>,
+        render_consumer: bucket_spsc::Consumer<Vec<RenderMessage>>,
         render_control: control::Consumer,
     ) -> RenderServer {
         // Initialize the display. The display is bound in the thread we're going to be making

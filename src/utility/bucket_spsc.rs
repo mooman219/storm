@@ -9,30 +9,30 @@ const CACHELINE: usize = CACHELINE_LEN / std::mem::size_of::<usize>();
 #[repr(C)]
 pub struct Buffer<T> {
     // Shared cacheline:
-    buffer: Box<[UnsafeCell<Vec<T>>]>, // 2 words
-    capacity: usize,                   // 1 word
-    allocated_size: usize,             // 1 word
+    buffer: Box<[UnsafeCell<T>]>, // 2 words
+    capacity: usize,              // 1 word
+    allocated_size: usize,        // 1 word
     _pad1: [usize; CACHELINE - 4],
     // Consumer cacheline:
-    head: AtomicUsize,               // 1 word
-    head_pointer: Cell<*mut Vec<T>>, // 1 word
-    shadow_tail: Cell<usize>,        // 1 word
-    _pad2: [usize; CACHELINE - 3],
+    head: AtomicUsize,        // 1 word
+    shadow_tail: Cell<usize>, // 1 word
+    _pad2: [usize; CACHELINE - 2],
     // Producer cacheline:
-    tail: AtomicUsize,               // 1 word
-    tail_pointer: Cell<*mut Vec<T>>, // 1 word
-    shadow_head: Cell<usize>,        // 1 word
-    _pad3: [usize; CACHELINE - 3],
+    tail: AtomicUsize,        // 1 word
+    shadow_head: Cell<usize>, // 1 word
+    _pad3: [usize; CACHELINE - 2],
 }
 
 unsafe impl<T: Sync> Sync for Buffer<T> {}
 
 pub struct Consumer<T> {
     buffer: Arc<Buffer<T>>,
+    head_pointer: *mut T,
 }
 
 pub struct Producer<T> {
     buffer: Arc<Buffer<T>>,
+    tail_pointer: *mut T,
 }
 
 unsafe impl<T: Send> Send for Consumer<T> {}
@@ -51,58 +51,58 @@ impl<T> Buffer<T> {
 
     // Consumer functions
 
-    pub fn head(&self) -> &mut Vec<T> {
-        unsafe { &mut *self.head_pointer.get() }
-    }
-
-    pub fn try_next_head(&self) -> bool {
+    pub fn try_next_head(&self) -> Option<*mut T> {
         let next_head = self.head.load(Ordering::Relaxed) + 1;
         if next_head == self.shadow_tail.get() {
             self.shadow_tail.set(self.tail.load(Ordering::Acquire));
             if next_head == self.shadow_tail.get() {
-                return false;
+                return None;
             }
         }
-        self.head_pointer.set(self.buffer[next_head & (self.allocated_size - 1)].get());
         self.head.store(next_head, Ordering::Release);
-        true
+        Some(self.buffer[next_head & (self.allocated_size - 1)].get())
     }
 
-    pub fn spin_next_head(&self) {
-        while !self.try_next_head() {}
+    pub fn spin_next_head(&self) -> *mut T {
+        loop {
+            match self.try_next_head() {
+                None => {},
+                Some(v) => return v,
+            }
+        }
     }
 
     // Producer functions
 
-    pub fn tail(&self) -> &mut Vec<T> {
-        unsafe { &mut *self.tail_pointer.get() }
-    }
-
-    pub fn try_next_tail(&self) -> bool {
+    pub fn try_next_tail(&self) -> Option<*mut T> {
         let next_tail = self.tail.load(Ordering::Relaxed) + 1;
         if self.shadow_head.get() + self.capacity <= next_tail {
             self.shadow_head.set(self.head.load(Ordering::Relaxed));
             if self.shadow_head.get() + self.capacity <= next_tail {
-                return false;
+                return None;
             }
         }
-        self.tail_pointer.set(self.buffer[next_tail & (self.allocated_size - 1)].get());
         self.tail.store(next_tail, Ordering::Release);
-        true
+        Some(self.buffer[next_tail & (self.allocated_size - 1)].get())
     }
 
-    pub fn spin_next_tail(&self) {
-        while !self.try_next_tail() {}
+    pub fn spin_next_tail(&self) -> *mut T {
+        loop {
+            match self.try_next_tail() {
+                None => {},
+                Some(v) => return v,
+            }
+        }
     }
 }
 
-pub fn make<T>(capacity: usize) -> (Producer<T>, Consumer<T>) {
+pub fn make<T: Default>(capacity: usize) -> (Producer<T>, Consumer<T>) {
     let adjusted_capacity = capacity + 2;
     let allocated_size = adjusted_capacity.next_power_of_two();
 
     let mut vec = Vec::with_capacity(allocated_size);
     for _ in 0..allocated_size {
-        vec.push(UnsafeCell::new(Vec::with_capacity(256)));
+        vec.push(UnsafeCell::new(T::default()));
     }
     let buffer = vec.into_boxed_slice();
     let head_pointer = buffer[0].get();
@@ -115,38 +115,44 @@ pub fn make<T>(capacity: usize) -> (Producer<T>, Consumer<T>) {
         allocated_size,              // 1 word
         _pad1: [0; CACHELINE - 4],
         // Consumer:
-        head: AtomicUsize::new(0),             // 1 word
-        head_pointer: Cell::new(head_pointer), // 1 word
-        shadow_tail: Cell::new(1),             // 1 word
-        _pad2: [0; CACHELINE - 3],
+        head: AtomicUsize::new(0), // 1 word
+        shadow_tail: Cell::new(1), // 1 word
+        _pad2: [0; CACHELINE - 2],
         // Producer:
-        tail: AtomicUsize::new(1),             // 1 word
-        tail_pointer: Cell::new(tail_pointer), // 1 word
-        shadow_head: Cell::new(0),             // 1 word
-        _pad3: [0; CACHELINE - 3],
+        tail: AtomicUsize::new(1), // 1 word
+        shadow_head: Cell::new(0), // 1 word
+        _pad3: [0; CACHELINE - 2],
     });
 
     (
         Producer {
             buffer: arc.clone(),
+            tail_pointer,
         },
         Consumer {
             buffer: arc.clone(),
+            head_pointer,
         },
     )
 }
 
 impl<T> Consumer<T> {
-    pub fn get(&mut self) -> &mut Vec<T> {
-        (*self.buffer).head()
+    pub fn get(&mut self) -> &mut T {
+        unsafe { &mut *self.head_pointer }
     }
 
-    pub fn try_next(&self) -> bool {
-        (*self.buffer).try_next_head()
+    pub fn try_next(&mut self) -> bool {
+        match (*self.buffer).try_next_head() {
+            Some(p) => {
+                self.head_pointer = p;
+                true
+            },
+            None => false,
+        }
     }
 
-    pub fn spin_next(&self) {
-        (*self.buffer).spin_next_head();
+    pub fn spin_next(&mut self) {
+        self.head_pointer = (*self.buffer).spin_next_head();
     }
 
     pub fn capacity(&self) -> usize {
@@ -159,16 +165,22 @@ impl<T> Consumer<T> {
 }
 
 impl<T> Producer<T> {
-    pub fn get(&mut self) -> &mut Vec<T> {
-        (*self.buffer).tail()
+    pub fn get(&mut self) -> &mut T {
+        unsafe { &mut *self.tail_pointer }
     }
 
-    pub fn try_next(&self) -> bool {
-        (*self.buffer).try_next_tail()
+    pub fn try_next(&mut self) -> bool {
+        match (*self.buffer).try_next_tail() {
+            Some(p) => {
+                self.tail_pointer = p;
+                true
+            },
+            None => false,
+        }
     }
 
-    pub fn spin_next(&self) {
-        (*self.buffer).spin_next_tail();
+    pub fn spin_next(&mut self) {
+        self.tail_pointer = (*self.buffer).spin_next_tail();
     }
 
     pub fn capacity(&self) -> usize {
@@ -198,7 +210,7 @@ mod tests {
 
     #[test]
     fn producer_next() {
-        let (p, _) = super::make::<usize>(5);
+        let (mut p, _) = super::make::<usize>(5);
         assert!(p.try_next());
         assert!(p.capacity() == 5);
         assert!(p.size() == 1);
@@ -206,7 +218,7 @@ mod tests {
 
     #[test]
     fn producer_next_full() {
-        let (p, _) = super::make::<usize>(1);
+        let (mut p, _) = super::make::<usize>(1);
         assert!(p.try_next());
         assert!(!p.try_next());
         assert!(p.capacity() == 1);
@@ -215,7 +227,7 @@ mod tests {
 
     #[test]
     fn consumer_next_empty() {
-        let (_, c) = super::make::<usize>(1);
+        let (_, mut c) = super::make::<usize>(1);
         assert!(!c.try_next());
         assert!(c.capacity() == 1);
         assert!(c.size() == 0);
@@ -223,7 +235,7 @@ mod tests {
 
     #[test]
     fn consumer_next() {
-        let (p, c) = super::make::<usize>(1);
+        let (mut p, mut c) = super::make::<usize>(1);
         assert!(p.try_next());
         assert!(c.try_next());
         assert!(c.capacity() == 1);
@@ -232,7 +244,7 @@ mod tests {
 
     #[test]
     fn wrapping() {
-        let (p, c) = super::make::<usize>(1);
+        let (mut p, mut c) = super::make::<usize>(1);
         for _ in 0..10 {
             assert!(p.try_next());
             assert!(c.try_next());
@@ -249,7 +261,7 @@ mod tests {
 
     #[bench]
     fn bench_cycle(bench: &mut Bencher) {
-        let (p, c) = super::make::<usize>(10);
+        let (mut p, mut c) = super::make::<usize>(10);
 
         bench.iter(|| {
             for _ in 0..ITERATIONS {

@@ -16,7 +16,7 @@ struct LayerSlot {
 
 pub struct RenderClient {
     render_batch: Vec<RenderMessage>,
-    render_producer: bucket_spsc::Producer<RenderMessage>,
+    render_producer: bucket_spsc::Producer<Vec<RenderMessage>>,
     render_control: control::Producer,
     layer_tracker: OrderedTracker<LayerReference>,
     layers: Vec<LayerSlot>,
@@ -26,7 +26,7 @@ pub struct RenderClient {
 
 impl RenderClient {
     pub fn new(
-        render_producer: bucket_spsc::Producer<RenderMessage>,
+        render_producer: bucket_spsc::Producer<Vec<RenderMessage>>,
         render_control: control::Producer,
     ) -> RenderClient {
         RenderClient {

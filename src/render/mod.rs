@@ -17,7 +17,7 @@ use utility;
 
 pub fn start(
     window: Window,
-    render_consumer: utility::bucket_spsc::Consumer<RenderMessage>,
+    render_consumer: utility::bucket_spsc::Consumer<Vec<RenderMessage>>,
     render_control: utility::control::Consumer,
 ) {
     let mut server = RenderServer::new(window, render_consumer, render_control);
