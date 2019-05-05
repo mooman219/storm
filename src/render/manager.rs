@@ -127,10 +127,14 @@ impl SceneManager {
             if layer.desc.visible {
                 clear(ClearBit::DepthBuffer);
                 self.shader.ortho(layer.matrix_full);
-                self.shader.texture(TextureUnit::Atlas);
-                layer.sprites.draw();
-                self.shader.texture(TextureUnit::Font);
-                layer.text.draw();
+                if layer.sprites.vertices() > 0 {
+                    self.shader.texture(TextureUnit::Atlas);
+                    layer.sprites.draw();
+                }
+                if layer.text.groups() > 0 {
+                    self.shader.texture(TextureUnit::Font);
+                    layer.text.draw();
+                }
             }
         }
     }

@@ -19,8 +19,9 @@ fn main() {
     let mut clock = Clock::new(144000);
     let mut engine = Engine::new();
     let layer_bg = engine.layer_create(0, &LayerDescription::default());
-    for x in 0..1000 {
-        for y in -500..500 {
+    let mut sprites = Vec::new();
+    for x in 0..100 {
+        for y in -50..50 {
             let color = if x & 1 != 0 {
                 if y & 1 != 0 {
                     ORANGE
@@ -34,15 +35,15 @@ fn main() {
                     RED
                 }
             };
-            engine.sprite_create(
+            sprites.push(engine.sprite_create(
                 &layer_bg,
                 &SpriteDescription {
-                    pos: Vector3::new(x as f32 * 1.0, y as f32 * 1.0, 0f32),
-                    size: Vector2::new(1.0, 1.0),
+                    pos: Vector3::new(x as f32 * 10.0, y as f32 * 10.0, 0f32),
+                    size: Vector2::new(10.0, 10.0),
                     color: color,
                     texture: DEFAULT_TEXTURE,
                 },
-            );
+            ));
         }
     }
     let layer_fg = engine.layer_create(1, &LayerDescription::default());

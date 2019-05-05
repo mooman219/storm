@@ -53,6 +53,11 @@ impl<T: Vertex + Copy> GeometryBuffer<T> {
     }
 
     #[inline]
+    pub fn vertices(&self) -> usize {
+        self.vertex_buffer.len()
+    }
+
+    #[inline]
     pub fn draw(&mut self) {
         let vertices = self.vertex_buffer.len();
         self.vertex_array.bind();

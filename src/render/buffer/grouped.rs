@@ -41,6 +41,11 @@ impl<T: Vertex + Copy> GroupedBuffer<T> {
     }
 
     #[inline]
+    pub fn groups(&self) -> usize {
+        self.groups.len()
+    }
+
+    #[inline]
     pub fn sync(&mut self) {
         if self.dirty {
             self.dirty = false;

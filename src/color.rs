@@ -9,11 +9,9 @@ pub const WHITE: Color = Color::new_raw(255, 255, 255, 255);
 pub const BLACK: Color = Color::new_raw(0, 0, 0, 255);
 pub const TRANSPARENT: Color = Color::new_raw(0, 0, 0, 0);
 
-use std::cmp::{Eq, PartialEq};
-
 /// Simple RGBA8 color type to represent colors.
 #[repr(C)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Color {
     pub r: u8,
     pub g: u8,
@@ -38,13 +36,5 @@ impl Color {
             b: blue,
             a: alpha,
         }
-    }
-}
-
-impl Eq for Color {}
-
-impl PartialEq for Color {
-    fn eq(&self, other: &Color) -> bool {
-        return self.r == other.r && self.b == other.b && self.g == other.g && self.a == other.a;
     }
 }
