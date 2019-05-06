@@ -5,14 +5,26 @@ use render::shader::shader_program::*;
 static VERTEX: &str = r#"
 #version 330
 
+const float PI     = 3.141592653589793238462643383279;
+const float TWO_PI = 6.283185307179586476925286766559;
+
 layout(location = 0) in float a_pos_z;
 layout(location = 1) in vec4 a_pos;
 layout(location = 2) in vec4 a_uv;
 layout(location = 3) in vec4 a_color;
+layout(location = 4) in float a_rotation;
 out vec2 v_uv;
 out vec4 v_color;
 
 uniform mat4 ortho;
+
+mat4 rotateZ(float psi){
+    return mat4(
+        vec4(cos(psi),-sin(psi),0.,0),
+        vec4(sin(psi),cos(psi),0.,0.),
+        vec4(0.,0.,1.,0.),
+        vec4(0.,0.,0.,1.));
+}
 
 void main() {
     // (x:left, y:right, z:bottom, w:top)
@@ -28,7 +40,7 @@ void main() {
     uv[3] = vec2(a_uv.y, a_uv.w); // right top
     v_uv = uv[gl_VertexID];
     v_color = a_color;
-    gl_Position = ortho * vec4(pos[gl_VertexID], a_pos_z, 1.0);
+    gl_Position = ortho * rotateZ(TWO_PI * a_rotation) * vec4(pos[gl_VertexID], a_pos_z, 1.0);
 }
 "#;
 static FRAGMENT: &str = r#"

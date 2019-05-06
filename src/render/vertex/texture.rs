@@ -11,26 +11,24 @@ pub struct TextureVertex {
     pos: Vector4<f32>,
     uv: Vector4<u16>,
     color: Color,
+    rotation: u8,
 }
 
 impl TextureVertex {
     /// The Vector4's are in the order of (left, right, bottom, top).
-    pub fn new(pos: Vector3<f32>, size: Vector2<f32>, uv: Vector4<u16>, color: Color) -> TextureVertex {
+    pub fn new(
+        pos: Vector3<f32>,
+        size: Vector2<f32>,
+        uv: Vector4<u16>,
+        color: Color,
+        rotation: f32,
+    ) -> TextureVertex {
         TextureVertex {
             pos_z: pos.z,
             pos: Vector4::new(pos.x, pos.x + size.x, pos.y, pos.y + size.y),
             uv: uv,
             color: color,
-        }
-    }
-
-    /// The Vector4's are in the order of (left, right, bottom, top).
-    pub fn new_raw(pos_z: f32, pos: Vector4<f32>, uv: Vector4<u16>, color: Color) -> TextureVertex {
-        TextureVertex {
-            pos_z: pos_z,
-            pos: pos,
-            uv: uv,
-            color: color,
+            rotation: (rotation.fract() * 255f32) as u8,
         }
     }
 }
@@ -91,5 +89,19 @@ impl Vertex for TextureVertex {
             Self::VERTEX_SIZE as i32,    // Stride
             size as *const _,            // Offset
         );
+        size += 4 * 1; // Count * Bytes
+
+        // Rotation
+        enable_vertex_attrib_array(4);
+        vertex_attrib_divisor(4, 1);
+        vertex_attrib_pointer(
+            4,                           // Index
+            1,                           // Count
+            AttributeType::UnsignedByte, // Type
+            true,                        // Normalized
+            Self::VERTEX_SIZE as i32,    // Stride
+            size as *const _,            // Offset
+        );
+        //size += 1 * 1; // Count * Bytes
     }
 }

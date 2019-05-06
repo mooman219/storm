@@ -176,7 +176,7 @@ impl RenderServer {
                     desc,
                 } => {
                     let uv = self.texture.get_uv(&desc.texture);
-                    let quad = TextureVertex::new(desc.pos, desc.size, uv, desc.color);
+                    let quad = TextureVertex::new(desc.pos, desc.size, uv, desc.color, desc.rotation);
                     self.scene.sprite_create(layer, &quad);
                 },
                 RenderMessage::SpriteUpdate {
@@ -185,7 +185,7 @@ impl RenderServer {
                     desc,
                 } => {
                     let uv = self.texture.get_uv(&desc.texture);
-                    let quad = TextureVertex::new(desc.pos, desc.size, uv, desc.color);
+                    let quad = TextureVertex::new(desc.pos, desc.size, uv, desc.color, desc.rotation);
                     self.scene.sprite_update(layer, sprite, &quad);
                 },
                 RenderMessage::SpriteRemove {

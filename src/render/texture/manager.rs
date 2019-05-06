@@ -177,6 +177,7 @@ impl TextManager {
                     value.size,
                     value.uv,
                     desc.color,
+                    0.0,
                 ));
             }
 
