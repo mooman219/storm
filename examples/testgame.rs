@@ -21,25 +21,12 @@ fn main() {
     // let texture = engine.texture_load("./examples/resources/2.png");
     let layer_bg = engine.layer_create(0, &LayerDescription::default());
     let mut sprites = Vec::new();
-    for x in 0..1000 {
-        for y in -100..100 {
-            let color = if x & 1 != 0 {
-                if y & 1 != 0 {
-                    ORANGE
-                } else {
-                    BLUE
-                }
-            } else {
-                if y & 1 != 0 {
-                    GREEN
-                } else {
-                    RED
-                }
-            };
+    for x in 0..250 {
+        for y in -500..500 {
             let desc = SpriteDescription {
                 pos: Vector3::new(x as f32 * 5.0, y as f32 * 5.0, 0f32),
                 size: Vector2::new(5.0, 5.0),
-                color: color,
+                color: BLUE,
                 texture: DEFAULT_TEXTURE,
                 rotation: 0.125,
             };
@@ -88,7 +75,7 @@ fn main() {
         );
         translation.x -= 25.0 * clock.get_delta();
         for (refer, desc) in &mut sprites {
-            desc.rotation = desc.rotation + 0.25 * clock.get_delta();
+            desc.rotation = desc.rotation + 0.1 * clock.get_delta();
             engine.sprite_update(refer, &desc);
         }
         engine.layer_update(&layer_bg, &LayerDescription::default().translation(translation));
