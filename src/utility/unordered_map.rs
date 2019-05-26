@@ -35,7 +35,7 @@ impl<T> UnorderedMap<T> {
         (index, value)
     }
 
-    pub fn get_mut(&mut self, key: Key<T>) -> (usize, &T) {
+    pub fn get_mut(&mut self, key: Key<T>) -> (usize, &mut T) {
         let index = self.map.get(key);
         let value = &mut self.values[index];
         (index, value)

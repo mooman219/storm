@@ -22,7 +22,7 @@ fn main() {
     // Create the engine context.
     let mut engine = Engine::new();
     // Create a layer to draw on.
-    let layer = engine.layer_create(0, &LayerDescription::default());
+    let layer = engine.layer_create(0, &BatchDescription::default());
     // Add a sprite to that layer (a white square).
     engine.sprite_create(&layer, &SpriteDescription::default());
 

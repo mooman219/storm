@@ -16,12 +16,12 @@ use storm::*;
 fn main() {
     SimpleLogger::init(LevelFilter::Trace);
 
-    let mut clock = Clock::new(144000);
+    let mut clock = Clock::new(14400);
     let mut engine = Engine::new();
     // let texture = engine.texture_load("./examples/resources/2.png");
-    let layer_bg = engine.layer_create(0, &LayerDescription::default());
+    let layer_bg = engine.layer_create(0, &BatchDescription::default());
     let mut sprites = Vec::new();
-    for x in 0..250 {
+    for x in 0..20 {
         for y in -500..500 {
             let desc = SpriteDescription {
                 pos: Vector3::new(x as f32 * 5.0, y as f32 * 5.0, 0f32),
@@ -33,17 +33,17 @@ fn main() {
             sprites.push((engine.sprite_create(&layer_bg, &desc), desc));
         }
     }
-    let layer_fg = engine.layer_create(1, &LayerDescription::default());
+    let layer_fg = engine.layer_create(1, &BatchDescription::default());
     let text = engine.text_create(
         &layer_fg,
         "A Storm Engine",
-        &TextDescription::default().pos(Vector3::new(-250.0, 0.0, 0.0)),
+        &StringDescription::default().pos(Vector3::new(-250.0, 0.0, 0.5)),
     );
     let speed = 200f32;
     let mut translation = Vector2::zero();
     let mut sprite = Sprite::new(&layer_fg);
     sprite.size(Vector2::new(100.0, 100.0));
-    sprite.color(color::BLACK);
+    sprite.color(color::RED);
 
     let mut is_active = true;
     while is_active {
@@ -71,14 +71,14 @@ fn main() {
         engine.text_update(
             &text,
             &string,
-            &TextDescription::default().max_width(Some(2000.0)).pos(Vector3::new(-1000.0, 650.0, 0.0)),
+            &StringDescription::default().max_width(Some(2000.0)).pos(Vector3::new(-1000.0, 650.0, 0.5)),
         );
         translation.x -= 25.0 * clock.get_delta();
         for (refer, desc) in &mut sprites {
             desc.rotation = desc.rotation + 0.1 * clock.get_delta();
             engine.sprite_update(refer, &desc);
         }
-        engine.layer_update(&layer_bg, &LayerDescription::default().translation(translation));
+        engine.layer_update(&layer_bg, &BatchDescription::default().translation(translation));
         sprite.update(clock.get_delta());
         sprite.sync(&mut engine);
         engine.window_commit();
@@ -86,14 +86,14 @@ fn main() {
     }
 }
 struct Sprite {
-    layer: LayerReference,
+    layer: BatchReference,
     key: Option<SpriteReference>,
     desc: SpriteDescription,
     velocity: Vector2<f32>,
 }
 
 impl Sprite {
-    pub fn new(layer: &LayerReference) -> Sprite {
+    pub fn new(layer: &BatchReference) -> Sprite {
         Sprite {
             layer: *layer,
             key: None,
@@ -130,6 +130,6 @@ impl Sprite {
     }
 
     pub fn update(&mut self, delta: f32) {
-        self.desc.pos += (self.velocity * delta).extend(0f32);
+        self.desc.pos += (self.velocity * delta).extend(0.0);
     }
 }

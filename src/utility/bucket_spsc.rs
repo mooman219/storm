@@ -2,6 +2,7 @@ use std::cell::Cell;
 use std::cell::UnsafeCell;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::thread;
 
 const CACHELINE_LEN: usize = 64; // Usually 64 words
 const CACHELINE: usize = CACHELINE_LEN / std::mem::size_of::<usize>();
@@ -66,7 +67,9 @@ impl<T> Buffer<T> {
     pub fn spin_next_head(&self) -> *mut T {
         loop {
             match self.try_next_head() {
-                None => {},
+                None => {
+                    thread::yield_now();
+                },
                 Some(v) => return v,
             }
         }
@@ -89,7 +92,9 @@ impl<T> Buffer<T> {
     pub fn spin_next_tail(&self) -> *mut T {
         loop {
             match self.try_next_tail() {
-                None => {},
+                None => {
+                    thread::yield_now();
+                },
                 Some(v) => return v,
             }
         }

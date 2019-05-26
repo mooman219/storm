@@ -12,9 +12,8 @@ pub struct Font {
 
 pub struct RenderedGlyph {
     pub size: Vector2<usize>,
-    pub offset_height: f32,
-    pub offset_width: f32,
-    pub data: Vec<color::Color>,
+    pub offset: Vector2<f32>,
+    pub data: Vec<color::RGBA8>,
 }
 
 impl Font {
@@ -61,12 +60,11 @@ impl Font {
                 let mut buffer = vec![color::BLACK; (size.x * size.y) as usize];
                 glyph.draw(|x, y, v| {
                     let v = (v * 255.0).round().max(0.0).min(255.0) as u8;
-                    buffer[(x as usize) + (y as usize) * size.x] = color::Color::new_raw(255, 255, 255, v);
+                    buffer[(x as usize) + (y as usize) * size.x] = color::RGBA8::new_raw(255, 255, 255, v);
                 });
                 let rendered_glyph = RenderedGlyph {
                     size: size,
-                    offset_height: rect.max.y as f32,
-                    offset_width: rect.min.x as f32,
+                    offset: Vector2::new(rect.min.x as f32, rect.max.y as f32),
                     data: buffer,
                 };
                 return Some(rendered_glyph);

@@ -9,37 +9,30 @@ extern crate image;
 extern crate log;
 extern crate hashbrown;
 extern crate parking_lot;
-extern crate rayon;
 extern crate rusttype;
 extern crate test;
 extern crate unicode_normalization;
 
 pub extern crate cgmath;
 
-pub mod color;
 pub mod math;
 pub mod time;
 
+pub use input::*;
+pub use texture::*;
+pub use types::*;
+
 mod font;
 mod input;
-mod layer;
 mod render;
-mod sprite;
-mod text;
 mod texture;
+mod types;
 mod utility;
-
-pub use input::*;
-pub use layer::*;
-pub use sprite::*;
-pub use text::*;
-pub use texture::*;
 
 use glutin::dpi::*;
 use render::*;
 use std::thread;
 use utility::bucket_spsc;
-use utility::control;
 
 /// The main entry point into the Storm engine.
 pub struct Engine {
@@ -52,9 +45,8 @@ impl Engine {
     /// Creates and runs an instance of the engine. This creates a window on
     /// another thread which listens for messages from the engine.
     pub fn new() -> Engine {
-        // Inter-thread messaging for rendering
-        let (render_producer_control, render_consumer_control) = control::make();
-        let (render_producer_pipe, render_consumer_pipe) = bucket_spsc::make(2);
+        // Inter-thread messaging.
+        let (render_producer_pipe, render_consumer_pipe) = bucket_spsc::make(1);
 
         // Winow creation
         let event_loop = glutin::EventsLoop::new();
@@ -63,7 +55,7 @@ impl Engine {
                 .build_windowed(
                     glutin::WindowBuilder::new()
                         .with_title("Storm Engine")
-                        .with_dimensions(LogicalSize::from((500, 500))),
+                        .with_dimensions(LogicalSize::from((1280, 1024))),
                     &event_loop,
                 )
                 .expect("Unable to build the window."),
@@ -71,11 +63,11 @@ impl Engine {
 
         // Rendering
         thread::spawn(move || {
-            render::start(window, render_consumer_pipe, render_consumer_control);
+            render::start(window, render_consumer_pipe);
         });
 
         Engine {
-            render_client: RenderClient::new(render_producer_pipe, render_producer_control),
+            render_client: RenderClient::new(render_producer_pipe),
             input_manager: InputManager::new(event_loop),
         }
     }
@@ -102,39 +94,66 @@ impl Engine {
     }
 
     // ////////////////////////////////////////////////////////
-    // Layer
+    // Audio
     // ////////////////////////////////////////////////////////
 
-    pub fn layer_create(&mut self, depth: usize, desc: &LayerDescription) -> LayerReference {
-        self.render_client.layer_create(depth, desc)
+    // TODO: Audio
+    // pub fn audio_load(&mut self) {}
+
+    // pub fn audio_play(&mut self) {}
+
+    // ////////////////////////////////////////////////////////
+    // Batch
+    // ////////////////////////////////////////////////////////
+
+    pub fn batch_create(&mut self, desc: BatchDescription) -> BatchReference {
+        self.render_client.batch_create(&desc)
     }
 
-    pub fn layer_update(&mut self, layer: &LayerReference, desc: &LayerDescription) {
-        self.render_client.layer_update(layer, desc)
+    pub fn batch_update(&mut self, batch: BatchReference, desc: BatchDescription) {
+        self.render_client.batch_update(&batch, &desc)
     }
 
-    pub fn layer_remove(&mut self, layer: &LayerReference) {
-        self.render_client.layer_remove(layer)
-    }
-
-    pub fn layer_clear(&mut self, layer: &LayerReference) {
-        self.render_client.layer_clear(layer)
+    pub fn batch_remove(&mut self, batch: BatchReference) {
+        self.render_client.batch_remove(&batch)
     }
 
     // ////////////////////////////////////////////////////////
     // Sprite
     // ////////////////////////////////////////////////////////
 
-    pub fn sprite_create(&mut self, layer: &LayerReference, desc: &SpriteDescription) -> SpriteReference {
-        self.render_client.sprite_create(layer, desc)
+    /// Appends a new sprite to the batch to render.
+    pub fn sprite_set(&mut self, batch: BatchReference, descs: &Vec<SpriteDescription>) {
+        self.render_client.sprite_set(&batch, descs);
     }
 
-    pub fn sprite_update(&mut self, sprite: &SpriteReference, desc: &SpriteDescription) {
-        self.render_client.sprite_update(sprite, desc)
+    /// Clears all sprites from the given batch.
+    pub fn sprite_clear(&mut self, batch: BatchReference) {
+        self.render_client.sprite_clear(&batch);
     }
 
-    pub fn sprite_remove(&mut self, sprite: &SpriteReference) {
-        self.render_client.sprite_remove(sprite)
+    // ////////////////////////////////////////////////////////
+    // String
+    // ////////////////////////////////////////////////////////
+
+    /// Loads a new font.
+    pub fn font_load(&mut self, path: &str) -> FontReference {
+        self.render_client.font_create(path)
+    }
+
+    /// Gets the default font.
+    pub fn font_default() -> FontReference {
+        DEFAULT_FONT
+    }
+
+    /// Appends a new string to the batch to render.
+    pub fn string_set(&mut self, batch: BatchReference, descs: &Vec<StringDescription>) {
+        self.render_client.string_set(&batch, descs);
+    }
+
+    /// Clears all strings from the given batch.
+    pub fn string_clear(&mut self, batch: BatchReference) {
+        self.render_client.string_clear(&batch);
     }
 
     // ////////////////////////////////////////////////////////
@@ -146,48 +165,10 @@ impl Engine {
         self.render_client.texture_create(path)
     }
 
-    /// Gets the default texture reference.
+    /// Gets the default texture.
     pub fn texture_default() -> TextureReference {
         DEFAULT_TEXTURE
     }
-
-    // ////////////////////////////////////////////////////////
-    // Text
-    // ////////////////////////////////////////////////////////
-
-    pub fn font_load(&mut self, path: &str) -> FontReference {
-        self.render_client.font_create(path)
-    }
-
-    pub fn font_default(&mut self) -> FontReference {
-        DEFAULT_FONT
-    }
-
-    pub fn text_create(
-        &mut self,
-        layer: &LayerReference,
-        text: &str,
-        desc: &TextDescription,
-    ) -> TextReference {
-        self.render_client.text_create(layer, text, desc)
-    }
-
-    pub fn text_update(&mut self, text_ref: &TextReference, text: &str, desc: &TextDescription) {
-        self.render_client.text_update(text_ref, text, desc);
-    }
-
-    pub fn text_remove(&mut self, text_ref: &TextReference) {
-        self.render_client.text_remove(text_ref);
-    }
-
-    // ////////////////////////////////////////////////////////
-    // Audio
-    // ////////////////////////////////////////////////////////
-
-    // TODO: Audio
-    // pub fn audio_load(&mut self) {}
-
-    // pub fn audio_play(&mut self) {}
 
     // ////////////////////////////////////////////////////////
     // Window

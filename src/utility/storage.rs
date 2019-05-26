@@ -108,7 +108,7 @@ impl<T> Storage<T> {
     }
 
     #[inline]
-    pub fn push_range(&mut self, elems: &[T]) {
+    pub fn push_range(&mut self, elems: Vec<T>) {
         self.buf.grow(self.len + elems.len());
         unsafe {
             ptr::copy_nonoverlapping(elems.as_ptr(), self.ptr().add(self.len), elems.len());
@@ -140,7 +140,7 @@ impl<T> Storage<T> {
     }
 
     #[inline]
-    pub fn insert_range(&mut self, index: usize, elems: &[T]) {
+    pub fn insert_range(&mut self, index: usize, elems: Vec<T>) {
         assert!(index <= self.len, "index out of bounds");
         self.buf.grow(self.len + elems.len());
         unsafe {

@@ -1,66 +1,67 @@
-use layer::*;
-use sprite::*;
-use text::*;
+use render::*;
+use texture::*;
+use types::*;
 
-pub enum RenderMessage {
-    // Layer
-    LayerCreate {
-        layer: usize,
-        desc: LayerDescription,
-    },
-    LayerUpdate {
-        layer: usize,
-        desc: LayerDescription,
-    },
-    LayerRemove {
-        layer: usize,
-    },
-    LayerClear {
-        layer: usize,
-    },
+pub struct RenderState {
+    pub batches: Vec<BatchState>,
+    pub batch_changes: Vec<BatchMessage>,
+    pub texture_atlas: Option<Image>,
+    pub font_atlas: Option<Image>,
+    pub window: WindowState,
+}
 
-    // Sprite
-    SpriteCreate {
-        layer: usize,
-        desc: SpriteDescription,
-    },
-    SpriteUpdate {
-        layer: usize,
-        sprite: usize,
-        desc: SpriteDescription,
-    },
-    SpriteRemove {
-        layer: usize,
-        sprite: usize,
-    },
+impl Default for RenderState {
+    fn default() -> RenderState {
+        RenderState {
+            batches: Vec::new(),
+            batch_changes: Vec::new(),
+            texture_atlas: None,
+            font_atlas: None,
+            window: WindowState::default(),
+        }
+    }
+}
 
-    // Texture
-    TextureLoad {
-        path: String,
-    },
+pub struct BatchState {
+    pub sprites: Vec<Quad>,
+    pub strings: Vec<Quad>,
+    pub dirty_sprites: bool,
+    pub dirty_strings: bool,
+}
 
-    // Text
-    FontLoad {
-        path: String,
-    },
-    TextCreate {
-        layer_index: usize,
-        text: String,
-        desc: TextDescription,
-    },
-    TextUpdate {
-        layer_index: usize,
-        text_index: usize,
-        text: String,
-        desc: TextDescription,
-    },
-    TextRemove {
-        layer_index: usize,
-        text_index: usize,
-    },
+impl Default for BatchState {
+    fn default() -> BatchState {
+        BatchState {
+            sprites: Vec::new(),
+            strings: Vec::new(),
+            dirty_sprites: false,
+            dirty_strings: false,
+        }
+    }
+}
 
-    // Window
-    WindowTitle {
-        title: String,
+#[derive(Copy, Clone)]
+pub enum BatchMessage {
+    Create {
+        desc: BatchDescription,
     },
+    Update {
+        index: usize,
+        desc: BatchDescription,
+    },
+    Remove {
+        index: usize,
+    },
+}
+
+pub struct WindowState {
+    pub title: Option<String>,
+}
+
+impl Default for WindowState {
+    fn default() -> WindowState {
+        WindowState {
+            title: None,
+        }
+    }
 }

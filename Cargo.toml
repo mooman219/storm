@@ -13,7 +13,6 @@ parking_lot = "0.7"
 hashbrown = "0.2"
 rusttype = "0.7"
 unicode-normalization = "0.1.8"
-rayon = "1.0"
 
 [profile.dev]
 opt-level = 2
