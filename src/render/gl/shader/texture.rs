@@ -19,10 +19,10 @@ out vec4 v_color;
 uniform mat4 ortho;
 
 uniform vec2 pos_lut[4] = vec2[4](
-    vec2(0.0, 1.0),  // left top
+    vec2(0.0, 65535.0),  // left top
     vec2(0.0, 0.0),  // left bottom
-    vec2(1.0, 1.0),  // right top
-    vec2(1.0, 0.0)); // right bottom
+    vec2(65535.0, 65535.0),  // right top
+    vec2(65535.0, 0.0)); // right bottom
 
 mat4 rotateZ(float psi){
     return mat4(
@@ -41,7 +41,7 @@ void main() {
     uv[3] = vec2(a_uv.y, a_uv.w); // right top
     v_uv = uv[gl_VertexID];
     v_color = a_color;
-    vec4 pos = a_pos + vec3(a_size * 65535 * pos_lut[gl_VertexID], 0.0);
+    vec3 pos = a_pos + vec3(a_size * pos_lut[gl_VertexID], 0.0);
     gl_Position = ortho * rotateZ(TWO_PI * a_rotation) * vec4(pos, 1.0);
 }
 "#;

@@ -40,7 +40,7 @@ impl OpenGLState {
     pub fn new(window: Window) -> OpenGLState {
         window.bind();
         let logical_size = window.get_logical_size();
-        let state = OpenGLState {
+        let mut state = OpenGLState {
             window: window,
             shader: TextureShader::new(),
             texture_atlas: TextureHandle::new(TextureUnit::Atlas),
@@ -136,5 +136,6 @@ impl OpenGLState {
                 }
             }
         }
+        self.window.swap_buffers();
     }
 }

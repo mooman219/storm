@@ -106,16 +106,16 @@ impl Engine {
     // Batch
     // ////////////////////////////////////////////////////////
 
-    pub fn batch_create(&mut self, desc: BatchDescription) -> BatchReference {
-        self.render_client.batch_create(&desc)
+    pub fn batch_create(&mut self, desc: &BatchDescription) -> BatchReference {
+        self.render_client.batch_create(desc)
     }
 
-    pub fn batch_update(&mut self, batch: BatchReference, desc: BatchDescription) {
-        self.render_client.batch_update(&batch, &desc)
+    pub fn batch_update(&mut self, batch: &BatchReference, desc: &BatchDescription) {
+        self.render_client.batch_update(batch, desc)
     }
 
-    pub fn batch_remove(&mut self, batch: BatchReference) {
-        self.render_client.batch_remove(&batch)
+    pub fn batch_remove(&mut self, batch: &BatchReference) {
+        self.render_client.batch_remove(batch)
     }
 
     // ////////////////////////////////////////////////////////
@@ -123,13 +123,13 @@ impl Engine {
     // ////////////////////////////////////////////////////////
 
     /// Appends a new sprite to the batch to render.
-    pub fn sprite_set(&mut self, batch: BatchReference, descs: &Vec<SpriteDescription>) {
-        self.render_client.sprite_set(&batch, descs);
+    pub fn sprite_set(&mut self, batch: &BatchReference, descs: &Vec<SpriteDescription>) {
+        self.render_client.sprite_set(batch, descs);
     }
 
     /// Clears all sprites from the given batch.
-    pub fn sprite_clear(&mut self, batch: BatchReference) {
-        self.render_client.sprite_clear(&batch);
+    pub fn sprite_clear(&mut self, batch: &BatchReference) {
+        self.render_client.sprite_clear(batch);
     }
 
     // ////////////////////////////////////////////////////////
@@ -147,13 +147,13 @@ impl Engine {
     }
 
     /// Appends a new string to the batch to render.
-    pub fn string_set(&mut self, batch: BatchReference, descs: &Vec<StringDescription>) {
-        self.render_client.string_set(&batch, descs);
+    pub fn string_set(&mut self, batch: &BatchReference, descs: &Vec<StringDescription>) {
+        self.render_client.string_set(batch, descs);
     }
 
     /// Clears all strings from the given batch.
-    pub fn string_clear(&mut self, batch: BatchReference) {
-        self.render_client.string_clear(&batch);
+    pub fn string_clear(&mut self, batch: &BatchReference) {
+        self.render_client.string_clear(batch);
     }
 
     // ////////////////////////////////////////////////////////

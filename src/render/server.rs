@@ -30,13 +30,14 @@ impl RenderServer {
 
     pub fn update(&mut self) {
         let messages = self.render_consumer.get();
-        if let Some(texture_atlas) = messages.texture_atlas {
+        if let Some(texture_atlas) = messages.texture_atlas.take() {
             self.state.upload_texture_atlas(&texture_atlas);
-            messages.texture_atlas = None;
         }
-        if let Some(font_atlas) = messages.font_atlas {
+        if let Some(font_atlas) = messages.font_atlas.take() {
             self.state.upload_font_atlas(&font_atlas);
-            messages.font_atlas = None;
+        }
+        if let Some(title) = messages.window.title.take() {
+            // TODO: Window title set
         }
         for message in messages.batch_changes.drain(..) {
             match message {

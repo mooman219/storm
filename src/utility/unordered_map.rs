@@ -13,6 +13,10 @@ impl<T> UnorderedMap<T> {
         }
     }
 
+    pub fn len(&self) -> usize {
+        self.map.len()
+    }
+
     pub fn clear(&mut self) {
         self.map.clear();
         self.values.clear();

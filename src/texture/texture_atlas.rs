@@ -5,15 +5,15 @@ use texture::packer::*;
 use texture::*;
 use types::*;
 
-pub struct TextureManager {
+pub struct TextureAtlas {
     packer: TexturePacker,
     uv: Vec<Vector4<u16>>,
     dirty: bool,
 }
 
-impl TextureManager {
-    pub fn new() -> TextureManager {
-        let mut manager = TextureManager {
+impl TextureAtlas {
+    pub fn new() -> TextureAtlas {
+        let mut manager = TextureAtlas {
             packer: TexturePacker::new(),
             uv: Vec::new(),
             dirty: false,

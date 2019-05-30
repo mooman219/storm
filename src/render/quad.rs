@@ -1,6 +1,5 @@
 use cgmath::*;
 use color::*;
-use std::mem;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]

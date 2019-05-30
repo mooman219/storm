@@ -30,6 +30,10 @@ impl<T> UnorderedTracker<T> {
         }
     }
 
+    pub fn len(&self) -> usize {
+        self.len as usize
+    }
+
     pub fn clear(&mut self) {
         let mut counter = 0;
         for slot in self.slots.iter_mut() {
