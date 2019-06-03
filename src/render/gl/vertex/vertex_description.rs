@@ -1,6 +1,6 @@
 use render::gl::raw::*;
-use render::Quad;
 use std::mem;
+use types::*;
 
 pub trait VertexDescription {
     const VERTEX_SIZE: usize;
@@ -8,7 +8,7 @@ pub trait VertexDescription {
     fn configure_vertex_attribute();
 }
 
-impl VertexDescription for Quad {
+impl VertexDescription for SpriteDescription {
     const VERTEX_SIZE: usize = mem::size_of::<Self>();
 
     fn configure_vertex_attribute() {

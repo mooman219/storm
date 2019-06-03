@@ -1,5 +1,5 @@
 use render::message::*;
-use render::*;
+use std::ptr;
 use texture::*;
 use types::*;
 use utility::bucket_spsc;
@@ -10,7 +10,6 @@ pub struct RenderClient {
     texture_atlas: TextureAtlas,
     font_atlas: FontAtlas,
     batch_tracker: UnorderedTracker<BatchReference>,
-    texture_count: usize,
     font_count: usize,
 }
 
@@ -21,7 +20,6 @@ impl RenderClient {
             texture_atlas: TextureAtlas::new(),
             font_atlas: FontAtlas::new(),
             batch_tracker: UnorderedTracker::new(),
-            texture_count: 0,
             font_count: 0,
         }
     }
@@ -67,15 +65,11 @@ impl RenderClient {
         let state = self.render_producer.get();
         let batch = &mut state.batches[batch_index];
         batch.dirty_sprites = true;
-        unsafe { batch.sprites.set_len(0) };
-        for desc in descs {
-            batch.sprites.push(Quad::new(
-                desc.pos,
-                desc.size,
-                self.texture_atlas.get_uv(&desc.texture),
-                desc.color,
-                desc.rotation,
-            ));
+        unsafe {
+            batch.sprites.set_len(0);
+            batch.sprites.reserve(descs.len());
+            ptr::copy_nonoverlapping(descs.as_ptr(), batch.sprites.as_mut_ptr(), descs.len());
+            batch.sprites.set_len(descs.len());
         }
     }
 
@@ -123,11 +117,9 @@ impl RenderClient {
     // ////////////////////////////////////////////////////////
 
     pub fn texture_create(&mut self, path: &str) -> TextureReference {
-        self.texture_atlas.add_path(path);
         let state = self.render_producer.get();
         state.texture_atlas = self.texture_atlas.sync();
-        self.texture_count += 1;
-        TextureReference::new(self.texture_count)
+        TextureReference::new(self.texture_atlas.add_path(path))
     }
 
     // ////////////////////////////////////////////////////////

@@ -3,7 +3,6 @@ use color;
 use std::path::Path;
 use texture::packer::*;
 use texture::*;
-use types::*;
 
 pub struct TextureAtlas {
     packer: TexturePacker,
@@ -18,27 +17,23 @@ impl TextureAtlas {
             uv: Vec::new(),
             dirty: false,
         };
-        manager.add_texture(Image::from_default(color::WHITE, 8, 8));
+        manager.add_texture(Image::from_default(color::WHITE, 4, 4));
         manager.sync();
         manager
     }
 
-    pub fn add_texture(&mut self, texture: Image) {
+    pub fn add_texture(&mut self, texture: Image) -> Vector4<u16> {
         let uv = self.packer.pack(&texture);
-        self.uv.push(uv);
         self.dirty = true;
         trace!("Loaded raw texture at {:?}", uv);
+        uv
     }
 
-    pub fn add_path(&mut self, path: &str) {
+    pub fn add_path(&mut self, path: &str) -> Vector4<u16> {
         let uv = self.packer.pack_path(Path::new(path));
-        self.uv.push(uv);
         self.dirty = true;
         trace!("Loaded texture {} at {:?}", path, uv);
-    }
-
-    pub fn get_uv(&self, reference: &TextureReference) -> Vector4<u16> {
-        self.uv[reference.key()]
+        uv
     }
 
     pub fn sync(&mut self) -> Option<Image> {

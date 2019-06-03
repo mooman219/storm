@@ -218,7 +218,7 @@ impl TexturePacker {
         let rect = self.packer.pack(texture.width(), texture.height());
         self.texture.set_texture(rect.x, rect.y, texture);
 
-        // UV Layout: X:LEFT Y:RIGHT Z:BOTTOM W:TOP
+        // UV Layout: xmin xmax ymin ymax
         let vector = Vector4::new(
             (rect.x * FULL_PIXEL) as u16,
             ((rect.x + rect.w) * FULL_PIXEL) as u16,

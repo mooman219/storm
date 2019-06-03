@@ -73,57 +73,108 @@ impl BatchDescription {
 // ////////////////////////////////////////////////////////
 
 /// Configuration description for a sprite.
-#[derive(Copy, Clone, Debug)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct SpriteDescription {
-    /// Units are measured in pixels.
-    pub pos: Vector3<f32>,
-    /// Units are measured in pixels.
-    pub size: Vector2<f32>,
-    pub color: RGBA8,
-    pub texture: TextureReference,
-    /// Rotation is measured in turns from [0, 1). Values outside of the range are wrapped into the
-    /// range. For example, 1.75 is wrapped into 0.75, -0.4 is wrapped into 0.6.
-    pub rotation: f32,
+    pos: Vector3<f32>,
+    size: Vector2<u16>,
+    uv: Vector4<u16>,
+    color: RGBA8,
+    rotation: u8,
 }
 
 impl Default for SpriteDescription {
     fn default() -> SpriteDescription {
         SpriteDescription {
-            pos: Vector3::new(0f32, 0f32, 0f32),
-            size: Vector2::new(100f32, 100f32),
+            pos: Vector3::new(0.0, 0.0, 0.0),
+            size: Vector2::new(100, 100),
+            uv: Vector4::new(0, 4, 0, 4),
             color: BLACK,
-            texture: DEFAULT_TEXTURE,
-            rotation: 0.0,
+            rotation: 0,
         }
     }
 }
 
+// {
+//     /// Units are measured in pixels.
+//     pub pos: Vector3<f32>,
+//     /// Units are measured in pixels.
+//     pub size: Vector2<f32>,
+//     pub color: RGBA8,
+//     pub texture: TextureReference,
+//     /// Rotation is measured in turns from [0, 1). Values outside of the range are wrapped into
+// the     /// range. For example, 1.75 is wrapped into 0.75, -0.4 is wrapped into 0.6.
+//     pub rotation: f32,
+// }
+
 impl SpriteDescription {
-    /// Units are measured in pixels.
+    /// The Vector4's are in the order of (xmin, xmax, ymin, ymax).
+    pub(crate) fn new_raw(
+        pos: Vector3<f32>,
+        size: Vector2<f32>,
+        uv: Vector4<u16>,
+        color: RGBA8,
+        rotation: f32,
+    ) -> SpriteDescription {
+        SpriteDescription {
+            pos: pos,
+            size: {
+                let x = (size.x as u32) & 0xFFFF;
+                let y = (size.y as u32) & 0xFFFF;
+                Vector2::new(x as u16, y as u16)
+            },
+            uv: uv,
+            color: color,
+            rotation: (rotation.fract() * 255f32) as u8,
+        }
+    }
+
+    pub fn new(
+        pos: Vector3<f32>,
+        size: Vector2<f32>,
+        texture: TextureReference,
+        color: RGBA8,
+        rotation: f32,
+    ) -> SpriteDescription {
+        Self::new_raw(pos, size, texture.uv, color, rotation)
+    }
+
+    /// Offset the position. Units are measured in pixels.
     pub fn pos(&mut self, pos: Vector3<f32>) -> &mut SpriteDescription {
-        self.pos = pos;
+        self.pos += pos;
         self
     }
 
-    /// Units are measured in pixels.
+    /// Offset the size. Units are measured in pixels.
     pub fn size(&mut self, size: Vector2<f32>) -> &mut SpriteDescription {
-        self.size = size;
+        self.size += {
+            let x = (size.x as u32) & 0xFFFF;
+            let y = (size.y as u32) & 0xFFFF;
+            Vector2::new(x as u16, y as u16)
+        };
         self
     }
 
-    pub fn color(&mut self, color: RGBA8) -> &mut SpriteDescription {
+    /// Offset the rotation. Rotation is measured in turns from [0, 1).
+    pub fn rotation(&mut self, rotation: f32) -> &mut SpriteDescription {
+        // self.rotation += (rotation.fract() * 255f32) as u8;
+        self.rotation += 1;
+        self
+    }
+
+    pub fn get_pos(&self) -> Vector3<f32> {
+        self.pos
+    }
+
+    /// Set the color.
+    pub fn set_color(&mut self, color: RGBA8) -> &mut SpriteDescription {
         self.color = color;
         self
     }
 
-    pub fn texture(&mut self, texture: TextureReference) -> &mut SpriteDescription {
-        self.texture = texture;
-        self
-    }
-
-    /// Rotation is measured in turns from [0, 1).
-    pub fn rotation(&mut self, rotation: f32) -> &mut SpriteDescription {
-        self.rotation = rotation;
+    /// Set the texture.
+    pub fn set_texture(&mut self, texture: TextureReference) -> &mut SpriteDescription {
+        self.uv = texture.uv;
         self
     }
 }
@@ -217,23 +268,23 @@ impl StringDescription {
 
 /// A default texture reference for a basic white square.
 pub const DEFAULT_TEXTURE: TextureReference = TextureReference {
-    key: 0,
+    uv: Vector4::new(0, 4, 0, 4),
 };
 
 /// Handle to reference an uploaded texture with.
 #[derive(Copy, Clone, Debug)]
 pub struct TextureReference {
-    key: usize,
+    uv: Vector4<u16>,
 }
 
 impl TextureReference {
-    pub(crate) fn new(key: usize) -> TextureReference {
+    pub(crate) fn new(uv: Vector4<u16>) -> TextureReference {
         TextureReference {
-            key: key,
+            uv: uv,
         }
     }
 
-    pub(crate) fn key(&self) -> usize {
-        self.key
+    pub(crate) fn uv(&self) -> Vector4<u16> {
+        self.uv
     }
 }

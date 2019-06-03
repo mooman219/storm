@@ -1,7 +1,6 @@
 use cgmath::*;
 use font::*;
 use hashbrown::HashMap;
-use render::*;
 use texture::packer::*;
 use texture::*;
 use types::*;
@@ -51,7 +50,7 @@ impl FontAtlas {
         self.fonts.push(Font::from_path(path));
     }
 
-    pub fn rasterize(&mut self, desc: &StringDescription, quads: &mut Vec<Quad>) {
+    pub fn rasterize(&mut self, desc: &StringDescription, quads: &mut Vec<SpriteDescription>) {
         // Needed for glyph calculation.
         let font_index = desc.font.key();
         let font = &self.fonts[font_index];
@@ -95,7 +94,7 @@ impl FontAtlas {
 
             // Create the vertex.
             if value.visible {
-                quads.push(Quad::new(
+                quads.push(SpriteDescription::new_raw(
                     Vector3::new(
                         desc.pos.x + caret.x + value.offset.x,
                         desc.pos.y + caret.y - value.offset.y,

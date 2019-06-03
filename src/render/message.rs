@@ -1,4 +1,3 @@
-use render::*;
 use texture::*;
 use types::*;
 
@@ -23,8 +22,8 @@ impl Default for RenderState {
 }
 
 pub struct BatchState {
-    pub sprites: Vec<Quad>,
-    pub strings: Vec<Quad>,
+    pub sprites: Vec<SpriteDescription>,
+    pub strings: Vec<SpriteDescription>,
     pub dirty_sprites: bool,
     pub dirty_strings: bool,
 }

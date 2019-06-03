@@ -4,14 +4,13 @@ use render::gl::raw::*;
 use render::gl::shader::*;
 use render::gl::texture_handle::*;
 use render::gl::window::*;
-use render::Quad;
 use texture::*;
 use types::*;
 
 struct Batch {
     desc: BatchDescription,
-    sprites: Buffer<Quad>,
-    strings: Buffer<Quad>,
+    sprites: Buffer<SpriteDescription>,
+    strings: Buffer<SpriteDescription>,
     matrix_translate_scaled: Matrix4<f32>,
     matrix_full: Matrix4<f32>,
 }
@@ -95,11 +94,11 @@ impl OpenGLState {
         batch.matrix_full = matrix_full;
     }
 
-    pub fn batch_sprite_set(&mut self, index: usize, quads: &Vec<Quad>) {
+    pub fn batch_sprite_set(&mut self, index: usize, quads: &Vec<SpriteDescription>) {
         self.batches[index].sprites.set(quads);
     }
 
-    pub fn batch_string_set(&mut self, index: usize, quads: &Vec<Quad>) {
+    pub fn batch_string_set(&mut self, index: usize, quads: &Vec<SpriteDescription>) {
         self.batches[index].strings.set(quads);
     }
 

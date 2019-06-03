@@ -21,15 +21,15 @@ fn main() {
 
     let background = engine.batch_create(&BatchDescription::default());
     let mut sprites = Vec::new();
-    for x in 0..350 {
+    for x in -500..500 {
         for y in -500..500 {
-            sprites.push(SpriteDescription {
-                pos: Vector3::new(x as f32 * 5.0, y as f32 * 5.0, 0f32),
-                size: Vector2::new(5.0, 5.0),
-                color: BLUE,
-                texture: DEFAULT_TEXTURE,
-                rotation: 0.125,
-            });
+            sprites.push(SpriteDescription::new(
+                Vector3::new(x as f32 * 1.0, y as f32 * 1.0, 0f32),
+                Vector2::new(1.0, 1.0),
+                DEFAULT_TEXTURE,
+                BLUE,
+                0.125,
+            ));
         }
     }
 
@@ -58,8 +58,8 @@ fn main() {
             },
             _ => {},
         });
-        let fps = (1.0 / clock.get_delta()) as u32;
-        let string = format!("{}fps", fps);
+        // let fps = (1.0 / clock.get_delta()) as u32;
+        // let string = format!("{}fps", fps);
         // engine.text_update(
         //     &text,
         //     &string,
@@ -67,7 +67,7 @@ fn main() {
         // );
         // translation.x -= 25.0 * clock.get_delta();
         for desc in &mut sprites {
-            desc.rotation = desc.rotation + 0.1 * clock.get_delta();
+            desc.rotation(0.25 * clock.get_delta());
         }
         engine.sprite_set(&background, &sprites);
         engine.window_commit();
