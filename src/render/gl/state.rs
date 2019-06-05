@@ -28,7 +28,7 @@ pub struct OpenGLState {
 fn matrix_from_bounds(bounds: &Vector2<f64>) -> Matrix4<f32> {
     let w = bounds.x as f32 / 2.0;
     let h = bounds.y as f32 / 2.0;
-    ortho(-w.floor(), w.ceil(), -h.floor(), h.ceil(), -1000.0, 1000.0)
+    ortho(-w.floor(), w.ceil(), -h.floor(), h.ceil(), -1.0, 1.0)
 }
 
 fn matrix_from_translate_scaled(translation: &Vector2<f32>, scale: f32) -> Matrix4<f32> {

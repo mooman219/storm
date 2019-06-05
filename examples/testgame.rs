@@ -1,10 +1,9 @@
-#![allow(dead_code)]
-
 extern crate log;
 extern crate storm;
 
 mod logger;
 
+use cgmath::prelude::*;
 use cgmath::*;
 use log::LevelFilter;
 use logger::*;
@@ -16,71 +15,74 @@ use storm::*;
 fn main() {
     SimpleLogger::init(LevelFilter::Trace);
 
-    let mut clock = Clock::new(14400);
+    let mut clock = Clock::new(144);
     let mut engine = Engine::new();
 
-    let background = engine.batch_create(&BatchDescription::default());
+    let screen = engine.batch_create(&BatchDescription::default());
     let mut sprites = Vec::new();
-    for x in -50..50 {
-        for y in -50..50 {
-            sprites.push(SpriteDescription::new(
-                Vector3::new(x as f32 * 1.0, y as f32 * 1.0, 0.0),
-                Vector2::new(1.0, 1.0),
-                DEFAULT_TEXTURE,
-                BLUE,
-                0.125,
-            ));
+    let mut particles = Vec::new();
+    for x in -250..250 {
+        for y in -250..250 {
+            let (sprite, particle) = Particle::new(Vector3::new(x as f32 * 2.0, y as f32 * 2.0, 0.0));
+            sprites.push(sprite);
+            particles.push(particle);
         }
     }
 
-    let mut strings = Vec::new();
-    {
-        let mut string = StringDescription::default();
-        string.set_pos(Vector3::new(-100.0, 100.0, 0.0));
-        string.set_scale(30);
-        string.set_string("Test");
-        strings.push(string);
-    }
-    engine.string_set(&background, &strings);
-
-    // let speed = 200f32;
-    // let mut velocity = Vector2::zero()
-    // let mut translation = Vector2::zero();
     let mut is_active = true;
-
     while is_active {
         engine.input_poll(|message| match message {
             InputMessage::CloseRequested => is_active = false,
             InputMessage::KeyPressed(key) => match key {
                 KeyboardButton::Escape => is_active = false,
-                // KeyboardButton::W => sprite.velocity(Vector2::new(0f32, speed)),
-                // KeyboardButton::S => sprite.velocity(Vector2::new(0f32, -speed)),
-                // KeyboardButton::A => sprite.velocity(Vector2::new(-speed, 0f32)),
-                // KeyboardButton::D => sprite.velocity(Vector2::new(speed, 0f32)),
-                _ => {},
-            },
-            InputMessage::KeyReleased(key) => match key {
-                // KeyboardButton::W => sprite.velocity(Vector2::new(0f32, -speed)),
-                // KeyboardButton::S => sprite.velocity(Vector2::new(0f32, speed)),
-                // KeyboardButton::A => sprite.velocity(Vector2::new(speed, 0f32)),
-                // KeyboardButton::D => sprite.velocity(Vector2::new(-speed, 0f32)),
                 _ => {},
             },
             _ => {},
         });
-        // let fps = (1.0 / clock.get_delta()) as u32;
-        // let string = format!("{}fps", fps);
-        // engine.text_update(
-        //     &text,
-        //     &string,
-        //     &StringDescription::default().max_width(Some(2000.0)).pos(Vector3::new(-1000.0, 650.0, 0.5)),
-        // );
-        // translation.x -= 25.0 * clock.get_delta();
-        for desc in &mut sprites {
-            desc.add_rotation(0.125 * clock.get_delta());
+
+        let delta = clock.get_delta();
+        for index in 0..sprites.len() {
+            Particle::tick(&mut sprites[index], &mut particles[index], delta);
         }
-        engine.sprite_set(&background, &sprites);
+
+        engine.sprite_set(&screen, &sprites);
         engine.window_commit();
         clock.tick();
+    }
+}
+
+pub struct Particle {
+    pos: Vector2<f32>,
+    velocity: Vector2<f32>,
+    acceleration: Vector2<f32>,
+}
+
+impl Particle {
+    // Play with these values to alter the way gravity works.
+    const G: f32 = 6.674;
+    const MASS: f32 = 200.0;
+
+    pub fn new(pos: Vector3<f32>) -> (SpriteDescription, Particle) {
+        let sprite = SpriteDescription::new(pos, Vector2::new(2.0, 2.0), DEFAULT_TEXTURE, BLACK, 0.0);
+        let particle = Particle {
+            pos: pos.truncate(),
+            velocity: Vector2::zero(),
+            acceleration: Vector2::zero(),
+        };
+        (sprite, particle)
+    }
+
+    pub fn tick(sprite: &mut SpriteDescription, particle: &mut Particle, delta: f32) {
+        let length_squared = particle.pos.x * particle.pos.x + particle.pos.y * particle.pos.y;
+        let length = f32::sqrt(length_squared);
+        let norm = particle.pos / length;
+        let norm_squared = particle.pos / length_squared;
+        particle.acceleration = -(norm * (Self::G * Self::MASS)).div_element_wise(norm_squared);
+        particle.velocity += particle.acceleration;
+        particle.pos += particle.velocity;
+
+        let velocity = particle.velocity + particle.acceleration * delta;
+        let position = particle.pos + velocity * delta;
+        sprite.set_pos(position.extend(0.0));
     }
 }

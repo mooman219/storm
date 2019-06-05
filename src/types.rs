@@ -128,25 +128,22 @@ impl SpriteDescription {
     }
 
     /// Offset the position. Units are measured in pixels.
-    pub fn add_pos(&mut self, pos: Vector3<f32>) -> &mut SpriteDescription {
+    pub fn add_pos(&mut self, pos: Vector3<f32>) {
         self.pos += pos;
-        self
     }
 
     /// Offset the size. Units are measured in pixels.
-    pub fn add_size(&mut self, size: Vector2<f32>) -> &mut SpriteDescription {
+    pub fn add_size(&mut self, size: Vector2<f32>) {
         self.size += {
             let x = (size.x as u32) & 0xFFFF;
             let y = (size.y as u32) & 0xFFFF;
             Vector2::new(x as u16, y as u16)
         };
-        self
     }
 
     /// Offset the rotation. Rotation is measured in turns from [0, 1).
-    pub fn add_rotation(&mut self, rotation: f32) -> &mut SpriteDescription {
+    pub fn add_rotation(&mut self, rotation: f32) {
         self.rotation += (rotation * 65536.0) as u16;
-        self
     }
 
     /// Units are measured in pixels.
@@ -173,16 +170,19 @@ impl SpriteDescription {
         self.rotation as f32 / 65536.0
     }
 
+    /// Set the position. Units are measured in pixels.
+    pub fn set_pos(&mut self, pos: Vector3<f32>) {
+        self.pos = pos;
+    }
+
     /// Set the color.
-    pub fn set_color(&mut self, color: RGBA8) -> &mut SpriteDescription {
+    pub fn set_color(&mut self, color: RGBA8) {
         self.color = color;
-        self
     }
 
     /// Set the texture.
-    pub fn set_texture(&mut self, texture: TextureReference) -> &mut SpriteDescription {
+    pub fn set_texture(&mut self, texture: TextureReference) {
         self.uv = texture.uv;
-        self
     }
 }
 
