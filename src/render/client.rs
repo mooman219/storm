@@ -87,8 +87,6 @@ impl RenderClient {
 
     pub fn font_create(&mut self, path: &str) -> FontReference {
         self.font_atlas.add_font_path(path);
-        let state = self.render_producer.get();
-        state.font_atlas = self.font_atlas.sync();
         self.font_count += 1;
         FontReference::new(self.font_count)
     }
@@ -102,6 +100,7 @@ impl RenderClient {
         for desc in descs {
             self.font_atlas.rasterize(desc, &mut batch.strings);
         }
+        state.font_atlas = self.font_atlas.sync();
     }
 
     pub fn string_clear(&mut self, batch: &BatchReference) {

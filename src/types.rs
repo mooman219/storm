@@ -47,22 +47,22 @@ impl Default for BatchDescription {
 }
 
 impl BatchDescription {
-    pub fn translation(&mut self, translation: Vector2<f32>) -> &mut BatchDescription {
+    pub fn set_translation(&mut self, translation: Vector2<f32>) -> &mut BatchDescription {
         self.translation = translation;
         self
     }
 
-    pub fn scale(&mut self, scale: f32) -> &mut BatchDescription {
+    pub fn set_scale(&mut self, scale: f32) -> &mut BatchDescription {
         self.scale = scale;
         self
     }
 
-    pub fn rotation(&mut self, rotation: f32) -> &mut BatchDescription {
+    pub fn set_rotation(&mut self, rotation: f32) -> &mut BatchDescription {
         self.rotation = rotation;
         self
     }
 
-    pub fn visible(&mut self, visible: bool) -> &mut BatchDescription {
+    pub fn set_visible(&mut self, visible: bool) -> &mut BatchDescription {
         self.visible = visible;
         self
     }
@@ -95,18 +95,6 @@ impl Default for SpriteDescription {
     }
 }
 
-// {
-//     /// Units are measured in pixels.
-//     pub pos: Vector3<f32>,
-//     /// Units are measured in pixels.
-//     pub size: Vector2<f32>,
-//     pub color: RGBA8,
-//     pub texture: TextureReference,
-//     /// Rotation is measured in turns from [0, 1). Values outside of the range are wrapped into
-// the     /// range. For example, 1.75 is wrapped into 0.75, -0.4 is wrapped into 0.6.
-//     pub rotation: f32,
-// }
-
 impl SpriteDescription {
     /// The Vector4's are in the order of (xmin, xmax, ymin, ymax).
     pub(crate) fn new_raw(
@@ -125,7 +113,7 @@ impl SpriteDescription {
             },
             uv: uv,
             color: color,
-            rotation: (rotation.fract() * 65535.0) as u16,
+            rotation: (rotation.fract() * 65536.0) as u16,
         }
     }
 
@@ -140,13 +128,13 @@ impl SpriteDescription {
     }
 
     /// Offset the position. Units are measured in pixels.
-    pub fn pos(&mut self, pos: Vector3<f32>) -> &mut SpriteDescription {
+    pub fn add_pos(&mut self, pos: Vector3<f32>) -> &mut SpriteDescription {
         self.pos += pos;
         self
     }
 
     /// Offset the size. Units are measured in pixels.
-    pub fn size(&mut self, size: Vector2<f32>) -> &mut SpriteDescription {
+    pub fn add_size(&mut self, size: Vector2<f32>) -> &mut SpriteDescription {
         self.size += {
             let x = (size.x as u32) & 0xFFFF;
             let y = (size.y as u32) & 0xFFFF;
@@ -156,14 +144,33 @@ impl SpriteDescription {
     }
 
     /// Offset the rotation. Rotation is measured in turns from [0, 1).
-    pub fn rotation(&mut self, rotation: f32) -> &mut SpriteDescription {
-        self.rotation += (rotation * 65535.0) as u16;
-        // self.rotation += 1;
+    pub fn add_rotation(&mut self, rotation: f32) -> &mut SpriteDescription {
+        self.rotation += (rotation * 65536.0) as u16;
         self
     }
 
+    /// Units are measured in pixels.
     pub fn get_pos(&self) -> Vector3<f32> {
         self.pos
+    }
+
+    /// Units are measured in pixels.
+    pub fn get_size(&self) -> Vector2<f32> {
+        Vector2::new(self.size.x as f32, self.size.y as f32)
+    }
+
+    pub fn get_texture(&self) -> TextureReference {
+        TextureReference::new(self.uv)
+    }
+
+    pub fn get_color(&self) -> RGBA8 {
+        self.color
+    }
+
+    /// Rotation is measured in turns from [0, 1). Values outside of the range are wrapped into the
+    /// range. For example, 1.75 is wrapped into 0.75, -0.4 is wrapped into 0.6.
+    pub fn get_rotation(&self) -> f32 {
+        self.rotation as f32 / 65536.0
     }
 
     /// Set the color.
@@ -231,32 +238,51 @@ impl Default for StringDescription {
 }
 
 impl StringDescription {
-    pub fn string(&mut self, string: String) -> &mut StringDescription {
-        self.string = string;
-        self
+    pub fn new(
+        string: String,
+        pos: Vector3<f32>,
+        max_width: Option<f32>,
+        scale: u32,
+        color: RGBA8,
+        font: FontReference,
+    ) -> StringDescription {
+        StringDescription {
+            string: string,
+            pos: pos,
+            max_width: max_width,
+            scale: scale,
+            color: color,
+            font: font,
+        }
     }
 
-    pub fn pos(&mut self, pos: Vector3<f32>) -> &mut StringDescription {
+    /// Offset the position. Units are measured in pixels.
+    pub fn add_pos(&mut self, pos: Vector3<f32>) {
+        self.pos += pos;
+    }
+
+    pub fn set_string(&mut self, string: &str) {
+        self.string.clear();
+        self.string.push_str(&string);
+    }
+
+    pub fn set_pos(&mut self, pos: Vector3<f32>) {
         self.pos = pos;
-        self
     }
 
-    pub fn max_width(&mut self, max_width: Option<f32>) -> &mut StringDescription {
+    pub fn set_max_width(&mut self, max_width: Option<f32>) {
         self.max_width = max_width;
-        self
     }
 
-    pub fn scale(&mut self, scale: u32) -> &mut StringDescription {
+    pub fn set_scale(&mut self, scale: u32) {
         self.scale = scale;
-        self
     }
 
-    pub fn color(&mut self, color: RGBA8) -> &mut StringDescription {
+    pub fn set_color(&mut self, color: RGBA8) {
         self.color = color;
-        self
     }
 
-    pub fn font(&mut self, font: FontReference) -> &mut StringDescription {
+    pub fn set_font(&mut self, font: FontReference) -> &mut StringDescription {
         self.font = font;
         self
     }
