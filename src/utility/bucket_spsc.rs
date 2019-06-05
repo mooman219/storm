@@ -69,6 +69,7 @@ impl<T> Buffer<T> {
             match self.try_next_head() {
                 None => {
                     thread::yield_now();
+                    // thread::sleep_ms(1);
                 },
                 Some(v) => return v,
             }
@@ -94,6 +95,7 @@ impl<T> Buffer<T> {
             match self.try_next_tail() {
                 None => {
                     thread::yield_now();
+                    // thread::sleep_ms(1);
                 },
                 Some(v) => return v,
             }

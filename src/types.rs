@@ -80,7 +80,7 @@ pub struct SpriteDescription {
     size: Vector2<u16>,
     uv: Vector4<u16>,
     color: RGBA8,
-    rotation: u8,
+    rotation: u16,
 }
 
 impl Default for SpriteDescription {
@@ -125,7 +125,7 @@ impl SpriteDescription {
             },
             uv: uv,
             color: color,
-            rotation: (rotation.fract() * 255f32) as u8,
+            rotation: (rotation.fract() * 65535.0) as u16,
         }
     }
 
@@ -157,8 +157,8 @@ impl SpriteDescription {
 
     /// Offset the rotation. Rotation is measured in turns from [0, 1).
     pub fn rotation(&mut self, rotation: f32) -> &mut SpriteDescription {
-        // self.rotation += (rotation.fract() * 255f32) as u8;
-        self.rotation += 1;
+        self.rotation += (rotation * 65535.0) as u16;
+        // self.rotation += 1;
         self
     }
 

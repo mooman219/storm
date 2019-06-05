@@ -24,7 +24,7 @@ fn main() {
     for x in -500..500 {
         for y in -500..500 {
             sprites.push(SpriteDescription::new(
-                Vector3::new(x as f32 * 1.0, y as f32 * 1.0, 0f32),
+                Vector3::new(x as f32 * 1.0, y as f32 * 1.0, 0.0),
                 Vector2::new(1.0, 1.0),
                 DEFAULT_TEXTURE,
                 BLUE,
@@ -67,7 +67,7 @@ fn main() {
         // );
         // translation.x -= 25.0 * clock.get_delta();
         for desc in &mut sprites {
-            desc.rotation(0.25 * clock.get_delta());
+            desc.rotation(0.125 * clock.get_delta());
         }
         engine.sprite_set(&background, &sprites);
         engine.window_commit();

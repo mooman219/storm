@@ -75,14 +75,14 @@ impl VertexDescription for SpriteDescription {
         enable_vertex_attrib_array(index);
         vertex_attrib_divisor(index, 1);
         vertex_attrib_pointer(
-            index,                       // Index
-            1,                           // Count
-            AttributeType::UnsignedByte, // Type
-            true,                        // Normalized
-            Self::VERTEX_SIZE as i32,    // Stride
-            size as *const _,            // Offset
+            index,                        // Index
+            1,                            // Count
+            AttributeType::UnsignedShort, // Type
+            true,                         // Normalized
+            Self::VERTEX_SIZE as i32,     // Stride
+            size as *const _,             // Offset
         );
         //index += 1;
-        //size += 1 * 1; // Count * Bytes
+        //size += 1 * 2; // Count * Bytes
     }
 }
