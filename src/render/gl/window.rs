@@ -52,4 +52,9 @@ impl Window {
     pub fn swap_buffers(&self) {
         self.inner.swap_buffers().expect("Error while swapping buffers.");
     }
+
+    #[inline]
+    pub fn set_title(&self, title: &str) {
+        self.inner.set_title(title);
+    }
 }

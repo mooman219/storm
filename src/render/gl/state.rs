@@ -65,6 +65,10 @@ impl OpenGLState {
         cull_face(CullFace::Back);
     }
 
+    pub fn window_title(&mut self, title: &str) {
+        self.window.set_title(title);
+    }
+
     pub fn upload_texture_atlas(&mut self, texture: &Image) {
         self.texture_atlas.set_texture(texture);
     }

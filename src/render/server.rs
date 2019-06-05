@@ -37,7 +37,7 @@ impl RenderServer {
             self.state.upload_font_atlas(&font_atlas);
         }
         if let Some(title) = messages.window.title.take() {
-            // TODO: Window title set
+            self.state.window_title(&title);
         }
         for message in messages.batch_changes.drain(..) {
             match message {
