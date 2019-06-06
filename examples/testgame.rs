@@ -21,9 +21,9 @@ fn main() {
     let screen = engine.batch_create(&BatchDescription::default());
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
-    for x in -250..250 {
-        for y in -250..250 {
-            let (sprite, particle) = Particle::new(Vector3::new(x as f32 * 2.0, y as f32 * 2.0, 0.0));
+    for x in -100..100 {
+        for y in -100..100 {
+            let (sprite, particle) = Particle::new(Vector3::new(x as f32 * 3.0, y as f32 * 3.0, 0.0));
             sprites.push(sprite);
             particles.push(particle);
         }
@@ -44,8 +44,8 @@ fn main() {
         for index in 0..sprites.len() {
             Particle::tick(&mut sprites[index], &mut particles[index], delta);
         }
-
         engine.sprite_set(&screen, &sprites);
+
         engine.window_commit();
         clock.tick();
     }
@@ -58,7 +58,6 @@ pub struct Particle {
 }
 
 impl Particle {
-    // Play with these values to alter the way gravity works.
     const G: f32 = 6.674;
     const MASS: f32 = 200.0;
 
@@ -76,13 +75,10 @@ impl Particle {
         let length_squared = particle.pos.x * particle.pos.x + particle.pos.y * particle.pos.y;
         let length = f32::sqrt(length_squared);
         let norm = particle.pos / length;
-        let norm_squared = particle.pos / length_squared;
-        particle.acceleration = -(norm * (Self::G * Self::MASS)).div_element_wise(norm_squared);
+        particle.acceleration = -(norm * (Self::G * Self::MASS)) / length_squared.max(500.0);
         particle.velocity += particle.acceleration;
-        particle.pos += particle.velocity;
+        particle.pos += particle.velocity * delta;
 
-        let velocity = particle.velocity + particle.acceleration * delta;
-        let position = particle.pos + velocity * delta;
-        sprite.set_pos(position.extend(0.0));
+        sprite.set_pos(particle.pos.extend(0.0));
     }
 }
