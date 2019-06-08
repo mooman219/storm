@@ -44,7 +44,7 @@ impl Engine {
     // TODO: Allow for assigning window setting on initial creation
     /// Creates and runs an instance of the engine. This creates a window on
     /// another thread which listens for messages from the engine.
-    pub fn new() -> Engine {
+    pub fn new(desc: WindowDescription) -> Engine {
         // Inter-thread messaging.
         let (render_producer_pipe, render_consumer_pipe) = bucket_spsc::make(1);
 
@@ -54,8 +54,9 @@ impl Engine {
             glutin::ContextBuilder::new()
                 .build_windowed(
                     glutin::WindowBuilder::new()
-                        .with_title("Storm Engine")
-                        .with_dimensions(LogicalSize::from((1280, 1024))),
+                        .with_title(desc.title)
+                        .with_dimensions(LogicalSize::from((desc.size.x, desc.size.y)))
+                        .with_resizable(desc.resizable),
                     &event_loop,
                 )
                 .expect("Unable to build the window."),

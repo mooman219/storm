@@ -3,6 +3,21 @@ use color::*;
 use utility::unordered_tracker::*;
 
 // ////////////////////////////////////////////////////////
+// Window
+// ////////////////////////////////////////////////////////
+
+/// Configuration for the window.
+#[derive(Debug, Clone)]
+pub struct WindowDescription {
+    /// The title of the window.
+    pub title: String,
+    /// The size of the window.
+    pub size: Vector2<u32>,
+    /// Flag for if the window is resizable.
+    pub resizable: bool,
+}
+
+// ////////////////////////////////////////////////////////
 // Batch
 // ////////////////////////////////////////////////////////
 

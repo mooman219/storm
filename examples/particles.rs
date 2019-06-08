@@ -16,7 +16,11 @@ fn main() {
     SimpleLogger::init(LevelFilter::Trace);
 
     let mut clock = Clock::new(144);
-    let mut engine = Engine::new();
+    let mut engine = Engine::new(WindowDescription {
+        title: String::from("Storm: Particles"),
+        size: Vector2::new(1280, 1024),
+        resizable: true,
+    });
 
     let screen = engine.batch_create(&BatchDescription::default());
     let mut sprites = Vec::new();

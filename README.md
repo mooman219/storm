@@ -10,6 +10,7 @@ extern crate storm;
 
 mod logger;
 
+use cgmath::*;
 use log::LevelFilter;
 use logger::*;
 use storm::time::*;
@@ -21,7 +22,11 @@ fn main() {
     // Tick at 144 ticks per second.
     let mut clock = Clock::new(144);
     // Create the engine context.
-    let mut engine = Engine::new();
+    let mut engine = Engine::new(WindowDescription {
+        title: String::from("Storm: Square"),
+        size: Vector2::new(1280, 1024),
+        resizable: true,
+    });;
     // Create a batch to draw on.
     let screen = engine.batch_create(&BatchDescription::default());
     // Add a sprite to that batch (a white square).
