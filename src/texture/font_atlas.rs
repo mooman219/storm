@@ -101,7 +101,7 @@ impl FontAtlas {
                         desc.pos.z,
                     ),
                     value.size,
-                    value.uv,
+                    TextureReference(value.uv),
                     desc.color,
                     0.0,
                 ));

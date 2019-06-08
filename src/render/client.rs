@@ -118,7 +118,7 @@ impl RenderClient {
     pub fn texture_create(&mut self, path: &str) -> TextureReference {
         let state = self.render_producer.get();
         state.texture_atlas = self.texture_atlas.sync();
-        TextureReference::new(self.texture_atlas.add_path(path))
+        TextureReference(self.texture_atlas.add_path(path))
     }
 
     // ////////////////////////////////////////////////////////

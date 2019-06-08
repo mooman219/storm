@@ -46,28 +46,6 @@ impl Default for BatchDescription {
     }
 }
 
-impl BatchDescription {
-    pub fn set_translation(&mut self, translation: Vector2<f32>) -> &mut BatchDescription {
-        self.translation = translation;
-        self
-    }
-
-    pub fn set_scale(&mut self, scale: f32) -> &mut BatchDescription {
-        self.scale = scale;
-        self
-    }
-
-    pub fn set_rotation(&mut self, rotation: f32) -> &mut BatchDescription {
-        self.rotation = rotation;
-        self
-    }
-
-    pub fn set_visible(&mut self, visible: bool) -> &mut BatchDescription {
-        self.visible = visible;
-        self
-    }
-}
-
 // ////////////////////////////////////////////////////////
 // Sprite
 // ////////////////////////////////////////////////////////
@@ -76,11 +54,14 @@ impl BatchDescription {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SpriteDescription {
-    pos: Vector3<f32>,
-    size: Vector2<u16>,
-    uv: Vector4<u16>,
-    color: RGBA8,
-    rotation: u16,
+    // Units are measured in pixels.
+    pub pos: Vector3<f32>,
+    // Units are measured in pixels.
+    pub size: Vector2<u16>,
+    pub texture: TextureReference,
+    pub color: RGBA8,
+    // Units are 1/65536th of a turn.
+    pub rotation: u16,
 }
 
 impl Default for SpriteDescription {
@@ -88,8 +69,8 @@ impl Default for SpriteDescription {
         SpriteDescription {
             pos: Vector3::new(0.0, 0.0, 0.0),
             size: Vector2::new(100, 100),
-            uv: Vector4::new(0, 4, 0, 4),
-            color: BLACK,
+            texture: DEFAULT_TEXTURE,
+            color: WHITE,
             rotation: 0,
         }
     }
@@ -97,10 +78,10 @@ impl Default for SpriteDescription {
 
 impl SpriteDescription {
     /// The Vector4's are in the order of (xmin, xmax, ymin, ymax).
-    pub(crate) fn new_raw(
+    pub fn new_raw(
         pos: Vector3<f32>,
         size: Vector2<f32>,
-        uv: Vector4<u16>,
+        texture: TextureReference,
         color: RGBA8,
         rotation: f32,
     ) -> SpriteDescription {
@@ -111,7 +92,7 @@ impl SpriteDescription {
                 let y = (size.y as u32) & 0xFFFF;
                 Vector2::new(x as u16, y as u16)
             },
-            uv: uv,
+            texture: texture,
             color: color,
             rotation: (rotation.fract() * 65536.0) as u16,
         }
@@ -124,65 +105,7 @@ impl SpriteDescription {
         color: RGBA8,
         rotation: f32,
     ) -> SpriteDescription {
-        Self::new_raw(pos, size, texture.uv, color, rotation)
-    }
-
-    /// Offset the position. Units are measured in pixels.
-    pub fn add_pos(&mut self, pos: Vector3<f32>) {
-        self.pos += pos;
-    }
-
-    /// Offset the size. Units are measured in pixels.
-    pub fn add_size(&mut self, size: Vector2<f32>) {
-        self.size += {
-            let x = (size.x as u32) & 0xFFFF;
-            let y = (size.y as u32) & 0xFFFF;
-            Vector2::new(x as u16, y as u16)
-        };
-    }
-
-    /// Offset the rotation. Rotation is measured in turns from [0, 1).
-    pub fn add_rotation(&mut self, rotation: f32) {
-        self.rotation += (rotation * 65536.0) as u16;
-    }
-
-    /// Units are measured in pixels.
-    pub fn get_pos(&self) -> Vector3<f32> {
-        self.pos
-    }
-
-    /// Units are measured in pixels.
-    pub fn get_size(&self) -> Vector2<f32> {
-        Vector2::new(self.size.x as f32, self.size.y as f32)
-    }
-
-    pub fn get_texture(&self) -> TextureReference {
-        TextureReference::new(self.uv)
-    }
-
-    pub fn get_color(&self) -> RGBA8 {
-        self.color
-    }
-
-    /// Rotation is measured in turns from [0, 1). Values outside of the range are wrapped into the
-    /// range. For example, 1.75 is wrapped into 0.75, -0.4 is wrapped into 0.6.
-    pub fn get_rotation(&self) -> f32 {
-        self.rotation as f32 / 65536.0
-    }
-
-    /// Set the position. Units are measured in pixels.
-    pub fn set_pos(&mut self, pos: Vector3<f32>) {
-        self.pos = pos;
-    }
-
-    /// Set the color.
-    pub fn set_color(&mut self, color: RGBA8) {
-        self.color = color;
-    }
-
-    /// Set the texture.
-    pub fn set_texture(&mut self, texture: TextureReference) {
-        self.uv = texture.uv;
+        Self::new_raw(pos, size, texture, color, rotation)
     }
 }
 
@@ -217,6 +140,7 @@ impl FontReference {
 #[derive(Clone, Debug)]
 pub struct StringDescription {
     pub string: String,
+    // Units are measured in pixels.
     pub pos: Vector3<f32>,
     pub max_width: Option<f32>,
     pub scale: u32,
@@ -256,7 +180,6 @@ impl StringDescription {
         }
     }
 
-    /// Offset the position. Units are measured in pixels.
     pub fn add_pos(&mut self, pos: Vector3<f32>) {
         self.pos += pos;
     }
@@ -293,24 +216,9 @@ impl StringDescription {
 // ////////////////////////////////////////////////////////
 
 /// A default texture reference for a basic white square.
-pub const DEFAULT_TEXTURE: TextureReference = TextureReference {
-    uv: Vector4::new(0, 4, 0, 4),
-};
+pub const DEFAULT_TEXTURE: TextureReference = TextureReference(Vector4::new(0, 4, 0, 4));
 
 /// Handle to reference an uploaded texture with.
 #[derive(Copy, Clone, Debug)]
-pub struct TextureReference {
-    uv: Vector4<u16>,
-}
-
-impl TextureReference {
-    pub(crate) fn new(uv: Vector4<u16>) -> TextureReference {
-        TextureReference {
-            uv: uv,
-        }
-    }
-
-    pub(crate) fn uv(&self) -> Vector4<u16> {
-        self.uv
-    }
-}
+#[repr(transparent)]
+pub struct TextureReference(pub(crate) Vector4<u16>);

@@ -59,7 +59,7 @@ impl OpenGLState {
         enable(Capability::CullFace);
         enable(Capability::Blend);
         enable(Capability::DepthTest);
-        clear_color(1.0, 1.0, 1.0, 1.0);
+        clear_color(0.0, 0.0, 0.0, 1.0);
         depth_func(DepthTest::Less);
         blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
         cull_face(CullFace::Back);

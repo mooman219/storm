@@ -11,7 +11,7 @@ use storm::color::*;
 use storm::time::*;
 use storm::*;
 
-/// Run with: cargo run --example testgame --release
+/// Run with: cargo run --example particles --release
 fn main() {
     SimpleLogger::init(LevelFilter::Trace);
 
@@ -21,8 +21,8 @@ fn main() {
     let screen = engine.batch_create(&BatchDescription::default());
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
-    for x in -100..100 {
-        for y in -100..100 {
+    for x in -500..500 {
+        for y in -500..500 {
             let (sprite, particle) = Particle::new(Vector3::new(x as f32 * 3.0, y as f32 * 3.0, 0.0));
             sprites.push(sprite);
             particles.push(particle);
@@ -62,7 +62,7 @@ impl Particle {
     const MASS: f32 = 200.0;
 
     pub fn new(pos: Vector3<f32>) -> (SpriteDescription, Particle) {
-        let sprite = SpriteDescription::new(pos, Vector2::new(2.0, 2.0), DEFAULT_TEXTURE, BLACK, 0.0);
+        let sprite = SpriteDescription::new(pos, Vector2::new(2.0, 2.0), DEFAULT_TEXTURE, WHITE, 0.0);
         let particle = Particle {
             pos: pos.truncate(),
             velocity: Vector2::zero(),
@@ -79,6 +79,6 @@ impl Particle {
         particle.velocity += particle.acceleration;
         particle.pos += particle.velocity * delta;
 
-        sprite.set_pos(particle.pos.extend(0.0));
+        sprite.pos = particle.pos.extend(0.0);
     }
 }
