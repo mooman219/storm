@@ -73,7 +73,7 @@ pub struct SpriteDescription {
     pub pos: Vector3<f32>,
     // Units are measured in pixels.
     pub size: Vector2<u16>,
-    pub texture: TextureReference,
+    pub texture: Texture,
     pub color: RGBA8,
     // Units are 1/65536th of a turn.
     pub rotation: u16,
@@ -96,7 +96,7 @@ impl SpriteDescription {
     pub fn new_raw(
         pos: Vector3<f32>,
         size: Vector2<f32>,
-        texture: TextureReference,
+        texture: Texture,
         color: RGBA8,
         rotation: f32,
     ) -> SpriteDescription {
@@ -116,7 +116,7 @@ impl SpriteDescription {
     pub fn new(
         pos: Vector3<f32>,
         size: Vector2<f32>,
-        texture: TextureReference,
+        texture: Texture,
         color: RGBA8,
         rotation: f32,
     ) -> SpriteDescription {
@@ -195,34 +195,9 @@ impl StringDescription {
         }
     }
 
-    pub fn add_pos(&mut self, pos: Vector3<f32>) {
-        self.pos += pos;
-    }
-
     pub fn set_string(&mut self, string: &str) {
         self.string.clear();
         self.string.push_str(&string);
-    }
-
-    pub fn set_pos(&mut self, pos: Vector3<f32>) {
-        self.pos = pos;
-    }
-
-    pub fn set_max_width(&mut self, max_width: Option<f32>) {
-        self.max_width = max_width;
-    }
-
-    pub fn set_scale(&mut self, scale: u32) {
-        self.scale = scale;
-    }
-
-    pub fn set_color(&mut self, color: RGBA8) {
-        self.color = color;
-    }
-
-    pub fn set_font(&mut self, font: FontReference) -> &mut StringDescription {
-        self.font = font;
-        self
     }
 }
 
@@ -231,9 +206,21 @@ impl StringDescription {
 // ////////////////////////////////////////////////////////
 
 /// A default texture reference for a basic white square.
-pub const DEFAULT_TEXTURE: TextureReference = TextureReference(Vector4::new(0, 4, 0, 4));
+pub const DEFAULT_TEXTURE: Texture = Texture(Vector4::new(0, 4, 0, 4));
 
 /// Handle to reference an uploaded texture with.
 #[derive(Copy, Clone, Debug)]
 #[repr(transparent)]
-pub struct TextureReference(pub(crate) Vector4<u16>);
+pub struct Texture(pub(crate) Vector4<u16>);
+
+impl Texture {
+    /// Mirrors the texture along the Y axis. Creates a new texture.
+    pub fn mirror_y(&self) -> Texture {
+        Texture(Vector4::new(self.0.y, self.0.x, self.0.z, self.0.w))
+    }
+
+    /// Mirrors the texture along the X axis. Creates a new texture.
+    pub fn mirror_x(&self) -> Texture {
+        Texture(Vector4::new(self.0.x, self.0.y, self.0.w, self.0.z))
+    }
+}

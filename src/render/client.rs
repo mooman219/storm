@@ -115,10 +115,11 @@ impl RenderClient {
     // Texture
     // ////////////////////////////////////////////////////////
 
-    pub fn texture_create(&mut self, path: &str) -> TextureReference {
+    pub fn texture_create(&mut self, path: &str) -> Texture {
+        let uv = self.texture_atlas.add_path(path);
         let state = self.render_producer.get();
         state.texture_atlas = self.texture_atlas.sync();
-        TextureReference(self.texture_atlas.add_path(path))
+        Texture(uv)
     }
 
     // ////////////////////////////////////////////////////////

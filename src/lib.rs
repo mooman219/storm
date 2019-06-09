@@ -162,12 +162,12 @@ impl Engine {
     // ////////////////////////////////////////////////////////
 
     /// Loads a new texture.
-    pub fn texture_load(&mut self, path: &str) -> TextureReference {
+    pub fn texture_load(&mut self, path: &str) -> Texture {
         self.render_client.texture_create(path)
     }
 
     /// Gets the default texture.
-    pub fn texture_default() -> TextureReference {
+    pub fn texture_default() -> Texture {
         DEFAULT_TEXTURE
     }
 
