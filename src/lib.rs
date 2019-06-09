@@ -55,7 +55,7 @@ impl Engine {
                 .build_windowed(
                     glutin::WindowBuilder::new()
                         .with_title(desc.title)
-                        .with_dimensions(LogicalSize::from((desc.size.x, desc.size.y)))
+                        .with_dimensions(LogicalSize::new(desc.size.x as f64, desc.size.y as f64))
                         .with_resizable(desc.resizable),
                     &event_loop,
                 )
@@ -69,7 +69,7 @@ impl Engine {
 
         Engine {
             render_client: RenderClient::new(render_producer_pipe),
-            input_manager: InputManager::new(event_loop),
+            input_manager: InputManager::new(event_loop, desc.size),
         }
     }
 

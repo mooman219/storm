@@ -15,11 +15,11 @@ pub enum InputMessage {
     /// Keyboard release event.
     KeyReleased(KeyboardButton),
     /// Cursor press event.
-    CursorPressed(CursorButton, Vector2<f64>),
+    CursorPressed(CursorButton, Vector2<f32>),
     /// Cursor release event.
-    CursorReleased(CursorButton, Vector2<f64>),
+    CursorReleased(CursorButton, Vector2<f32>),
     /// Cursor moved event.
-    CursorMoved(Vector2<f64>),
+    CursorMoved(Vector2<f32>),
     /// Cursor left the bounds of the window event.
     CursorLeft,
     /// Cursor entered the bounds of the window event.

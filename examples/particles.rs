@@ -18,7 +18,7 @@ fn main() {
     let mut clock = Clock::new(144);
     let mut engine = Engine::new(WindowDescription {
         title: String::from("Storm: Particles"),
-        size: Vector2::new(1280, 1024),
+        size: Vector2::new(1280.0, 1024.0),
         resizable: true,
     });
 

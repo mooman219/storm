@@ -18,7 +18,7 @@ fn main() {
     // Create the engine context and describe the window.
     let mut engine = Engine::new(WindowDescription {
         title: String::from("Storm: Square"),
-        size: Vector2::new(1280, 1024),
+        size: Vector2::new(1280.0, 1024.0),
         resizable: true,
     });
     // Create a batch to draw on. Batches persist between engine.window_commit()'s.

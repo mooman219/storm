@@ -12,7 +12,7 @@ pub struct WindowDescription {
     /// The title of the window.
     pub title: String,
     /// The size of the window.
-    pub size: Vector2<u32>,
+    pub size: Vector2<f32>,
     /// Flag for if the window is resizable.
     pub resizable: bool,
 }

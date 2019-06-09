@@ -6,7 +6,8 @@ use glutin::WindowEvent;
 use input::message::*;
 
 struct InputState {
-    cursor_pos: Vector2<f64>,
+    cursor_pos: Vector2<f32>,
+    window_size: Vector2<f32>,
     key_state: [bool; 512],
 }
 
@@ -16,10 +17,11 @@ pub struct InputManager {
 }
 
 impl InputManager {
-    pub fn new(event_loop: EventsLoop) -> InputManager {
+    pub fn new(event_loop: EventsLoop, window_size: Vector2<f32>) -> InputManager {
         InputManager {
             state: InputState {
                 cursor_pos: Vector2::zero(),
+                window_size: window_size,
                 key_state: [false; 512],
             },
             event_loop: event_loop,
@@ -37,6 +39,9 @@ impl InputManager {
                 // Window
                 WindowEvent::CloseRequested => {
                     callback(InputMessage::CloseRequested);
+                },
+                WindowEvent::Resized(size) => {
+                    state.window_size = Vector2::new(size.width as f32, size.height as f32);
                 },
 
                 // Keyboard
@@ -79,11 +84,11 @@ impl InputManager {
                     position,
                     ..
                 } => {
-                    let (x, y) = position.into();
-                    state.cursor_pos = Vector2::new(x, y);
+                    state.cursor_pos = Vector2::new(
+                        position.x as f32 - state.window_size.x / 2.0,
+                        -position.y as f32 + state.window_size.y / 2.0,
+                    );
                 },
-
-                // Mouse
                 WindowEvent::MouseInput {
                     state: button_state,
                     button,
