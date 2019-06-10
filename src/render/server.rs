@@ -20,7 +20,7 @@ impl RenderServer {
     pub fn run_forever(&mut self) {
         let mut timer_render = Timer::new("[R] Frame");
         loop {
-            self.render_consumer.spin_next();
+            self.render_consumer.next();
             timer_render.start();
             self.update();
             self.state.draw();

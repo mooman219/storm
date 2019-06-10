@@ -3,7 +3,7 @@ use parking_lot::Mutex;
 use std::sync::Arc;
 
 pub struct Producer {
-    cvar: Arc<(Mutex<bool>, Condvar)>,
+    cvar: Arc<(Mutex<()>, Condvar)>,
 }
 
 impl Producer {
@@ -15,7 +15,7 @@ impl Producer {
 }
 
 pub struct Consumer {
-    cvar: Arc<(Mutex<bool>, Condvar)>,
+    cvar: Arc<(Mutex<()>, Condvar)>,
 }
 
 impl Consumer {
@@ -36,7 +36,7 @@ impl Clone for Consumer {
 
 pub fn make() -> (Producer, Consumer) {
     // This is the only place where a buffer is created.
-    let arc = Arc::new((Mutex::new(false), Condvar::new()));
+    let arc = Arc::new((Mutex::new(()), Condvar::new()));
     (
         Producer {
             cvar: arc.clone(),

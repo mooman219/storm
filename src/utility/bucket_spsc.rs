@@ -1,3 +1,5 @@
+use parking_lot::Condvar;
+use parking_lot::Mutex;
 use std::cell::Cell;
 use std::cell::UnsafeCell;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -9,19 +11,21 @@ const CACHELINE: usize = CACHELINE_LEN / std::mem::size_of::<usize>();
 
 #[repr(C)]
 pub struct Buffer<T> {
+    // Consumer cacheline:
+    head: AtomicUsize,        // 1 word
+    shadow_tail: Cell<usize>, // 1 word
+    _pad1: [usize; CACHELINE - 2],
+    // Producer cacheline:
+    tail: AtomicUsize,        // 1 word
+    shadow_head: Cell<usize>, // 1 word
+    _pad2: [usize; CACHELINE - 2],
     // Shared cacheline:
     buffer: Box<[UnsafeCell<T>]>, // 2 words
     capacity: usize,              // 1 word
     allocated_size: usize,        // 1 word
-    _pad1: [usize; CACHELINE - 4],
-    // Consumer cacheline:
-    head: AtomicUsize,        // 1 word
-    shadow_tail: Cell<usize>, // 1 word
-    _pad2: [usize; CACHELINE - 2],
-    // Producer cacheline:
-    tail: AtomicUsize,        // 1 word
-    shadow_head: Cell<usize>, // 1 word
-    _pad3: [usize; CACHELINE - 2],
+    lock_state: Mutex<usize>,     // 2 words
+    lock_condition: Condvar,      // 1 word
+    _pad3: [usize; CACHELINE - 7],
 }
 
 unsafe impl<T: Sync> Sync for Buffer<T> {}
@@ -64,12 +68,15 @@ impl<T> Buffer<T> {
         Some(self.buffer[next_head & (self.allocated_size - 1)].get())
     }
 
-    pub fn spin_next_head(&self) -> *mut T {
+    pub fn next_head(&self) -> *mut T {
         loop {
             match self.try_next_head() {
                 None => {
-                    thread::yield_now();
-                    // thread::sleep_ms(1);
+                    let mut lock = self.lock_state.lock();
+                    if *lock == 0 {
+                        self.lock_condition.wait(&mut lock);
+                    }
+                    *lock -= 1;
                 },
                 Some(v) => return v,
             }
@@ -90,14 +97,18 @@ impl<T> Buffer<T> {
         Some(self.buffer[next_tail & (self.allocated_size - 1)].get())
     }
 
-    pub fn spin_next_tail(&self) -> *mut T {
+    pub fn next_tail(&self) -> *mut T {
         loop {
             match self.try_next_tail() {
                 None => {
                     thread::yield_now();
-                    // thread::sleep_ms(1);
                 },
-                Some(v) => return v,
+                Some(v) => {
+                    let mut lock = self.lock_state.lock();
+                    *lock += 1;
+                    self.lock_condition.notify_all();
+                    return v;
+                },
             }
         }
     }
@@ -116,19 +127,21 @@ pub fn make<T: Default>(capacity: usize) -> (Producer<T>, Consumer<T>) {
     let tail_pointer = buffer[1].get();
 
     let arc = Arc::new(Buffer {
-        // Shared
-        buffer,                      // 2 words
-        capacity: adjusted_capacity, // 1 word
-        allocated_size,              // 1 word
-        _pad1: [0; CACHELINE - 4],
         // Consumer:
         head: AtomicUsize::new(0), // 1 word
         shadow_tail: Cell::new(1), // 1 word
-        _pad2: [0; CACHELINE - 2],
+        _pad1: [0; CACHELINE - 2],
         // Producer:
         tail: AtomicUsize::new(1), // 1 word
         shadow_head: Cell::new(0), // 1 word
-        _pad3: [0; CACHELINE - 2],
+        _pad2: [0; CACHELINE - 2],
+        // Shared
+        buffer,                         // 2 words
+        capacity: adjusted_capacity,    // 1 word
+        allocated_size,                 // 1 word
+        lock_state: Mutex::new(0),      // 2 words
+        lock_condition: Condvar::new(), // 1 word
+        _pad3: [0; CACHELINE - 7],
     });
 
     (
@@ -144,6 +157,7 @@ pub fn make<T: Default>(capacity: usize) -> (Producer<T>, Consumer<T>) {
 }
 
 impl<T> Consumer<T> {
+    #[inline]
     pub fn get(&mut self) -> &mut T {
         unsafe { &mut *self.head_pointer }
     }
@@ -158,8 +172,8 @@ impl<T> Consumer<T> {
         }
     }
 
-    pub fn spin_next(&mut self) {
-        self.head_pointer = (*self.buffer).spin_next_head();
+    pub fn next(&mut self) {
+        self.head_pointer = (*self.buffer).next_head();
     }
 
     pub fn capacity(&self) -> usize {
@@ -172,6 +186,7 @@ impl<T> Consumer<T> {
 }
 
 impl<T> Producer<T> {
+    #[inline]
     pub fn get(&mut self) -> &mut T {
         unsafe { &mut *self.tail_pointer }
     }
@@ -186,8 +201,8 @@ impl<T> Producer<T> {
         }
     }
 
-    pub fn spin_next(&mut self) {
-        self.tail_pointer = (*self.buffer).spin_next_tail();
+    pub fn next(&mut self) {
+        self.tail_pointer = (*self.buffer).next_tail();
     }
 
     pub fn capacity(&self) -> usize {

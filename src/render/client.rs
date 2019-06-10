@@ -132,7 +132,7 @@ impl RenderClient {
     }
 
     pub fn commit(&mut self) {
-        self.render_producer.spin_next();
+        self.render_producer.next();
         let state = self.render_producer.get();
         while state.batches.len() < self.batch_tracker.len() {
             state.batches.push(BatchState::default());
