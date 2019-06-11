@@ -28,7 +28,7 @@ pub struct AudioReference {
     key: Key<AudioReference>,
 }
 
-impl BatchReference {
+impl AudioReference {
     pub(crate) fn new(key: Key<AudioReference>) -> AudioReference {
         BatchReference {
             key: key,
