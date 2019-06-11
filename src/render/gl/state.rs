@@ -26,8 +26,8 @@ pub struct OpenGLState {
 }
 
 fn matrix_from_bounds(bounds: &Vector2<f64>) -> Matrix4<f32> {
-    let w = bounds.x as f32 / 2.0;
-    let h = bounds.y as f32 / 2.0;
+    let w = (bounds.x / 2.0) as f32;
+    let h = (bounds.y / 2.0) as f32;
     ortho(-w.floor(), w.ceil(), -h.floor(), h.ceil(), -1.0, 1.0)
 }
 
@@ -116,7 +116,7 @@ impl OpenGLState {
             self.current_logical_size = new_logical_size;
             let new_physical_size = self.window.get_physical_size();
             viewport(0, 0, new_physical_size.x as i32, new_physical_size.y as i32);
-            self.matrix_bounds = matrix_from_bounds(&new_physical_size);
+            self.matrix_bounds = matrix_from_bounds(&new_logical_size);
             for batch in &mut self.batches {
                 batch.matrix_full = self.matrix_bounds * batch.matrix_translate_scaled;
             }
