@@ -17,33 +17,31 @@ pub struct WindowDescription {
     pub resizable: bool,
 }
 
-
 // ////////////////////////////////////////////////////////
 // Audio
 // ////////////////////////////////////////////////////////
 
-/// Handle to reference audio with.
-#[derive(Copy, Clone, Debug)]
-pub struct AudioReference {
-    key: Key<AudioReference>,
-}
+// /// Handle to reference audio with.
+// #[derive(Copy, Clone, Debug)]
+// pub struct AudioReference {
+//     key: Key<AudioReference>,
+// }
 
-impl AudioReference {
-    pub(crate) fn new(key: Key<AudioReference>) -> AudioReference {
-        BatchReference {
-            key: key,
-        }
-    }
+// impl AudioReference {
+//     pub(crate) fn new(key: Key<AudioReference>) -> AudioReference {
+//         BatchReference {
+//             key: key,
+//         }
+//     }
 
-    pub(crate) fn key(&self) -> Key<AudioReference> {
-        self.key
-    }
-}
+//     pub(crate) fn key(&self) -> Key<AudioReference> {
+//         self.key
+//     }
+// }
 
 /// Configuration for audio.
 #[derive(Debug, Copy, Clone)]
-pub struct AudioDescription {
-}
+pub struct AudioDescription {}
 
 // ////////////////////////////////////////////////////////
 // Batch

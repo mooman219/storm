@@ -41,7 +41,6 @@ pub struct Engine {
 }
 
 impl Engine {
-    // TODO: Allow for assigning window setting on initial creation
     /// Creates and runs an instance of the engine. This creates a window on
     /// another thread which listens for messages from the engine.
     pub fn new(desc: WindowDescription) -> Engine {
