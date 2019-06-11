@@ -116,7 +116,7 @@ impl OpenGLState {
             self.current_logical_size = new_logical_size;
             let new_physical_size = self.window.get_physical_size();
             viewport(0, 0, new_physical_size.x as i32, new_physical_size.y as i32);
-            self.matrix_bounds = matrix_from_bounds(&new_logical_size);
+            self.matrix_bounds = matrix_from_bounds(&new_physical_size);
             for batch in &mut self.batches {
                 batch.matrix_full = self.matrix_bounds * batch.matrix_translate_scaled;
             }
