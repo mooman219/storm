@@ -1,7 +1,6 @@
 use crate::color::*;
 use crate::texture::image::*;
 use cgmath::*;
-use std;
 use std::cmp::max;
 use std::path::Path;
 
