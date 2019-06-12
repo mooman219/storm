@@ -6,13 +6,13 @@ mod uniform;
 mod utility;
 mod vertex;
 
-pub use render::gl::raw::buffer::*;
-pub use render::gl::raw::capability::*;
-pub use render::gl::raw::draw::*;
-pub use render::gl::raw::texture::*;
-pub use render::gl::raw::uniform::*;
-pub use render::gl::raw::utility::*;
-pub use render::gl::raw::vertex::*;
+pub use crate::render::gl::raw::buffer::*;
+pub use crate::render::gl::raw::capability::*;
+pub use crate::render::gl::raw::draw::*;
+pub use crate::render::gl::raw::texture::*;
+pub use crate::render::gl::raw::uniform::*;
+pub use crate::render::gl::raw::utility::*;
+pub use crate::render::gl::raw::vertex::*;
 
 use gl;
 

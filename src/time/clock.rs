@@ -1,7 +1,7 @@
+use crate::time::convert::*;
 use std::thread::sleep;
 use std::time::Duration;
 use std::time::Instant;
-use time::convert::*;
 
 pub struct Clock {
     last_tick: Instant,

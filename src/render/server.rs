@@ -1,8 +1,8 @@
-use render::gl::OpenGLState;
-use render::message::*;
-use render::*;
-use time::*;
-use utility::bucket_spsc;
+use crate::render::gl::OpenGLState;
+use crate::render::message::*;
+use crate::render::*;
+use crate::time::*;
+use crate::utility::bucket_spsc;
 
 pub struct RenderServer {
     render_consumer: bucket_spsc::Consumer<RenderState>,

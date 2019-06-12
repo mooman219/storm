@@ -1,10 +1,10 @@
+use crate::color::*;
+use crate::image;
+use crate::texture::*;
 use cgmath::*;
-use color::*;
-use image;
 use std;
 use std::cmp::max;
 use std::path::Path;
-use texture::*;
 
 #[derive(Copy, Clone, Debug)]
 struct Rect {

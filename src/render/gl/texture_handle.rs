@@ -1,5 +1,5 @@
-use render::gl::raw::*;
-use texture::*;
+use crate::render::gl::raw::*;
+use crate::texture::*;
 
 static DEFAULT: [u8; 4] = [255u8, 255u8, 255u8, 255u8];
 

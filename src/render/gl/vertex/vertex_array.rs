@@ -1,5 +1,5 @@
-use render::gl::raw::*;
-use render::gl::vertex::*;
+use crate::render::gl::raw::*;
+use crate::render::gl::vertex::*;
 use std::marker::PhantomData;
 
 pub struct VertexArray<T: VertexDescription> {

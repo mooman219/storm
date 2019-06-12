@@ -1,5 +1,5 @@
-use texture::*;
-use types::*;
+use crate::texture::*;
+use crate::types::*;
 
 pub struct RenderState {
     pub batches: Vec<BatchState>,

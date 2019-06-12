@@ -1,6 +1,6 @@
+use crate::render::gl::raw::*;
+use crate::render::gl::shader::shader_program::*;
 use cgmath::*;
-use render::gl::raw::*;
-use render::gl::shader::shader_program::*;
 
 static VERTEX: &str = r#"
 #version 330

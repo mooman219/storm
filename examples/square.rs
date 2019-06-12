@@ -3,9 +3,9 @@ extern crate storm;
 
 mod logger;
 
-use cgmath::*;
+use crate::cgmath::*;
+use crate::logger::*;
 use log::LevelFilter;
-use logger::*;
 use storm::time::*;
 use storm::*;
 

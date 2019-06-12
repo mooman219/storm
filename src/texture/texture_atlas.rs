@@ -1,8 +1,8 @@
+use crate::color;
+use crate::texture::packer::*;
+use crate::texture::*;
 use cgmath::*;
-use color;
 use std::path::Path;
-use texture::packer::*;
-use texture::*;
 
 pub struct TextureAtlas {
     packer: TexturePacker,

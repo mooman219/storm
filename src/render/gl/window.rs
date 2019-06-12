@@ -1,7 +1,7 @@
+use crate::render::gl::raw::*;
 use cgmath::*;
 use glutin;
 use glutin::ContextTrait;
-use render::gl::raw::*;
 
 pub struct Window {
     inner: glutin::WindowedContext,

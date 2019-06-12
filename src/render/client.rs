@@ -1,9 +1,9 @@
-use render::message::*;
+use crate::render::message::*;
+use crate::texture::*;
+use crate::types::*;
+use crate::utility::bucket_spsc;
+use crate::utility::unordered_tracker::*;
 use std::ptr;
-use texture::*;
-use types::*;
-use utility::bucket_spsc;
-use utility::unordered_tracker::*;
 
 pub struct RenderClient {
     render_producer: bucket_spsc::Producer<RenderState>,

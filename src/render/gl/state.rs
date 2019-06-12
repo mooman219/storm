@@ -1,11 +1,11 @@
+use crate::render::gl::buffer::*;
+use crate::render::gl::raw::*;
+use crate::render::gl::shader::*;
+use crate::render::gl::texture_handle::*;
+use crate::render::gl::window::*;
+use crate::texture::*;
+use crate::types::*;
 use cgmath::*;
-use render::gl::buffer::*;
-use render::gl::raw::*;
-use render::gl::shader::*;
-use render::gl::texture_handle::*;
-use render::gl::window::*;
-use texture::*;
-use types::*;
 
 struct Batch {
     desc: BatchDescription,

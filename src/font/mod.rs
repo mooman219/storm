@@ -1,3 +1,3 @@
 mod rusttype;
 
-pub use font::rusttype::*;
+pub use crate::font::rusttype::*;

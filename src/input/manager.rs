@@ -1,9 +1,9 @@
+use crate::input::message::*;
 use cgmath::*;
 use glutin::ElementState;
 use glutin::Event;
 use glutin::EventsLoop;
 use glutin::WindowEvent;
-use input::message::*;
 
 struct InputState {
     cursor_pos: Vector2<f32>,

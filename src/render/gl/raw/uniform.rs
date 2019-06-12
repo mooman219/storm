@@ -1,5 +1,5 @@
+use crate::render::gl::raw::bool_to_enum;
 use gl;
-use render::gl::raw::bool_to_enum;
 
 /// Specify the value of a uniform variable for the current program object.
 ///

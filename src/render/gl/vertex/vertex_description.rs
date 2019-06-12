@@ -1,6 +1,6 @@
-use render::gl::raw::*;
+use crate::render::gl::raw::*;
+use crate::types::*;
 use std::mem;
-use types::*;
 
 pub trait VertexDescription {
     const VERTEX_SIZE: usize;

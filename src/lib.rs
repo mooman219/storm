@@ -18,9 +18,9 @@ pub extern crate cgmath;
 pub mod math;
 pub mod time;
 
-pub use input::*;
-pub use texture::*;
-pub use types::*;
+pub use crate::input::*;
+pub use crate::texture::*;
+pub use crate::types::*;
 
 mod font;
 mod input;
@@ -29,10 +29,10 @@ mod texture;
 mod types;
 mod utility;
 
+use crate::render::*;
+use crate::utility::bucket_spsc;
 use glutin::dpi::*;
-use render::*;
 use std::thread;
-use utility::bucket_spsc;
 
 /// The main entry point into the Storm engine.
 pub struct Engine {

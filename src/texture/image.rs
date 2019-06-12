@@ -1,4 +1,4 @@
-use color::*;
+use crate::color::*;
 use image::{DynamicImage, ImageBuffer, Rgba};
 
 #[derive(Clone, Debug)]

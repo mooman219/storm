@@ -1,5 +1,5 @@
 mod manager;
 mod message;
 
-pub(crate) use input::manager::*;
-pub use input::message::*;
+pub(crate) use crate::input::manager::*;
+pub use crate::input::message::*;

@@ -1,6 +1,6 @@
+use crate::color::*;
+use crate::utility::unordered_tracker::*;
 use cgmath::*;
-use color::*;
-use utility::unordered_tracker::*;
 
 // ////////////////////////////////////////////////////////
 // Window

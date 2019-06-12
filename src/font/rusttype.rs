@@ -1,5 +1,5 @@
+use crate::color;
 use cgmath::*;
-use color;
 use rusttype;
 use std::fs::File;
 use std::io::BufReader;

@@ -1,9 +1,9 @@
+use crate::font::*;
+use crate::texture::packer::*;
+use crate::texture::*;
+use crate::types::*;
 use cgmath::*;
-use font::*;
 use hashbrown::HashMap;
-use texture::packer::*;
-use texture::*;
-use types::*;
 use unicode_normalization::UnicodeNormalization;
 
 #[derive(Debug, Hash, Copy, Clone, Eq, PartialEq)]
