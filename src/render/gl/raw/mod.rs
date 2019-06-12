@@ -14,8 +14,6 @@ pub use crate::render::gl::raw::uniform::*;
 pub use crate::render::gl::raw::utility::*;
 pub use crate::render::gl::raw::vertex::*;
 
-use gl;
-
 /// Set the viewport.
 ///
 /// # Arguments

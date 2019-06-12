@@ -1,4 +1,3 @@
-use gl;
 use std::os::raw::c_void;
 
 #[repr(u32)]

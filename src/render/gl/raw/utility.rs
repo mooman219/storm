@@ -1,4 +1,3 @@
-use gl;
 use std::ffi::CStr;
 use std::os::raw::c_void;
 

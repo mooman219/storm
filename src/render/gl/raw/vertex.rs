@@ -1,5 +1,5 @@
 use crate::render::gl::raw::bool_to_enum;
-use gl;
+
 use std::os::raw::c_void;
 
 #[repr(u32)]

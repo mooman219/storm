@@ -1,5 +1,3 @@
-use gl;
-
 #[repr(u32)]
 #[derive(Copy, Clone)]
 pub enum Capability {
