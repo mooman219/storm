@@ -1,6 +1,5 @@
 use crate::color::*;
-use crate::image;
-use crate::texture::*;
+use crate::texture::image::*;
 use cgmath::*;
 use std;
 use std::cmp::max;

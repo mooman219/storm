@@ -1,19 +1,11 @@
 #![feature(const_fn, asm, test, alloc_layout_extra)]
 #![allow(dead_code, non_camel_case_types, non_snake_case, intra_doc_link_resolution_failure)]
 
-extern crate core;
-extern crate gl;
-extern crate glutin;
-extern crate image;
 #[macro_use]
 extern crate log;
-extern crate hashbrown;
-extern crate parking_lot;
-extern crate rusttype;
 extern crate test;
-extern crate unicode_normalization;
 
-pub extern crate cgmath;
+pub use cgmath;
 
 pub mod math;
 pub mod time;
