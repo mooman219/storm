@@ -1,17 +1,9 @@
-extern crate log;
-extern crate storm;
-
-mod logger;
-
 use crate::cgmath::*;
-use crate::logger::*;
-use log::LevelFilter;
 use storm::time::*;
 use storm::*;
 
 /// Run with: cargo run --example texture --release
 fn main() {
-    SimpleLogger::init(LevelFilter::Trace);
     let mut clock = Clock::new(144);
     let mut engine = Engine::new(WindowDescription {
         title: String::from("Storm: Texture"),

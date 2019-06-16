@@ -2,7 +2,7 @@
 #![allow(dead_code, non_camel_case_types, non_snake_case, intra_doc_link_resolution_failure)]
 
 #[macro_use]
-extern crate log;
+pub extern crate log;
 extern crate test;
 
 pub use cgmath;
@@ -36,6 +36,8 @@ impl Engine {
     /// Creates and runs an instance of the engine. This creates a window on
     /// another thread which listens for messages from the engine.
     pub fn new(desc: WindowDescription) -> Engine {
+        simple_logger::init().unwrap();
+
         // Inter-thread messaging.
         let (render_producer_pipe, render_consumer_pipe) = bucket_spsc::make(1);
 

@@ -1,18 +1,9 @@
-extern crate log;
-extern crate storm;
-
-mod logger;
-
 use crate::cgmath::*;
-use crate::logger::*;
-use log::LevelFilter;
 use storm::time::*;
 use storm::*;
 
 /// Run with: cargo run --example square --release
 fn main() {
-    // It's ideal to setup a logger to get the engine output.
-    SimpleLogger::init(LevelFilter::Trace);
     // Tick at 144 ticks per second.
     let mut clock = Clock::new(144);
     // Create the engine context and describe the window.
