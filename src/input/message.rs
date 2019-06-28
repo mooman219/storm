@@ -1,8 +1,8 @@
 use cgmath::*;
 
 // Re-exports.
-pub use glutin::MouseButton as CursorButton;
-pub use glutin::VirtualKeyCode as KeyboardButton;
+pub use beryllium::Keycode as KeyboardButton;
+pub use beryllium::MouseButton as CursorButton;
 
 /// An input event. These are represented as an enumeration to preserve
 /// ordering when stored in a vector and read sequentially.

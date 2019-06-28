@@ -6,12 +6,18 @@ use storm::*;
 
 /// Run with: cargo run --example particles --release
 fn main() {
+    Engine::start(
+        WindowDescription {
+            title: String::from("Storm: Particles"),
+            size: Vector2::new(1280, 1024),
+            resizable: true,
+        },
+        game,
+    );
+}
+
+fn game(mut engine: Engine) {
     let mut clock = Clock::new(144);
-    let mut engine = Engine::new(WindowDescription {
-        title: String::from("Storm: Particles"),
-        size: Vector2::new(1280.0, 1024.0),
-        resizable: true,
-    });
 
     let screen = engine.batch_create(&BatchDescription::default());
     let mut sprites = Vec::new();
@@ -26,14 +32,16 @@ fn main() {
 
     let mut is_active = true;
     while is_active {
-        engine.input_poll(|message| match message {
-            InputMessage::CloseRequested => is_active = false,
-            InputMessage::KeyPressed(key) => match key {
-                KeyboardButton::Escape => is_active = false,
+        while let Some(message) = engine.input_poll() {
+            match message {
+                InputMessage::CloseRequested => is_active = false,
+                InputMessage::KeyPressed(key) => match key {
+                    KeyboardButton::Escape => is_active = false,
+                    _ => {},
+                },
                 _ => {},
-            },
-            _ => {},
-        });
+            }
+        }
 
         let delta = clock.get_delta();
         for index in 0..sprites.len() {

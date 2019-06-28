@@ -16,18 +16,18 @@ struct Batch {
 }
 
 pub struct OpenGLState {
-    window: Window,
+    window: StormWindow,
     shader: TextureShader,
     texture_atlas: TextureHandle,
     texture_font: TextureHandle,
     batches: Vec<Batch>,
     matrix_bounds: Matrix4<f32>,
-    current_logical_size: Vector2<f64>,
+    current_logical_size: Vector2<f32>,
 }
 
-fn matrix_from_bounds(bounds: &Vector2<f64>) -> Matrix4<f32> {
-    let w = (bounds.x / 2.0) as f32;
-    let h = (bounds.y / 2.0) as f32;
+fn matrix_from_bounds(bounds: &Vector2<f32>) -> Matrix4<f32> {
+    let w = bounds.x / 2.0;
+    let h = bounds.y / 2.0;
     ortho(-w.floor(), w.ceil(), -h.floor(), h.ceil(), -1.0, 1.0)
 }
 
@@ -36,8 +36,7 @@ fn matrix_from_translate_scaled(translation: &Vector2<f32>, scale: f32) -> Matri
 }
 
 impl OpenGLState {
-    pub fn new(window: Window) -> OpenGLState {
-        window.bind();
+    pub fn new(window: StormWindow) -> OpenGLState {
         let logical_size = window.get_logical_size();
         let mut state = OpenGLState {
             window: window,

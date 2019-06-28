@@ -18,7 +18,6 @@ pub struct RenderedGlyph {
 
 impl Font {
     pub fn from_bytes(bytes: &'static [u8]) -> Font {
-        trace!("Loaded font raw");
         Font {
             font: rusttype::Font::from_bytes(bytes).expect("Unable to parse font"),
         }
@@ -29,7 +28,6 @@ impl Font {
         let mut file = BufReader::new(file);
         let mut bytes = Vec::new();
         file.read_to_end(&mut bytes).expect("Unable to read bytes");
-        trace!("Loaded font from {}", path);
         Font {
             font: rusttype::Font::from_bytes(bytes).expect("Unable to parse font"),
         }

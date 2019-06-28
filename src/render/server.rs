@@ -7,28 +7,27 @@ use crate::utility::bucket_spsc;
 pub struct RenderServer {
     render_consumer: bucket_spsc::Consumer<RenderState>,
     state: OpenGLState,
+    timer_render: Timer,
 }
 
 impl RenderServer {
-    pub fn new(window: Window, render_consumer: bucket_spsc::Consumer<RenderState>) -> RenderServer {
+    pub fn new(window: StormWindow, render_consumer: bucket_spsc::Consumer<RenderState>) -> RenderServer {
         RenderServer {
             render_consumer: render_consumer,
             state: OpenGLState::new(window),
+            timer_render: Timer::new("[R] Frame"),
         }
     }
 
-    pub fn run_forever(&mut self) {
-        let mut timer_render = Timer::new("[R] Frame");
-        loop {
-            self.render_consumer.next();
-            timer_render.start();
-            self.update();
-            self.state.draw();
-            timer_render.stop();
-        }
+    pub fn tick(&mut self) {
+        self.render_consumer.next();
+        self.timer_render.start();
+        self.update();
+        self.state.draw();
+        self.timer_render.stop();
     }
 
-    pub fn update(&mut self) {
+    fn update(&mut self) {
         let messages = self.render_consumer.get();
         if let Some(texture_atlas) = messages.texture_atlas.take() {
             self.state.upload_texture_atlas(&texture_atlas);

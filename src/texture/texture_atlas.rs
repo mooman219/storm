@@ -25,14 +25,14 @@ impl TextureAtlas {
     pub fn add_texture(&mut self, texture: Image) -> Vector4<u16> {
         let uv = self.packer.pack(&texture);
         self.dirty = true;
-        trace!("Loaded raw texture at {:?}", uv);
+        info!("Loaded raw texture at {:?}", uv);
         uv
     }
 
     pub fn add_path(&mut self, path: &str) -> Vector4<u16> {
         let uv = self.packer.pack_path(Path::new(path));
         self.dirty = true;
-        trace!("Loaded texture {} at {:?}", path, uv);
+        info!("Loaded texture {} at {:?}", path, uv);
         uv
     }
 

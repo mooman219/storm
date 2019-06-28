@@ -22,47 +22,82 @@ mod types;
 mod utility;
 
 use crate::render::*;
+use crate::utility::bounded_spsc;
 use crate::utility::bucket_spsc;
-use glutin::dpi::*;
+use beryllium::{WindowFlags, WINDOW_POSITION_CENTERED};
+use cgmath::*;
 use std::thread;
 
 /// The main entry point into the Storm engine.
 pub struct Engine {
     render_client: RenderClient,
-    input_manager: InputManager,
+    input_client: InputClient,
 }
 
 impl Engine {
-    /// Creates and runs an instance of the engine. This creates a window on
-    /// another thread which listens for messages from the engine.
-    pub fn new(desc: WindowDescription) -> Engine {
+    // Starts the engine. The game_loop parameter is called once with a valid instance of the engine
+    // once the engine is constructed.
+    pub fn start(desc: WindowDescription, mut game_loop: impl FnMut(Engine) + Send + 'static) {
         simple_logger::init().unwrap();
+
+        // Init SDL2
+        let sdl = unsafe { beryllium::init().expect("Unable to init beryllium (SDL).") };
+
+        // Make a window
+        let flags = WindowFlags::default().with_shown(true).with_opengl(true).with_resizable(desc.resizable);
+        let window = sdl
+            .create_window(
+                &desc.title,              // title
+                WINDOW_POSITION_CENTERED, // x
+                WINDOW_POSITION_CENTERED, // y
+                desc.size.x,              // width
+                desc.size.y,              // height
+                flags,                    // flags
+            )
+            .expect("Unable to build the window.");
+
+        // Attributes and context
+        sdl.gl_set_attribute(
+            beryllium::GLattr::ContextFlags,
+            beryllium::CONTEXT_DEBUG_FLAG | beryllium::CONTEXT_FORWARD_COMPATIBLE_FLAG,
+        );
+        sdl.gl_set_attribute(beryllium::GLattr::ContextProfileMask, beryllium::CONTEXT_PROFILE_CORE);
+        sdl.gl_set_attribute(beryllium::GLattr::ContextMajorVersion, 4);
+        sdl.gl_set_attribute(beryllium::GLattr::ContextMinorVersion, 1);
+        unsafe {
+            let _ctx = window.gl_create_context().expect("Unable to create context");
+        }
+
+        // Loading time
+        gl::load_with(|s| unsafe { sdl.gl_get_proc_address(s) });
+
+        let window = StormWindow::new(window, &sdl);
 
         // Inter-thread messaging.
         let (render_producer_pipe, render_consumer_pipe) = bucket_spsc::make(1);
+        let (input_producer_pipe, input_consumer_pipe) = bounded_spsc::make(512);
 
-        // Winow creation
-        let event_loop = glutin::EventsLoop::new();
-        let window = Window::new(
-            glutin::ContextBuilder::new()
-                .build_windowed(
-                    glutin::WindowBuilder::new()
-                        .with_title(desc.title)
-                        .with_dimensions(LogicalSize::new(desc.size.x as f64, desc.size.y as f64))
-                        .with_resizable(desc.resizable),
-                    &event_loop,
-                )
-                .expect("Unable to build the window."),
-        );
-
-        // Rendering
         thread::spawn(move || {
-            render::start(window, render_consumer_pipe);
+            let engine = Engine {
+                render_client: RenderClient::new(render_producer_pipe),
+                input_client: InputClient::new(input_consumer_pipe),
+            };
+            game_loop(engine);
         });
 
-        Engine {
-            render_client: RenderClient::new(render_producer_pipe),
-            input_manager: InputManager::new(event_loop, desc.size),
+        // Rendering
+        let mut render_server = RenderServer::new(window, render_consumer_pipe);
+        let mut input_server = InputServer::new(
+            input_producer_pipe,
+            Vector2::new(
+                desc.size.x as f32, // width
+                desc.size.y as f32, // height
+            ),
+        );
+
+        loop {
+            render_server.tick();
+            input_server.tick(&sdl);
         }
     }
 
@@ -83,8 +118,8 @@ impl Engine {
 
     /// Fetches all the events that are pending, calls the callback function for
     /// each of them, and returns.
-    pub fn input_poll(&mut self, callback: impl FnMut(InputMessage)) {
-        self.input_manager.poll(callback);
+    pub fn input_poll(&mut self) -> Option<InputMessage> {
+        self.input_client.poll()
     }
 
     // ////////////////////////////////////////////////////////

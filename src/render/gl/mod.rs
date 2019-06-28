@@ -1,5 +1,5 @@
 pub use crate::render::gl::state::OpenGLState;
-pub use crate::render::gl::window::Window;
+pub use crate::render::gl::window::StormWindow;
 
 mod buffer;
 mod raw;

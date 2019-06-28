@@ -44,10 +44,12 @@ impl FontAtlas {
 
     pub fn add_font_bytes(&mut self, bytes: &'static [u8]) {
         self.fonts.push(Font::from_bytes(bytes));
+        info!("Loaded font from bytes");
     }
 
     pub fn add_font_path(&mut self, path: &str) {
         self.fonts.push(Font::from_path(path));
+        info!("Loaded font from path: {}", path);
     }
 
     pub fn rasterize(&mut self, desc: &StringDescription, quads: &mut Vec<SpriteDescription>) {

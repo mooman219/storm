@@ -1,48 +1,30 @@
 use crate::render::gl::raw::*;
+use beryllium::*;
 use cgmath::*;
-use glutin;
-use glutin::ContextTrait;
 
-pub struct Window {
-    inner: glutin::WindowedContext,
+pub struct StormWindow {
+    inner: Window<'static>,
 }
 
-// Mark the display as send. In some systems, glutin::GlWindow isn't send so we
-// make it as such. This might be a problem later, but not today.
-unsafe impl Send for Window {}
-
-impl Window {
-    pub fn new(window: glutin::WindowedContext) -> Window {
-        Window {
-            inner: window,
+impl StormWindow {
+    pub fn new(window: Window, sdl: &SDLToken) -> StormWindow {
+        // This really isn't safe but sue me.
+        let window_static: Window<'static> = unsafe { core::mem::transmute(window) };
+        StormWindow {
+            inner: window_static,
         }
     }
 
-    /// Initialize the display. The display is bound in the thread we're going
-    /// to be making opengl calls in. Behavior is undefined is the display is
-    /// bound outside of the thread and usually segfaults.
-    pub fn bind(&self) {
-        unsafe {
-            self.inner.context().make_current().unwrap();
-        }
-        load_with(|symbol| self.inner.get_proc_address(symbol) as *const _);
-        info!("Render: OpenGL version {}", get_string(StringTarget::Version));
+    #[inline]
+    pub fn get_logical_size(&self) -> Vector2<f32> {
+        let (x, y) = self.inner.size();
+        Vector2::new(x as f32, y as f32)
     }
 
     #[inline]
-    pub fn get_logical_size(&self) -> Vector2<f64> {
-        let logical_size = self.inner.get_inner_size().expect("Window no longer exists.");
-        Vector2::new(logical_size.width, logical_size.height)
-    }
-
-    #[inline]
-    pub fn get_physical_size(&self) -> Vector2<f64> {
-        let physical_size = self
-            .inner
-            .get_inner_size()
-            .expect("Window no longer exists.")
-            .to_physical(self.inner.get_hidpi_factor());
-        Vector2::new(physical_size.width, physical_size.height)
+    pub fn get_physical_size(&self) -> Vector2<f32> {
+        let (x, y) = self.inner.gl_get_drawable_size();
+        Vector2::new(x as f32, y as f32)
     }
 
     /// Swaps the buffers in case of double or triple buffering. You should
@@ -50,11 +32,14 @@ impl Window {
     /// image may not be displayed on the screen.
     #[inline]
     pub fn swap_buffers(&self) {
-        self.inner.swap_buffers().expect("Error while swapping buffers.");
+        unsafe {
+            self.inner.gl_swap_window();
+        }
     }
 
     #[inline]
     pub fn set_title(&self, title: &str) {
-        self.inner.set_title(title);
+        // TODO: This.
+        // self.inner.set_title(title);
     }
 }
