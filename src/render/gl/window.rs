@@ -1,29 +1,69 @@
 use crate::render::gl::raw::*;
+use crate::types::*;
 use beryllium::*;
 use cgmath::*;
+use std::mem::*;
 
 pub struct StormWindow {
-    inner: Window<'static>,
+    inner: ManuallyDrop<GLWindow<'static>>,
+}
+
+impl Drop for StormWindow {
+    fn drop<'drop>(&mut self) {
+        unsafe {
+            ManuallyDrop::drop(&mut self.inner);
+        }
+    }
 }
 
 impl StormWindow {
-    pub fn new(window: Window, sdl: &SDLToken) -> StormWindow {
-        // This really isn't safe but sue me.
-        let window_static: Window<'static> = unsafe { core::mem::transmute(window) };
+    pub fn new(desc: &WindowDescription, sdl: &SDLToken) -> StormWindow {
+        // Attributes
+        sdl.gl_set_attribute(
+            beryllium::GLattr::ContextFlags,
+            beryllium::CONTEXT_DEBUG_FLAG | beryllium::CONTEXT_FORWARD_COMPATIBLE_FLAG,
+        );
+        sdl.gl_set_attribute(beryllium::GLattr::ContextProfileMask, beryllium::CONTEXT_PROFILE_CORE);
+        sdl.gl_set_attribute(beryllium::GLattr::ContextMajorVersion, 4);
+        sdl.gl_set_attribute(beryllium::GLattr::ContextMinorVersion, 1);
+
+        // Make a window
+        let window = sdl
+            .create_window(
+                &desc.title,
+                WINDOW_POSITION_CENTERED,
+                WINDOW_POSITION_CENTERED,
+                desc.size.x,
+                desc.size.y,
+                WindowFlags::default().with_shown(true).with_opengl(true).with_resizable(desc.resizable),
+            )
+            .expect("Unable to build the window.")
+            .try_into_gl()
+            .expect("Unable to upgrade into a GL window.");
+        let window: GLWindow<'static> = unsafe { core::mem::transmute(window) };
+
+        // Load OpenGL
+        load_with(|s| unsafe { sdl.gl_get_proc_address(s) });
+
+        // Logging
+        info!("SDL Loaded {:?}", beryllium::version());
+        info!("OpenGL Loaded {}", get_string(StringTarget::Version));
+
         StormWindow {
-            inner: window_static,
+            // This really isn't safe but sue me.
+            inner: ManuallyDrop::new(window),
         }
     }
 
     #[inline]
-    pub fn get_logical_size(&self) -> Vector2<f32> {
+    pub fn logical_size(&self) -> Vector2<f32> {
         let (x, y) = self.inner.size();
         Vector2::new(x as f32, y as f32)
     }
 
     #[inline]
-    pub fn get_physical_size(&self) -> Vector2<f32> {
-        let (x, y) = self.inner.gl_get_drawable_size();
+    pub fn physical_size(&self) -> Vector2<f32> {
+        let (x, y) = self.inner.drawable_size();
         Vector2::new(x as f32, y as f32)
     }
 
@@ -33,13 +73,12 @@ impl StormWindow {
     #[inline]
     pub fn swap_buffers(&self) {
         unsafe {
-            self.inner.gl_swap_window();
+            self.inner.swap_window();
         }
     }
 
     #[inline]
     pub fn set_title(&self, title: &str) {
-        // TODO: This.
-        // self.inner.set_title(title);
+        (**self.inner).set_title(title);;
     }
 }

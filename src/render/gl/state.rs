@@ -37,7 +37,7 @@ fn matrix_from_translate_scaled(translation: &Vector2<f32>, scale: f32) -> Matri
 
 impl OpenGLState {
     pub fn new(window: StormWindow) -> OpenGLState {
-        let logical_size = window.get_logical_size();
+        let logical_size = window.logical_size();
         let mut state = OpenGLState {
             window: window,
             shader: TextureShader::new(),
@@ -110,10 +110,10 @@ impl OpenGLState {
     }
 
     fn resize(&mut self) {
-        let new_logical_size = self.window.get_logical_size();
+        let new_logical_size = self.window.logical_size();
         if self.current_logical_size != new_logical_size {
             self.current_logical_size = new_logical_size;
-            let new_physical_size = self.window.get_physical_size();
+            let new_physical_size = self.window.physical_size();
             viewport(0, 0, new_physical_size.x as i32, new_physical_size.y as i32);
             self.matrix_bounds = matrix_from_bounds(&new_logical_size);
             for batch in &mut self.batches {

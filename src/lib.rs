@@ -24,7 +24,6 @@ mod utility;
 use crate::render::*;
 use crate::utility::bounded_spsc;
 use crate::utility::bucket_spsc;
-use beryllium::{WindowFlags, WINDOW_POSITION_CENTERED};
 use cgmath::*;
 use std::thread;
 
@@ -44,34 +43,7 @@ impl Engine {
         let sdl = unsafe { beryllium::init().expect("Unable to init beryllium (SDL).") };
 
         // Make a window
-        let flags = WindowFlags::default().with_shown(true).with_opengl(true).with_resizable(desc.resizable);
-        let window = sdl
-            .create_window(
-                &desc.title,              // title
-                WINDOW_POSITION_CENTERED, // x
-                WINDOW_POSITION_CENTERED, // y
-                desc.size.x,              // width
-                desc.size.y,              // height
-                flags,                    // flags
-            )
-            .expect("Unable to build the window.");
-
-        // Attributes and context
-        sdl.gl_set_attribute(
-            beryllium::GLattr::ContextFlags,
-            beryllium::CONTEXT_DEBUG_FLAG | beryllium::CONTEXT_FORWARD_COMPATIBLE_FLAG,
-        );
-        sdl.gl_set_attribute(beryllium::GLattr::ContextProfileMask, beryllium::CONTEXT_PROFILE_CORE);
-        sdl.gl_set_attribute(beryllium::GLattr::ContextMajorVersion, 4);
-        sdl.gl_set_attribute(beryllium::GLattr::ContextMinorVersion, 1);
-        unsafe {
-            let _ctx = window.gl_create_context().expect("Unable to create context");
-        }
-
-        // Loading time
-        gl::load_with(|s| unsafe { sdl.gl_get_proc_address(s) });
-
-        let window = StormWindow::new(window, &sdl);
+        let window = StormWindow::new(&desc, &sdl);
 
         // Inter-thread messaging.
         let (render_producer_pipe, render_consumer_pipe) = bucket_spsc::make(1);
@@ -95,22 +67,12 @@ impl Engine {
             ),
         );
 
-        loop {
+        let mut running = true;
+        while running {
             render_server.tick();
-            input_server.tick(&sdl);
+            running = input_server.tick(&sdl);
         }
     }
-
-    // ////////////////////////////////////////////////////////
-    // Engine
-    // ////////////////////////////////////////////////////////
-
-    // TODO: Engine inspection
-    // pub fn engine_render_alive() -> bool {
-    //     false
-    // }
-
-    // pub fn engine_shutdow(&mut self) {}
 
     // ////////////////////////////////////////////////////////
     // Input
