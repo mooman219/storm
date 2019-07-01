@@ -4,6 +4,8 @@ use crate::types::*;
 use crate::utility::bucket_spsc;
 use crate::utility::unordered_tracker::*;
 use std::ptr;
+use std::thread;
+use std::time::Duration;
 
 pub struct RenderClient {
     render_producer: bucket_spsc::Producer<RenderState>,
@@ -132,7 +134,9 @@ impl RenderClient {
     }
 
     pub fn commit(&mut self) {
-        self.render_producer.next();
+        while !self.render_producer.try_next() {
+            thread::sleep(Duration::MICROSECOND);
+        }
         let state = self.render_producer.get();
         while state.batches.len() < self.batch_tracker.len() {
             state.batches.push(BatchState::default());

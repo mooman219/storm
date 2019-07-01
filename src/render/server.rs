@@ -20,11 +20,12 @@ impl RenderServer {
     }
 
     pub fn tick(&mut self) {
-        self.render_consumer.next();
-        self.timer_render.start();
-        self.update();
-        self.state.draw();
-        self.timer_render.stop();
+        if self.render_consumer.try_next() {
+            self.timer_render.start();
+            self.update();
+            self.state.draw();
+            self.timer_render.stop();
+        }
     }
 
     fn update(&mut self) {

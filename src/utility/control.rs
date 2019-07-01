@@ -1,48 +1,38 @@
-use parking_lot::Condvar;
-use parking_lot::Mutex;
-use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Weak};
 
-pub struct Producer {
-    cvar: Arc<(Mutex<()>, Condvar)>,
+pub struct Watcher {
+    control: Weak<AtomicBool>,
 }
 
-impl Producer {
-    pub fn notify(&self) {
-        let &(ref lock, ref cvar) = &*self.cvar;
-        let _ = lock.lock();
-        cvar.notify_all();
-    }
-}
-
-pub struct Consumer {
-    cvar: Arc<(Mutex<()>, Condvar)>,
-}
-
-impl Consumer {
-    pub fn wait(&self) {
-        let &(ref lock, ref cvar) = &*self.cvar;
-        let mut started = lock.lock();
-        cvar.wait(&mut started);
-    }
-}
-
-impl Clone for Consumer {
-    fn clone(&self) -> Self {
-        Consumer {
-            cvar: self.cvar.clone(),
+impl Watcher {
+    pub fn alive(&self) -> bool {
+        match self.control.upgrade() {
+            Some(_) => true,
+            None => false,
         }
     }
 }
 
-pub fn make() -> (Producer, Consumer) {
-    // This is the only place where a buffer is created.
-    let arc = Arc::new((Mutex::new(()), Condvar::new()));
+pub struct Probe {
+    control: Arc<AtomicBool>,
+}
+
+impl Probe {
+    pub fn finalize(self) {
+        (*self.control).store(false, Ordering::Relaxed);
+    }
+}
+
+pub fn make_probe() -> (Watcher, Probe) {
+    let source = Arc::new(AtomicBool::new(true));
+    let flag = Arc::downgrade(&source);
     (
-        Producer {
-            cvar: arc.clone(),
+        Watcher {
+            control: flag,
         },
-        Consumer {
-            cvar: arc.clone(),
+        Probe {
+            control: source,
         },
     )
 }

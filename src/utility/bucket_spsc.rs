@@ -1,10 +1,7 @@
-use parking_lot::Condvar;
-use parking_lot::Mutex;
 use std::cell::Cell;
 use std::cell::UnsafeCell;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread;
 
 const CACHELINE_LEN: usize = 64; // Usually 64 words
 const CACHELINE: usize = CACHELINE_LEN / std::mem::size_of::<usize>();
@@ -23,9 +20,7 @@ pub struct Buffer<T> {
     buffer: Box<[UnsafeCell<T>]>, // 2 words
     capacity: usize,              // 1 word
     allocated_size: usize,        // 1 word
-    lock_state: Mutex<usize>,     // 2 words
-    lock_condition: Condvar,      // 1 word
-    _pad3: [usize; CACHELINE - 7],
+    _pad3: [usize; CACHELINE - 4],
 }
 
 unsafe impl<T: Sync> Sync for Buffer<T> {}
@@ -68,21 +63,6 @@ impl<T> Buffer<T> {
         Some(self.buffer[next_head & (self.allocated_size - 1)].get())
     }
 
-    pub fn next_head(&self) -> *mut T {
-        loop {
-            match self.try_next_head() {
-                None => {
-                    let mut lock = self.lock_state.lock();
-                    if *lock == 0 {
-                        self.lock_condition.wait(&mut lock);
-                    }
-                    *lock -= 1;
-                },
-                Some(v) => return v,
-            }
-        }
-    }
-
     // Producer functions
 
     pub fn try_next_tail(&self) -> Option<*mut T> {
@@ -95,22 +75,6 @@ impl<T> Buffer<T> {
         }
         self.tail.store(next_tail, Ordering::Release);
         Some(self.buffer[next_tail & (self.allocated_size - 1)].get())
-    }
-
-    pub fn next_tail(&self) -> *mut T {
-        loop {
-            match self.try_next_tail() {
-                None => {
-                    thread::yield_now();
-                },
-                Some(v) => {
-                    let mut lock = self.lock_state.lock();
-                    *lock += 1;
-                    self.lock_condition.notify_all();
-                    return v;
-                },
-            }
-        }
     }
 }
 
@@ -136,12 +100,10 @@ pub fn make<T: Default>(capacity: usize) -> (Producer<T>, Consumer<T>) {
         shadow_head: Cell::new(0), // 1 word
         _pad2: [0; CACHELINE - 2],
         // Shared
-        buffer,                         // 2 words
-        capacity: adjusted_capacity,    // 1 word
-        allocated_size,                 // 1 word
-        lock_state: Mutex::new(0),      // 2 words
-        lock_condition: Condvar::new(), // 1 word
-        _pad3: [0; CACHELINE - 7],
+        buffer,                      // 2 words
+        capacity: adjusted_capacity, // 1 word
+        allocated_size,              // 1 word
+        _pad3: [0; CACHELINE - 4],
     });
 
     (
@@ -172,10 +134,6 @@ impl<T> Consumer<T> {
         }
     }
 
-    pub fn next(&mut self) {
-        self.head_pointer = (*self.buffer).next_head();
-    }
-
     pub fn capacity(&self) -> usize {
         (*self.buffer).capacity()
     }
@@ -199,10 +157,6 @@ impl<T> Producer<T> {
             },
             None => false,
         }
-    }
-
-    pub fn next(&mut self) {
-        self.tail_pointer = (*self.buffer).next_tail();
     }
 
     pub fn capacity(&self) -> usize {

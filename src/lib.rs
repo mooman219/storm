@@ -1,4 +1,4 @@
-#![feature(const_fn, test, alloc_layout_extra)]
+#![feature(const_fn, test, alloc_layout_extra, duration_constants)]
 #![allow(dead_code, non_camel_case_types, non_snake_case, intra_doc_link_resolution_failure)]
 
 #[macro_use]
@@ -24,8 +24,10 @@ mod utility;
 use crate::render::*;
 use crate::utility::bounded_spsc;
 use crate::utility::bucket_spsc;
+use crate::utility::control;
 use cgmath::*;
 use std::thread;
+use std::time::Duration;
 
 /// The main entry point into the Storm engine.
 pub struct Engine {
@@ -48,6 +50,7 @@ impl Engine {
         // Inter-thread messaging.
         let (render_producer_pipe, render_consumer_pipe) = bucket_spsc::make(1);
         let (input_producer_pipe, input_consumer_pipe) = bounded_spsc::make(512);
+        let (engine_watcher, engine_probe) = control::make_probe();
 
         thread::spawn(move || {
             let engine = Engine {
@@ -55,6 +58,7 @@ impl Engine {
                 input_client: InputClient::new(input_consumer_pipe),
             };
             game_loop(engine);
+            engine_probe.finalize();
         });
 
         // Rendering
@@ -67,10 +71,10 @@ impl Engine {
             ),
         );
 
-        let mut running = true;
-        while running {
+        while engine_watcher.alive() {
             render_server.tick();
-            running = input_server.tick(&sdl);
+            input_server.tick(&sdl);
+            thread::sleep(Duration::MICROSECOND);
         }
     }
 
@@ -102,11 +106,11 @@ impl Engine {
     }
 
     pub fn batch_update(&mut self, batch: &BatchReference, desc: &BatchDescription) {
-        self.render_client.batch_update(batch, desc)
+        self.render_client.batch_update(batch, desc);
     }
 
     pub fn batch_remove(&mut self, batch: &BatchReference) {
-        self.render_client.batch_remove(batch)
+        self.render_client.batch_remove(batch);
     }
 
     // ////////////////////////////////////////////////////////
@@ -167,12 +171,12 @@ impl Engine {
 
     /// Sets the title of the window.
     pub fn window_title(&mut self, title: &str) {
-        self.render_client.window_title(title)
+        self.render_client.window_title(title);
     }
 
     /// Commits the queued window related changes to the renderer. This may block
     /// if the renderer is getting changes faster than it can process.
     pub fn window_commit(&mut self) {
-        self.render_client.commit()
+        self.render_client.commit();
     }
 }
