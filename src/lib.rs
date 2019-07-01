@@ -58,6 +58,7 @@ impl Engine {
                 input_client: InputClient::new(input_consumer_pipe),
             };
             game_loop(engine);
+            info!("Game thread has exited.");
             engine_probe.finalize();
         });
 
