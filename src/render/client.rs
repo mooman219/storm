@@ -1,14 +1,12 @@
 use crate::render::message::*;
 use crate::texture::*;
 use crate::types::*;
-use crate::utility::bucket_spsc;
+use crate::utility::swap_spsc;
 use crate::utility::unordered_tracker::*;
 use std::ptr;
-use std::thread;
-use std::time::Duration;
 
 pub struct RenderClient {
-    render_producer: bucket_spsc::Producer<RenderState>,
+    render_producer: swap_spsc::Producer<RenderState>,
     texture_atlas: TextureAtlas,
     font_atlas: FontAtlas,
     batch_tracker: UnorderedTracker<BatchReference>,
@@ -16,7 +14,7 @@ pub struct RenderClient {
 }
 
 impl RenderClient {
-    pub fn new(render_producer: bucket_spsc::Producer<RenderState>) -> RenderClient {
+    pub fn new(render_producer: swap_spsc::Producer<RenderState>) -> RenderClient {
         RenderClient {
             render_producer: render_producer,
             texture_atlas: TextureAtlas::new(),
@@ -134,12 +132,11 @@ impl RenderClient {
     }
 
     pub fn commit(&mut self) {
-        while !self.render_producer.try_next() {
-            thread::sleep(Duration::MICROSECOND);
-        }
-        let state = self.render_producer.get();
-        while state.batches.len() < self.batch_tracker.len() {
-            state.batches.push(BatchState::default());
+        if self.render_producer.try_next() {
+            let state = self.render_producer.get();
+            while state.batches.len() < self.batch_tracker.len() {
+                state.batches.push(BatchState::default());
+            }
         }
     }
 }

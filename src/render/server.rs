@@ -2,16 +2,16 @@ use crate::render::gl::OpenGLState;
 use crate::render::message::*;
 use crate::render::*;
 use crate::time::*;
-use crate::utility::bucket_spsc;
+use crate::utility::swap_spsc;
 
 pub struct RenderServer {
-    render_consumer: bucket_spsc::Consumer<RenderState>,
+    render_consumer: swap_spsc::Consumer<RenderState>,
     state: OpenGLState,
     timer_render: Timer,
 }
 
 impl RenderServer {
-    pub fn new(window: StormWindow, render_consumer: bucket_spsc::Consumer<RenderState>) -> RenderServer {
+    pub fn new(window: StormWindow, render_consumer: swap_spsc::Consumer<RenderState>) -> RenderServer {
         RenderServer {
             render_consumer: render_consumer,
             state: OpenGLState::new(window),

@@ -40,6 +40,7 @@ impl StormWindow {
             .expect("Unable to build the window.")
             .try_into_gl()
             .expect("Unable to upgrade into a GL window.");
+        unsafe { window.set_swap_interval(0) }.expect("Unable to disable vsync.");
         let window: GLWindow<'static> = unsafe { core::mem::transmute(window) };
 
         // Load OpenGL

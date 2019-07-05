@@ -23,8 +23,8 @@ mod utility;
 
 use crate::render::*;
 use crate::utility::bounded_spsc;
-use crate::utility::bucket_spsc;
 use crate::utility::control;
+use crate::utility::swap_spsc;
 use cgmath::*;
 use std::thread;
 use std::time::Duration;
@@ -48,7 +48,7 @@ impl Engine {
         let window = StormWindow::new(&desc, &sdl);
 
         // Inter-thread messaging.
-        let (render_producer_pipe, render_consumer_pipe) = bucket_spsc::make(1);
+        let (render_producer_pipe, render_consumer_pipe) = swap_spsc::make();
         let (input_producer_pipe, input_consumer_pipe) = bounded_spsc::make(512);
         let (engine_watcher, engine_probe) = control::make_probe();
 
