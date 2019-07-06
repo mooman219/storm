@@ -32,7 +32,7 @@ impl Image {
             panic!("Neither width or height can be 0.");
         }
         let mut pixels = Vec::new();
-        for pixel in rgba_image.into_raw().as_slice().rchunks_exact(4) {
+        for pixel in rgba_image.into_raw().as_slice().chunks_exact(4) {
             pixels.push(RGBA8::new_raw(pixel[0], pixel[1], pixel[2], pixel[3]));
         }
         Image {
