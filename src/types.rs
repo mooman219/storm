@@ -49,11 +49,15 @@ impl BatchToken {
 /// Configuration settings for a batch.
 #[derive(Copy, Clone, Debug)]
 pub struct BatchSettings {
+    /// The translation of the batch.
     pub translation: Vector2<f32>,
+    /// The zoom level of the batch. This is 1.0 by default, meaning 1 pixel takes up 1x1 pixels on
+    /// screen.
     pub scale: f32,
     /// Rotation is measured in turns from [0, 1). Values outside of the range are wrapped into the
     /// range. For example, 1.75 is wrapped into 0.75, -0.4 is wrapped into 0.6.
     pub rotation: f32,
+    /// If the renderer should render this batch or not.
     pub visible: bool,
 }
 
@@ -76,13 +80,16 @@ impl Default for BatchSettings {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct Sprite {
-    // Position of the sprite. The Z coordinate represents sprite depth. Units are measured in pixels.
+    /// Position of the sprite. The X and Y coordinates represent the bottom left corner of the
+    /// sprite. The Z coordinate represents sprite depth. Units are measured in pixels.
     pub pos: Vector3<f32>,
-    // Units are measured in pixels.
+    /// Units are measured in pixels.
     pub size: Vector2<u16>,
+    /// Texture to apply to the sprite. The default is a plain white texture.
     pub texture: Texture,
+    /// Color multiplier to apply to the sprite. The default is white.
     pub color: RGBA8,
-    // Units are 1/65536th of a turn.
+    /// Rotation of the sprite. Units are 1/65536th of a turn.
     pub rotation: u16,
 }
 
@@ -154,12 +161,19 @@ impl Default for FontToken {
 /// Configuration settings for text.
 #[derive(Clone, Debug)]
 pub struct Text {
+    /// Text that's being drawn.
     pub string: String,
-    // Units are measured in pixels.
+    /// Position of the text. The X and Y coordinates represent the bottom left corner of the text.
+    /// The Z coordinate represents sprite depth. Units are measured in pixels.
     pub pos: Vector3<f32>,
+    /// Max width of the text before it's pushed to a new line. If this is set to None, it will
+    /// not wrap text to a new line. Units are measured in pixels. The default is None.
     pub max_width: Option<f32>,
+    /// Amount to scale the text by as defined by the font. The default is 24.
     pub scale: u32,
+    /// Color to use for the text. The default is black.
     pub color: RGBA8,
+    /// Font to use for the text. This is the engine font by default.
     pub font: FontToken,
 }
 

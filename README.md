@@ -1,5 +1,7 @@
 # Storm Engine
-The storm engine is a simple 2D renderer designed for performance. It currently features an OpenGL backend and supports Windows, Linux, ans Mac. The engine is experimental and can change at any time.
+The storm engine is a simple 2D renderer designed for performance. It currently features an OpenGL 3.3 backend and supports Windows, Linux, ans Mac. The engine is experimental and can change at any time.
+
+The engine compiles with nightly.
 
 ## Example
 This example will render a white square in about the center of the screen.
