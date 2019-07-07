@@ -20,7 +20,7 @@ pub struct RGBA8 {
 }
 
 impl RGBA8 {
-    pub const fn new(red: f32, green: f32, blue: f32, alpha: f32) -> RGBA8 {
+    pub fn new(red: f32, green: f32, blue: f32, alpha: f32) -> RGBA8 {
         RGBA8 {
             r: (red * 255f32) as u8,
             g: (green * 255f32) as u8,

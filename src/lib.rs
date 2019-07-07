@@ -1,4 +1,4 @@
-#![feature(const_fn, test, alloc_layout_extra, duration_constants)]
+#![feature(test, alloc_layout_extra)]
 #![allow(dead_code, non_camel_case_types, non_snake_case, intra_doc_link_resolution_failure)]
 
 #[macro_use]
@@ -27,7 +27,6 @@ use crate::utility::control;
 use crate::utility::swap_spsc;
 use cgmath::*;
 use std::thread;
-use std::time::Duration;
 
 /// The main entry point into the Storm engine. All interactions with the engine are managed by the
 /// API on this type. The engine is send, and can be moved between threads.
@@ -76,7 +75,7 @@ impl Engine {
         while engine_watcher.alive() {
             render_server.tick();
             input_server.tick(&sdl);
-            thread::sleep(Duration::MICROSECOND);
+            thread::sleep(time::MICROSECOND);
         }
     }
 

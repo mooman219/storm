@@ -17,6 +17,11 @@ pub const SECS_PER_HOUR: u64 = 3_600;
 /// The number of (non-leap) seconds in days.
 pub const SECS_PER_DAY: u64 = 86_400;
 
+pub const SECOND: Duration = Duration::from_secs(1);
+pub const MILLISECOND: Duration = Duration::from_millis(1);
+pub const MICROSECOND: Duration = Duration::from_micros(1);
+pub const NANOSECOND: Duration = Duration::from_nanos(1);
+
 #[inline]
 pub fn as_days(duration: &Duration) -> u64 {
     let secs = duration.as_secs();
