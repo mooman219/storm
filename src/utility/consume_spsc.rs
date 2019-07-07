@@ -1,5 +1,5 @@
 use std::cell::Cell;
-use std::mem;
+use std::mem::MaybeUninit;
 use std::sync::atomic::*;
 use std::sync::Arc;
 
@@ -26,7 +26,7 @@ impl<T: Copy> Buffer<T> {
             is_empty: AtomicBool::new(true),
             read: AtomicPtr::new(0 as *mut T),
             current: Cell::new(0),
-            buffer: unsafe { mem::uninitialized() },
+            buffer: unsafe { MaybeUninit::uninit().assume_init() },
         };
         this
     }
