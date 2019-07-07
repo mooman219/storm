@@ -4,7 +4,6 @@ pub mod consume_spsc;
 pub mod control;
 pub mod ordered_tracker;
 pub mod replace_spsc;
-pub mod storage;
 pub mod swap_spsc;
 pub mod thread_control;
 pub mod unordered_map;

@@ -1,4 +1,4 @@
-#![feature(test, alloc_layout_extra)]
+#![feature(test)]
 #![allow(dead_code, non_camel_case_types, non_snake_case, intra_doc_link_resolution_failure)]
 
 #[macro_use]
