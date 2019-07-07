@@ -8,7 +8,7 @@ pub trait VertexDescription {
     fn configure_vertex_attribute();
 }
 
-impl VertexDescription for SpriteDescription {
+impl VertexDescription for Sprite {
     const VERTEX_SIZE: usize = mem::size_of::<Self>();
 
     fn configure_vertex_attribute() {
@@ -84,6 +84,6 @@ impl VertexDescription for SpriteDescription {
         );
         //index += 1;
         // size += 1 * 2; // Count * Bytes
-        // warn!("{}, {}", size, std::mem::size_of::<SpriteDescription>()); // DEBUG
+        // warn!("{}, {}", size, std::mem::size_of::<Sprite>()); // DEBUG
     }
 }

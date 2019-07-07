@@ -18,13 +18,15 @@ out vec2 v_uv;
 out vec4 v_color;
 
 uniform mat4 ortho;
+
 uniform vec2 pos_lut[4] = vec2[4](
     vec2(0.0, 65536.0),     // left top
     vec2(0.0, 0.0),         // left bottom
     vec2(65536.0, 65536.0), // right top
     vec2(65536.0, 0.0));    // right bottom
 
-vec4 rotateZ(vec3 pos, float psi) {
+vec4 rotateZ(vec3 pos) {
+    float psi = TWO_PI * a_rotation;
     vec2 origin = vec2(
         a_pos.x + (a_size.x * 32768.0),
         a_pos.y + (a_size.y * 32768.0));
@@ -46,9 +48,10 @@ void main() {
     uv[3] = vec2(a_uv.y, a_uv.w); // right top
     v_uv = uv[gl_VertexID];
     v_color = a_color;
-    
-    vec3 pos = a_pos + vec3(a_size * pos_lut[gl_VertexID], 0.0);
-    gl_Position = ortho * rotateZ(pos, TWO_PI * a_rotation);
+
+    vec3 size = vec3(a_size * pos_lut[gl_VertexID], 0.0);
+    vec3 pos = a_pos + size;
+    gl_Position = ortho * rotateZ(pos);
 }
 "#;
 static FRAGMENT: &str = r#"

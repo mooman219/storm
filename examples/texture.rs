@@ -5,7 +5,7 @@ use storm::*;
 /// Run with: cargo run --example texture --release
 fn main() {
     Engine::start(
-        WindowDescription {
+        WindowSettings {
             title: String::from("Storm: Texture"),
             size: Vector2::new(1280, 1024),
             resizable: true,
@@ -21,9 +21,9 @@ fn game(mut engine: Engine) {
     let texture_2 = engine.texture_load("./examples/resources/2.png");
     let texture_2 = texture_2.sub_texture(0, 0, 16, 16).unwrap();
 
-    let screen = engine.batch_create(&BatchDescription::default());
+    let screen = engine.batch_create(&BatchSettings::default());
     let mut sprites = Vec::new();
-    let mut sprite = SpriteDescription::default();
+    let mut sprite = Sprite::default();
     sprite.texture = texture_1;
     sprites.push(sprite);
     sprite.texture = texture_1.mirror_x();

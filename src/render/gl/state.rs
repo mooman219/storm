@@ -8,9 +8,9 @@ use crate::types::*;
 use cgmath::*;
 
 struct Batch {
-    desc: BatchDescription,
-    sprites: Buffer<SpriteDescription>,
-    strings: Buffer<SpriteDescription>,
+    desc: BatchSettings,
+    sprites: Buffer<Sprite>,
+    strings: Buffer<Sprite>,
     matrix_translate_scaled: Matrix4<f32>,
     matrix_full: Matrix4<f32>,
 }
@@ -76,7 +76,7 @@ impl OpenGLState {
         self.texture_font.set_texture(texture);
     }
 
-    pub fn batch_create(&mut self, desc: &BatchDescription) {
+    pub fn batch_create(&mut self, desc: &BatchSettings) {
         let matrix_translate_scaled = matrix_from_translate_scaled(&desc.translation, desc.scale);
         let matrix_full = self.matrix_bounds * matrix_translate_scaled;
         self.batches.push(Batch {
@@ -88,7 +88,7 @@ impl OpenGLState {
         });
     }
 
-    pub fn batch_update(&mut self, index: usize, desc: &BatchDescription) {
+    pub fn batch_update(&mut self, index: usize, desc: &BatchSettings) {
         let batch = &mut self.batches[index];
         let matrix_translate_scaled = matrix_from_translate_scaled(&desc.translation, desc.scale);
         let matrix_full = self.matrix_bounds * matrix_translate_scaled;
@@ -97,11 +97,11 @@ impl OpenGLState {
         batch.matrix_full = matrix_full;
     }
 
-    pub fn batch_sprite_set(&mut self, index: usize, quads: &Vec<SpriteDescription>) {
+    pub fn batch_sprite_set(&mut self, index: usize, quads: &Vec<Sprite>) {
         self.batches[index].sprites.set(quads);
     }
 
-    pub fn batch_string_set(&mut self, index: usize, quads: &Vec<SpriteDescription>) {
+    pub fn batch_string_set(&mut self, index: usize, quads: &Vec<Sprite>) {
         self.batches[index].strings.set(quads);
     }
 

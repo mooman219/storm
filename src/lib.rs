@@ -38,7 +38,7 @@ pub struct Engine {
 impl Engine {
     // Starts the engine. The game_loop parameter is called once with a valid instance of the engine
     // once the engine is constructed.
-    pub fn start(desc: WindowDescription, mut game_loop: impl FnMut(Engine) + Send + 'static) {
+    pub fn start(desc: WindowSettings, mut game_loop: impl FnMut(Engine) + Send + 'static) {
         simple_logger::init().unwrap();
 
         // Init SDL2
@@ -102,15 +102,15 @@ impl Engine {
     // Batch
     // ////////////////////////////////////////////////////////
 
-    pub fn batch_create(&mut self, desc: &BatchDescription) -> BatchReference {
+    pub fn batch_create(&mut self, desc: &BatchSettings) -> BatchToken {
         self.render_client.batch_create(desc)
     }
 
-    pub fn batch_update(&mut self, batch: &BatchReference, desc: &BatchDescription) {
+    pub fn batch_update(&mut self, batch: &BatchToken, desc: &BatchSettings) {
         self.render_client.batch_update(batch, desc);
     }
 
-    pub fn batch_remove(&mut self, batch: &BatchReference) {
+    pub fn batch_remove(&mut self, batch: &BatchToken) {
         self.render_client.batch_remove(batch);
     }
 
@@ -119,12 +119,12 @@ impl Engine {
     // ////////////////////////////////////////////////////////
 
     /// Appends a new sprite to the batch to render.
-    pub fn sprite_set(&mut self, batch: &BatchReference, descs: &Vec<SpriteDescription>) {
+    pub fn sprite_set(&mut self, batch: &BatchToken, descs: &Vec<Sprite>) {
         self.render_client.sprite_set(batch, descs);
     }
 
     /// Clears all sprites from the given batch.
-    pub fn sprite_clear(&mut self, batch: &BatchReference) {
+    pub fn sprite_clear(&mut self, batch: &BatchToken) {
         self.render_client.sprite_clear(batch);
     }
 
@@ -133,17 +133,17 @@ impl Engine {
     // ////////////////////////////////////////////////////////
 
     /// Loads a new font.
-    pub fn font_load(&mut self, path: &str) -> FontReference {
+    pub fn font_load(&mut self, path: &str) -> FontToken {
         self.render_client.font_create(path)
     }
 
     /// Appends a new string to the batch to render.
-    pub fn string_set(&mut self, batch: &BatchReference, descs: &Vec<StringDescription>) {
+    pub fn string_set(&mut self, batch: &BatchToken, descs: &Vec<Text>) {
         self.render_client.string_set(batch, descs);
     }
 
     /// Clears all strings from the given batch.
-    pub fn string_clear(&mut self, batch: &BatchReference) {
+    pub fn string_clear(&mut self, batch: &BatchToken) {
         self.render_client.string_clear(batch);
     }
 

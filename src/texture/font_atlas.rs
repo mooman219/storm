@@ -52,7 +52,7 @@ impl FontAtlas {
         info!("Loaded font from path: {}", path);
     }
 
-    pub fn rasterize(&mut self, desc: &StringDescription, quads: &mut Vec<SpriteDescription>) {
+    pub fn rasterize(&mut self, desc: &Text, quads: &mut Vec<Sprite>) {
         // Needed for glyph calculation.
         let font_index = desc.font.key();
         let font = &self.fonts[font_index];
@@ -96,7 +96,7 @@ impl FontAtlas {
 
             // Create the vertex.
             if value.visible {
-                quads.push(SpriteDescription::new_raw(
+                quads.push(Sprite::new(
                     Vector3::new(
                         desc.pos.x + caret.x + value.offset.x,
                         desc.pos.y + caret.y - value.offset.y,

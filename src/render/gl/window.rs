@@ -17,7 +17,7 @@ impl Drop for StormWindow {
 }
 
 impl StormWindow {
-    pub fn new(desc: &WindowDescription, sdl: &SDLToken) -> StormWindow {
+    pub fn new(desc: &WindowSettings, sdl: &SDLToken) -> StormWindow {
         // Attributes
         sdl.gl_set_attribute(
             beryllium::GLattr::ContextFlags,

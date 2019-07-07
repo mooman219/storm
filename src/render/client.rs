@@ -9,7 +9,7 @@ pub struct RenderClient {
     render_producer: swap_spsc::Producer<RenderState>,
     texture_atlas: TextureAtlas,
     font_atlas: FontAtlas,
-    batch_tracker: UnorderedTracker<BatchReference>,
+    batch_tracker: UnorderedTracker<BatchToken>,
     font_count: usize,
 }
 
@@ -28,17 +28,17 @@ impl RenderClient {
     // Batch
     // ////////////////////////////////////////////////////////
 
-    pub fn batch_create(&mut self, desc: &BatchDescription) -> BatchReference {
+    pub fn batch_create(&mut self, desc: &BatchSettings) -> BatchToken {
         let state = self.render_producer.get();
         state.batches.push(BatchState::default());
         state.batch_changes.push(BatchMessage::Create {
             desc: *desc,
         });
         let batch_key = self.batch_tracker.add();
-        BatchReference::new(batch_key)
+        BatchToken::new(batch_key)
     }
 
-    pub fn batch_remove(&mut self, batch: &BatchReference) {
+    pub fn batch_remove(&mut self, batch: &BatchToken) {
         let batch_index = self.batch_tracker.remove(batch.key());
         let state = self.render_producer.get();
         state.batches.swap_remove(batch_index);
@@ -47,7 +47,7 @@ impl RenderClient {
         });
     }
 
-    pub fn batch_update(&mut self, batch: &BatchReference, desc: &BatchDescription) {
+    pub fn batch_update(&mut self, batch: &BatchToken, desc: &BatchSettings) {
         let batch_index = self.batch_tracker.get(batch.key());
         let state = self.render_producer.get();
         state.batch_changes.push(BatchMessage::Update {
@@ -60,7 +60,7 @@ impl RenderClient {
     // Sprite
     // ////////////////////////////////////////////////////////
 
-    pub fn sprite_set(&mut self, batch: &BatchReference, descs: &Vec<SpriteDescription>) {
+    pub fn sprite_set(&mut self, batch: &BatchToken, descs: &Vec<Sprite>) {
         let batch_index = self.batch_tracker.get(batch.key());
         let state = self.render_producer.get();
         let batch = &mut state.batches[batch_index];
@@ -73,7 +73,7 @@ impl RenderClient {
         }
     }
 
-    pub fn sprite_clear(&mut self, batch: &BatchReference) {
+    pub fn sprite_clear(&mut self, batch: &BatchToken) {
         let batch_index = self.batch_tracker.get(batch.key());
         let state = self.render_producer.get();
         let batch = &mut state.batches[batch_index];
@@ -85,13 +85,13 @@ impl RenderClient {
     // String
     // ////////////////////////////////////////////////////////
 
-    pub fn font_create(&mut self, path: &str) -> FontReference {
+    pub fn font_create(&mut self, path: &str) -> FontToken {
         self.font_atlas.add_font_path(path);
         self.font_count += 1;
-        FontReference::new(self.font_count)
+        FontToken::new(self.font_count)
     }
 
-    pub fn string_set(&mut self, batch: &BatchReference, descs: &Vec<StringDescription>) {
+    pub fn string_set(&mut self, batch: &BatchToken, descs: &Vec<Text>) {
         let batch_index = self.batch_tracker.get(batch.key());
         let state = self.render_producer.get();
         let batch = &mut state.batches[batch_index];
@@ -103,7 +103,7 @@ impl RenderClient {
         state.font_atlas = self.font_atlas.sync();
     }
 
-    pub fn string_clear(&mut self, batch: &BatchReference) {
+    pub fn string_clear(&mut self, batch: &BatchToken) {
         let batch_index = self.batch_tracker.get(batch.key());
         let state = self.render_producer.get();
         let batch = &mut state.batches[batch_index];

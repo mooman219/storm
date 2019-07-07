@@ -22,8 +22,8 @@ impl Default for RenderState {
 }
 
 pub struct BatchState {
-    pub sprites: Vec<SpriteDescription>,
-    pub strings: Vec<SpriteDescription>,
+    pub sprites: Vec<Sprite>,
+    pub strings: Vec<Sprite>,
     pub dirty_sprites: bool,
     pub dirty_strings: bool,
 }
@@ -42,11 +42,11 @@ impl Default for BatchState {
 #[derive(Copy, Clone)]
 pub enum BatchMessage {
     Create {
-        desc: BatchDescription,
+        desc: BatchSettings,
     },
     Update {
         index: usize,
-        desc: BatchDescription,
+        desc: BatchSettings,
     },
     Remove {
         index: usize,

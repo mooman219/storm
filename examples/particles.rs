@@ -7,7 +7,7 @@ use storm::*;
 /// Run with: cargo run --example particles --release
 fn main() {
     Engine::start(
-        WindowDescription {
+        WindowSettings {
             title: String::from("Storm: Particles"),
             size: Vector2::new(1280, 1024),
             resizable: true,
@@ -19,7 +19,7 @@ fn main() {
 fn game(mut engine: Engine) {
     let mut clock = Clock::new(144);
 
-    let screen = engine.batch_create(&BatchDescription::default());
+    let screen = engine.batch_create(&BatchSettings::default());
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
     for x in -500..500 {
@@ -64,8 +64,8 @@ impl Particle {
     const G: f32 = 6.674;
     const MASS: f32 = 200.0;
 
-    pub fn new(pos: Vector3<f32>) -> (SpriteDescription, Particle) {
-        let sprite = SpriteDescription::new(pos, Vector2::new(2.0, 2.0), Texture::default(), WHITE, 0.0);
+    pub fn new(pos: Vector3<f32>) -> (Sprite, Particle) {
+        let sprite = Sprite::new(pos, Vector2::new(2.0, 2.0), Texture::default(), WHITE, 0.0);
         let particle = Particle {
             pos: pos.truncate(),
             velocity: Vector2::zero(),
@@ -74,7 +74,7 @@ impl Particle {
         (sprite, particle)
     }
 
-    pub fn tick(sprite: &mut SpriteDescription, particle: &mut Particle, delta: f32) {
+    pub fn tick(sprite: &mut Sprite, particle: &mut Particle, delta: f32) {
         let length_squared = particle.pos.x * particle.pos.x + particle.pos.y * particle.pos.y;
         let length = f32::sqrt(length_squared);
         let norm = particle.pos / length;
