@@ -13,11 +13,11 @@ layout(location = 1) in vec2 a_size;
 layout(location = 2) in vec4 a_uv;
 layout(location = 3) in vec4 a_color;
 layout(location = 4) in float a_rotation;
+
 out vec2 v_uv;
 out vec4 v_color;
 
 uniform mat4 ortho;
-
 uniform vec2 pos_lut[4] = vec2[4](
     vec2(0.0, 65536.0),     // left top
     vec2(0.0, 0.0),         // left bottom
@@ -36,12 +36,14 @@ vec4 rotateZ(vec3 pos, float psi) {
 }
 
 void main() {
-    // (x:left, y:right, z:bottom, w:top)
+    // UV Layout: xmin xmax ymin ymax
+    // ymin and ymax are swapped below because OpenGL reads images from bottom row to top row, but
+    // they're stored top to bottom on upload, so this corrects that.
     vec2 uv[4];
-    uv[0] = vec2(a_uv.x, a_uv.w); // left top
-    uv[1] = vec2(a_uv.x, a_uv.z); // left bottom
-    uv[2] = vec2(a_uv.y, a_uv.w); // right top
-    uv[3] = vec2(a_uv.y, a_uv.z); // right bottom
+    uv[0] = vec2(a_uv.x, a_uv.z); // left bottom
+    uv[1] = vec2(a_uv.x, a_uv.w); // left top
+    uv[2] = vec2(a_uv.y, a_uv.z); // right bottom
+    uv[3] = vec2(a_uv.y, a_uv.w); // right top
     v_uv = uv[gl_VertexID];
     v_color = a_color;
     

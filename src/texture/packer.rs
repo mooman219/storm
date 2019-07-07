@@ -76,7 +76,7 @@ impl Skyline {
 
 const MAX: u32 = 65536;
 const SIZE: u32 = 4096;
-const FULL_PIXEL: u32 = MAX / SIZE;
+pub(crate) const PIXEL_SIZE: u32 = MAX / SIZE;
 
 struct SkylinePacker {
     border: Rect,
@@ -218,15 +218,12 @@ impl TexturePacker {
 
         // UV Layout: xmin xmax ymin ymax
         let vector = Vector4::new(
-            (rect.x * FULL_PIXEL) as u16,
-            ((rect.x + rect.w) * FULL_PIXEL) as u16,
-            ((rect.y + rect.h) * FULL_PIXEL) as u16, // Actually ymax
-            (rect.y * FULL_PIXEL) as u16,            // Actually ymin
+            (rect.x * PIXEL_SIZE) as u16,            // Left
+            ((rect.x + rect.w) * PIXEL_SIZE) as u16, // Right
+            (rect.y * PIXEL_SIZE) as u16,            // Top
+            ((rect.y + rect.h) * PIXEL_SIZE) as u16, // Bottom
         );
-        // OpenGL: ymin and ymax are swapped because OpenGL reads images from bottom row to top row, but
-        // they're stored as top to bottom, so this corrects that.
 
-        // trace!("Packing rect: {:?} -> {:?}", rect, vector); // DEBUG
         vector
     }
 

@@ -6,7 +6,6 @@ use std::path::Path;
 
 pub struct TextureAtlas {
     packer: TexturePacker,
-    uv: Vec<Vector4<u16>>,
     dirty: bool,
 }
 
@@ -14,10 +13,9 @@ impl TextureAtlas {
     pub fn new() -> TextureAtlas {
         let mut manager = TextureAtlas {
             packer: TexturePacker::new(),
-            uv: Vec::new(),
             dirty: false,
         };
-        manager.add_texture(Image::from_default(color::WHITE, 4, 4));
+        manager.add_texture(Image::from_default(color::WHITE, 1, 1));
         manager.sync();
         manager
     }

@@ -83,6 +83,7 @@ impl VertexDescription for SpriteDescription {
             size as *const _,             // Offset
         );
         //index += 1;
-        //size += 1 * 2; // Count * Bytes
+        // size += 1 * 2; // Count * Bytes
+        // warn!("{}, {}", size, std::mem::size_of::<SpriteDescription>()); // DEBUG
     }
 }

@@ -19,6 +19,7 @@ fn game(mut engine: Engine) {
 
     let texture_1 = engine.texture_load("./examples/resources/1.png");
     let texture_2 = engine.texture_load("./examples/resources/2.png");
+    let texture_2 = texture_2.sub_texture(0, 0, 16, 16).unwrap();
 
     let screen = engine.batch_create(&BatchDescription::default());
     let mut sprites = Vec::new();
