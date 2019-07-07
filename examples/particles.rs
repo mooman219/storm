@@ -65,7 +65,7 @@ impl Particle {
     const MASS: f32 = 200.0;
 
     pub fn new(pos: Vector3<f32>) -> (SpriteDescription, Particle) {
-        let sprite = SpriteDescription::new(pos, Vector2::new(2.0, 2.0), DEFAULT_TEXTURE, WHITE, 0.0);
+        let sprite = SpriteDescription::new(pos, Vector2::new(2.0, 2.0), Texture::default(), WHITE, 0.0);
         let particle = Particle {
             pos: pos.truncate(),
             velocity: Vector2::zero(),

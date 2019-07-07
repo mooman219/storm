@@ -137,11 +137,6 @@ impl Engine {
         self.render_client.font_create(path)
     }
 
-    /// Gets the default font.
-    pub fn font_default() -> FontReference {
-        DEFAULT_FONT
-    }
-
     /// Appends a new string to the batch to render.
     pub fn string_set(&mut self, batch: &BatchReference, descs: &Vec<StringDescription>) {
         self.render_client.string_set(batch, descs);
@@ -159,11 +154,6 @@ impl Engine {
     /// Loads a new texture.
     pub fn texture_load(&mut self, path: &str) -> Texture {
         self.render_client.texture_create(path)
-    }
-
-    /// Gets the default texture.
-    pub fn texture_default() -> Texture {
-        DEFAULT_TEXTURE
     }
 
     // ////////////////////////////////////////////////////////

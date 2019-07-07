@@ -111,7 +111,7 @@ impl Default for SpriteDescription {
         SpriteDescription {
             pos: Vector3::new(0.0, 0.0, 0.0),
             size: Vector2::new(100, 100),
-            texture: DEFAULT_TEXTURE,
+            texture: Texture::default(),
             color: WHITE,
             rotation: 0,
         }
@@ -154,11 +154,6 @@ impl SpriteDescription {
 // String
 // ////////////////////////////////////////////////////////
 
-/// A default font reference for a basic white square.
-pub const DEFAULT_FONT: FontReference = FontReference {
-    key: 0,
-};
-
 /// Handle to reference an uploaded font with.
 #[derive(Copy, Clone, Debug)]
 pub struct FontReference {
@@ -174,6 +169,15 @@ impl FontReference {
 
     pub(crate) fn key(&self) -> usize {
         self.key
+    }
+}
+
+impl Default for FontReference {
+    // The engine default font.
+    fn default() -> FontReference {
+        FontReference {
+            key: 0,
+        }
     }
 }
 
@@ -197,7 +201,7 @@ impl Default for StringDescription {
             max_width: None,
             scale: 24,
             color: BLACK,
-            font: DEFAULT_FONT,
+            font: FontReference::default(),
         }
     }
 }
@@ -231,13 +235,17 @@ impl StringDescription {
 // Texture
 // ////////////////////////////////////////////////////////
 
-/// A default texture reference for a basic white square.
-pub const DEFAULT_TEXTURE: Texture = Texture(Vector4::new(0, PIXEL_SIZE as u16, 0, PIXEL_SIZE as u16));
-
 /// Handle to reference an uploaded texture with.
 #[derive(Copy, Clone, Debug)]
 #[repr(transparent)]
 pub struct Texture(pub(crate) Vector4<u16>);
+
+impl Default for Texture {
+    /// A default texture reference for a basic white square.
+    fn default() -> Texture {
+        Texture(Vector4::new(0, PIXEL_SIZE as u16, 0, PIXEL_SIZE as u16))
+    }
+}
 
 impl Texture {
     /// Mirrors the texture along the Y axis. Creates a new texture.
