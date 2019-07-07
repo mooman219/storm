@@ -1,6 +1,6 @@
 use crate::render::gl::raw::bool_to_enum;
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -14,7 +14,7 @@ pub fn uniform_1f(location: i32, v0: f32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -28,7 +28,7 @@ pub fn uniform_2f(location: i32, v0: f32, v1: f32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -42,7 +42,7 @@ pub fn uniform_3f(location: i32, v0: f32, v1: f32, v2: f32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -56,7 +56,7 @@ pub fn uniform_4f(location: i32, v0: f32, v1: f32, v2: f32, v3: f32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -70,7 +70,7 @@ pub fn uniform_1i(location: i32, v0: i32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -84,7 +84,7 @@ pub fn uniform_2i(location: i32, v0: i32, v1: i32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -98,7 +98,7 @@ pub fn uniform_3i(location: i32, v0: i32, v1: i32, v2: i32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -112,7 +112,7 @@ pub fn uniform_4i(location: i32, v0: i32, v1: i32, v2: i32, v3: i32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -126,7 +126,7 @@ pub fn uniform_1ui(location: i32, v0: u32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -140,7 +140,7 @@ pub fn uniform_2ui(location: i32, v0: u32, v1: u32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -154,7 +154,7 @@ pub fn uniform_3ui(location: i32, v0: u32, v1: u32, v2: u32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -168,7 +168,7 @@ pub fn uniform_4ui(location: i32, v0: u32, v1: u32, v2: u32, v3: u32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -187,7 +187,7 @@ pub fn uniform_1fv(location: i32, count: i32, value: *const f32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -206,7 +206,7 @@ pub fn uniform_2fv(location: i32, count: i32, value: *const f32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -225,7 +225,7 @@ pub fn uniform_3fv(location: i32, count: i32, value: *const f32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -244,7 +244,7 @@ pub fn uniform_4fv(location: i32, count: i32, value: *const f32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -263,7 +263,7 @@ pub fn uniform_1iv(location: i32, count: i32, value: *const i32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -282,7 +282,7 @@ pub fn uniform_2iv(location: i32, count: i32, value: *const i32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -301,7 +301,7 @@ pub fn uniform_3iv(location: i32, count: i32, value: *const i32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -320,7 +320,7 @@ pub fn uniform_4iv(location: i32, count: i32, value: *const i32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -339,7 +339,7 @@ pub fn uniform_1uiv(location: i32, count: i32, value: *const u32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -358,7 +358,7 @@ pub fn uniform_2uiv(location: i32, count: i32, value: *const u32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -377,7 +377,7 @@ pub fn uniform_3uiv(location: i32, count: i32, value: *const u32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -396,7 +396,7 @@ pub fn uniform_4uiv(location: i32, count: i32, value: *const u32) {
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -416,7 +416,7 @@ pub fn uniform_matrix_2fv(location: i32, count: i32, transpose: bool, value: *co
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -436,7 +436,7 @@ pub fn uniform_matrix_3fv(location: i32, count: i32, transpose: bool, value: *co
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -456,7 +456,7 @@ pub fn uniform_matrix_4fv(location: i32, count: i32, transpose: bool, value: *co
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -476,7 +476,7 @@ pub fn uniform_matrix_2x3fv(location: i32, count: i32, transpose: bool, value: *
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -496,7 +496,7 @@ pub fn uniform_matrix_3x2fv(location: i32, count: i32, transpose: bool, value: *
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -516,7 +516,7 @@ pub fn uniform_matrix_2x4fv(location: i32, count: i32, transpose: bool, value: *
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -536,7 +536,7 @@ pub fn uniform_matrix_4x2fv(location: i32, count: i32, transpose: bool, value: *
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///
@@ -556,7 +556,7 @@ pub fn uniform_matrix_3x4fv(location: i32, count: i32, transpose: bool, value: *
     }
 }
 
-/// Specify the value of a uniform variable for the current program object.
+/// [2.0] Specify the value of a uniform variable for the current program object.
 ///
 /// # Arguments
 ///

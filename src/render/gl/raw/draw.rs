@@ -25,7 +25,7 @@ pub enum DrawMode {
     Patches = gl::PATCHES,
 }
 
-/// Render primitives from array data with a per-element offset.
+/// [3.2] Render primitives from array data with a per-element offset.
 ///
 /// # Arguments
 ///
@@ -48,7 +48,7 @@ pub fn draw_elements_base_vertex(
     }
 }
 
-/// Draw multiple instances of a range of elements.
+/// [3.1] Draw multiple instances of a range of elements.
 ///
 /// # Arguments
 ///

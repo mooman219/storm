@@ -21,7 +21,7 @@ where
     gl::load_with(loadfn);
 }
 
-/// Loads the associated string for the target.
+/// [2.0] Loads the associated string for the target.
 ///
 /// # Arguments
 ///

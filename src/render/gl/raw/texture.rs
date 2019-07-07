@@ -222,7 +222,7 @@ pub enum TextureMagFilterValue {
     Linear = gl::LINEAR,
 }
 
-/// Generate a texture name.
+/// [2.0] Generate a texture name.
 #[inline]
 pub fn gen_texture() -> u32 {
     unsafe {
@@ -232,7 +232,7 @@ pub fn gen_texture() -> u32 {
     }
 }
 
-/// Select active texture unit.
+/// [2.0] Select active texture unit.
 ///
 /// # Arguments
 ///
@@ -245,7 +245,7 @@ pub fn active_texture(texture: TextureUnit) {
     }
 }
 
-/// Bind a named texture to a texturing target.
+/// [2.0] Bind a named texture to a texturing target.
 ///
 /// # Arguments
 ///
@@ -258,7 +258,7 @@ pub fn bind_texture(target: TextureBindingTarget, texture: u32) {
     }
 }
 
-/// Delete named textures.
+/// [2.0] Delete named textures.
 ///
 /// # Arguments
 ///
@@ -270,7 +270,7 @@ pub fn delete_texture(name: u32) {
     }
 }
 
-/// Specify a two-dimensional texture image.
+/// [2.0] Specify a two-dimensional texture image.
 ///
 /// # Arguments
 ///
@@ -311,7 +311,7 @@ pub fn tex_image_2D(
     }
 }
 
-/// Sets the wrap parameter for texture coordinate s.
+/// [2.0] Sets the wrap parameter for texture coordinate s.
 ///
 /// # Arguments
 ///
@@ -324,7 +324,7 @@ pub fn tex_parameter_wrap_s(target: TextureParameterTarget, param: TextureWrapVa
     }
 }
 
-/// Sets the wrap parameter for texture coordinate t.
+/// [2.0] Sets the wrap parameter for texture coordinate t.
 ///
 /// # Arguments
 ///
@@ -337,7 +337,7 @@ pub fn tex_parameter_wrap_t(target: TextureParameterTarget, param: TextureWrapVa
     }
 }
 
-/// Sets the wrap parameter for texture coordinate r.
+/// [2.0] Sets the wrap parameter for texture coordinate r.
 ///
 /// # Arguments
 ///
@@ -350,8 +350,8 @@ pub fn tex_parameter_wrap_r(target: TextureParameterTarget, param: TextureWrapVa
     }
 }
 
-/// The texture minifying function is used whenever the level-of-detail function used when sampling
-/// from the texture determines that the texture should be minified.
+/// [2.0] The texture minifying function is used whenever the level-of-detail function used when
+/// sampling from the texture determines that the texture should be minified.
 ///
 /// # Arguments
 ///
@@ -364,7 +364,7 @@ pub fn tex_parameter_min_filter(target: TextureParameterTarget, param: TextureMi
     }
 }
 
-/// The texture magnification function is used whenever the level-of-detail function used when
+/// [2.0] The texture magnification function is used whenever the level-of-detail function used when
 /// sampling from the texture determines that the texture should be magified.
 ///
 /// # Arguments

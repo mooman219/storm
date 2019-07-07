@@ -20,7 +20,7 @@ pub enum AttributeType {
     UnsignedInt10f_11f_11f_Rev = gl::UNSIGNED_INT_10F_11F_11F_REV,
 }
 
-/// Bind a vertex array object.
+/// [3.0] Bind a vertex array object.
 ///
 /// # Arguments
 ///
@@ -32,7 +32,7 @@ pub fn bind_vertex_array(name: u32) {
     }
 }
 
-/// Generate a vertex array.
+/// [3.0] Generate a vertex array.
 #[inline]
 pub fn gen_vertex_array() -> u32 {
     unsafe {
@@ -42,7 +42,7 @@ pub fn gen_vertex_array() -> u32 {
     }
 }
 
-/// Delete a named vertex array.
+/// [3.0] Delete a named vertex array.
 ///
 /// # Arguments
 ///
@@ -54,7 +54,7 @@ pub fn delete_vertex_array(name: u32) {
     }
 }
 
-/// Enable a generic vertex attribute array.
+/// [2.0] Enable a generic vertex attribute array.
 ///
 /// # Arguments
 ///
@@ -66,7 +66,7 @@ pub fn enable_vertex_attrib_array(index: u32) {
     }
 }
 
-/// Disable a generic vertex attribute array.
+/// [2.0] Disable a generic vertex attribute array.
 ///
 /// # Arguments
 ///
@@ -78,7 +78,7 @@ pub fn disable_vertex_attrib_array(index: u32) {
     }
 }
 
-/// Define an array of generic vertex attribute data.
+/// [2.0] Define an array of generic vertex attribute data.
 ///
 /// # Arguments
 ///
@@ -105,7 +105,7 @@ pub fn vertex_attrib_pointer(
     }
 }
 
-/// Modify the rate at which generic vertex attributes advance during instanced rendering.
+/// [3.3] Modify the rate at which generic vertex attributes advance during instanced rendering.
 ///
 /// # Arguments
 ///
