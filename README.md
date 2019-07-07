@@ -43,7 +43,7 @@ fn game(mut engine: Engine) {
         string.pos.y -= 50.0;
         strings.push(string);
         // Assign the strings we want to draw to a batch.
-        engine.string_set(&screen, &strings);
+        engine.text_set(&screen, &strings);
     }
     let mut is_active = true;
     while is_active {

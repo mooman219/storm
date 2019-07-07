@@ -29,7 +29,8 @@ use cgmath::*;
 use std::thread;
 use std::time::Duration;
 
-/// The main entry point into the Storm engine.
+/// The main entry point into the Storm engine. All interactions with the engine are managed by the
+/// API on this type. The engine is send, and can be moved between threads.
 pub struct Engine {
     render_client: RenderClient,
     input_client: InputClient,
@@ -37,7 +38,7 @@ pub struct Engine {
 
 impl Engine {
     // Starts the engine. The game_loop parameter is called once with a valid instance of the engine
-    // once the engine is constructed.
+    // once the engine is constructed. If the game loop exits or panics, the engine shuts down.
     pub fn start(desc: WindowSettings, mut game_loop: impl FnMut(Engine) + Send + 'static) {
         simple_logger::init().unwrap();
 
@@ -83,8 +84,7 @@ impl Engine {
     // Input
     // ////////////////////////////////////////////////////////
 
-    /// Fetches all the events that are pending, calls the callback function for
-    /// each of them, and returns.
+    /// Polls for an input message. If there are no buffered input messages, then this returns None.
     pub fn input_poll(&mut self) -> Option<InputMessage> {
         self.input_client.poll()
     }
@@ -94,22 +94,25 @@ impl Engine {
     // ////////////////////////////////////////////////////////
 
     // TODO: Audio
-    // pub fn audio_load(&mut self) {}
-
-    // pub fn audio_play(&mut self) {}
 
     // ////////////////////////////////////////////////////////
     // Batch
     // ////////////////////////////////////////////////////////
 
+    /// Creates a new batch with the given settings and returns a token to reference the batch by
+    /// later. The returned token can be freely copied.
     pub fn batch_create(&mut self, desc: &BatchSettings) -> BatchToken {
         self.render_client.batch_create(desc)
     }
 
+    /// Updates the settings for an existing batch. If the token references an invalid or removed
+    /// batch, this will panic.
     pub fn batch_update(&mut self, batch: &BatchToken, desc: &BatchSettings) {
         self.render_client.batch_update(batch, desc);
     }
 
+    /// Removes an existing batch from the engine. If the token references an invalid or removed
+    /// batch, this will panic.
     pub fn batch_remove(&mut self, batch: &BatchToken) {
         self.render_client.batch_remove(batch);
     }
@@ -118,32 +121,38 @@ impl Engine {
     // Sprite
     // ////////////////////////////////////////////////////////
 
-    /// Appends a new sprite to the batch to render.
+    /// Sets the sprites to render for a given batch. If the token references an invalid or removed
+    /// batch, this will panic.
     pub fn sprite_set(&mut self, batch: &BatchToken, descs: &Vec<Sprite>) {
         self.render_client.sprite_set(batch, descs);
     }
 
-    /// Clears all sprites from the given batch.
+    /// Clears all sprites from the given batch. This does the same thing as passing an empty Vec to
+    /// sprite_set. If the token references an invalid or removed batch, this will panic.
     pub fn sprite_clear(&mut self, batch: &BatchToken) {
         self.render_client.sprite_clear(batch);
     }
 
     // ////////////////////////////////////////////////////////
-    // String
+    // Text
     // ////////////////////////////////////////////////////////
 
-    /// Loads a new font.
+    /// Loads a new font and returns a token to reference it with later.
     pub fn font_load(&mut self, path: &str) -> FontToken {
         self.render_client.font_create(path)
     }
 
-    /// Appends a new string to the batch to render.
-    pub fn string_set(&mut self, batch: &BatchToken, descs: &Vec<Text>) {
+    // TODO: Alternative font loading functions.
+
+    /// Sets the text to render for a given batch. If the token references an invalid or removed
+    /// batch, this will panic.
+    pub fn text_set(&mut self, batch: &BatchToken, descs: &Vec<Text>) {
         self.render_client.string_set(batch, descs);
     }
 
-    /// Clears all strings from the given batch.
-    pub fn string_clear(&mut self, batch: &BatchToken) {
+    /// Clears all text from the given batch. This does the same thing as passing an empty Vec to
+    /// sprite_set. If the token references an invalid or removed batch, this will panic.
+    pub fn text_clear(&mut self, batch: &BatchToken) {
         self.render_client.string_clear(batch);
     }
 
@@ -156,6 +165,8 @@ impl Engine {
         self.render_client.texture_create(path)
     }
 
+    // TODO: Alternative texture loading functions.
+
     // ////////////////////////////////////////////////////////
     // Window
     // ////////////////////////////////////////////////////////
@@ -165,8 +176,8 @@ impl Engine {
         self.render_client.window_title(title);
     }
 
-    /// Commits the queued window related changes to the renderer. This may block
-    /// if the renderer is getting changes faster than it can process.
+    /// Commits the queued window, batch, sprite, text, and texture related changes to the renderer.
+    /// This function will not block.
     pub fn window_commit(&mut self) {
         self.render_client.commit();
     }

@@ -7,7 +7,7 @@ use cgmath::*;
 // Window
 // ////////////////////////////////////////////////////////
 
-/// Configuration for the window.
+/// Configuration settings for the window.
 #[derive(Debug, Clone)]
 pub struct WindowSettings {
     /// The title of the window.
@@ -22,15 +22,13 @@ pub struct WindowSettings {
 // Audio
 // ////////////////////////////////////////////////////////
 
-/// Configuration for audio.
-#[derive(Debug, Copy, Clone)]
-pub struct AudioDesc {}
+// TODO: Audio
 
 // ////////////////////////////////////////////////////////
 // Batch
 // ////////////////////////////////////////////////////////
 
-/// Handle to reference a batch with.
+/// Token to reference a batch with.
 #[derive(Copy, Clone, Debug)]
 pub struct BatchToken {
     key: Key<BatchToken>,
@@ -48,7 +46,7 @@ impl BatchToken {
     }
 }
 
-/// Configuration description for a sprite.
+/// Configuration settings for a batch.
 #[derive(Copy, Clone, Debug)]
 pub struct BatchSettings {
     pub translation: Vector2<f32>,
@@ -74,7 +72,7 @@ impl Default for BatchSettings {
 // Sprite
 // ////////////////////////////////////////////////////////
 
-/// Configuration description for a sprite.
+/// Configuration settings for a sprite.
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct Sprite {
@@ -126,7 +124,7 @@ impl Sprite {
 // Text
 // ////////////////////////////////////////////////////////
 
-/// Handle to reference an uploaded font with.
+/// Token to reference a font with.
 #[derive(Copy, Clone, Debug)]
 pub struct FontToken {
     key: usize,
@@ -153,7 +151,7 @@ impl Default for FontToken {
     }
 }
 
-/// Configuration description for text.
+/// Configuration settings for text.
 #[derive(Clone, Debug)]
 pub struct Text {
     pub string: String,
@@ -207,7 +205,7 @@ impl Text {
 // Texture
 // ////////////////////////////////////////////////////////
 
-/// Handle to reference an uploaded texture with.
+/// Token to reference a texture with. Has basic configuration settings.
 #[derive(Copy, Clone, Debug)]
 #[repr(transparent)]
 pub struct Texture(pub(crate) Vector4<u16>);
