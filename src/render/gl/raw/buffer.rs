@@ -33,7 +33,7 @@ pub enum BufferUsage {
     DynamicCopy = gl::DYNAMIC_COPY,
 }
 
-/// Creates and initializes a buffer object's data store.
+/// [2.0] Creates and initializes a buffer object's data store.
 ///
 /// # Arguments
 ///
@@ -50,7 +50,7 @@ pub fn buffer_data(target: BufferBindingTarget, size: isize, data: *const c_void
     }
 }
 
-/// Updates a subset of a buffer object's data store.
+/// [2.0] Updates a subset of a buffer object's data store.
 ///
 /// # Arguments
 ///
@@ -66,7 +66,7 @@ pub fn buffer_sub_data(target: BufferBindingTarget, offset: isize, size: isize, 
     }
 }
 
-/// Creates and initializes a buffer object's data store.
+/// [2.0] Creates and initializes a buffer object's data store.
 ///
 /// # Arguments
 ///
@@ -79,7 +79,7 @@ pub fn bind_buffer(target: BufferBindingTarget, buffer: u32) {
     }
 }
 
-/// Generate a buffer object.
+/// [2.0] Generate a buffer object.
 #[inline]
 pub fn gen_buffer() -> u32 {
     unsafe {
@@ -89,7 +89,7 @@ pub fn gen_buffer() -> u32 {
     }
 }
 
-/// Delete a named buffer object.
+/// [2.0] Delete a named buffer object.
 ///
 /// # Arguments
 /// `buffer` - Specifies a buffer to be deleted.

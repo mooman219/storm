@@ -76,7 +76,7 @@ impl Default for BatchSettings {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct Sprite {
-    // Units are measured in pixels.
+    // Position of the sprite. The Z coordinate represents sprite depth. Units are measured in pixels.
     pub pos: Vector3<f32>,
     // Units are measured in pixels.
     pub size: Vector2<u16>,
