@@ -1,6 +1,6 @@
 [package]
 name = "storm"
-version = "0.0.2"
+version = "0.1.0"
 authors = ["Joe Cumbo <mooman219@gmail.com>"]
 edition = "2018"
 
