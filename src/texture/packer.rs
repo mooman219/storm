@@ -2,7 +2,6 @@ use crate::color::*;
 use crate::texture::image::*;
 use cgmath::*;
 use std::cmp::max;
-use std::path::Path;
 
 #[derive(Copy, Clone, Debug)]
 struct Rect {
@@ -208,7 +207,7 @@ impl TexturePacker {
     pub fn new() -> TexturePacker {
         TexturePacker {
             packer: SkylinePacker::new(),
-            texture: Image::from_default(TRANSPARENT, SIZE, SIZE),
+            texture: Image::from_color(TRANSPARENT, SIZE, SIZE),
         }
     }
 
@@ -225,15 +224,6 @@ impl TexturePacker {
         );
 
         vector
-    }
-
-    pub fn pack_path(&mut self, path: &Path) -> Vector4<u16> {
-        let texture = match image::open(path) {
-            Ok(img) => img,
-            Err(msg) => panic!("Unable to open image: {}", msg),
-        };
-        let texture = Image::from_image(texture);
-        self.pack(&texture)
     }
 
     pub fn export(&self) -> Image {

@@ -2,7 +2,6 @@ use crate::color;
 use crate::texture::packer::*;
 use crate::texture::*;
 use cgmath::*;
-use std::path::Path;
 
 pub struct TextureAtlas {
     packer: TexturePacker,
@@ -15,7 +14,7 @@ impl TextureAtlas {
             packer: TexturePacker::new(),
             dirty: false,
         };
-        manager.add_texture(Image::from_default(color::WHITE, 1, 1));
+        manager.add_texture(Image::from_color(color::WHITE, 1, 1));
         manager.sync();
         manager
     }
@@ -28,7 +27,8 @@ impl TextureAtlas {
     }
 
     pub fn add_path(&mut self, path: &str) -> Vector4<u16> {
-        let uv = self.packer.pack_path(Path::new(path));
+        let texture = Image::from_path(path);
+        let uv = self.packer.pack(&texture);
         self.dirty = true;
         info!("Loaded texture {} at {:?}", path, uv);
         uv

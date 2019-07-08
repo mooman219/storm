@@ -85,7 +85,7 @@ impl FontAtlas {
                         value.offset = glyph.offset;
                         value.size = Vector2::new(glyph.size.x as f32, glyph.size.y as f32);
                         let texture =
-                            Image::from_color_Vec(&glyph.data, glyph.size.x as u32, glyph.size.y as u32);
+                            Image::from_color_vec(&glyph.data, glyph.size.x as u32, glyph.size.y as u32);
                         value.uv = self.packer.pack(&texture);
                         self.dirty = true;
                     }

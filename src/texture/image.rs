@@ -1,5 +1,6 @@
 use crate::color::*;
 use image::{DynamicImage, ImageBuffer, Rgba};
+use std::path::Path;
 
 #[derive(Clone, Debug)]
 pub struct Image {
@@ -9,19 +10,27 @@ pub struct Image {
 }
 
 impl Image {
-    pub fn from_default(default: RGBA8, width: u32, height: u32) -> Image {
+    pub fn from_color(color: RGBA8, width: u32, height: u32) -> Image {
         if width == 0 || height == 0 {
             panic!("Neither width or height can be 0.");
         }
         let mut pixels = Vec::new();
         for _ in 0..(width * height) {
-            pixels.push(default);
+            pixels.push(color);
         }
         Image {
             pixels: pixels,
             width: width,
             height: height,
         }
+    }
+
+    pub fn from_path(path: &str) -> Image {
+        let image = match image::open(&Path::new(path)) {
+            Ok(img) => img,
+            Err(msg) => panic!("Unable to open image: {}", msg),
+        };
+        Image::from_image(image)
     }
 
     pub fn from_image(image: DynamicImage) -> Image {
@@ -42,7 +51,7 @@ impl Image {
         }
     }
 
-    pub fn from_color_Vec(buf: &Vec<RGBA8>, width: u32, height: u32) -> Image {
+    pub fn from_color_vec(buf: &Vec<RGBA8>, width: u32, height: u32) -> Image {
         if width == 0 || height == 0 {
             panic!("Neither width or height can be 0.");
         }
