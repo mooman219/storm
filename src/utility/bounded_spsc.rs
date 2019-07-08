@@ -372,8 +372,6 @@ mod tests {
     use super::*;
     use std::sync::mpsc::sync_channel;
     use std::thread;
-    use test::black_box;
-    use test::Bencher;
 
     #[test]
     fn buffer_size() {
@@ -501,35 +499,5 @@ mod tests {
             let t = c.pop();
             assert!(t == i);
         }
-    }
-
-    // ////////////////////////////////////////////////////////////////////////////
-    // Benches
-    // ////////////////////////////////////////////////////////////////////////////
-
-    const ITERATIONS: usize = 1000;
-
-    #[bench]
-    fn bench_cycle(bench: &mut Bencher) {
-        let (p, c) = make(ITERATIONS);
-
-        bench.iter(|| {
-            for x in 0..ITERATIONS {
-                black_box(p.push(x));
-                black_box(c.pop());
-            }
-        });
-    }
-
-    #[bench]
-    fn bench_cycle_default(bench: &mut Bencher) {
-        let (tx, rx) = sync_channel(ITERATIONS);
-
-        bench.iter(|| {
-            for x in 0..ITERATIONS {
-                black_box(tx.send(x).unwrap());
-                black_box(rx.recv().unwrap());
-            }
-        });
     }
 }

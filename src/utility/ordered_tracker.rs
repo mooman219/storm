@@ -121,8 +121,6 @@ impl<T> OrderedTracker<T> {
 mod tests {
     #![allow(unused_imports)]
     use super::*;
-    use test::black_box;
-    use test::Bencher;
 
     #[test]
     fn insert_continuous_get() {
@@ -239,36 +237,5 @@ mod tests {
         assert_eq!(third_remove, 1);
         assert_eq!(map.len, 1);
         assert_eq!(map.free, 2);
-    }
-
-    // ////////////////////////////////////////////////////////////////////////////
-    // Benches
-    // ////////////////////////////////////////////////////////////////////////////
-
-    const ITERATIONS: usize = 1000;
-
-    #[bench]
-    fn bench_cycle(bench: &mut Bencher) {
-        let mut map = OrderedTracker::<usize>::new();
-
-        bench.iter(|| {
-            for _ in 0..ITERATIONS {
-                let a = map.insert(0);
-                black_box(map.get(a));
-                black_box(map.remove(a));
-            }
-        });
-    }
-
-    #[bench]
-    fn bench_get(bench: &mut Bencher) {
-        let mut map = OrderedTracker::<usize>::new();
-        let a = map.insert(0);
-
-        bench.iter(|| {
-            for _ in 0..ITERATIONS {
-                black_box(map.get(a));
-            }
-        });
     }
 }

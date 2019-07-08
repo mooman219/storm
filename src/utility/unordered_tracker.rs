@@ -109,8 +109,6 @@ impl<T> UnorderedTracker<T> {
 mod tests {
     #![allow(unused_imports)]
     use super::*;
-    use test::black_box;
-    use test::Bencher;
 
     #[test]
     fn add_get() {
@@ -249,47 +247,5 @@ mod tests {
         assert_eq!(map.get(third), 1);
         assert_eq!(map.len, 2);
         assert_eq!(map.free, 0);
-    }
-
-    // ////////////////////////////////////////////////////////////////////////////
-    // Benches
-    // ////////////////////////////////////////////////////////////////////////////
-
-    const ITERATIONS: usize = 1000;
-
-    #[bench]
-    fn bench_cycle(bench: &mut Bencher) {
-        let mut map = UnorderedTracker::<usize>::new();
-
-        bench.iter(|| {
-            for _ in 0..ITERATIONS {
-                let a = map.add();
-                black_box(map.get(a));
-                black_box(map.remove(a));
-            }
-        });
-    }
-
-    #[bench]
-    fn bench_get(bench: &mut Bencher) {
-        let mut map = UnorderedTracker::<usize>::new();
-        let a = map.add();
-
-        bench.iter(|| {
-            for _ in 0..ITERATIONS {
-                black_box(map.get(a));
-            }
-        });
-    }
-
-    #[bench]
-    fn bench_add(bench: &mut Bencher) {
-        let mut map = UnorderedTracker::<usize>::new();
-
-        bench.iter(|| {
-            for _ in 0..ITERATIONS {
-                black_box(map.add());
-            }
-        });
     }
 }

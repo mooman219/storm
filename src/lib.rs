@@ -1,9 +1,7 @@
-#![feature(test)]
 #![allow(dead_code, non_camel_case_types, non_snake_case, intra_doc_link_resolution_failure)]
 
 #[macro_use]
 pub extern crate log;
-extern crate test;
 
 pub use cgmath;
 

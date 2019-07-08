@@ -117,8 +117,6 @@ impl<T: Copy> Consumer<T> {
 mod tests {
     #![allow(unused_imports)]
     use super::*;
-    use test::black_box;
-    use test::Bencher;
 
     #[test]
     fn cycle() {
@@ -134,23 +132,5 @@ mod tests {
         producer.set(1u32);
         assert_eq!(consumer.consume(), Some(1u32));
         assert_eq!(consumer.consume(), None);
-    }
-
-    // ////////////////////////////////////////////////////////////////////////////
-    // Benches
-    // ////////////////////////////////////////////////////////////////////////////
-
-    const ITERATIONS: usize = 1000;
-
-    #[bench]
-    fn bench_cycle(bench: &mut Bencher) {
-        let (p, c) = make();
-
-        bench.iter(|| {
-            for x in 0..ITERATIONS {
-                black_box(p.set(x));
-                black_box(c.consume());
-            }
-        });
     }
 }
