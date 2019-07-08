@@ -1,25 +1,28 @@
 use std::time::Duration;
 
-/// The number of nanoseconds in a microsecond.
+/// The number of nanoseconds per microsecond.
 pub const NANOS_PER_MICRO: u64 = 1_000;
-/// The number of nanoseconds in a millisecond.
+/// The number of nanoseconds per millisecond.
 pub const NANOS_PER_MILLI: u64 = 1_000_000;
-/// The number of nanoseconds in seconds.
+/// The number of nanoseconds per second.
 pub const NANOS_PER_SEC: u64 = 1_000_000_000;
 /// The number of microseconds per second.
 pub const MICROS_PER_SEC: u64 = 1_000_000;
 /// The number of milliseconds per second.
 pub const MILLIS_PER_SEC: u64 = 1_000;
-/// The number of seconds in a minute.
+/// The number of seconds per minute.
 pub const SECS_PER_MINUTE: u64 = 60;
-/// The number of seconds in an hour.
+/// The number of seconds per hour.
 pub const SECS_PER_HOUR: u64 = 3_600;
 /// The number of (non-leap) seconds in days.
 pub const SECS_PER_DAY: u64 = 86_400;
-
+// A const duration representing a second.
 pub const SECOND: Duration = Duration::from_secs(1);
+// A const duration representing a millisecond.
 pub const MILLISECOND: Duration = Duration::from_millis(1);
+// A const duration representing a microsecond.
 pub const MICROSECOND: Duration = Duration::from_micros(1);
+// A const duration representing a nanosecond.
 pub const NANOSECOND: Duration = Duration::from_nanos(1);
 
 #[inline]
