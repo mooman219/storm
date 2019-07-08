@@ -4,14 +4,13 @@ The storm engine is a simple 2D renderer designed for performance. It currently 
 The engine compiles with nightly.
 
 ## Example
-This example will render a white square in about the center of the screen.
+This example will render a white square in about the center of the screen with text below it.
 
 ```rust
 use crate::cgmath::*;
 use storm::time::*;
 use storm::*;
 
-/// Run with: cargo run --example square --release
 fn main() {
     // Create the engine context and describe the window.
     Engine::start(
@@ -39,11 +38,11 @@ fn game(mut engine: Engine) {
     {
         // Add all the strings we want to draw to a vec.
         let mut strings = Vec::new();
-        let mut string = Text::default();
-        string.string.push_str("Hello world!");
-        string.color = color::WHITE;
-        string.pos.y -= 50.0;
-        strings.push(string);
+        let mut text = Text::default();
+        text.set_string("Hello world!");
+        text.color = color::WHITE;
+        text.pos.y -= 50.0;
+        text.push(string);
         // Assign the strings we want to draw to a batch.
         engine.text_set(&screen, &strings);
     }

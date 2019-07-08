@@ -30,11 +30,11 @@ fn game(mut engine: Engine) {
     {
         // Add all the strings we want to draw to a vec.
         let mut strings = Vec::new();
-        let mut string = Text::default();
-        string.string.push_str("Hello world!");
-        string.color = color::WHITE;
-        string.pos.y -= 50.0;
-        strings.push(string);
+        let mut text = Text::default();
+        text.set_string("Hello world!");
+        text.color = color::WHITE;
+        text.pos.y -= 50.0;
+        strings.push(text);
         // Assign the strings we want to draw to a batch.
         engine.text_set(&screen, &strings);
     }
