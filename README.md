@@ -4,9 +4,9 @@
 [![Crates.io](https://img.shields.io/crates/v/storm.svg)](https://crates.io/crates/storm)
 [![License](https://img.shields.io/crates/l/storm.svg)](https://github.com/mooman219/storm/blob/master/LICENSE)
 
-The storm engine is a simple 2D renderer designed for performance. It currently features an OpenGL 3.3 backend and supports Windows, Linux, and Mac. The engine is experimental and can change at any time.
+The storm engine is a simple 2D renderer designed for performance. It currently features an OpenGL 3.3 backend and supports Windows, Linux, and Mac. 
 
-The engine compiles with nightly.
+The engine: is experimental and __will__ change at any time, compiles with nightly, and requires SDL build. For Windows, SDL is included automatically. On Mac and Linux, follow the instructions [here](https://github.com/Lokathor/beryllium#building) to setup SDL.
 
 ## Example
 This example will render a white square in about the center of the screen with text below it.
