@@ -2,11 +2,19 @@
 name = "storm"
 version = "0.1.0"
 authors = ["Joe Cumbo <mooman219@gmail.com>"]
+description = "2D game engine designed for performance"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/mooman219/storm"
+keywords = ["game", "engine", "2D", "graphics"]
+categories = ["game-engines"]
 edition = "2018"
 exclude = [
-    "examples/*",
     "examples_old/*",
 ]
+
+[badges]
+maintenance = { status = "actively-developed" }
 
 [dependencies]
 gl = "0.12"
