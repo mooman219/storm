@@ -14,23 +14,15 @@ impl TextureAtlas {
             packer: TexturePacker::new(),
             dirty: false,
         };
-        manager.add_texture(Image::from_color(color::WHITE, 1, 1));
+        manager.add(Image::from_color(color::WHITE, 1, 1));
         manager.sync();
         manager
     }
 
-    pub fn add_texture(&mut self, texture: Image) -> Vector4<u16> {
+    pub fn add(&mut self, texture: Image) -> Vector4<u16> {
         let uv = self.packer.pack(&texture);
         self.dirty = true;
         info!("Loaded raw texture at {:?}", uv);
-        uv
-    }
-
-    pub fn add_path(&mut self, path: &str) -> Vector4<u16> {
-        let texture = Image::from_path(path);
-        let uv = self.packer.pack(&texture);
-        self.dirty = true;
-        info!("Loaded texture {} at {:?}", path, uv);
         uv
     }
 

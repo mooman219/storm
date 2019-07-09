@@ -24,6 +24,7 @@ use crate::utility::bounded_spsc;
 use crate::utility::control;
 use crate::utility::swap_spsc;
 use cgmath::*;
+use std::path::Path;
 use std::thread;
 
 /// The main entry point into the Storm engine. All interactions with the engine are managed by the
@@ -161,6 +162,11 @@ impl Engine {
 
     /// Loads a new texture. If there is an issue loading the texture, this function will panic.
     pub fn texture_load(&mut self, path: &str) -> Texture {
+        self.render_client.texture_create(&Path::new(path))
+    }
+
+    /// Loads a new texture. If there is an issue loading the texture, this function will panic.
+    pub fn texture_load_path(&mut self, path: &Path) -> Texture {
         self.render_client.texture_create(path)
     }
 

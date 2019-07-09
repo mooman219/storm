@@ -3,6 +3,7 @@ use crate::texture::*;
 use crate::types::*;
 use crate::utility::swap_spsc;
 use crate::utility::unordered_tracker::*;
+use std::path::Path;
 use std::ptr;
 
 pub struct RenderClient {
@@ -115,8 +116,8 @@ impl RenderClient {
     // Texture
     // ////////////////////////////////////////////////////////
 
-    pub fn texture_create(&mut self, path: &str) -> Texture {
-        let uv = self.texture_atlas.add_path(path);
+    pub fn texture_create(&mut self, path: &Path) -> Texture {
+        let uv = self.texture_atlas.add(Image::from_path(path));
         let state = self.render_producer.get();
         state.texture_atlas = self.texture_atlas.sync();
         Texture(uv)

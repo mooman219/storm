@@ -25,7 +25,7 @@ impl Image {
         }
     }
 
-    pub fn from_path(path: &str) -> Image {
+    pub fn from_path(path: &Path) -> Image {
         let image = match image::open(&Path::new(path)) {
             Ok(img) => img,
             Err(msg) => panic!("Unable to open image: {}", msg),
