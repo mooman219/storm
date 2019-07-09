@@ -106,6 +106,10 @@ impl Default for Sprite {
 }
 
 impl Sprite {
+    /// Creates aa new sprite. This converts the rotation and size from floats automatically. Size
+    /// is measured in pixels, and is limited to 65535. Rotation is measured in turns from [0, 1).
+    /// Values outside of the range are wrapped into the range. For example, 1.75 is wrapped into
+    /// 0.75, -0.4 is wrapped into 0.6.
     pub fn new(
         pos: Vector3<f32>,
         size: Vector2<f32>,
@@ -126,6 +130,8 @@ impl Sprite {
         }
     }
 
+    /// Creates a new sprite. This does not conversions and represents exactly the members of the
+    /// sprite type.
     pub fn new_raw(
         pos: Vector3<f32>,
         size: Vector2<u16>,
