@@ -172,8 +172,6 @@ impl Engine {
     // Window
     // ////////////////////////////////////////////////////////
 
-    // TODO: Clear color API
-
     /// Sets the title of the window.
     pub fn window_title(&mut self, title: &str) {
         self.render_client.window_title(title);
