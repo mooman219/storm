@@ -21,6 +21,7 @@ fn game(mut engine: Engine) {
     let texture_2 = engine.texture_load("./examples/resources/2.png");
     let texture_2 = texture_2.sub_texture(0, 0, 16, 16).unwrap();
 
+    engine.window_clear_color(storm::color::BLUE);
     let screen = engine.batch_create(&BatchSettings::default());
     let mut sprites = Vec::new();
     let mut sprite = Sprite::default();

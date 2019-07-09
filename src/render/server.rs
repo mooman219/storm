@@ -39,6 +39,9 @@ impl RenderServer {
         if let Some(title) = messages.window.title.take() {
             self.state.window_title(&title);
         }
+        if let Some(clear_color) = messages.window.clear_color.take() {
+            self.state.window_clear_color(clear_color);
+        }
         for message in messages.batch_changes.drain(..) {
             match message {
                 BatchMessage::Create {

@@ -1,3 +1,4 @@
+use crate::color::RGBA8;
 use crate::texture::*;
 use crate::types::*;
 
@@ -55,12 +56,14 @@ pub enum BatchMessage {
 
 pub struct WindowState {
     pub title: Option<String>,
+    pub clear_color: Option<RGBA8>,
 }
 
 impl Default for WindowState {
     fn default() -> WindowState {
         WindowState {
             title: None,
+            clear_color: None,
         }
     }
 }

@@ -19,10 +19,9 @@ mod texture;
 mod types;
 mod utility;
 
-use crate::render::*;
-use crate::utility::bounded_spsc;
-use crate::utility::control;
-use crate::utility::swap_spsc;
+use crate::color::RGBA8;
+use crate::render::{RenderClient, RenderServer, StormWindow};
+use crate::utility::{bounded_spsc, control, swap_spsc};
 use cgmath::*;
 use std::path::Path;
 use std::thread;
@@ -181,6 +180,11 @@ impl Engine {
     /// Sets the title of the window.
     pub fn window_title(&mut self, title: &str) {
         self.render_client.window_title(title);
+    }
+
+    /// Sets the clear color for the window.
+    pub fn window_clear_color(&mut self, clear_color: RGBA8) {
+        self.render_client.window_clear_color(clear_color);
     }
 
     /// Commits the queued window, batch, sprite, text, and texture related changes to the renderer.

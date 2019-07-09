@@ -1,3 +1,4 @@
+use crate::color::RGBA8;
 use crate::render::gl::buffer::*;
 use crate::render::gl::raw::*;
 use crate::render::gl::shader::*;
@@ -38,7 +39,7 @@ fn matrix_from_translate_scaled(translation: &Vector2<f32>, scale: f32) -> Matri
 impl OpenGLState {
     pub fn new(window: StormWindow) -> OpenGLState {
         let logical_size = window.logical_size();
-        let mut state = OpenGLState {
+        let state = OpenGLState {
             window: window,
             shader: TextureShader::new(),
             texture_atlas: TextureHandle::new(TextureUnit::Atlas),
@@ -47,25 +48,27 @@ impl OpenGLState {
             matrix_bounds: matrix_from_bounds(&logical_size),
             current_logical_size: logical_size,
         };
-        state.setup();
-        state
-    }
-
-    fn setup(&mut self) {
         // Bind shader once.
-        self.shader.bind();
+        state.shader.bind();
         // Setup cabilities.
         enable(Capability::CullFace);
         enable(Capability::Blend);
         enable(Capability::DepthTest);
-        clear_color(0.0, 0.5, 0.0, 1.0);
+        clear_color(0.0, 0.0, 0.0, 1.0);
         depth_func(DepthTest::Less);
         blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
         cull_face(CullFace::Back);
+        // State is setup.
+        state
     }
 
     pub fn window_title(&mut self, title: &str) {
         self.window.set_title(title);
+    }
+
+    pub fn window_clear_color(&mut self, color: RGBA8) {
+        let color: Vector4<f32> = color.into();
+        clear_color(color.x, color.y, color.z, color.w);
     }
 
     pub fn upload_texture_atlas(&mut self, texture: &Image) {
@@ -109,6 +112,7 @@ impl OpenGLState {
         self.batches.swap_remove(index);
     }
 
+    /// Helper function to resize the window.
     fn resize(&mut self) {
         let new_logical_size = self.window.logical_size();
         if self.current_logical_size != new_logical_size {

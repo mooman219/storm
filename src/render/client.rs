@@ -1,3 +1,4 @@
+use crate::color::RGBA8;
 use crate::render::message::*;
 use crate::texture::*;
 use crate::types::*;
@@ -130,6 +131,11 @@ impl RenderClient {
     pub fn window_title(&mut self, title: &str) {
         let state = self.render_producer.get();
         state.window.title = Some(String::from(title));
+    }
+
+    pub fn window_clear_color(&mut self, clear_color: RGBA8) {
+        let state = self.render_producer.get();
+        state.window.clear_color = Some(clear_color);
     }
 
     pub fn commit(&mut self) {
