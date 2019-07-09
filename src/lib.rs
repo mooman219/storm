@@ -157,7 +157,9 @@ impl Engine {
     // Texture
     // ////////////////////////////////////////////////////////
 
-    /// Loads a new texture.
+    // TODO: Non panicing API for texture loading.
+
+    /// Loads a new texture. If there is an issue loading the texture, this function will panic.
     pub fn texture_load(&mut self, path: &str) -> Texture {
         self.render_client.texture_create(path)
     }
@@ -167,6 +169,8 @@ impl Engine {
     // ////////////////////////////////////////////////////////
     // Window
     // ////////////////////////////////////////////////////////
+
+    // TODO: Clear color API
 
     /// Sets the title of the window.
     pub fn window_title(&mut self, title: &str) {

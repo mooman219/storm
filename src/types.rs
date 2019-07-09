@@ -125,6 +125,22 @@ impl Sprite {
             rotation: (rotation.fract() * 65536.0) as u16,
         }
     }
+
+    pub fn new_raw(
+        pos: Vector3<f32>,
+        size: Vector2<u16>,
+        texture: Texture,
+        color: RGBA8,
+        rotation: u16,
+    ) -> Sprite {
+        Sprite {
+            pos: pos,
+            size: size,
+            texture: texture,
+            color: color,
+            rotation: rotation,
+        }
+    }
 }
 
 // ////////////////////////////////////////////////////////
