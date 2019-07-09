@@ -20,7 +20,7 @@ mod types;
 mod utility;
 
 use crate::color::RGBA8;
-use crate::render::{RenderClient, RenderServer, StormWindow};
+use crate::render::{RenderClient, RenderServer};
 use crate::utility::{bounded_spsc, control, swap_spsc};
 use cgmath::*;
 use std::path::Path;
@@ -42,13 +42,20 @@ impl Engine {
         // Init SDL2
         let sdl = unsafe { beryllium::init().expect("Unable to init beryllium (SDL).") };
 
-        // Make a window
-        let window = StormWindow::new(&desc, &sdl);
-
         // Inter-thread messaging.
         let (render_producer_pipe, render_consumer_pipe) = swap_spsc::make();
         let (input_producer_pipe, input_consumer_pipe) = bounded_spsc::make(512);
         let (engine_watcher, engine_probe) = control::make_probe();
+
+        // Rendering and input
+        let mut render_server = RenderServer::new(&desc, &sdl, render_consumer_pipe);
+        let mut input_server = InputServer::new(
+            input_producer_pipe,
+            Vector2::new(
+                desc.size.x as f32, // width
+                desc.size.y as f32, // height
+            ),
+        );
 
         thread::spawn(move || {
             let engine = Engine {
@@ -59,16 +66,6 @@ impl Engine {
             info!("Game thread has exited.");
             engine_probe.finalize();
         });
-
-        // Rendering
-        let mut render_server = RenderServer::new(window, render_consumer_pipe);
-        let mut input_server = InputServer::new(
-            input_producer_pipe,
-            Vector2::new(
-                desc.size.x as f32, // width
-                desc.size.y as f32, // height
-            ),
-        );
 
         while engine_watcher.alive() {
             render_server.tick();

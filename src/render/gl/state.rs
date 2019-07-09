@@ -6,6 +6,7 @@ use crate::render::gl::texture_handle::*;
 use crate::render::gl::window::*;
 use crate::texture::*;
 use crate::types::*;
+use beryllium::SDLToken;
 use cgmath::*;
 
 struct Batch {
@@ -17,7 +18,7 @@ struct Batch {
 }
 
 pub struct OpenGLState {
-    window: StormWindow,
+    window: OpenGLWindow,
     shader: TextureShader,
     texture_atlas: TextureHandle,
     texture_font: TextureHandle,
@@ -37,7 +38,8 @@ fn matrix_from_translate_scaled(translation: &Vector2<f32>, scale: f32) -> Matri
 }
 
 impl OpenGLState {
-    pub fn new(window: StormWindow) -> OpenGLState {
+    pub fn new(desc: &WindowSettings, sdl: &SDLToken) -> OpenGLState {
+        let window = OpenGLWindow::new(desc, sdl);
         let logical_size = window.logical_size();
         let state = OpenGLState {
             window: window,

@@ -4,11 +4,11 @@ use beryllium::*;
 use cgmath::*;
 use std::mem::*;
 
-pub struct StormWindow {
+pub struct OpenGLWindow {
     inner: ManuallyDrop<GLWindow<'static>>,
 }
 
-impl Drop for StormWindow {
+impl Drop for OpenGLWindow {
     fn drop<'drop>(&mut self) {
         unsafe {
             ManuallyDrop::drop(&mut self.inner);
@@ -16,8 +16,8 @@ impl Drop for StormWindow {
     }
 }
 
-impl StormWindow {
-    pub fn new(desc: &WindowSettings, sdl: &SDLToken) -> StormWindow {
+impl OpenGLWindow {
+    pub fn new(desc: &WindowSettings, sdl: &SDLToken) -> OpenGLWindow {
         // Attributes
         sdl.gl_set_attribute(
             beryllium::GLattr::ContextFlags,
@@ -50,7 +50,7 @@ impl StormWindow {
         info!("SDL Loaded {:?}", beryllium::version());
         info!("OpenGL Loaded {}", get_string(StringTarget::Version));
 
-        StormWindow {
+        OpenGLWindow {
             // This really isn't safe but sue me.
             inner: ManuallyDrop::new(window),
         }
