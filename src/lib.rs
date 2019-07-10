@@ -38,6 +38,7 @@ impl Engine {
     // once the engine is constructed. If the game loop exits or panics, the engine shuts down.
     pub fn start(desc: WindowSettings, mut game_loop: impl FnMut(Engine) + Send + 'static) {
         simple_logger::init().unwrap();
+        info!("Engine started.");
 
         // Init SDL2
         let sdl = unsafe { beryllium::init().expect("Unable to init beryllium (SDL).") };
@@ -62,8 +63,9 @@ impl Engine {
                 render_client: RenderClient::new(render_producer_pipe),
                 input_client: InputClient::new(input_consumer_pipe),
             };
+            info!("Game started.");
             game_loop(engine);
-            info!("Game thread has exited.");
+            info!("Game exited.");
             engine_probe.finalize();
         });
 
