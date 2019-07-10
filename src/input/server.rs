@@ -28,7 +28,7 @@ impl InputServer {
 
     pub fn tick(&mut self, sdl: &SDLToken) {
         let last_cursor_pos = self.cursor_pos;
-        // let last_window_size = self.window_size;
+        let last_window_size = self.window_size;
         while let Some(event) = sdl.poll_event() {
             match event {
                 // Window
@@ -100,6 +100,9 @@ impl InputServer {
         }
         if self.cursor_pos != last_cursor_pos {
             self.input_producer.push(InputMessage::CursorMoved(self.cursor_pos));
+        }
+        if self.window_size != last_window_size {
+            self.input_producer.push(InputMessage::WindowResized(self.window_size));
         }
     }
 }

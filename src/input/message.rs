@@ -14,14 +14,16 @@ pub enum InputMessage {
     KeyPressed(KeyboardButton),
     /// Keyboard release event.
     KeyReleased(KeyboardButton),
-    /// Cursor press event.
+    /// Cursor press event. Contains the button pressed and the position it was pressed at.
     CursorPressed(CursorButton, Vector2<f32>),
-    /// Cursor release event.
+    /// Cursor release event. Contains the button released and the position it was released at.
     CursorReleased(CursorButton, Vector2<f32>),
-    /// Cursor moved event.
+    /// Cursor moved event. Contains the position of the cursor.
     CursorMoved(Vector2<f32>),
     /// Cursor left the bounds of the window event.
     CursorLeft,
     /// Cursor entered the bounds of the window event.
     CursorEntered,
+    /// Window resized event. Contains the new dimensions of the window.
+    WindowResized(Vector2<f32>),
 }
