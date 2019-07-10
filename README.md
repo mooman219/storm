@@ -8,6 +8,13 @@ The storm engine is a simple 2D renderer designed for performance. It currently 
 
 The engine: is experimental and __will__ change at any time, compiles with nightly, and requires SDL build. For Windows, SDL is included automatically. On Mac and Linux, follow the instructions [here](https://github.com/Lokathor/beryllium#building) to setup SDL.
 
+## Todo
+
+- Audio API
+- Loading textures from bytes
+- Expose vsync options
+- Increase texture storage space
+
 ## Example
 This example will render a white square in about the center of the screen with text below it.
 
