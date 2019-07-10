@@ -38,7 +38,6 @@ impl FontAtlas {
             dirty: true,
         };
         manager.add_font_bytes(include_bytes!("./resources/RobotoMono-Regular.ttf") as &[u8]);
-        manager.sync();
         manager
     }
 

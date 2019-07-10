@@ -15,7 +15,6 @@ impl TextureAtlas {
             dirty: false,
         };
         manager.add(Image::from_color(color::WHITE, 1, 1));
-        manager.sync();
         manager
     }
 
