@@ -1,4 +1,5 @@
 use crate::color::*;
+use crate::types::TextureFormat;
 use image::{DynamicImage, ImageBuffer, Rgba};
 use std::path::Path;
 
@@ -31,6 +32,12 @@ impl Image {
             Err(msg) => panic!("Unable to open image: {}", msg),
         };
         Image::from_image(image)
+    }
+
+    pub fn from_bytes(bytes: &[u8], format: TextureFormat) -> Image {
+        let dynamic_image =
+            ::image::load_from_memory_with_format(bytes, format).expect("Unable to convert bytes to image.");
+        Image::from_image(dynamic_image)
     }
 
     pub fn from_image(image: DynamicImage) -> Image {

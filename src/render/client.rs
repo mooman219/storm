@@ -118,11 +118,21 @@ impl RenderClient {
     // ////////////////////////////////////////////////////////
 
     pub fn texture_create(&mut self, path: &Path) -> Texture {
-        let uv = self.texture_atlas.add(Image::from_path(path));
+        self.texture(Image::from_path(path))
+    }
+
+    pub fn texture_create_bytes(&mut self, bytes: &[u8], format: TextureFormat) -> Texture {
+        self.texture(Image::from_bytes(bytes, format))
+    }
+
+    fn texture(&mut self, image: Image) -> Texture {
+        let uv = self.texture_atlas.add(image);
         let state = self.render_producer.get();
         state.texture_atlas = self.texture_atlas.sync();
         Texture(uv)
     }
+
+    // bytes: &[u8], format: TextureFormat
 
     // ////////////////////////////////////////////////////////
     // Window

@@ -1,3 +1,5 @@
+pub use image::ImageFormat as TextureFormat;
+
 use crate::color::*;
 use crate::texture::PIXEL_SIZE;
 use crate::utility::unordered_tracker::*;

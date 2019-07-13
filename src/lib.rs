@@ -168,7 +168,10 @@ impl Engine {
         self.render_client.texture_create(path)
     }
 
-    // TODO: Alternative texture loading functions.
+    /// Loads a new texture. If there is an issue loading the texture, this function will panic.
+    pub fn texture_load_bytes(&mut self, bytes: &[u8], format: TextureFormat) -> Texture {
+        self.render_client.texture_create_bytes(bytes, format)
+    }
 
     // ////////////////////////////////////////////////////////
     // Window
