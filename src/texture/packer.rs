@@ -76,6 +76,7 @@ impl Skyline {
 const MAX: u32 = 65536;
 const SIZE: u32 = 4096;
 pub(crate) const PIXEL_SIZE: u32 = MAX / SIZE;
+const PADDING: u32 = 0;
 
 struct SkylinePacker {
     border: Rect,
@@ -186,11 +187,11 @@ impl SkylinePacker {
     }
 
     fn pack(&mut self, width: u32, height: u32) -> Rect {
-        if let Some((i, mut rect)) = self.find_skyline(width + 1, height + 1) {
+        if let Some((i, mut rect)) = self.find_skyline(width + PADDING, height + PADDING) {
             self.split(i, &rect);
             self.merge();
-            rect.w -= 1;
-            rect.h -= 1;
+            rect.w -= PADDING;
+            rect.h -= PADDING;
             rect
         } else {
             panic!("Unable to find space for the texture.");
