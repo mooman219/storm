@@ -66,9 +66,14 @@ impl Particle {
 
     pub fn new(pos: Vector3<f32>) -> (Sprite, Particle) {
         let sprite = Sprite::new(pos, Vector2::new(2.0, 2.0), Texture::default(), WHITE, 0.0);
+        let velocity = if pos.y < 0.0 {
+            Vector2::new(20.0, 0.0)
+        } else {
+            Vector2::new(-20.0, 0.0)
+        };
         let particle = Particle {
             pos: pos.truncate(),
-            velocity: Vector2::zero(),
+            velocity: velocity,
             acceleration: Vector2::zero(),
         };
         (sprite, particle)
