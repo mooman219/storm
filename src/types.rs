@@ -241,6 +241,7 @@ impl Text {
 // Texture
 // ////////////////////////////////////////////////////////
 
+/// Enumeration for all the loadable texture formats. Currently only PNG is supported.
 #[derive(Copy, Clone, Debug)]
 pub enum TextureFormat {
     PNG,
