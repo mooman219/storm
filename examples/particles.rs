@@ -18,6 +18,7 @@ fn main() {
 
 fn game(mut engine: Engine) {
     let mut clock = Clock::new(144);
+    engine.window_clear_color(WHITE);
 
     let screen = engine.batch_create(&BatchSettings::default());
     let mut sprites = Vec::new();
@@ -65,7 +66,7 @@ impl Particle {
     const MASS: f32 = 200.0;
 
     pub fn new(pos: Vector3<f32>) -> (Sprite, Particle) {
-        let sprite = Sprite::new(pos, Vector2::new(2.0, 2.0), Texture::default(), WHITE, 0.0);
+        let sprite = Sprite::new(pos, Vector2::new(2.0, 2.0), Texture::default(), BLACK, 0.0);
         let velocity = if pos.y < 0.0 {
             Vector2::new(20.0, 0.0)
         } else {
