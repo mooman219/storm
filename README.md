@@ -11,7 +11,6 @@ The engine is experimental and __will__ change at any time, compiles with nightl
 ## Todo
 
 - Audio API
-- Loading textures from bytes
 - Expose vsync options
 - Increase texture storage space
 
