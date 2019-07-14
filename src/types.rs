@@ -270,7 +270,7 @@ impl Texture {
     }
 
     /// Returns a sub texture from the given texture. Values are in pixels. The top left of the
-    /// texture has the coordinates of 0, 0.
+    /// texture has the coordinates of 0, 0. This ignore any mirroring on the underlying texture.
     ///
     /// Returns an error if the size is 0, or the bounds of the sub texture are outside of the
     /// original texture.
