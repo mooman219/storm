@@ -24,7 +24,7 @@ fn game(mut engine: Engine) {
     let mut particles = Vec::new();
     for x in -500..500 {
         for y in -500..500 {
-            let (sprite, particle) = Particle::new(Vector3::new(x as f32 * 3.0, y as f32 * 3.0, 0.0));
+            let (sprite, particle) = Particle::new(Vector3::new(x as f32 * 5.0, y as f32 * 5.0, 0.0));
             sprites.push(sprite);
             particles.push(particle);
         }
