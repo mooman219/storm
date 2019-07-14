@@ -1,7 +1,7 @@
-use crate::color::*;
+use crate::color::RGBA8;
+use crate::texture::formats;
 use crate::types::TextureFormat;
-use image::{DynamicImage, ImageBuffer, Rgba};
-use std::path::Path;
+use std::io::Read;
 
 #[derive(Clone, Debug)]
 pub struct Image {
@@ -11,14 +11,17 @@ pub struct Image {
 }
 
 impl Image {
+    pub fn from_raw<R: Read>(bytes: R, format: TextureFormat) -> Image {
+        match format {
+            TextureFormat::PNG => formats::png::read(bytes),
+        }
+    }
+
     pub fn from_color(color: RGBA8, width: u32, height: u32) -> Image {
         if width == 0 || height == 0 {
             panic!("Neither width or height can be 0.");
         }
-        let mut pixels = Vec::new();
-        for _ in 0..(width * height) {
-            pixels.push(color);
-        }
+        let pixels = vec![color; (width * height) as usize];
         Image {
             pixels: pixels,
             width: width,
@@ -26,44 +29,12 @@ impl Image {
         }
     }
 
-    pub fn from_path(path: &Path) -> Image {
-        let image = match image::open(&Path::new(path)) {
-            Ok(img) => img,
-            Err(msg) => panic!("Unable to open image: {}", msg),
-        };
-        Image::from_image(image)
-    }
-
-    pub fn from_bytes(bytes: &[u8], format: TextureFormat) -> Image {
-        let dynamic_image =
-            ::image::load_from_memory_with_format(bytes, format).expect("Unable to convert bytes to image.");
-        Image::from_image(dynamic_image)
-    }
-
-    pub fn from_image(image: DynamicImage) -> Image {
-        let rgba_image = image.to_rgba();
-        let width = rgba_image.width();
-        let height = rgba_image.height();
-        if width == 0 || height == 0 {
-            panic!("Neither width or height can be 0.");
-        }
-        let mut pixels = Vec::new();
-        for pixel in rgba_image.into_raw().as_slice().chunks_exact(4) {
-            pixels.push(RGBA8::new_raw(pixel[0], pixel[1], pixel[2], pixel[3]));
-        }
-        Image {
-            pixels: pixels,
-            width: width,
-            height: height,
-        }
-    }
-
-    pub fn from_color_vec(buf: &Vec<RGBA8>, width: u32, height: u32) -> Image {
+    pub fn from_vec(buf: Vec<RGBA8>, width: u32, height: u32) -> Image {
         if width == 0 || height == 0 {
             panic!("Neither width or height can be 0.");
         }
         Image {
-            pixels: buf.clone(),
+            pixels: buf,
             width: width,
             height: height,
         }
@@ -103,22 +74,5 @@ impl Image {
                 self.pixels[index_self] = tex.pixels[index_tex];
             }
         }
-    }
-
-    pub fn save_png(&self, path: &str) {
-        let width = self.width;
-        let height = self.height;
-        let mut pixels = Vec::new();
-        for pixel in &self.pixels {
-            pixels.push(pixel.r);
-            pixels.push(pixel.g);
-            pixels.push(pixel.b);
-            pixels.push(pixel.a);
-        }
-        let image = match ImageBuffer::<Rgba<u8>, Vec<u8>>::from_raw(width, height, pixels) {
-            Some(image_buffer) => DynamicImage::ImageRgba8(image_buffer),
-            None => panic!("Can't export texture"),
-        };
-        image.save(path).unwrap();
     }
 }

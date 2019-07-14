@@ -18,8 +18,8 @@ fn game(mut engine: Engine) {
     let mut clock = Clock::new(144);
 
     let texture_1_bytes = include_bytes!("resources/1.png");
-    let texture_1 = engine.texture_load_bytes(texture_1_bytes, TextureFormat::PNG);
-    let texture_2 = engine.texture_load("./examples/resources/2.png");
+    let texture_1 = engine.texture_create(texture_1_bytes.as_ref(), TextureFormat::PNG);
+    let texture_2 = engine.texture_load("./examples/resources/2.png", TextureFormat::PNG);
     let texture_2 = texture_2.sub_texture(0, 0, 16, 16).unwrap();
 
     engine.window_clear_color(storm::color::BLUE);

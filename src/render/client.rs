@@ -4,7 +4,7 @@ use crate::texture::*;
 use crate::types::*;
 use crate::utility::swap_spsc;
 use crate::utility::unordered_tracker::*;
-use std::path::Path;
+use std::io::Read;
 use std::ptr;
 
 pub struct RenderClient {
@@ -117,22 +117,13 @@ impl RenderClient {
     // Texture
     // ////////////////////////////////////////////////////////
 
-    pub fn texture_create(&mut self, path: &Path) -> Texture {
-        self.texture(Image::from_path(path))
-    }
-
-    pub fn texture_create_bytes(&mut self, bytes: &[u8], format: TextureFormat) -> Texture {
-        self.texture(Image::from_bytes(bytes, format))
-    }
-
-    fn texture(&mut self, image: Image) -> Texture {
+    pub fn texture_create<R: Read>(&mut self, bytes: R, format: TextureFormat) -> Texture {
+        let image = Image::from_raw(bytes, format);
         let uv = self.texture_atlas.add(image);
         let state = self.render_producer.get();
         state.texture_atlas = self.texture_atlas.sync();
         Texture(uv)
     }
-
-    // bytes: &[u8], format: TextureFormat
 
     // ////////////////////////////////////////////////////////
     // Window

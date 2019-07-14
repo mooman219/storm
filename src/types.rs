@@ -1,6 +1,4 @@
-pub use image::ImageFormat as TextureFormat;
-
-use crate::color::*;
+use crate::color::{BLACK, RGBA8, WHITE};
 use crate::texture::PIXEL_SIZE;
 use crate::utility::unordered_tracker::*;
 use cgmath::*;
@@ -242,6 +240,11 @@ impl Text {
 // ////////////////////////////////////////////////////////
 // Texture
 // ////////////////////////////////////////////////////////
+
+#[derive(Copy, Clone, Debug)]
+pub enum TextureFormat {
+    PNG,
+}
 
 /// Token to reference a texture with. Has basic configuration settings.
 #[derive(Copy, Clone, Debug)]

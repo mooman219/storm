@@ -23,6 +23,9 @@ use crate::color::RGBA8;
 use crate::render::{RenderClient, RenderServer};
 use crate::utility::{bounded_spsc, control, swap_spsc};
 use cgmath::*;
+use std::fs::File;
+use std::io::BufReader;
+use std::io::Read;
 use std::path::Path;
 use std::thread;
 
@@ -158,19 +161,21 @@ impl Engine {
 
     // TODO: Non panicing API for texture loading.
 
-    /// Loads a new texture. If there is an issue loading the texture, this function will panic.
-    pub fn texture_load(&mut self, path: &str) -> Texture {
-        self.render_client.texture_create(&Path::new(path))
+    /// Loads a new texture from a given path. If there is an issue loading the texture, this
+    /// function will panic.
+    pub fn texture_load<P: AsRef<Path>>(&mut self, path: P, format: TextureFormat) -> Texture {
+        let f = File::open(path).expect("Unable to open file to read path.");
+        let reader = BufReader::new(f);
+        self.render_client.texture_create(reader, format)
     }
 
-    /// Loads a new texture. If there is an issue loading the texture, this function will panic.
-    pub fn texture_load_path(&mut self, path: &Path) -> Texture {
-        self.render_client.texture_create(path)
-    }
-
-    /// Loads a new texture. If there is an issue loading the texture, this function will panic.
-    pub fn texture_load_bytes(&mut self, bytes: &[u8], format: TextureFormat) -> Texture {
-        self.render_client.texture_create_bytes(bytes, format)
+    /// Loads a new texture from an in memory source. If there is an issue loading the texture, this
+    /// function will panic.
+    ///
+    /// If loading from an array, like from include_bytes!(), you can use as_ref() on the array to
+    /// convert it into a readable type.
+    pub fn texture_create<R: Read>(&mut self, reader: R, format: TextureFormat) -> Texture {
+        self.render_client.texture_create(reader, format)
     }
 
     // ////////////////////////////////////////////////////////

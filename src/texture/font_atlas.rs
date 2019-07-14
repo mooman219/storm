@@ -37,7 +37,7 @@ impl FontAtlas {
             fonts: Vec::new(),
             dirty: true,
         };
-        manager.add_font_bytes(include_bytes!("./resources/RobotoMono-Regular.ttf") as &[u8]);
+        manager.add_font_bytes(include_bytes!("fonts/RobotoMono-Regular.ttf") as &[u8]);
         manager
     }
 
@@ -83,8 +83,7 @@ impl FontAtlas {
                         value.visible = true;
                         value.offset = glyph.offset;
                         value.size = Vector2::new(glyph.size.x as f32, glyph.size.y as f32);
-                        let texture =
-                            Image::from_color_vec(&glyph.data, glyph.size.x as u32, glyph.size.y as u32);
+                        let texture = Image::from_vec(glyph.data, glyph.size.x as u32, glyph.size.y as u32);
                         value.uv = self.packer.pack(&texture);
                         self.dirty = true;
                     }
