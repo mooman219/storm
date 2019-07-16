@@ -14,8 +14,36 @@ pub struct WindowSettings {
     pub title: String,
     /// The size of the window.
     pub size: Vector2<i32>,
-    /// Flag for if the window is resizable.
+    /// If the window is resizable.
     pub resizable: bool,
+    /// Vsync mode for the window.
+    pub vsync: Vsync,
+}
+
+impl Default for WindowSettings {
+    fn default() -> WindowSettings {
+        WindowSettings {
+            title: String::from("Storm Engine"),
+            size: Vector2::new(500, 500),
+            resizable: true,
+            vsync: Vsync::Disabled,
+        }
+    }
+}
+
+/// Enumeration for all possible vsync settings.
+#[derive(Copy, Clone, Debug)]
+pub enum Vsync {
+    /// Vsync will be disabled.
+    Disabled,
+    /// Vsync will be enabled.
+    Enabled,
+    /// Adaptive vsync works the same as vsync, but if you've already missed the vertical retrace
+    /// for a given frame, it swaps buffers immediately, which might be less jarring for the user
+    /// during occasional framerate drops.
+    ///
+    /// If adaptive vsync isn't supported, this defaults to normal vsync.
+    Adaptive,
 }
 
 // ////////////////////////////////////////////////////////

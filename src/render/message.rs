@@ -57,6 +57,7 @@ pub enum BatchMessage {
 pub struct WindowState {
     pub title: Option<String>,
     pub clear_color: Option<RGBA8>,
+    pub vsync: Option<Vsync>,
 }
 
 impl Default for WindowState {
@@ -64,6 +65,7 @@ impl Default for WindowState {
         WindowState {
             title: None,
             clear_color: None,
+            vsync: None,
         }
     }
 }

@@ -2,7 +2,7 @@ use crate::render::gl::raw::*;
 use crate::types::*;
 use beryllium::*;
 use cgmath::*;
-use std::mem::*;
+use core::mem::{transmute, ManuallyDrop};
 
 pub struct OpenGLWindow {
     inner: ManuallyDrop<GLWindow<'static>>,
@@ -40,8 +40,7 @@ impl OpenGLWindow {
             .expect("Unable to build the window.")
             .try_into_gl()
             .expect("Unable to upgrade into a GL window.");
-        unsafe { window.set_swap_interval(0) }.expect("Unable to disable vsync.");
-        let window: GLWindow<'static> = unsafe { core::mem::transmute(window) };
+        let window: GLWindow<'static> = unsafe { transmute(window) };
 
         // Load OpenGL
         load_with(|s| unsafe { sdl.gl_get_proc_address(s) });
@@ -50,10 +49,12 @@ impl OpenGLWindow {
         info!("SDL Loaded {:?}", beryllium::version());
         info!("OpenGL Loaded {}", get_string(StringTarget::Version));
 
-        OpenGLWindow {
+        let window = OpenGLWindow {
             // This really isn't safe but sue me.
             inner: ManuallyDrop::new(window),
-        }
+        };
+        window.set_vsync(desc.vsync);
+        window
     }
 
     #[inline]
@@ -78,8 +79,26 @@ impl OpenGLWindow {
         }
     }
 
-    #[inline]
     pub fn set_title(&self, title: &str) {
         (**self.inner).set_title(title);;
+    }
+
+    pub fn set_vsync(&self, vsync: Vsync) {
+        let setting = match vsync {
+            Vsync::Disabled => 0,
+            Vsync::Enabled => 1,
+            Vsync::Adaptive => -1,
+        };
+        let result = unsafe { self.inner.set_swap_interval(setting) };
+        if result.is_err() {
+            warn!("Failed to set vsync to {:?}", vsync);
+            match vsync {
+                Vsync::Disabled => warn!("Unable to configure vsync."),
+                Vsync::Enabled => self.set_vsync(Vsync::Disabled),
+                Vsync::Adaptive => self.set_vsync(Vsync::Enabled),
+            }
+        } else {
+            info!("Set vsync to {:?}", vsync);
+        }
     }
 }

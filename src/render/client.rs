@@ -139,6 +139,11 @@ impl RenderClient {
         state.window.clear_color = Some(clear_color);
     }
 
+    pub fn window_vsync(&mut self, vsync: Vsync) {
+        let state = self.render_producer.get();
+        state.window.vsync = Some(vsync);
+    }
+
     pub fn commit(&mut self) {
         if self.render_producer.try_next() {
             let state = self.render_producer.get();

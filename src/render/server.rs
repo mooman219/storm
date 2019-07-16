@@ -47,6 +47,9 @@ impl RenderServer {
         if let Some(clear_color) = messages.window.clear_color.take() {
             self.state.window_clear_color(clear_color);
         }
+        if let Some(vsync) = messages.window.vsync.take() {
+            self.state.window_vsync(vsync);
+        }
         for message in messages.batch_changes.drain(..) {
             match message {
                 BatchMessage::Create {

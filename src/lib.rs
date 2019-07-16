@@ -192,6 +192,11 @@ impl Engine {
         self.render_client.window_clear_color(clear_color);
     }
 
+    /// Sets the vsync setting for the window.
+    pub fn window_vsync(&mut self, vsync: Vsync) {
+        self.render_client.window_vsync(vsync);
+    }
+
     /// Commits the queued window, batch, sprite, text, and texture related changes to the renderer.
     /// This function will not block.
     pub fn window_commit(&mut self) {

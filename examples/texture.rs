@@ -9,6 +9,7 @@ fn main() {
             title: String::from("Storm: Texture"),
             size: Vector2::new(1280, 1024),
             resizable: true,
+            vsync: Vsync::Disabled,
         },
         game,
     );

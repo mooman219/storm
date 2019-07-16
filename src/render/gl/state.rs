@@ -73,6 +73,10 @@ impl OpenGLState {
         clear_color(color.x, color.y, color.z, color.w);
     }
 
+    pub fn window_vsync(&mut self, vsync: Vsync) {
+        self.window.set_vsync(vsync);
+    }
+
     pub fn upload_texture_atlas(&mut self, texture: &Image) {
         self.texture_atlas.set_texture(texture);
     }

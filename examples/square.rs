@@ -10,6 +10,7 @@ fn main() {
             title: String::from("Storm: Square"),
             size: Vector2::new(1280, 1024),
             resizable: true,
+            vsync: Vsync::Disabled,
         },
         game,
     );
