@@ -1,6 +1,6 @@
 [package]
 name = "storm"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Joe Cumbo <mooman219@gmail.com>"]
 description = "2D game engine designed for performance"
 license = "MIT"
