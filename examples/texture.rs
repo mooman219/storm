@@ -1,4 +1,3 @@
-use crate::cgmath::*;
 use storm::time::*;
 use storm::*;
 
@@ -7,8 +6,11 @@ fn main() {
     Engine::start(
         WindowSettings {
             title: String::from("Storm: Texture"),
-            size: Vector2::new(1280, 1024),
-            resizable: true,
+            display_mode: DisplayMode::Windowed {
+                width: 1280,
+                height: 1024,
+                resizable: true,
+            },
             vsync: Vsync::Disabled,
         },
         game,

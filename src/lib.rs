@@ -22,7 +22,6 @@ mod utility;
 use crate::color::RGBA8;
 use crate::render::{RenderClient, RenderServer};
 use crate::utility::{bounded_spsc, control, swap_spsc};
-use cgmath::*;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::Read;
@@ -44,7 +43,7 @@ impl Engine {
         info!("Engine started.");
 
         // Init SDL2
-        let sdl = unsafe { beryllium::init().expect("Unable to init beryllium (SDL).") };
+        let sdl = beryllium::init().expect("Unable to init beryllium (SDL).");
 
         // Inter-thread messaging.
         let (render_producer_pipe, render_consumer_pipe) = swap_spsc::make();
@@ -53,13 +52,7 @@ impl Engine {
 
         // Rendering and input
         let mut render_server = RenderServer::new(&desc, &sdl, render_consumer_pipe);
-        let mut input_server = InputServer::new(
-            input_producer_pipe,
-            Vector2::new(
-                desc.size.x as f32, // width
-                desc.size.y as f32, // height
-            ),
-        );
+        let mut input_server = InputServer::new(input_producer_pipe);
 
         thread::spawn(move || {
             let engine = Engine {
@@ -190,6 +183,11 @@ impl Engine {
     /// Sets the clear color for the window.
     pub fn window_clear_color(&mut self, clear_color: RGBA8) {
         self.render_client.window_clear_color(clear_color);
+    }
+
+    /// Sets the display mode of the window.
+    pub fn window_display_mode(&mut self, display_mode: DisplayMode) {
+        self.render_client.window_display_mode(display_mode)
     }
 
     /// Sets the vsync setting for the window.

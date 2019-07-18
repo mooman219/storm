@@ -134,6 +134,11 @@ impl RenderClient {
         state.window.title = Some(String::from(title));
     }
 
+    pub fn window_display_mode(&mut self, display_mode: DisplayMode) {
+        let state = self.render_producer.get();
+        state.window.display_mode = Some(display_mode);
+    }
+
     pub fn window_clear_color(&mut self, clear_color: RGBA8) {
         let state = self.render_producer.get();
         state.window.clear_color = Some(clear_color);

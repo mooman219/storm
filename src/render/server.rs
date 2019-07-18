@@ -47,6 +47,9 @@ impl RenderServer {
         if let Some(clear_color) = messages.window.clear_color.take() {
             self.state.window_clear_color(clear_color);
         }
+        if let Some(display_mode) = messages.window.display_mode.take() {
+            self.state.window_display_mode(display_mode);
+        }
         if let Some(vsync) = messages.window.vsync.take() {
             self.state.window_vsync(vsync);
         }

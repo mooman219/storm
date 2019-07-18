@@ -9,8 +9,11 @@ fn main() {
     Engine::start(
         WindowSettings {
             title: String::from("Storm: Particles"),
-            size: Vector2::new(1280, 1024),
-            resizable: true,
+            display_mode: DisplayMode::Windowed {
+                width: 1280,
+                height: 1024,
+                resizable: true,
+            },
             vsync: Vsync::Enabled,
         },
         game,

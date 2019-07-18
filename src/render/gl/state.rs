@@ -48,7 +48,7 @@ impl OpenGLState {
             texture_font: TextureHandle::new(TextureUnit::Font),
             batches: Vec::new(),
             matrix_bounds: matrix_from_bounds(&logical_size),
-            current_logical_size: logical_size,
+            current_logical_size: Vector2::zero(),
         };
         // Bind shader once.
         state.shader.bind();
@@ -71,6 +71,10 @@ impl OpenGLState {
     pub fn window_clear_color(&mut self, color: RGBA8) {
         let color: Vector4<f32> = color.into();
         clear_color(color.x, color.y, color.z, color.w);
+    }
+
+    pub fn window_display_mode(&self, display_mode: DisplayMode) {
+        self.window.set_display_mode(display_mode);
     }
 
     pub fn window_vsync(&mut self, vsync: Vsync) {
@@ -122,8 +126,9 @@ impl OpenGLState {
     fn resize(&mut self) {
         let new_logical_size = self.window.logical_size();
         if self.current_logical_size != new_logical_size {
-            self.current_logical_size = new_logical_size;
             let new_physical_size = self.window.physical_size();
+            info!("Window resized {:?}", new_physical_size);
+            self.current_logical_size = new_logical_size;
             viewport(0, 0, new_physical_size.x as i32, new_physical_size.y as i32);
             self.matrix_bounds = matrix_from_bounds(&new_logical_size);
             for batch in &mut self.batches {

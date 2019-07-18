@@ -1,6 +1,6 @@
 use crate::render::gl::raw::*;
 use crate::types::*;
-use beryllium::*;
+use beryllium::{FullscreenStyle, GLWindow, SDLToken, WindowFlags, WINDOW_POSITION_CENTERED};
 use cgmath::*;
 use core::mem::{transmute, ManuallyDrop};
 
@@ -19,13 +19,10 @@ impl Drop for OpenGLWindow {
 impl OpenGLWindow {
     pub fn new(desc: &WindowSettings, sdl: &SDLToken) -> OpenGLWindow {
         // Attributes
-        sdl.gl_set_attribute(
-            beryllium::GLattr::ContextFlags,
-            beryllium::CONTEXT_DEBUG_FLAG | beryllium::CONTEXT_FORWARD_COMPATIBLE_FLAG,
-        );
+        sdl.gl_set_attribute(beryllium::GLattr::ContextFlags, beryllium::CONTEXT_FORWARD_COMPATIBLE_FLAG);
         sdl.gl_set_attribute(beryllium::GLattr::ContextProfileMask, beryllium::CONTEXT_PROFILE_CORE);
-        sdl.gl_set_attribute(beryllium::GLattr::ContextMajorVersion, 4);
-        sdl.gl_set_attribute(beryllium::GLattr::ContextMinorVersion, 1);
+        sdl.gl_set_attribute(beryllium::GLattr::ContextMajorVersion, 3);
+        sdl.gl_set_attribute(beryllium::GLattr::ContextMinorVersion, 3);
 
         // Make a window
         let window = sdl
@@ -33,9 +30,9 @@ impl OpenGLWindow {
                 &desc.title,
                 WINDOW_POSITION_CENTERED,
                 WINDOW_POSITION_CENTERED,
-                desc.size.x,
-                desc.size.y,
-                WindowFlags::default().with_shown(true).with_opengl(true).with_resizable(desc.resizable),
+                1000,
+                1000,
+                WindowFlags::default().with_shown(false).with_hidden(true).with_opengl(true),
             )
             .expect("Unable to build the window.")
             .try_into_gl()
@@ -53,7 +50,9 @@ impl OpenGLWindow {
             // This really isn't safe but sue me.
             inner: ManuallyDrop::new(window),
         };
+        window.set_display_mode(desc.display_mode);
         window.set_vsync(desc.vsync);
+        window.inner.show();
         window
     }
 
@@ -81,6 +80,30 @@ impl OpenGLWindow {
 
     pub fn set_title(&self, title: &str) {
         (**self.inner).set_title(title);;
+    }
+
+    pub fn set_display_mode(&self, display_mode: DisplayMode) {
+        match display_mode {
+            DisplayMode::Windowed {
+                width,
+                height,
+                resizable,
+            } => {
+                self.inner.set_size(width, height);
+                self.inner.set_resizable(resizable);
+                self.inner.set_fullscreen_style(FullscreenStyle::Windowed).unwrap();
+            },
+            DisplayMode::WindowedFullscreen => {
+                let dm = (*self.inner).desktop_display_mode().unwrap();
+                self.inner.set_size(dm.width, dm.height);
+                self.inner.set_fullscreen_style(FullscreenStyle::FullscreenDesktop).unwrap();
+            },
+            DisplayMode::Fullscreen => {
+                let dm = (*self.inner).desktop_display_mode().unwrap();
+                self.inner.set_size(dm.width, dm.height);
+                self.inner.set_fullscreen_style(FullscreenStyle::Fullscreen).unwrap();
+            },
+        }
     }
 
     pub fn set_vsync(&self, vsync: Vsync) {

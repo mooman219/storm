@@ -18,7 +18,7 @@ maintenance = { status = "experimental" }
 
 [dependencies]
 gl = "0.13.0"
-beryllium = '0.0.13'
+beryllium = '0.0.15'
 cgmath = "0.17.0"
 log = "0.4.7"
 simple_logger = "1.3.0"

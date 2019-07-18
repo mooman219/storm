@@ -18,7 +18,6 @@ The engine is experimental and __will__ change at any time, compiles with nightl
 This example will render a white square in about the center of the screen with text below it.
 
 ```rust
-use crate::cgmath::*;
 use storm::time::*;
 use storm::*;
 
@@ -27,8 +26,12 @@ fn main() {
     Engine::start(
         WindowSettings {
             title: String::from("Storm: Square"),
-            size: Vector2::new(1280, 1024),
-            resizable: true,
+            display_mode: DisplayMode::Windowed {
+                width: 1280,
+                height: 1024,
+                resizable: true,
+            },
+            vsync: Vsync::Disabled,
         },
         game,
     );
@@ -53,7 +56,7 @@ fn game(mut engine: Engine) {
         text.set_string("Hello world!");
         text.color = color::WHITE;
         text.pos.y -= 50.0;
-        text.push(string);
+        strings.push(text);
         // Assign the strings we want to draw to a batch.
         engine.text_set(&screen, &strings);
     }

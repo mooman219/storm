@@ -15,14 +15,11 @@ pub struct InputServer {
 }
 
 impl InputServer {
-    pub fn new(
-        input_producer: bounded_spsc::Producer<InputMessage>,
-        window_size: Vector2<f32>,
-    ) -> InputServer {
+    pub fn new(input_producer: bounded_spsc::Producer<InputMessage>) -> InputServer {
         InputServer {
             input_producer: input_producer,
             cursor_pos: Vector2::zero(),
-            window_size: window_size,
+            window_size: Vector2::zero(),
         }
     }
 
