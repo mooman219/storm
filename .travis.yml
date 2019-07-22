@@ -25,7 +25,7 @@ before_script:
     else
       # the package managers often have very old versions of SDL2, we just build
       # the correct version from source
-      sudo ./install-sdl2.sh
+      sudo ./build/install-sdl2.sh
     fi
   - sdl2-config --cflags
   - sdl2-config --libs
