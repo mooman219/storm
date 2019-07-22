@@ -6,9 +6,12 @@ rust:
   - stable
 
 cache:
-  cargo
+  - cargo
+  - directories:
+    - $HOME/Library/Caches/Homebrew
 
 os:
+  - windows
   - linux
   - osx
 
@@ -16,20 +19,26 @@ branches:
   only:
     - master
 
+before_cache:
+  - brew cleanup
+
 before_script:
   - |
-    if [ "$TRAVIS_OS_NAME" == "osx" ]
+    if [ "$TRAVIS_OS_NAME" != "windows" ]
     then
-      # https://formulae.brew.sh/formula/sdl2#default
-      brew install sdl2
-    else
-      # the package managers often have very old versions of SDL2, we just build
-      # the correct version from source
-      sudo ./build/install-sdl2.sh
+      if [ "$TRAVIS_OS_NAME" == "osx" ]
+      then
+        # https://formulae.brew.sh/formula/sdl2#default
+        brew install sdl2
+      elif [ "$TRAVIS_OS_NAME" == "linux" ]
+        # the package managers often have very old versions of SDL2, we just build
+        # the correct version from source
+        sudo ./build/install-sdl2.sh
+      fi
+      sdl2-config --cflags
+      sdl2-config --libs
+      sdl2-config --static-libs
     fi
-  - sdl2-config --cflags
-  - sdl2-config --libs
-  - sdl2-config --static-libs
 
 script:
   - cargo build
