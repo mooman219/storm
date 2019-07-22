@@ -18,7 +18,7 @@ branches:
 
 before_script:
   - |
-    if [[ $TRAVIS_OS_NAME == "osx" ]]
+    if [ "$TRAVIS_OS_NAME" == "osx" ]
     then
       # https://formulae.brew.sh/formula/sdl2#default
       brew install sdl2
