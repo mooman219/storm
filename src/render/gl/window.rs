@@ -1,6 +1,6 @@
 use crate::render::gl::raw::*;
 use crate::types::*;
-use beryllium::{FullscreenStyle, GLWindow, SDLToken, WindowFlags, WINDOW_POSITION_CENTERED};
+use beryllium::{FullscreenStyle, GLWindow, SDLToken, WindowFlags};
 use cgmath::*;
 use core::mem::{transmute, ManuallyDrop};
 
@@ -28,10 +28,10 @@ impl OpenGLWindow {
         let window = sdl
             .create_window(
                 &desc.title,
-                WINDOW_POSITION_CENTERED,
-                WINDOW_POSITION_CENTERED,
-                1000,
-                1000,
+                50,
+                50,
+                100,
+                100,
                 WindowFlags::default().with_shown(false).with_hidden(true).with_opengl(true),
             )
             .expect("Unable to build the window.")
@@ -92,17 +92,17 @@ impl OpenGLWindow {
                 self.inner.set_size(width, height);
                 self.inner.set_resizable(resizable);
                 self.inner.set_fullscreen_style(FullscreenStyle::Windowed).unwrap();
-            },
+            }
             DisplayMode::WindowedFullscreen => {
                 let dm = (*self.inner).desktop_display_mode().unwrap();
                 self.inner.set_size(dm.width, dm.height);
                 self.inner.set_fullscreen_style(FullscreenStyle::FullscreenDesktop).unwrap();
-            },
+            }
             DisplayMode::Fullscreen => {
                 let dm = (*self.inner).desktop_display_mode().unwrap();
                 self.inner.set_size(dm.width, dm.height);
                 self.inner.set_fullscreen_style(FullscreenStyle::Fullscreen).unwrap();
-            },
+            }
         }
     }
 
