@@ -29,6 +29,7 @@ before_script:
       # https://formulae.brew.sh/formula/sdl2#default
       brew install sdl2
     elif [ "$TRAVIS_OS_NAME" == "linux" ]
+    then
       # the package managers often have very old versions of SDL2, we just build
       # the correct version from source
       sudo ./build/install-sdl2.sh
