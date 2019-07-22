@@ -11,6 +11,7 @@ cache:
     - $HOME/Library/Caches/Homebrew
 
 os:
+  - windows
   - linux
   - osx
 
