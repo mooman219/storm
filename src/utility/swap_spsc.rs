@@ -101,7 +101,7 @@ impl<T> Consumer<T> {
             Some(p) => {
                 self.pointer = p;
                 true
-            },
+            }
             None => false,
         }
     }
@@ -118,7 +118,7 @@ impl<T> Producer<T> {
             Some(p) => {
                 self.pointer = p;
                 true
-            },
+            }
             None => false,
         }
     }

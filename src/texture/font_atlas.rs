@@ -89,7 +89,7 @@ impl FontAtlas {
                     }
                     self.cache.insert(key, value);
                     value
-                },
+                }
             };
 
             // Create the vertex.

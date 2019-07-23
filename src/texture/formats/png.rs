@@ -16,28 +16,28 @@ pub fn read<R: Read>(bytes: R) -> Image {
                 output.push(RGBA8::new_raw(rgb[0], rgb[1], rgb[2], 255));
             }
             Image::from_vec(output, info.width, info.height)
-        },
+        }
         ColorType::RGBA => {
             let mut output = Vec::with_capacity(input.len());
             for rgba in input.chunks_exact(4) {
                 output.push(RGBA8::new_raw(rgba[0], rgba[1], rgba[2], rgba[3]));
             }
             Image::from_vec(output, info.width, info.height)
-        },
+        }
         ColorType::Grayscale => {
             let mut output = Vec::with_capacity(input.len() * 4);
             for g in input {
                 output.push(RGBA8::new_raw(g, g, g, 255));
             }
             Image::from_vec(output, info.width, info.height)
-        },
+        }
         ColorType::GrayscaleAlpha => {
             let mut output = Vec::with_capacity(input.len() * 2);
             for ga in input.chunks_exact(2) {
                 output.push(RGBA8::new_raw(ga[0], ga[0], ga[0], ga[1]));
             }
             Image::from_vec(output, info.width, info.height)
-        },
+        }
         ColorType::Indexed => panic!("PNG Indexed color type is unsupported."),
     }
 }

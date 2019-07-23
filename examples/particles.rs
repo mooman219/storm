@@ -24,7 +24,8 @@ fn game(mut engine: Engine) {
     let mut clock = Clock::new(144);
     engine.window_clear_color(WHITE);
 
-    let screen = engine.batch_create(&BatchSettings::default());
+    let mut screen_settings = BatchSettings::default();
+    let screen = engine.batch_create(&screen_settings);
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
     for x in -500..500 {
@@ -44,6 +45,14 @@ fn game(mut engine: Engine) {
                     KeyboardButton::Escape => is_active = false,
                     _ => {}
                 },
+                InputMessage::CursorScroll(direction) => {
+                    match direction {
+                        ScrollDirection::Up => screen_settings.scale *= 1.1,
+                        ScrollDirection::Down => screen_settings.scale /= 1.1,
+                        _ => {}
+                    }
+                    engine.batch_update(&screen, &screen_settings);
+                }
                 _ => {}
             }
         }

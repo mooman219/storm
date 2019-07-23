@@ -129,7 +129,7 @@ impl<T> Consumer<T> {
             Some(p) => {
                 self.head_pointer = p;
                 true
-            },
+            }
             None => false,
         }
     }
@@ -154,7 +154,7 @@ impl<T> Producer<T> {
             Some(p) => {
                 self.tail_pointer = p;
                 true
-            },
+            }
             None => false,
         }
     }

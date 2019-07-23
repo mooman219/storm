@@ -117,7 +117,7 @@ impl<T> Buffer<T> {
     pub fn pop(&self) -> T {
         loop {
             match self.try_pop() {
-                None => {},
+                None => {}
                 Some(v) => return v,
             }
         }
@@ -458,7 +458,7 @@ mod tests {
         match p.try_push(10) {
             Some(v) => {
                 assert!(v == 10);
-            },
+            }
             None => assert!(false, "Queue should not have accepted another write!"),
         }
     }
@@ -469,7 +469,7 @@ mod tests {
 
         match c.try_pop() {
             Some(_) => assert!(false, "Queue was empty but a value was read!"),
-            None => {},
+            None => {}
         }
 
         p.push(123);
@@ -481,7 +481,7 @@ mod tests {
 
         match c.try_pop() {
             Some(_) => assert!(false, "Queue was empty but a value was read!"),
-            None => {},
+            None => {}
         }
     }
 

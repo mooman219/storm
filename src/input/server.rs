@@ -33,14 +33,14 @@ impl InputServer {
                     ..
                 } => {
                     self.input_producer.push(InputMessage::CloseRequested);
-                },
+                }
                 Event::WindowSizeChanged {
                     width,
                     height,
                     ..
                 } => {
                     self.window_size = Vector2::new(width as f32, height as f32);
-                },
+                }
 
                 // Keyboard
                 Event::Keyboard {
@@ -58,7 +58,7 @@ impl InputServer {
                             }
                         }
                     }
-                },
+                }
 
                 // Cursor
                 Event::MouseMotion {
@@ -70,7 +70,28 @@ impl InputServer {
                         x as f32 - self.window_size.x / 2.0,
                         -y as f32 + self.window_size.y / 2.0,
                     );
-                },
+                }
+                Event::MouseWheel {
+                    mut x,
+                    mut y,
+                    is_flipped,
+                    ..
+                } => {
+                    if is_flipped {
+                        x *= -1;
+                        y *= -1;
+                    }
+                    if x < 0 {
+                        self.input_producer.push(InputMessage::CursorScroll(ScrollDirection::Left));
+                    } else if x > 0 {
+                        self.input_producer.push(InputMessage::CursorScroll(ScrollDirection::Right));
+                    }
+                    if y < 0 {
+                        self.input_producer.push(InputMessage::CursorScroll(ScrollDirection::Down));
+                    } else if y > 0 {
+                        self.input_producer.push(InputMessage::CursorScroll(ScrollDirection::Up));
+                    }
+                }
                 Event::MouseButtonEvent {
                     is_pressed,
                     button,
@@ -81,18 +102,18 @@ impl InputServer {
                     } else {
                         self.input_producer.push(InputMessage::CursorReleased(button, self.cursor_pos));
                     }
-                },
+                }
                 Event::MouseEnteredWindow {
                     ..
                 } => {
                     self.input_producer.push(InputMessage::CursorEntered);
-                },
+                }
                 Event::MouseLeftWindow {
                     ..
                 } => {
                     self.input_producer.push(InputMessage::CursorLeft);
-                },
-                _ => {},
+                }
+                _ => {}
             }
         }
         if self.cursor_pos != last_cursor_pos {
