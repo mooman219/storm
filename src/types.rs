@@ -8,7 +8,7 @@ use cgmath::*;
 // ////////////////////////////////////////////////////////
 
 /// Configuration settings for the window.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct WindowSettings {
     /// The title of the window.
     pub title: String,
@@ -32,7 +32,7 @@ impl Default for WindowSettings {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum DisplayMode {
     /// Normal windowed mode.
     Windowed {
@@ -50,7 +50,7 @@ pub enum DisplayMode {
 }
 
 /// Enumeration for all possible vsync settings.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Vsync {
     /// Vsync will be disabled.
     Disabled,
@@ -75,7 +75,7 @@ pub enum Vsync {
 // ////////////////////////////////////////////////////////
 
 /// Token to reference a batch with.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct BatchToken {
     key: Key<BatchToken>,
 }
@@ -93,7 +93,7 @@ impl BatchToken {
 }
 
 /// Configuration settings for a batch.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct BatchSettings {
     /// The translation of the batch.
     pub translation: Vector2<f32>,
@@ -124,7 +124,7 @@ impl Default for BatchSettings {
 
 /// Configuration settings for a sprite.
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Sprite {
     /// Position of the sprite. The X and Y coordinates represent the bottom left corner of the
     /// sprite. The Z coordinate represents sprite depth. Units are measured in pixels.
@@ -200,7 +200,7 @@ impl Sprite {
 // ////////////////////////////////////////////////////////
 
 /// Token to reference a font with.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct FontToken {
     key: usize,
 }
@@ -227,7 +227,7 @@ impl Default for FontToken {
 }
 
 /// Configuration settings for text.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Text {
     /// Text that's being drawn.
     pub string: String,
@@ -288,13 +288,13 @@ impl Text {
 // ////////////////////////////////////////////////////////
 
 /// Enumeration for all the loadable texture formats. Currently only PNG is supported.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum TextureFormat {
     PNG,
 }
 
 /// Token to reference a texture with. Has basic configuration settings.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 #[repr(transparent)]
 pub struct Texture(pub(crate) Vector4<u16>);
 

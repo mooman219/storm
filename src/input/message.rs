@@ -31,7 +31,7 @@ pub enum InputMessage {
 }
 
 /// A cursor wheel movement. Some mice have left and right scroll options.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum ScrollDirection {
     /// Cursor wheel scrolled up.
     Up,

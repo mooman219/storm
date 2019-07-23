@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Key<T> {
     index: u32,
     version: u16,
