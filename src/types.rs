@@ -176,8 +176,8 @@ impl Sprite {
         }
     }
 
-    /// Creates a new sprite. This does not conversions and represents exactly the members of the
-    /// sprite type.
+    /// Creates a new sprite. This does not perform conversions and represents exactly the members
+    /// of the sprite type.
     pub fn new_raw(
         pos: Vector3<f32>,
         size: Vector2<u16>,
