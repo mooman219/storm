@@ -16,19 +16,26 @@ pub enum InputMessage {
     KeyReleased(KeyboardButton),
     /// Cursor press event. Contains the button pressed and the position it was pressed at.
     CursorPressed {
+        /// Button pressed.
         button: CursorButton,
+        /// Cursor position at time of press.
         pos: Vector2<f32>,
     },
     /// Cursor release event. Contains the button released and the position it was released at.
     CursorReleased {
+        /// Button released.
         button: CursorButton,
+        /// Cursor position at time of release.
         pos: Vector2<f32>,
     },
     /// Cursor wheel scroll event.
     CursorScroll(ScrollDirection),
-    /// Cursor moved event. Contains the position of the cursor.
+    /// Cursor moved event. Contains the position of the cursor and the delta from its last
+    /// position.
     CursorMoved {
+        /// Current cursor position.
         pos: Vector2<f32>,
+        /// Change from last position.
         delta: Vector2<f32>,
     },
     /// Cursor left the bounds of the window event.
