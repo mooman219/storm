@@ -1,6 +1,7 @@
 use crate::input::message::*;
 use crate::utility::bounded_spsc;
 use beryllium::*;
+use cgmath::prelude::*;
 use cgmath::*;
 
 struct InputState {
@@ -98,9 +99,15 @@ impl InputServer {
                     ..
                 } => {
                     if is_pressed {
-                        self.input_producer.push(InputMessage::CursorPressed(button, self.cursor_pos));
+                        self.input_producer.push(InputMessage::CursorPressed {
+                            button,
+                            pos: self.cursor_pos,
+                        });
                     } else {
-                        self.input_producer.push(InputMessage::CursorReleased(button, self.cursor_pos));
+                        self.input_producer.push(InputMessage::CursorReleased {
+                            button,
+                            pos: self.cursor_pos,
+                        });
                     }
                 }
                 Event::MouseEnteredWindow {
@@ -117,7 +124,11 @@ impl InputServer {
             }
         }
         if self.cursor_pos != last_cursor_pos {
-            self.input_producer.push(InputMessage::CursorMoved(self.cursor_pos));
+            let delta = self.cursor_pos - last_cursor_pos;
+            self.input_producer.push(InputMessage::CursorMoved {
+                pos: self.cursor_pos,
+                delta,
+            });
         }
         if self.window_size != last_window_size {
             self.input_producer.push(InputMessage::WindowResized(self.window_size));

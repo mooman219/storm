@@ -54,19 +54,24 @@ fn game(mut engine: Engine) {
                 InputMessage::CloseRequested => is_active = false,
                 InputMessage::KeyPressed(key) => match key {
                     KeyboardButton::Escape => is_active = false,
-                    _ => {},
+                    _ => {}
                 },
-                InputMessage::CursorPressed(..) => {
+                InputMessage::CursorPressed {
+                    ..
+                } => {
                     let sprite = &mut sprites[4];
                     sprite.texture = sprite.texture.mirror_x();
                     moved = true;
-                },
-                InputMessage::CursorMoved(pos) => {
+                }
+                InputMessage::CursorMoved {
+                    pos,
+                    ..
+                } => {
                     let sprite = &mut sprites[4];
                     sprite.pos = pos.extend(0.1);
                     moved = true;
-                },
-                _ => {},
+                }
+                _ => {}
             }
         }
         if moved {

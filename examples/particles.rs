@@ -37,6 +37,7 @@ fn game(mut engine: Engine) {
     }
 
     let mut is_active = true;
+    let mut is_dragging = false;
     while is_active {
         while let Some(message) = engine.input_poll() {
             match message {
@@ -45,6 +46,29 @@ fn game(mut engine: Engine) {
                     KeyboardButton::Escape => is_active = false,
                     _ => {}
                 },
+                InputMessage::CursorPressed {
+                    button,
+                    ..
+                } => match button {
+                    CursorButton::Left => is_dragging = true,
+                    _ => {}
+                },
+                InputMessage::CursorReleased {
+                    button,
+                    ..
+                } => match button {
+                    CursorButton::Left => is_dragging = false,
+                    _ => {}
+                },
+                InputMessage::CursorMoved {
+                    delta,
+                    ..
+                } => {
+                    if is_dragging {
+                        screen_settings.translation += delta * screen_settings.scale;
+                        engine.batch_update(&screen, &screen_settings);
+                    }
+                }
                 InputMessage::CursorScroll(direction) => {
                     match direction {
                         ScrollDirection::Up => screen_settings.scale *= 1.1,
@@ -100,7 +124,6 @@ impl Particle {
         particle.acceleration = -(norm * (Self::G * Self::MASS)) / length_squared.max(500.0);
         particle.velocity += particle.acceleration;
         particle.pos += particle.velocity * delta;
-
         sprite.pos = particle.pos.extend(0.0);
     }
 }
