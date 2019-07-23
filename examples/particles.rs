@@ -42,9 +42,9 @@ fn game(mut engine: Engine) {
                 InputMessage::CloseRequested => is_active = false,
                 InputMessage::KeyPressed(key) => match key {
                     KeyboardButton::Escape => is_active = false,
-                    _ => {},
+                    _ => {}
                 },
-                _ => {},
+                _ => {}
             }
         }
 
