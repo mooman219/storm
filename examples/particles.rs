@@ -25,11 +25,12 @@ fn game(mut engine: Engine) {
     engine.window_clear_color(WHITE);
 
     let mut screen_settings = BatchSettings::default();
+    screen_settings.rotation = 0.1;
     let screen = engine.batch_create(&screen_settings);
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
-    for x in -500..500 {
-        for y in -500..500 {
+    for x in -1000..1000 {
+        for y in -250..250 {
             let (sprite, particle) = Particle::new(Vector3::new(x as f32 * 5.0, y as f32 * 5.0, 0.0));
             sprites.push(sprite);
             particles.push(particle);
@@ -65,7 +66,7 @@ fn game(mut engine: Engine) {
                     ..
                 } => {
                     if is_dragging {
-                        screen_settings.translation += delta * screen_settings.scale;
+                        screen_settings.translation += delta;
                         engine.batch_update(&screen, &screen_settings);
                     }
                 }

@@ -13,7 +13,7 @@ struct Batch {
     desc: BatchSettings,
     sprites: Buffer<Sprite>,
     strings: Buffer<Sprite>,
-    matrix_translate_scaled: Matrix4<f32>,
+    matrix_transform: Matrix4<f32>,
     matrix_full: Matrix4<f32>,
 }
 
@@ -31,10 +31,6 @@ fn matrix_from_bounds(bounds: &Vector2<f32>) -> Matrix4<f32> {
     let w = bounds.x / 2.0;
     let h = bounds.y / 2.0;
     ortho(-w.floor(), w.ceil(), -h.floor(), h.ceil(), -1.0, 1.0)
-}
-
-fn matrix_from_translate_scaled(translation: &Vector2<f32>, scale: f32) -> Matrix4<f32> {
-    Matrix4::from_translation(translation.extend(0.0)) * Matrix4::from_scale(scale)
 }
 
 impl OpenGLState {
@@ -90,23 +86,23 @@ impl OpenGLState {
     }
 
     pub fn batch_create(&mut self, desc: &BatchSettings) {
-        let matrix_translate_scaled = matrix_from_translate_scaled(&desc.translation, desc.scale);
-        let matrix_full = self.matrix_bounds * matrix_translate_scaled;
+        let matrix_transform = desc.transform_matrix();
+        let matrix_full = self.matrix_bounds * matrix_transform;
         self.batches.push(Batch {
             desc: *desc,
             sprites: Buffer::new(BufferBindingTarget::ArrayBuffer),
             strings: Buffer::new(BufferBindingTarget::ArrayBuffer),
-            matrix_translate_scaled: matrix_translate_scaled,
+            matrix_transform: matrix_transform,
             matrix_full: matrix_full,
         });
     }
 
     pub fn batch_update(&mut self, index: usize, desc: &BatchSettings) {
         let batch = &mut self.batches[index];
-        let matrix_translate_scaled = matrix_from_translate_scaled(&desc.translation, desc.scale);
-        let matrix_full = self.matrix_bounds * matrix_translate_scaled;
+        let matrix_transform = desc.transform_matrix();
+        let matrix_full = self.matrix_bounds * matrix_transform;
         batch.desc = *desc;
-        batch.matrix_translate_scaled = matrix_translate_scaled;
+        batch.matrix_transform = matrix_transform;
         batch.matrix_full = matrix_full;
     }
 
@@ -132,7 +128,7 @@ impl OpenGLState {
             viewport(0, 0, new_physical_size.x as i32, new_physical_size.y as i32);
             self.matrix_bounds = matrix_from_bounds(&new_logical_size);
             for batch in &mut self.batches {
-                batch.matrix_full = self.matrix_bounds * batch.matrix_translate_scaled;
+                batch.matrix_full = self.matrix_bounds * batch.matrix_transform;
             }
         }
     }

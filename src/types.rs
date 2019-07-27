@@ -118,6 +118,15 @@ impl Default for BatchSettings {
     }
 }
 
+impl BatchSettings {
+    /// Creates a new transform matix based on the parameters of the BatchSettings.
+    pub fn transform_matrix(&self) -> Matrix4<f32> {
+        Matrix4::from_translation(self.translation.extend(0.0))
+            * Matrix4::from_angle_z(Rad(std::f32::consts::PI * 2.0 * self.rotation))
+            * Matrix4::from_scale(self.scale)
+    }
+}
+
 // ////////////////////////////////////////////////////////
 // Sprite
 // ////////////////////////////////////////////////////////
