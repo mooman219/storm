@@ -119,11 +119,12 @@ impl Default for BatchSettings {
 }
 
 impl BatchSettings {
-    /// Creates a new transform matix based on the parameters of the BatchSettings.
+    /// Creates a new transform matix based on the parameters of the BatchSettings. The transform
+    /// matrix is built in this order: Scale * Translation * Rotation.
     pub fn transform_matrix(&self) -> Matrix4<f32> {
-        Matrix4::from_translation(self.translation.extend(0.0))
+        Matrix4::from_scale(self.scale)
+            * Matrix4::from_translation(self.translation.extend(0.0))
             * Matrix4::from_angle_z(Rad(std::f32::consts::PI * 2.0 * self.rotation))
-            * Matrix4::from_scale(self.scale)
     }
 }
 
