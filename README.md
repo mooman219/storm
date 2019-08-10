@@ -42,24 +42,22 @@ fn game(mut engine: Engine) {
     let mut clock = Clock::new(144);
     // Create a batch to draw on. Batches persist between engine.window_commit()'s.
     let screen = engine.batch_create(&BatchSettings::default());
-    {
-        // Add all the sprites we want to draw to a vec.
-        let mut sprites = Vec::new();
-        sprites.push(Sprite::default());
-        // Assign the sprites we want to draw to a batch.
-        engine.sprite_set(&screen, &sprites);
-    }
-    {
-        // Add all the strings we want to draw to a vec.
-        let mut strings = Vec::new();
-        let mut text = Text::default();
-        text.set_string("Hello world!");
-        text.color = color::WHITE;
-        text.pos.y -= 50.0;
-        strings.push(text);
-        // Assign the strings we want to draw to a batch.
-        engine.text_set(&screen, &strings);
-    }
+    // Add all the sprites we want to draw to a vec.
+    let mut sprites = Vec::new();
+    sprites.push(Sprite::default());
+    // Assign the sprites we want to draw to a batch.
+    engine.sprite_set(&screen, &sprites);
+    // Add all the strings we want to draw to a vec.
+    let mut strings = Vec::new();
+    let mut text = Text::default();
+    text.set_string("Hello world!");
+    text.pos.z = 0.5;
+    text.pos.y += 50.0;
+    text.max_width = Some(65.0);
+    strings.push(text);
+    // Assign the strings we want to draw to a batch.
+    engine.text_set(&screen, &strings);
+
     let mut is_active = true;
     while is_active {
         // Input for closing the window.
@@ -68,9 +66,9 @@ fn game(mut engine: Engine) {
                 InputMessage::CloseRequested => is_active = false,
                 InputMessage::KeyPressed(key) => match key {
                     KeyboardButton::Escape => is_active = false,
-                    _ => {},
+                    _ => {}
                 },
-                _ => {},
+                _ => {}
             }
         }
         // Commit any state we changed to the window. This will trigger a draw.
