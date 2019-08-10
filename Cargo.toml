@@ -26,6 +26,7 @@ png = "0.14"
 hashbrown = "0.5.0"
 rusttype = "0.7.7"
 unicode-normalization = "0.1.8"
+rand = "*"
 
 [profile.dev]
 opt-level = 3
