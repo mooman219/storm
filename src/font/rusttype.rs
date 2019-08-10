@@ -35,14 +35,12 @@ impl Font {
 
     pub fn advance_height(&self, scale: u32) -> f32 {
         let v_metrics = self.font.v_metrics(rusttype::Scale::uniform(scale as f32));
-        let advance_height = v_metrics.ascent - v_metrics.descent + v_metrics.line_gap;
-        advance_height
+        v_metrics.ascent - v_metrics.descent + v_metrics.line_gap
     }
 
     pub fn advance_width(&self, glyph: char, scale: u32) -> f32 {
         let glyph = self.font.glyph(glyph).scaled(rusttype::Scale::uniform(scale as f32));
-        let advance_width = glyph.h_metrics().advance_width;
-        advance_width
+        glyph.h_metrics().advance_width
     }
 
     pub fn render_glyph(&self, glyph: char, scale: u32) -> Option<RenderedGlyph> {
@@ -61,7 +59,7 @@ impl Font {
                     buffer[(x as usize) + (y as usize) * size.x] = color::RGBA8::new_raw(255, 255, 255, v);
                 });
                 let rendered_glyph = RenderedGlyph {
-                    size: size,
+                    size,
                     offset: Vector2::new(rect.min.x as f32, rect.max.y as f32),
                     data: buffer,
                 };

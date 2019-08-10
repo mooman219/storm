@@ -7,8 +7,6 @@ use rodio::Source;
 use std::fs::File;
 use std::io::BufReader;
 
-use rand::Rng;
-
 /// Run with: cargo run --example tetris --release
 fn main() {
     Engine::start(
@@ -313,14 +311,11 @@ fn game(mut engine: Engine) {
 
     let mut clock = Clock::new(144);
 
-    let texture_1 = engine.texture_create(include_bytes!("resources/3.png").as_ref(), TextureFormat::PNG);
-
     engine.window_clear_color(storm::color::BLACK);
     let screen = engine.batch_create(&BatchSettings::default());
     let mut sprites = Vec::new();
 
     let mut sprite = Sprite::default();
-    //sprite.texture = texture_1;
     sprite.size.x = sprite.size.x / 5;
     sprite.size.y = sprite.size.y / 5;
 

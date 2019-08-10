@@ -22,10 +22,10 @@ impl<T: VertexDescription + Copy> Buffer<T> {
         );
         let vertex_array = VertexArray::new();
         Buffer {
-            vbo: vbo,
+            vbo,
             vertices: 0,
-            buffer_type: buffer_type,
-            vertex_array: vertex_array,
+            buffer_type,
+            vertex_array,
         }
     }
 

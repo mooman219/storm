@@ -12,7 +12,7 @@ pub struct Timer {
 impl Timer {
     pub fn new(label: &'static str) -> Timer {
         Timer {
-            label: label,
+            label,
             start: Instant::now(),
             last_display: Instant::now(),
             duration: 0,

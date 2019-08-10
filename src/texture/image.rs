@@ -23,9 +23,9 @@ impl Image {
         }
         let pixels = vec![color; (width * height) as usize];
         Image {
-            pixels: pixels,
-            width: width,
-            height: height,
+            pixels,
+            width,
+            height,
         }
     }
 
@@ -35,8 +35,8 @@ impl Image {
         }
         Image {
             pixels: buf,
-            width: width,
-            height: height,
+            width,
+            height,
         }
     }
 

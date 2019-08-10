@@ -13,7 +13,7 @@ impl<T: VertexDescription> VertexArray<T> {
         bind_vertex_array(vao);
         T::configure_vertex_attribute();
         VertexArray {
-            vao: vao,
+            vao,
             phantom: PhantomData,
         }
     }

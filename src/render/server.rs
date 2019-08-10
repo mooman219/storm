@@ -18,7 +18,7 @@ impl RenderServer {
         render_consumer: swap_spsc::Consumer<RenderState>,
     ) -> RenderServer {
         RenderServer {
-            render_consumer: render_consumer,
+            render_consumer,
             state: OpenGLState::new(desc, sdl),
             timer_render: Timer::new("[R] Frame"),
         }

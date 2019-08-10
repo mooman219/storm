@@ -18,7 +18,7 @@ pub struct RenderClient {
 impl RenderClient {
     pub fn new(render_producer: swap_spsc::Producer<RenderState>) -> RenderClient {
         RenderClient {
-            render_producer: render_producer,
+            render_producer,
             texture_atlas: TextureAtlas::new(),
             font_atlas: FontAtlas::new(),
             batch_tracker: UnorderedTracker::new(),

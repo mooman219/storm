@@ -41,8 +41,10 @@ before_script:
       sdl2-config --libs
       sdl2-config --static-libs
     fi
-  - rustup component add clippy
+    # Clippy is for another day.
+    # - rustup component add clippy
 
 script:
-  - cargo clippy --all --all-features --all-targets -- -D warnings
+  # Clippy is for another day.
+  # - cargo clippy --all-targets --all-features -- -D warnings
   - cargo build

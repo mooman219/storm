@@ -83,7 +83,7 @@ pub struct BatchToken {
 impl BatchToken {
     pub(crate) fn new(key: Key<BatchToken>) -> BatchToken {
         BatchToken {
-            key: key,
+            key,
         }
     }
 
@@ -174,14 +174,14 @@ impl Sprite {
         rotation: f32,
     ) -> Sprite {
         Sprite {
-            pos: pos,
+            pos,
             size: {
                 let x = (size.x as u32) & 0xFFFF;
                 let y = (size.y as u32) & 0xFFFF;
                 Vector2::new(x as u16, y as u16)
             },
-            texture: texture,
-            color: color,
+            texture,
+            color,
             rotation: (rotation.fract() * 65536.0) as u16,
         }
     }
@@ -196,11 +196,11 @@ impl Sprite {
         rotation: u16,
     ) -> Sprite {
         Sprite {
-            pos: pos,
-            size: size,
-            texture: texture,
-            color: color,
-            rotation: rotation,
+            pos,
+            size,
+            texture,
+            color,
+            rotation,
         }
     }
 }
@@ -218,7 +218,7 @@ pub struct FontToken {
 impl FontToken {
     pub(crate) fn new(key: usize) -> FontToken {
         FontToken {
-            key: key,
+            key,
         }
     }
 
@@ -278,12 +278,12 @@ impl Text {
         font: FontToken,
     ) -> Text {
         Text {
-            string: string,
-            pos: pos,
-            max_width: max_width,
-            scale: scale,
-            color: color,
-            font: font,
+            string,
+            pos,
+            max_width,
+            scale,
+            color,
+            font,
         }
     }
 

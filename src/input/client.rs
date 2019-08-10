@@ -8,7 +8,7 @@ pub struct InputClient {
 impl InputClient {
     pub fn new(input_producer: bounded_spsc::Consumer<InputMessage>) -> InputClient {
         InputClient {
-            input_producer: input_producer,
+            input_producer,
         }
     }
 

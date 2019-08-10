@@ -108,7 +108,7 @@ impl AABB2D {
         aabb.max.x += res.x;
         *self = aabb;
 
-        return result;
+        result
     }
 }
 

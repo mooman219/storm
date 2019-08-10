@@ -66,7 +66,7 @@ impl FontAtlas {
             let key = CharCacheKey {
                 font: font_index,
                 character: c,
-                scale: scale,
+                scale,
             };
 
             let value = match self.cache.get(&key).copied() {

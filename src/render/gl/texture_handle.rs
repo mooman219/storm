@@ -13,8 +13,8 @@ impl TextureHandle {
         let id = gen_texture();
         let unit = texture_unit;
         let texture = TextureHandle {
-            id: id,
-            unit: unit,
+            id,
+            unit,
         };
         texture.set_raw(1, 1, (&DEFAULT).as_ptr());
         texture

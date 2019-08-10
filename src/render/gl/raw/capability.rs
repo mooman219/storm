@@ -45,9 +45,9 @@ pub enum DepthTest {
 
 #[allow(non_snake_case, non_upper_case_globals)]
 pub mod ClearBit {
-    pub const ColorBuffer: u32 = 0x00004000; // gl::COLOR_BUFFER_BIT;
-    pub const DepthBuffer: u32 = 0x00000100; // gl::DEPTH_BUFFER_BIT;
-    pub const StencilBuffer: u32 = 0x00000400; // gl::STENCIL_BUFFER_BIT;
+    pub const ColorBuffer: u32 = 0x0000_4000; // gl::COLOR_BUFFER_BIT;
+    pub const DepthBuffer: u32 = 0x0000_0100; // gl::DEPTH_BUFFER_BIT;
+    pub const StencilBuffer: u32 = 0x0000_0400; // gl::STENCIL_BUFFER_BIT;
 }
 
 #[repr(u32)]

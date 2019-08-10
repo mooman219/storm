@@ -85,9 +85,9 @@ impl TextureShader {
         let uniform_ortho = program.get_uniform_location("ortho");
         let uniform_texture = program.get_uniform_location("tex");
         TextureShader {
-            program: program,
-            uniform_ortho: uniform_ortho,
-            uniform_texture: uniform_texture,
+            program,
+            uniform_ortho,
+            uniform_texture,
         }
     }
 

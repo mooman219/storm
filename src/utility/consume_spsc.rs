@@ -22,13 +22,12 @@ struct Buffer<T: Copy> {
 
 impl<T: Copy> Buffer<T> {
     fn new() -> Buffer<T> {
-        let this = Buffer {
+        Buffer {
             is_empty: AtomicBool::new(true),
             read: AtomicPtr::new(0 as *mut T),
             current: Cell::new(0),
             buffer: unsafe { MaybeUninit::uninit().assume_init() },
-        };
-        this
+        }
     }
 
     pub fn read(&self) -> Option<T> {

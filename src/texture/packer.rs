@@ -14,10 +14,10 @@ struct Rect {
 impl Rect {
     fn new(x: u32, y: u32, w: u32, h: u32) -> Rect {
         Rect {
-            x: x,
-            y: y,
-            w: w,
-            h: h,
+            x,
+            y,
+            w,
+            h,
         }
     }
 
@@ -95,7 +95,7 @@ impl SkylinePacker {
 
         SkylinePacker {
             border: Rect::new(0, 0, SIZE, SIZE),
-            skylines: skylines,
+            skylines,
         }
     }
 
@@ -217,14 +217,12 @@ impl TexturePacker {
         self.texture.set_texture(rect.x, rect.y, texture);
 
         // UV Layout: xmin xmax ymin ymax
-        let vector = Vector4::new(
+        Vector4::new(
             (rect.x * PIXEL_SIZE) as u16,            // Left
             ((rect.x + rect.w) * PIXEL_SIZE) as u16, // Right
             (rect.y * PIXEL_SIZE) as u16,            // Top
             ((rect.y + rect.h) * PIXEL_SIZE) as u16, // Bottom
-        );
-
-        vector
+        )
     }
 
     pub fn export(&self) -> Image {

@@ -38,7 +38,7 @@ impl OpenGLState {
         let window = OpenGLWindow::new(desc, sdl);
         let logical_size = window.logical_size();
         let state = OpenGLState {
-            window: window,
+            window,
             shader: TextureShader::new(),
             texture_atlas: TextureHandle::new(TextureUnit::Atlas),
             texture_font: TextureHandle::new(TextureUnit::Font),
@@ -92,8 +92,8 @@ impl OpenGLState {
             desc: *desc,
             sprites: Buffer::new(BufferBindingTarget::ArrayBuffer),
             strings: Buffer::new(BufferBindingTarget::ArrayBuffer),
-            matrix_transform: matrix_transform,
-            matrix_full: matrix_full,
+            matrix_transform,
+            matrix_full,
         });
     }
 
