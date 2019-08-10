@@ -3,6 +3,12 @@ use storm::time::*;
 use storm::*;
 use std::ops::Add;
 
+
+
+use std::fs::File;
+use std::io::BufReader;
+use rodio::Source;
+
 use rand::{
     Rng,
 };
@@ -180,6 +186,14 @@ fn random_tetris_block() -> TetrisBlockType {
 
 fn game(mut engine: Engine) {
 
+
+
+    let device = rodio::default_output_device().unwrap();
+
+    let file = File::open("tetris.ogg").unwrap();
+    let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
+    rodio::play_raw(&device, source.convert_samples());
+
     let mut board = [[TetrisBlockType::Empty; 10];40];
 
   //  let mut current_block_cluster : 
@@ -204,8 +218,20 @@ fn game(mut engine: Engine) {
             sprites.push(sprite);
         }
     }
+        let mut strings = Vec::new();
+        let mut text = Text::default();
 
+    {
+        text.set_string("Score: 0");
+        text.color = color::WHITE;
+        text.pos.x = 125.0;
+        text.pos.y += 375.0;
+        strings.push(text);
+        // Assign the strings we want to draw to a batch.
+        engine.text_set(&screen, &strings);
+    }
 
+    let mut score = 0;
     let mut curret_cluster = TetrisCluster::new(Pos::new(4, 38), random_tetris_block());
 
     let position = curret_cluster.current_position;
@@ -364,15 +390,17 @@ fn game(mut engine: Engine) {
                         }
                         shift_row += 1;
                     }
+                    score += 100;
                 }
                 else {
                     row += 1;
                 }
             }
+            strings[0].set_string(&("Score".to_string() + " : " +  &score.to_string()));
+            engine.text_set(&screen, &strings);
         }
 
         engine.sprite_set(&screen, &sprites);
-    
         engine.window_commit();
         clock.tick();
     }
