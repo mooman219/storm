@@ -100,8 +100,8 @@ pub struct Particle {
 }
 
 impl Particle {
-    const G: f32 = 6.674;
-    const MASS: f32 = 200.0;
+    const G: f32 = 10.674;
+    const MASS: f32 = 500.0;
 
     pub fn new(pos: Vector3<f32>) -> (Sprite, Particle) {
         let sprite = Sprite::new(pos, Vector2::new(2.0, 2.0), Texture::default(), BLACK, 0.0);
@@ -122,7 +122,7 @@ impl Particle {
         let length_squared = particle.pos.x * particle.pos.x + particle.pos.y * particle.pos.y;
         let length = f32::sqrt(length_squared);
         let norm = particle.pos / length;
-        particle.acceleration = -(norm * (Self::G * Self::MASS)) / length_squared.max(500.0);
+        particle.acceleration = -(norm * (Self::G * Self::MASS)) / length_squared.max(1000.0);
         particle.velocity += particle.acceleration;
         particle.pos += particle.velocity * delta;
         sprite.pos = particle.pos.extend(0.0);
