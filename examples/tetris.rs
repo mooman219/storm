@@ -1,23 +1,19 @@
 extern crate rand;
+use std::ops::Add;
 use storm::time::*;
 use storm::*;
-use std::ops::Add;
 
-
-
+use rodio::Source;
 use std::fs::File;
 use std::io::BufReader;
-use rodio::Source;
 
-use rand::{
-    Rng,
-};
+use rand::Rng;
 
-/// Run with: cargo run --example texture --release
+/// Run with: cargo run --example tetris --release
 fn main() {
     Engine::start(
         WindowSettings {
-            title: String::from("Storm: Texture"),
+            title: String::from("Storm: Tetris"),
             display_mode: DisplayMode::Windowed {
                 width: 1280,
                 height: 1024,
@@ -38,35 +34,157 @@ enum TetrisBlockType {
     ReverseL,
     Square,
     Line,
-    Empty
+    Empty,
 }
 
 impl TetrisBlockType {
-    pub fn get_offsets(&self) -> [Pos; 4]{
+    pub fn get_offsets(&self) -> [Pos; 4] {
         match self {
             TetrisBlockType::L => {
-                return [Pos{x: 0, y: 1}, Pos{x: 0, y: 0}, Pos{x: 0, y: -1}, Pos{x: 1, y: -1}];
-            },
+                return [
+                    Pos {
+                        x: 0,
+                        y: 1,
+                    },
+                    Pos {
+                        x: 0,
+                        y: 0,
+                    },
+                    Pos {
+                        x: 0,
+                        y: -1,
+                    },
+                    Pos {
+                        x: 1,
+                        y: -1,
+                    },
+                ];
+            }
             TetrisBlockType::S => {
-                return [Pos{x: 1, y: 0}, Pos{x: 0, y: 0}, Pos{x: 0, y: -1}, Pos{x: -1, y: -1}];
-            },
+                return [
+                    Pos {
+                        x: 1,
+                        y: 0,
+                    },
+                    Pos {
+                        x: 0,
+                        y: 0,
+                    },
+                    Pos {
+                        x: 0,
+                        y: -1,
+                    },
+                    Pos {
+                        x: -1,
+                        y: -1,
+                    },
+                ];
+            }
             TetrisBlockType::Z => {
-                return [Pos{x: -1, y: 0}, Pos{x: 0, y: 0}, Pos{x: 0, y: -1}, Pos{x: 1, y: -1}];
-            },
+                return [
+                    Pos {
+                        x: -1,
+                        y: 0,
+                    },
+                    Pos {
+                        x: 0,
+                        y: 0,
+                    },
+                    Pos {
+                        x: 0,
+                        y: -1,
+                    },
+                    Pos {
+                        x: 1,
+                        y: -1,
+                    },
+                ];
+            }
             TetrisBlockType::T => {
-                return [Pos{x: 0, y: 0}, Pos{x: 1, y: 0}, Pos{x: -1, y: 0}, Pos{x: 0, y: -1}];
-            },
+                return [
+                    Pos {
+                        x: 0,
+                        y: 0,
+                    },
+                    Pos {
+                        x: 1,
+                        y: 0,
+                    },
+                    Pos {
+                        x: -1,
+                        y: 0,
+                    },
+                    Pos {
+                        x: 0,
+                        y: -1,
+                    },
+                ];
+            }
             TetrisBlockType::ReverseL => {
-                return [Pos{x: 0, y: 1}, Pos{x: 0, y: 0}, Pos{x: 0, y: -1}, Pos{x: -1, y: -1}];
-            },
-            TetrisBlockType::Square => { 
-                return [Pos{x: 0, y: 0}, Pos{x: 1, y: 0}, Pos{x: 0, y: -1}, Pos{x: 1, y: -1}];
-            },
+                return [
+                    Pos {
+                        x: 0,
+                        y: 1,
+                    },
+                    Pos {
+                        x: 0,
+                        y: 0,
+                    },
+                    Pos {
+                        x: 0,
+                        y: -1,
+                    },
+                    Pos {
+                        x: -1,
+                        y: -1,
+                    },
+                ];
+            }
+            TetrisBlockType::Square => {
+                return [
+                    Pos {
+                        x: 0,
+                        y: 0,
+                    },
+                    Pos {
+                        x: 1,
+                        y: 0,
+                    },
+                    Pos {
+                        x: 0,
+                        y: -1,
+                    },
+                    Pos {
+                        x: 1,
+                        y: -1,
+                    },
+                ];
+            }
             TetrisBlockType::Line => {
-                return [Pos{x: 0, y: 1}, Pos{x: 0, y: 0}, Pos{x: 0, y: -1}, Pos{x: 0, y: -2}];
-            },
+                return [
+                    Pos {
+                        x: 0,
+                        y: 1,
+                    },
+                    Pos {
+                        x: 0,
+                        y: 0,
+                    },
+                    Pos {
+                        x: 0,
+                        y: -1,
+                    },
+                    Pos {
+                        x: 0,
+                        y: -2,
+                    },
+                ];
+            }
             TetrisBlockType::Empty => {
-                return [Pos{x: 0, y: 0}; 4];
+                return [Pos {
+                    x: 0,
+                    y: 0,
+                }; 4];
             }
         }
     }
@@ -75,25 +193,25 @@ impl TetrisBlockType {
         match self {
             TetrisBlockType::L => {
                 return storm::color::BLUE;
-            },
+            }
             TetrisBlockType::S => {
                 return storm::color::GREEN;
-            },
+            }
             TetrisBlockType::Z => {
                 return storm::color::ORANGE;
-            },
+            }
             TetrisBlockType::T => {
                 return storm::color::RED;
-            },
+            }
             TetrisBlockType::ReverseL => {
                 return storm::color::MAGENTA;
-            },
+            }
             TetrisBlockType::Square => {
                 return storm::color::RGBA8::new_raw(125, 125, 0, 255);
-            },
+            }
             TetrisBlockType::Line => {
                 return storm::color::PURPLE;
-            },
+            }
             TetrisBlockType::Empty => {
                 return storm::color::WHITE;
             }
@@ -104,14 +222,14 @@ impl TetrisBlockType {
 #[derive(Clone, Copy)]
 struct Pos {
     pub x: isize,
-    pub y: isize
+    pub y: isize,
 }
 
 impl Pos {
     pub fn new(x: isize, y: isize) -> Pos {
         Pos {
             x,
-            y
+            y,
         }
     }
 }
@@ -128,9 +246,9 @@ impl Add for Pos {
 }
 
 struct TetrisCluster {
-    pub block_type:TetrisBlockType,
+    pub block_type: TetrisBlockType,
     pub current_position: Pos,
-    pub offsets: [Pos; 4]
+    pub offsets: [Pos; 4],
 }
 
 impl TetrisCluster {
@@ -138,16 +256,15 @@ impl TetrisCluster {
         TetrisCluster {
             block_type,
             current_position,
-            offsets: block_type.get_offsets()
+            offsets: block_type.get_offsets(),
         }
     }
 
-    pub fn generate_offsets(&mut self, direction: i32) -> [Pos; 4]{
-
+    pub fn generate_offsets(&mut self, direction: i32) -> [Pos; 4] {
         match self.block_type {
             TetrisBlockType::Square => {
                 return self.offsets;
-            },
+            }
             _ => {}
         }
 
@@ -159,8 +276,7 @@ impl TetrisCluster {
                 let old_y = offset.y;
                 new_offsets[count].x = old_y;
                 new_offsets[count].y = old_x * -1;
-            }
-            else {
+            } else {
                 let old_x = offset.x;
                 let old_y = offset.y;
                 new_offsets[count].x = old_y * -1;
@@ -174,29 +290,26 @@ impl TetrisCluster {
 
 fn random_tetris_block() -> TetrisBlockType {
     match rand::Rng::gen_range(&mut rand::thread_rng(), 0, 7) {
-            0 => TetrisBlockType::S,
-            1 => TetrisBlockType::Z,
-            2 => TetrisBlockType::L,
-            3 => TetrisBlockType::ReverseL,
-            4 => TetrisBlockType::Square,
-            5 => TetrisBlockType::T,
-            _ => TetrisBlockType::Line
-        }
+        0 => TetrisBlockType::S,
+        1 => TetrisBlockType::Z,
+        2 => TetrisBlockType::L,
+        3 => TetrisBlockType::ReverseL,
+        4 => TetrisBlockType::Square,
+        5 => TetrisBlockType::T,
+        _ => TetrisBlockType::Line,
+    }
 }
 
 fn game(mut engine: Engine) {
-
-
-
     let device = rodio::default_output_device().unwrap();
 
-    let file = File::open("tetris.ogg").unwrap();
+    let file = File::open("./examples/resources/tetris.ogg").unwrap();
     let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
     rodio::play_raw(&device, source.convert_samples());
 
-    let mut board = [[TetrisBlockType::Empty; 10];40];
+    let mut board = [[TetrisBlockType::Empty; 10]; 40];
 
-  //  let mut current_block_cluster : 
+    //  let mut current_block_cluster :
 
     let mut clock = Clock::new(144);
 
@@ -205,7 +318,7 @@ fn game(mut engine: Engine) {
     engine.window_clear_color(storm::color::BLACK);
     let screen = engine.batch_create(&BatchSettings::default());
     let mut sprites = Vec::new();
-    
+
     let mut sprite = Sprite::default();
     //sprite.texture = texture_1;
     sprite.size.x = sprite.size.x / 5;
@@ -218,8 +331,8 @@ fn game(mut engine: Engine) {
             sprites.push(sprite);
         }
     }
-        let mut strings = Vec::new();
-        let mut text = Text::default();
+    let mut strings = Vec::new();
+    let mut text = Text::default();
 
     {
         text.set_string("Score: 0");
@@ -246,15 +359,14 @@ fn game(mut engine: Engine) {
     let mut generate_new_cluster = false;
     let mut update_count = 0;
     while is_active {
-
-        if generate_new_cluster { 
+        if generate_new_cluster {
             curret_cluster = TetrisCluster::new(Pos::new(4, 38), random_tetris_block());
             generate_new_cluster = false;
         }
 
         let mut movement_vector = Pos::new(0, -1);
         let mut lateral_move = false;
-        
+
         let mut rotation_direction = 0;
         while let Some(message) = engine.input_poll() {
             match message {
@@ -264,26 +376,26 @@ fn game(mut engine: Engine) {
                         movement_vector.x = -1;
                         movement_vector.y = 0;
                         lateral_move = true;
-                    },
+                    }
                     KeyboardButton::Right => {
                         movement_vector.x = 1;
                         movement_vector.y = 0;
                         lateral_move = true;
-                    },
+                    }
                     KeyboardButton::Q => {
                         rotation_direction = -1;
                         movement_vector.x = 0;
                         movement_vector.y = 0;
-                    },
+                    }
                     KeyboardButton::E => {
                         rotation_direction = 1;
                         movement_vector.x = 0;
                         movement_vector.y = 0;
-                    },
+                    }
 
                     KeyboardButton::Escape => is_active = false,
                     _ => {}
-                }
+                },
                 _ => {}
             }
         }
@@ -297,7 +409,6 @@ fn game(mut engine: Engine) {
                 board[block_pos.y as usize][block_pos.x as usize] = TetrisBlockType::Empty;
             }
 
-
             //check if we can do the move
             let mut all_empty = true;
             let mut hit_edge = false;
@@ -305,8 +416,7 @@ fn game(mut engine: Engine) {
             let use_offsets;
             if rotation_direction == 0 {
                 use_offsets = curret_cluster.offsets;
-            }
-            else {
+            } else {
                 use_offsets = curret_cluster.generate_offsets(rotation_direction);
             }
 
@@ -317,27 +427,25 @@ fn game(mut engine: Engine) {
                     continue;
                 }
                 match board[block_pos.y as usize][block_pos.x as usize] {
-                    TetrisBlockType::Empty => {},
+                    TetrisBlockType::Empty => {}
                     _ => {
                         all_empty = false;
                     }
                 }
             }
 
-
             if hit_edge == false && all_empty {
                 curret_cluster.offsets = use_offsets;
             }
 
-            if hit_edge || (movement_vector.y != 0 && all_empty == false){
+            if hit_edge || (movement_vector.y != 0 && all_empty == false) {
                 movement_vector = Pos::new(0, 0);
             }
             //if we passed the check, update the position of the block
             if all_empty {
                 position = position + movement_vector;
                 curret_cluster.current_position = position;
-            }
-            else if hit_edge == false {
+            } else if hit_edge == false {
                 generate_new_cluster = true;
             }
 
@@ -352,8 +460,7 @@ fn game(mut engine: Engine) {
             if update_count == 20 {
                 update_count = 0;
             }
-        }
-        else {
+        } else {
             update_count += 1;
         }
 
@@ -365,7 +472,6 @@ fn game(mut engine: Engine) {
         }
 
         if generate_new_cluster == true {
-
             let mut row = 0;
             while row != 40 {
                 let mut has_empty_slot = false;
@@ -373,7 +479,7 @@ fn game(mut engine: Engine) {
                     match board[row][x] {
                         TetrisBlockType::Empty => {
                             has_empty_slot = true;
-                        },
+                        }
                         _ => {}
                     }
                 }
@@ -386,17 +492,16 @@ fn game(mut engine: Engine) {
                     while shift_row != 40 {
                         for x in 0..10 {
                             board[shift_row - 1][x] = board[shift_row][x];
-                            board[shift_row][x] = TetrisBlockType::Empty; 
+                            board[shift_row][x] = TetrisBlockType::Empty;
                         }
                         shift_row += 1;
                     }
                     score += 100;
-                }
-                else {
+                } else {
                     row += 1;
                 }
             }
-            strings[0].set_string(&("Score".to_string() + " : " +  &score.to_string()));
+            strings[0].set_string(&("Score".to_string() + " : " + &score.to_string()));
             engine.text_set(&screen, &strings);
         }
 
