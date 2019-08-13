@@ -2,10 +2,9 @@ extern crate rand;
 use std::ops::Add;
 use storm::time::*;
 use storm::*;
+mod tetris_game;
 
-use rodio::Source;
-use std::fs::File;
-use std::io::BufReader;
+use tetris_game::Bruback;
 
 /// Run with: cargo run --example tetris --release
 fn main() {
@@ -301,13 +300,11 @@ fn random_tetris_block() -> TetrisBlockType {
 fn game(mut engine: Engine) {
     let device = rodio::default_output_device().unwrap();
 
-    let file = File::open("./examples/resources/tetris.ogg").unwrap();
-    let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
-    rodio::play_raw(&device, source.convert_samples());
+    let mut bruback = Bruback::new();
 
+    bruback.play_music(String::from("examples/resources/tetris.ogg"));
+    bruback.set_music_volume(0.05);
     let mut board = [[TetrisBlockType::Empty; 10]; 40];
-
-    //  let mut current_block_cluster :
 
     let mut clock = Clock::new(144);
 
@@ -468,6 +465,7 @@ fn game(mut engine: Engine) {
 
         if generate_new_cluster == true {
             let mut row = 0;
+            let mut cleared_rows = 0;
             while row != 40 {
                 let mut has_empty_slot = false;
                 for x in 0..10 {
@@ -480,6 +478,7 @@ fn game(mut engine: Engine) {
                 }
 
                 if has_empty_slot == false {
+                    cleared_rows += 1;
                     for x in 0..10 {
                         board[row][x] = TetrisBlockType::Empty;
                     }
@@ -496,6 +495,12 @@ fn game(mut engine: Engine) {
                     row += 1;
                 }
             }
+
+            if cleared_rows != 0 {
+                bruback.play_sound_effect(String::from("examples/resources/clear.wav"));
+                bruback.set_effect_volume(0.05);
+            }
+
             strings[0].set_string(&("Score".to_string() + " : " + &score.to_string()));
             engine.text_set(&screen, &strings);
         }
