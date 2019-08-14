@@ -302,8 +302,8 @@ fn game(mut engine: Engine) {
 
     let mut bruback = Bruback::new();
 
-    bruback.play_music(String::from("examples/resources/tetris.ogg"));
     bruback.set_music_volume(0.05);
+    bruback.play_music(String::from("examples/resources/tetris.ogg"));
     let mut board = [[TetrisBlockType::Empty; 10]; 40];
 
     let mut clock = Clock::new(144);
@@ -497,8 +497,8 @@ fn game(mut engine: Engine) {
             }
 
             if cleared_rows != 0 {
-                bruback.play_sound_effect(String::from("examples/resources/clear.wav"));
                 bruback.set_effect_volume(0.05);
+                bruback.play_sound_effect(String::from("examples/resources/clear.wav"));
             }
 
             strings[0].set_string(&("Score".to_string() + " : " + &score.to_string()));
