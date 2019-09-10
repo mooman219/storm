@@ -21,6 +21,7 @@ pub struct TetrisState {
     is_paused: bool,
     audio: Bruback,
     main_sink: SinkID,
+    pause_sink: SinkID,
     effect_sink: SinkID
 }
 
@@ -90,6 +91,11 @@ impl TetrisState {
         bruback.play_track(String::from("examples/resources/tetris.ogg"), main_sink);
 
         let effect_sink = bruback.create_new_sink();
+        let pause_sink = bruback.create_new_sink();
+
+        bruback.set_track_volume(0.05, pause_sink);
+        bruback.play_track(String::from("examples/resources/pause.mp3"), pause_sink);
+        bruback.pause_track(pause_sink);
 
         TetrisState {
             is_active: true,
@@ -110,7 +116,8 @@ impl TetrisState {
             is_paused: false,
             audio: bruback,
             main_sink,
-            effect_sink
+            effect_sink,
+            pause_sink
         }
     }
 
@@ -307,6 +314,12 @@ impl TetrisState {
                         self.is_paused = !self.is_paused;
                         if self.is_paused {
                             self.engine.sprite_clear(&self.screen);
+                            self.audio.pause_track(self.main_sink);
+                            self.audio.resume_track(self.pause_sink);
+                        }
+                        else {
+                            self.audio.pause_track(self.pause_sink);
+                            self.audio.resume_track(self.main_sink);
                         }
                     }
 
