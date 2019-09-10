@@ -19,7 +19,9 @@ pub struct TetrisState {
     screen: BatchToken,
     clock: Clock,
     is_paused: bool,
-    audio: Bruback
+    audio: Bruback,
+    main_sink: SinkID,
+    effect_sink: SinkID
 }
 
 impl TetrisState {
@@ -82,9 +84,12 @@ impl TetrisState {
 
         let mut bruback = Bruback::new();
 
-        bruback.set_music_volume(0.05);
-        bruback.play_music(String::from("examples/resources/tetris.ogg"));
+        let main_sink = bruback.create_new_sink();
 
+        bruback.set_track_volume(0.05, main_sink);
+        bruback.play_track(String::from("examples/resources/tetris.ogg"), main_sink);
+
+        let effect_sink = bruback.create_new_sink();
 
         TetrisState {
             is_active: true,
@@ -103,7 +108,9 @@ impl TetrisState {
             screen,
             clock,
             is_paused: false,
-            audio: bruback
+            audio: bruback,
+            main_sink,
+            effect_sink
         }
     }
 
@@ -187,8 +194,8 @@ impl TetrisState {
         }
 
         if cleared_rows != 0 {
-            self.audio.set_effect_volume(0.05);
-            self.audio.play_sound_effect(String::from("examples/resources/clear.wav"));
+            self.audio.set_track_volume(0.05, self.effect_sink);
+            self.audio.play_track(String::from("examples/resources/clear.wav"), self.effect_sink);
         }
         self.total_lines_cleared += cleared_rows;
 

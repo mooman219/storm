@@ -10,7 +10,7 @@ use rodio::*;
 
 pub type SinkID = u32;
 
-pub struct SinkController {
+struct SinkController {
     sink: Sink,
     tracks_to_play: Vec<String>,
     song_count: usize
@@ -29,6 +29,7 @@ impl SinkController {
         let file_path_copy = String::from(track.clone());
         let file = File::open(track).unwrap();
         let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
+        self.sink.append(source);
         self.add_track(file_path_copy);
     }
 
@@ -41,15 +42,15 @@ impl SinkController {
     }
 
     pub fn play(&mut self) {
-        self.play();
+        self.sink.play();
     }
 
     pub fn set_volume(&mut self, volume: f32) {
-        self.set_volume(volume);
+        self.sink.set_volume(volume);
     }
 
     pub fn tick(&mut self) {
-        if self.sink.empty() {
+        if self.sink.empty() && self.song_count > 0 {
             let song_path = String::from(self.tracks_to_play[self.song_count % self.tracks_to_play.len()].clone());
             let file = File::open(song_path).unwrap();
             self.song_count += 1;
@@ -125,13 +126,9 @@ pub struct Bruback {
 impl Bruback {
     pub fn new() -> Bruback {
         let device = rodio::default_output_device().unwrap();
-        
-        let mut music_track_sink = Sink::new(&device);
-        let mut sound_effect_sink = Sink::new(&device);
-
         let (tx, rx): (Sender<AudioMessage>, Receiver<AudioMessage>) = mpsc::channel();
 
-        let child = thread::spawn(move || {
+        let _ = thread::spawn(move || {
             let mut bruback_state = BrubackState::new(rx, device);
             bruback_state.update();         
         });
@@ -150,19 +147,19 @@ impl Bruback {
         return new_sink_id;
     }
 
-    pub fn play_music(&mut self, file_path: String, sink_id: SinkID) {
-        self.sender.send(AudioMessage::PlayTrack(file_path, sink_id));
+    pub fn play_track(&mut self, file_path: String, sink_id: SinkID) {
+        let _ = self.sender.send(AudioMessage::PlayTrack(file_path, sink_id));
     }
 
     pub fn pause_track(&mut self, sink_id: SinkID) {
-        self.sender.send(AudioMessage::PauseSink(sink_id));
+        let _ = self.sender.send(AudioMessage::PauseSink(sink_id));
     }
 
     pub fn resume_track(&mut self, sink_id: SinkID) {
-        self.sender.send(AudioMessage::ResumeSink(sink_id));
+        let _ = self.sender.send(AudioMessage::ResumeSink(sink_id));
     }
 
-    pub fn set_music_volume(&mut self, level: f32, sink_id: SinkID) {
-        self.sender.send(AudioMessage::SetSinkVolume(level, sink_id));
+    pub fn set_track_volume(&mut self, level: f32, sink_id: SinkID) {
+        let _ = self.sender.send(AudioMessage::SetSinkVolume(level, sink_id));
     }
 }
