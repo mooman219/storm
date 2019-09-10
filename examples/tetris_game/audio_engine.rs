@@ -21,7 +21,6 @@ pub struct Bruback {
     sender: Sender<AudioMessage>,
 }
 
-
 impl Bruback {
     pub fn new() -> Bruback {
         let device = rodio::default_output_device().unwrap();
@@ -32,13 +31,13 @@ impl Bruback {
         let (tx, rx): (Sender<AudioMessage>, Receiver<AudioMessage>) = mpsc::channel();
 
         let child = thread::spawn(move || {
-            let mut current_main_track : String = String::new();
+        let mut current_main_track : String = String::new();
+        let mut songs = vec![];
+        let mut song_count = 0;
 
             loop{
                 
                 let message = rx.try_recv();
-                let mut songs = vec![];
-                let mut song_count = 0;
 
                 if let Ok(message) = message {
                     match message {
@@ -47,7 +46,7 @@ impl Bruback {
                             let file = File::open(song_file_path).unwrap();
                             let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
                             songs.push(file_path_copy);
-                            song_count = 0;
+                            song_count = 1;
                             music_track_sink.append(source);
                         },
                         AudioMessage::PlaySoundEffect(sound_effect_path) => {
@@ -65,12 +64,12 @@ impl Bruback {
                             music_track_sink.pause();
                         },
                         AudioMessage::Resume => {
-
+                            music_track_sink.play();
                         }
                     }
                 }
 
-                if music_track_sink.empty() {
+                if music_track_sink.empty() && song_count > 0 {
                     let song_path = String::from(songs[song_count % songs.len()].clone());
                     let file = File::open(song_path).unwrap();
                     song_count += 1;
