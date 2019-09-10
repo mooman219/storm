@@ -18,7 +18,8 @@ pub struct TetrisState {
     strings: Vec<Text>,
     screen: BatchToken,
     clock: Clock,
-    is_paused: bool
+    is_paused: bool,
+    audio: Bruback
 }
 
 impl TetrisState {
@@ -32,9 +33,9 @@ impl TetrisState {
         let screen = engine.batch_create(&BatchSettings::default());
      
         let mut sprites = Vec::new();
-        let mut clock = Clock::new(144);
+        let clock = Clock::new(144);
 
-        let mut current_cluster = TetrisCluster::new(Pos::new(4, 38), TetrisBlockType::random_tetris_block());
+        let current_cluster = TetrisCluster::new(Pos::new(4, 38), TetrisBlockType::random_tetris_block());
 
         let mut sprite = Sprite::default();
         sprite.size.x = sprite.size.x / 5;
@@ -79,6 +80,12 @@ impl TetrisState {
 
         engine.sprite_set(&screen, &sprites);
 
+        let mut bruback = Bruback::new();
+
+        bruback.set_music_volume(0.05);
+        bruback.play_music(String::from("examples/resources/tetris.ogg"));
+
+
         TetrisState {
             is_active: true,
             generate_new_cluster: false,
@@ -95,7 +102,8 @@ impl TetrisState {
             strings,
             screen,
             clock,
-            is_paused: false
+            is_paused: false,
+            audio: bruback
         }
     }
 
@@ -127,19 +135,20 @@ impl TetrisState {
             if self.generate_new_cluster {
                 self.read_and_clear_map();
             }
+            
             if self.is_paused == false {
                 self.engine.sprite_set(&self.screen, &self.sprites);
             }
             else {
-                self.engine.text_set(&self.screen, &self.strings);
+                self.draw_menu_text();
             }
+
             self.engine.window_commit();
             self.clock.tick();
         }
     }
 
     pub fn draw_menu_text(&mut self) {
-    
         self.strings[1].set_string(&"Hey");
         self.engine.text_set(&self.screen, &self.strings);
     }
@@ -178,8 +187,8 @@ impl TetrisState {
         }
 
         if cleared_rows != 0 {
-      //      bruback.set_effect_volume(0.05);
-      //      bruback.play_sound_effect(String::from("examples/resources/clear.wav"));
+            self.audio.set_effect_volume(0.05);
+            self.audio.play_sound_effect(String::from("examples/resources/clear.wav"));
         }
         self.total_lines_cleared += cleared_rows;
 

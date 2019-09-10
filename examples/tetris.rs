@@ -21,12 +21,15 @@ fn main() {
     );
 }
 
-fn game(mut engine: Engine) {
-    let device = rodio::default_output_device().unwrap();
+fn game(engine: Engine) {
     let mut tetris_state = TetrisState::new(engine);
-    let mut bruback = Bruback::new();
-
-    bruback.set_music_volume(0.05);
-    bruback.play_music(String::from("examples/resources/tetris.ogg"));
     tetris_state.update();
 }
+
+
+//todos:
+//1. Pause music, with current track being paused
+//2. Correct Tetris Scoring
+//3. volume up and down
+//4. Effect when you clear a row
+//5. hover move
