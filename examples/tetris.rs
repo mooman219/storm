@@ -1,5 +1,4 @@
 extern crate rand;
-use storm::time::*;
 use storm::*;
 mod tetris_game;
 

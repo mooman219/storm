@@ -2,34 +2,47 @@ use storm::*;
 use crate::tetris_game::*;
 use storm::time::*;
 
+
+//Tetris State holds all the data needed to keep the game going
 pub struct TetrisState {
     is_active: bool,
-    generate_new_cluster: bool,
     update_count: u32,
-    engine: Engine,
+    
+    engine: Engine,//Connection to the storm engine to handle rendering
+    screen: BatchToken,//the screen we draw to
+
     board: [[TetrisBlockType;10]; 40],
+
+    //our two main cluster(tetrinom) control variables, 
     current_cluster: TetrisCluster,
+    generate_new_cluster: bool,
+    
     score: i32,
     total_lines_cleared: u32,
+
+    //these three handle the movement as we look at how we should change the current position of the current cluster
     lateral_move: bool,
     movement_vector: Pos,
     rotation_direction: i32,
+    
+    //handles to the various sprites and bits of text we are rendering
     sprites: Vec<Sprite>,
     strings: Vec<Text>,
-    screen: BatchToken,
+
     clock: Clock,
+
     is_paused: bool,
+    
+    //audio control varibles, each represents a new "source" we cna play songs o
     audio: Bruback,
     main_sink: SinkID,
     pause_sink: SinkID,
-    effect_sink: SinkID
+    effect_sink: SinkID,
+    ui_engine: UIEngine
 }
 
 impl TetrisState {
     pub fn new(mut engine: Engine) -> TetrisState {
-
-
-
         let mut board = [[TetrisBlockType::Empty;10];40];
         engine.window_clear_color(storm::color::BLACK);
 
@@ -38,12 +51,14 @@ impl TetrisState {
         let mut sprites = Vec::new();
         let clock = Clock::new(144);
 
+        //the basic idea is, create a number of tiles that matches the size of a tetris board
         let current_cluster = TetrisCluster::new(Pos::new(4, 38), TetrisBlockType::random_tetris_block());
 
         let mut sprite = Sprite::default();
         sprite.size.x = sprite.size.x / 5;
         sprite.size.y = sprite.size.y / 5;
 
+        //and then turn on the ones we want to show as being filled in
         for x in 0..10 {
             for y in 0..40 {
                 sprite.pos.x = (x * 20) as f32 - 100.0f32;
@@ -83,8 +98,11 @@ impl TetrisState {
 
         engine.sprite_set(&screen, &sprites);
 
-        let mut bruback = Bruback::new();
 
+        //a sink is a way of playing music or effects, they will clober progress and each other if we use the same one
+        //so we have three, one for the main track while playing, one for when you are in a menu paused,
+        //and one to play sound effects
+        let mut bruback = Bruback::new();
         let main_sink = bruback.create_new_sink();
 
         bruback.set_track_volume(0.05, main_sink);
@@ -96,6 +114,13 @@ impl TetrisState {
         bruback.set_track_volume(0.05, pause_sink);
         bruback.play_track(String::from("examples/resources/pause.mp3"), pause_sink);
         bruback.pause_track(pause_sink);
+        let mut ui_engine = UIEngine::new(&mut engine);
+
+        let button = Button::new(UIPos::new(-600.0, 0.0), 100, 50, storm::color::GREEN, String::from("Menu"));
+        let _ = ui_engine.add_new_ui_element(Box::new(button));
+
+        let other_button = Button::new(UIPos::new(-600.0, -50.0), 200, 50, storm::color::GREEN, String::from("Back To Game"));
+        let _ = ui_engine.add_new_ui_element(Box::new(other_button));
 
         TetrisState {
             is_active: true,
@@ -117,7 +142,8 @@ impl TetrisState {
             audio: bruback,
             main_sink,
             effect_sink,
-            pause_sink
+            pause_sink,
+            ui_engine
         }
     }
 
@@ -154,17 +180,13 @@ impl TetrisState {
                 self.engine.sprite_set(&self.screen, &self.sprites);
             }
             else {
-                self.draw_menu_text();
+//                self.draw_menu_text();
+               self.ui_engine.draw(&mut self.engine);
             }
 
             self.engine.window_commit();
             self.clock.tick();
         }
-    }
-
-    pub fn draw_menu_text(&mut self) {
-        self.strings[1].set_string(&"Hey");
-        self.engine.text_set(&self.screen, &self.strings);
     }
 
     pub fn read_and_clear_map(&mut self) {
@@ -318,14 +340,39 @@ impl TetrisState {
                             self.audio.resume_track(self.pause_sink);
                         }
                         else {
+                            self.engine.sprite_clear(&self.ui_engine.screen);
+                            self.engine.text_clear(&self.ui_engine.screen);
                             self.audio.pause_track(self.pause_sink);
                             self.audio.resume_track(self.main_sink);
                         }
                     }
 
+
                     KeyboardButton::Escape => self.is_active = false,
                     _ => {}
                 },
+                InputMessage::CursorPressed{button, pos} => {
+                    match button {
+                        CursorButton::Left => {
+                            //ask the UI Engine if any of its buttons have been clicked,
+                            //if they have don't procede with the click
+                            self.ui_engine.click_down_event(pos);
+                        },
+                        _=> {
+
+                        }
+                    }
+                },
+                InputMessage::CursorReleased{button, pos} => {
+                    match button {
+                        CursorButton::Left => {
+                            self.ui_engine.click_up_event(pos);
+                        },
+                        _=> {
+
+                        }
+                    }
+                }
                 _ => {}
             }
         }
