@@ -5,13 +5,13 @@ authors = ["Joe Cumbo <mooman219@gmail.com>"]
 description = "2D game engine designed for performance"
 license = "MIT"
 readme = "README.md"
+documentation = "https://docs.rs/storm"
+homepage = "https://github.com/mooman219/storm"
 repository = "https://github.com/mooman219/storm"
 keywords = ["game", "engine", "2D", "graphics"]
 categories = ["game-engines"]
 edition = "2018"
-exclude = [
-    "examples_old/*",
-]
+exclude = ["examples_old/**", "examples/**"]
 
 # This forces docs.rs to build us on windows, which has the simplest build for docs.rs to perform.
 [package.metadata.docs.rs]

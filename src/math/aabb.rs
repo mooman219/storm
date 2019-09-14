@@ -38,7 +38,8 @@ impl AABB2D {
 
     #[inline(always)]
     pub fn contains_point(&self, point: &Vector2<f32>) -> bool {
-self.min.x <= point.x && self.max.x >= point.x && self.min.y <= point.y && self.max.y >= point.y    }
+        self.min.x <= point.x && self.max.x >= point.x && self.min.y <= point.y && self.max.y >= point.y
+    }
 
     pub fn slide(&mut self, mov: &Vector2<f32>, others: &Vec<AABB2D>) -> bool {
         if mov.x == 0f32 && mov.y == 0f32 {
