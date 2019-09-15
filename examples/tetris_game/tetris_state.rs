@@ -36,9 +36,13 @@ pub struct TetrisState {
     //audio control varibles, each represents a new "source" we cna play songs o
     audio: Bruback,
     main_sink: SinkID,
+    current_main_volume: f32,
     pause_sink: SinkID,
     effect_sink: SinkID,
-    ui_engine: UIEngine
+    ui_engine: UIEngine,
+    volume_up_button: UIElementToken,
+    volume_down_button: UIElementToken,
+    return_to_game: UIElementToken
 }
 
 impl TetrisState {
@@ -78,14 +82,6 @@ impl TetrisState {
             strings.push(text);
             // Assign the strings we want to draw to a batch.
 
-            let mut menu_text = Text::default();
-            //test string for menu text
-            menu_text.set_string("Hey");
-            menu_text.color = color::WHITE;
-            menu_text.pos.x = 0.0;
-            menu_text.pos.y = 0.0;
-            strings.push(menu_text);
-
             engine.text_set(&screen, &strings);
         }
 
@@ -104,23 +100,26 @@ impl TetrisState {
         //and one to play sound effects
         let mut bruback = Bruback::new();
         let main_sink = bruback.create_new_sink();
-
-        bruback.set_track_volume(0.05, main_sink);
+        let current_main_volume = 0.05;
+        bruback.set_track_volume(current_main_volume, main_sink);
         bruback.play_track(String::from("examples/resources/tetris.ogg"), main_sink);
 
         let effect_sink = bruback.create_new_sink();
         let pause_sink = bruback.create_new_sink();
 
-        bruback.set_track_volume(0.05, pause_sink);
+        bruback.set_track_volume(current_main_volume, pause_sink);
         bruback.play_track(String::from("examples/resources/pause.mp3"), pause_sink);
         bruback.pause_track(pause_sink);
         let mut ui_engine = UIEngine::new(&mut engine);
 
-        let button = Button::new(UIPos::new(-600.0, 0.0), 100, 50, storm::color::GREEN, String::from("Menu"));
-        let _ = ui_engine.add_new_ui_element(Box::new(button));
+        let button = Button::new(UIPos::new(-600.0, 0.0), 50, 50, storm::color::GREEN, String::from("+"));
+        let volume_up_button = ui_engine.add_new_ui_element(Box::new(button));
+
+        let button = Button::new(UIPos::new(-450.0, 0.0), 50, 50, storm::color::GREEN, String::from("-"));
+        let volume_down_button = ui_engine.add_new_ui_element(Box::new(button));
 
         let other_button = Button::new(UIPos::new(-600.0, -50.0), 200, 50, storm::color::GREEN, String::from("Back To Game"));
-        let _ = ui_engine.add_new_ui_element(Box::new(other_button));
+        let return_to_game = ui_engine.add_new_ui_element(Box::new(other_button));
 
         TetrisState {
             is_active: true,
@@ -141,9 +140,13 @@ impl TetrisState {
             is_paused: false,
             audio: bruback,
             main_sink,
+            current_main_volume,
             effect_sink,
             pause_sink,
-            ui_engine
+            ui_engine,
+            volume_up_button,
+            volume_down_button,
+            return_to_game
         }
     }
 
@@ -180,7 +183,6 @@ impl TetrisState {
                 self.engine.sprite_set(&self.screen, &self.sprites);
             }
             else {
-//                self.draw_menu_text();
                self.ui_engine.draw(&mut self.engine);
             }
 
@@ -305,51 +307,80 @@ impl TetrisState {
         }
     }
 
+    pub fn handle_volume_change(&mut self, element: UIElementToken) {
+        println!("{}", element);
+        if element == self.volume_down_button {
+            if self.current_main_volume > 0.0 {
+                self.current_main_volume -= 0.01;
+            }
+            self.audio.set_track_volume(self.current_main_volume, self.main_sink);
+            self.audio.set_track_volume(self.current_main_volume, self.pause_sink);
+            self.audio.set_track_volume(self.current_main_volume, self.effect_sink);
+        }
+        else if element == self.volume_up_button {
+            if self.current_main_volume < 0.1 {
+                self.current_main_volume += 0.01;
+            }
+            self.audio.set_track_volume(self.current_main_volume, self.main_sink);
+            self.audio.set_track_volume(self.current_main_volume, self.pause_sink);
+            self.audio.set_track_volume(self.current_main_volume, self.effect_sink);
+        }
+    }
+
+    pub fn pause_unpause(&mut self) {
+        println!("YO");
+        self.is_paused = !self.is_paused;
+        if self.is_paused {
+            self.engine.sprite_clear(&self.screen);
+            self.audio.pause_track(self.main_sink);
+            self.audio.resume_track(self.pause_sink);
+        }
+        else {
+            self.engine.sprite_clear(&self.ui_engine.screen);
+            self.engine.text_clear(&self.ui_engine.screen);
+            self.audio.pause_track(self.pause_sink);
+            self.audio.resume_track(self.main_sink);
+        }
+    }
+
+    pub fn handle_key_press_event(&mut self, key: KeyboardButton) {
+        match key {
+            KeyboardButton::Left => {
+                self.movement_vector.x = -1;
+                self.movement_vector.y = 0;
+                self.lateral_move = true;
+            }
+            KeyboardButton::Right => {
+                self.movement_vector.x = 1;
+                self.movement_vector.y = 0;
+                self.lateral_move = true;
+            }
+            KeyboardButton::Q => {
+                self.rotation_direction = -1;
+                self.movement_vector.x = 0;
+                self.movement_vector.y = 0;
+            }
+            KeyboardButton::E => {
+                self.rotation_direction = 1;
+                self.movement_vector.x = 0;
+                self.movement_vector.y = 0;
+            }
+            KeyboardButton::P => {
+                self.pause_unpause();
+            }
+            KeyboardButton::Escape => self.is_active = false,
+            _ => {}
+        }
+    }
+
     pub fn check_input(&mut self) {
         self.movement_vector.y = -1;
         self.movement_vector.x = 0;
         while let Some(message) = self.engine.input_poll() {
             match message {
                 InputMessage::CloseRequested => self.is_active = false,
-                InputMessage::KeyPressed(key) => match key {
-                    KeyboardButton::Left => {
-                        self.movement_vector.x = -1;
-                        self.movement_vector.y = 0;
-                        self.lateral_move = true;
-                    }
-                    KeyboardButton::Right => {
-                        self.movement_vector.x = 1;
-                        self.movement_vector.y = 0;
-                        self.lateral_move = true;
-                    }
-                    KeyboardButton::Q => {
-                        self.rotation_direction = -1;
-                        self.movement_vector.x = 0;
-                        self.movement_vector.y = 0;
-                    }
-                    KeyboardButton::E => {
-                        self.rotation_direction = 1;
-                        self.movement_vector.x = 0;
-                        self.movement_vector.y = 0;
-                    }
-                    KeyboardButton::P => {
-                        self.is_paused = !self.is_paused;
-                        if self.is_paused {
-                            self.engine.sprite_clear(&self.screen);
-                            self.audio.pause_track(self.main_sink);
-                            self.audio.resume_track(self.pause_sink);
-                        }
-                        else {
-                            self.engine.sprite_clear(&self.ui_engine.screen);
-                            self.engine.text_clear(&self.ui_engine.screen);
-                            self.audio.pause_track(self.pause_sink);
-                            self.audio.resume_track(self.main_sink);
-                        }
-                    }
-
-
-                    KeyboardButton::Escape => self.is_active = false,
-                    _ => {}
+                InputMessage::KeyPressed(key) => {
+                    self.handle_key_press_event(key);
                 },
                 InputMessage::CursorPressed{button, pos} => {
                     match button {
@@ -366,7 +397,16 @@ impl TetrisState {
                 InputMessage::CursorReleased{button, pos} => {
                     match button {
                         CursorButton::Left => {
-                            self.ui_engine.click_up_event(pos);
+                            let have_responded = self.ui_engine.click_up_event(pos);
+                            if have_responded.len() > 0 {
+                                for element in have_responded.iter() {
+                                    if *element == self.volume_down_button || *element == self.volume_up_button {
+                                        self.handle_volume_change(*element);
+                                    } else if *element == self.return_to_game {
+                                        self.pause_unpause();
+                                    }
+                                }
+                            }
                         },
                         _=> {
 

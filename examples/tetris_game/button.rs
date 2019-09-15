@@ -3,6 +3,7 @@ use crate::tetris_game::*;
 use storm::color::RGBA8;
 use storm::cgmath::*;
 use storm::math::AABB2D;
+use std::rc::Weak;
 
 #[derive(Clone, Copy)]
 pub struct UIPos {
@@ -20,7 +21,7 @@ impl UIPos {
 }
 
 pub struct Button {
-    pos: UIPos,    
+    pos: UIPos,
     width: u16,
     height: u16 ,
     sprite: Sprite,
@@ -88,12 +89,15 @@ fn draw(&mut self,  sprites: &mut Vec<Sprite>, texts: &mut Vec<Text>) {
         self.color = storm::color::ORANGE;
     }
 
-    fn click_up(&mut self, point : Vector2<f32>) {
+    fn click_up(&mut self, point : Vector2<f32>) -> bool {
         let bb = self.bounding_box();
         if bb.contains_point(&point) {
-
+            self.color = storm::color::GREEN;
+            self.is_clicked = false;
+            return true;
         }
         self.color = storm::color::GREEN;
         self.is_clicked = false;
+        return false;
     }
 }

@@ -4,13 +4,13 @@ use storm::cgmath::*;
 
 use std::collections::HashMap;
 
-type UIElementToken = u32;
+pub type UIElementToken = u32;
 
 pub trait UIElement {
     fn draw(&mut self, sprites: &mut Vec<Sprite>, texts: &mut Vec<Text>);
     fn bounding_box(&self) -> AABB2D;
     fn click_down(&mut self, click_point: Vector2<f32>);
-    fn click_up(&mut self, up_point: Vector2<f32>);
+    fn click_up(&mut self, up_point: Vector2<f32>)->bool;
 }
 
 
@@ -36,7 +36,7 @@ impl UIEngine {
     pub fn add_new_ui_element(&mut self, ui_element: Box<dyn UIElement>) -> UIElementToken {
         self.ui_elements.insert(self.ui_element_count + 1, ui_element);
         self.ui_element_count += 1;
-        return self.ui_element_count - 1;
+        return self.ui_element_count;
     }
 
     pub fn draw(&mut self, engine: &mut Engine) {
@@ -54,25 +54,22 @@ impl UIEngine {
 
         for (k, element) in self.ui_elements.iter_mut() {
             let aabb = element.bounding_box();
-            println!("{:?}", aabb);
-            println!("{:?}", pos);
-
             if aabb.contains_point(&pos) {
-                println!("ljksdf");
                 element.click_down(pos);
                 self.is_clicked_objects.push(*k);
             }
         }
     }
 
-    pub fn click_up_event(&mut self, pos: Vector2<f32>) {
-
+    pub fn click_up_event(&mut self, pos: Vector2<f32>) -> Vec<UIElementToken> {
+        let mut click_down_responded = vec![];
         for k in self.is_clicked_objects.iter() {
             let object = self.ui_elements.get_mut(k).unwrap();
-            println!("ljksdf");
-
-            object.click_up(pos);
+            if object.click_up(pos) {
+                click_down_responded.push(*k);
+            }
         }
-
+        self.is_clicked_objects = vec![];
+        return click_down_responded;
     }
 }
