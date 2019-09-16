@@ -4,6 +4,21 @@ use storm::cgmath::*;
 
 use std::collections::HashMap;
 
+#[derive(Clone, Copy)]
+pub struct UIPos {
+    pub x: f32,
+    pub y: f32,
+}
+
+impl UIPos {
+    pub fn new(x: f32, y: f32) -> UIPos {
+        UIPos {
+            x,
+            y,
+        }
+    }
+}
+
 pub type UIElementToken = u32;
 
 pub trait UIElement {
@@ -34,8 +49,8 @@ impl UIEngine {
     }
 
     pub fn add_new_ui_element(&mut self, ui_element: Box<dyn UIElement>) -> UIElementToken {
-        self.ui_elements.insert(self.ui_element_count + 1, ui_element);
         self.ui_element_count += 1;
+        self.ui_elements.insert(self.ui_element_count, ui_element);
         return self.ui_element_count;
     }
 
@@ -45,13 +60,11 @@ impl UIEngine {
         for (_, element) in self.ui_elements.iter_mut() {
             element.draw(&mut sprites, &mut texts);
         }
-
         engine.sprite_set(&self.screen, &sprites);
         engine.text_set(&self.screen, &texts);
     }
 
     pub fn click_down_event(&mut self, pos: Vector2<f32>) {
-
         for (k, element) in self.ui_elements.iter_mut() {
             let aabb = element.bounding_box();
             if aabb.contains_point(&pos) {

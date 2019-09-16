@@ -39,6 +39,15 @@ impl RGBA8 {
             a: alpha,
         }
     }
+
+    pub fn inverse(&self) -> RGBA8 {
+        RGBA8 {
+            r: 255 - self.r,
+            g: 255 - self.g,
+            b: 255 - self.b,
+            a: 255
+        }
+    }
 }
 
 impl Into<Vector4<f32>> for RGBA8 {

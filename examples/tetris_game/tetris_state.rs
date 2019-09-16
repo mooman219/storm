@@ -112,14 +112,18 @@ impl TetrisState {
         bruback.pause_track(pause_sink);
         let mut ui_engine = UIEngine::new(&mut engine);
 
-        let button = Button::new(UIPos::new(-600.0, 0.0), 50, 50, storm::color::GREEN, String::from("+"));
+        let button = Button::new(UIPos::new(-600.0, 0.0), 50, 50, storm::color::WHITE, String::from("+"));
         let volume_up_button = ui_engine.add_new_ui_element(Box::new(button));
 
-        let button = Button::new(UIPos::new(-450.0, 0.0), 50, 50, storm::color::GREEN, String::from("-"));
+        let button = Button::new(UIPos::new(-450.0, 0.0), 50, 50, storm::color::WHITE, String::from("-"));
         let volume_down_button = ui_engine.add_new_ui_element(Box::new(button));
 
-        let other_button = Button::new(UIPos::new(-600.0, -50.0), 200, 50, storm::color::GREEN, String::from("Back To Game"));
+        let other_button = Button::new(UIPos::new(-600.0, -75.0), 200, 50, storm::color::WHITE, String::from("Back To Game"));
         let return_to_game = ui_engine.add_new_ui_element(Box::new(other_button));
+
+        let other_button = Label::new(UIPos::new(-550.0, -0.0), 100, 50, String::from("Volume"));
+        let _ = ui_engine.add_new_ui_element(Box::new(other_button));
+
 
         TetrisState {
             is_active: true,
@@ -308,7 +312,6 @@ impl TetrisState {
     }
 
     pub fn handle_volume_change(&mut self, element: UIElementToken) {
-        println!("{}", element);
         if element == self.volume_down_button {
             if self.current_main_volume > 0.0 {
                 self.current_main_volume -= 0.01;
@@ -328,7 +331,6 @@ impl TetrisState {
     }
 
     pub fn pause_unpause(&mut self) {
-        println!("YO");
         self.is_paused = !self.is_paused;
         if self.is_paused {
             self.engine.sprite_clear(&self.screen);
@@ -397,13 +399,15 @@ impl TetrisState {
                 InputMessage::CursorReleased{button, pos} => {
                     match button {
                         CursorButton::Left => {
-                            let have_responded = self.ui_engine.click_up_event(pos);
-                            if have_responded.len() > 0 {
-                                for element in have_responded.iter() {
-                                    if *element == self.volume_down_button || *element == self.volume_up_button {
-                                        self.handle_volume_change(*element);
-                                    } else if *element == self.return_to_game {
-                                        self.pause_unpause();
+                            if self.is_paused {
+                                let have_responded = self.ui_engine.click_up_event(pos);
+                                if have_responded.len() > 0 {
+                                    for element in have_responded.iter() {
+                                        if *element == self.volume_down_button || *element == self.volume_up_button {
+                                            self.handle_volume_change(*element);
+                                        } else if *element == self.return_to_game {
+                                            self.pause_unpause();
+                                        }
                                     }
                                 }
                             }
