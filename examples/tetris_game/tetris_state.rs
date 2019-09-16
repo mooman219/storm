@@ -39,6 +39,9 @@ pub struct TetrisState {
     current_main_volume: f32,
     pause_sink: SinkID,
     effect_sink: SinkID,
+
+    //The UIEngine is the compositor for the UI screen layer
+    //UIElementTokens are referances used to lookup the UIElement later
     ui_engine: UIEngine,
     volume_up_button: UIElementToken,
     volume_down_button: UIElementToken,
@@ -316,6 +319,7 @@ impl TetrisState {
             if self.current_main_volume > 0.0 {
                 self.current_main_volume -= 0.01;
             }
+            //TODO: create a master volume track
             self.audio.set_track_volume(self.current_main_volume, self.main_sink);
             self.audio.set_track_volume(self.current_main_volume, self.pause_sink);
             self.audio.set_track_volume(self.current_main_volume, self.effect_sink);
