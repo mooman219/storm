@@ -46,7 +46,7 @@ impl AABB2D {
             return false;
         }
         let mut result = false;
-        let mut res = *mov; // Copy/
+        let mut res = *mov; // Copy
         let mut aabb = *self; // Copy
 
         // Y movement

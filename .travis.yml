@@ -47,4 +47,4 @@ before_script:
 script:
   # Clippy is for another day.
   # - cargo clippy --all-targets --all-features -- -D warnings
-  - cargo build
+  - cargo build --all-targets
