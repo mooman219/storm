@@ -6,6 +6,7 @@ use storm::*;
 
 /// Run with: cargo run --example particles --release
 fn main() {
+    simple_logger::init().unwrap();
     Engine::start(
         WindowSettings {
             title: String::from("Storm: Particles"),

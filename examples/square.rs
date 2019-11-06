@@ -3,6 +3,7 @@ use storm::*;
 
 /// Run with: cargo run --example square --release
 fn main() {
+    simple_logger::init().unwrap();
     // Create the engine context and describe the window.
     Engine::start(
         WindowSettings {

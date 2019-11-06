@@ -1,9 +1,9 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
-use std::collections::HashMap;
 
-use std::sync::mpsc::{Sender, Receiver};
 use std::sync::mpsc;
+use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 
 use rodio::*;
@@ -13,7 +13,7 @@ pub type SinkID = u32;
 struct SinkController {
     sink: Sink,
     tracks_to_play: Vec<String>,
-    song_count: usize
+    song_count: usize,
 }
 
 impl SinkController {
@@ -21,7 +21,7 @@ impl SinkController {
         SinkController {
             sink,
             tracks_to_play: vec![],
-            song_count: 0
+            song_count: 0,
         }
     }
 
@@ -33,7 +33,7 @@ impl SinkController {
         self.add_track(file_path_copy);
     }
 
-    pub fn add_track(&mut self, track: String)  {
+    pub fn add_track(&mut self, track: String) {
         self.tracks_to_play.push(track)
     }
 
@@ -51,7 +51,8 @@ impl SinkController {
 
     pub fn tick(&mut self) {
         if self.sink.empty() && self.song_count > 0 {
-            let song_path = String::from(self.tracks_to_play[self.song_count % self.tracks_to_play.len()].clone());
+            let song_path =
+                String::from(self.tracks_to_play[self.song_count % self.tracks_to_play.len()].clone());
             let file = File::open(song_path).unwrap();
             self.song_count += 1;
             let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
@@ -71,7 +72,7 @@ pub enum AudioMessage {
 pub struct BrubackState {
     sinks: HashMap<SinkID, SinkController>,
     rx: Receiver<AudioMessage>,
-    device: Device
+    device: Device,
 }
 
 impl BrubackState {
@@ -79,31 +80,31 @@ impl BrubackState {
         BrubackState {
             sinks: HashMap::new(),
             rx,
-            device
+            device,
         }
     }
 
-    pub fn update(&mut self) { 
-        loop{    
+    pub fn update(&mut self) {
+        loop {
             let message = self.rx.try_recv();
 
             if let Ok(message) = message {
                 match message {
                     AudioMessage::NewSink(sink_id) => {
                         self.sinks.insert(sink_id, SinkController::new(Sink::new(&self.device)));
-                    },
+                    }
                     AudioMessage::PlayTrack(track, sink_id) => {
                         let sink = self.sinks.get_mut(&sink_id).unwrap();
                         sink.play_track(track);
-                    },
+                    }
                     AudioMessage::PauseSink(sink_id) => {
                         let sink = self.sinks.get_mut(&sink_id).unwrap();
                         sink.pause();
-                    },
+                    }
                     AudioMessage::ResumeSink(sink_id) => {
                         let sink = self.sinks.get_mut(&sink_id).unwrap();
                         sink.play();
-                    },
+                    }
                     AudioMessage::SetSinkVolume(volume, sink_id) => {
                         let sink = self.sinks.get_mut(&sink_id).unwrap();
                         sink.set_volume(volume);
@@ -120,7 +121,7 @@ impl BrubackState {
 
 pub struct Bruback {
     sender: Sender<AudioMessage>,
-    sink_id_count: SinkID
+    sink_id_count: SinkID,
 }
 
 impl Bruback {
@@ -130,15 +131,14 @@ impl Bruback {
 
         let _ = thread::spawn(move || {
             let mut bruback_state = BrubackState::new(rx, device);
-            bruback_state.update();         
+            bruback_state.update();
         });
 
         Bruback {
             sender: tx,
-            sink_id_count: 0
+            sink_id_count: 0,
         }
     }
-
 
     pub fn create_new_sink(&mut self) -> SinkID {
         let new_sink_id = self.sink_id_count + 1;

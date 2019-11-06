@@ -39,7 +39,6 @@ impl Engine {
     // Starts the engine. The game_loop parameter is called once with a valid instance of the engine
     // once the engine is constructed. If the game loop exits or panics, the engine shuts down.
     pub fn start(desc: WindowSettings, mut game_loop: impl FnMut(Engine) + Send + 'static) {
-        simple_logger::init().unwrap();
         info!("Engine started.");
 
         // Init SDL2

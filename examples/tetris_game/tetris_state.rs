@@ -1,13 +1,13 @@
-use storm::*;
 use crate::tetris_game::*;
 use storm::time::*;
+use storm::*;
 
 pub struct TetrisState {
     is_active: bool,
     generate_new_cluster: bool,
     update_count: u32,
     engine: Engine,
-    board: [[TetrisBlockType;10]; 40],
+    board: [[TetrisBlockType; 10]; 40],
     current_cluster: TetrisCluster,
     score: i32,
     total_lines_cleared: u32,
@@ -21,19 +21,16 @@ pub struct TetrisState {
     is_paused: bool,
     audio: Bruback,
     main_sink: SinkID,
-    effect_sink: SinkID
+    effect_sink: SinkID,
 }
 
 impl TetrisState {
     pub fn new(mut engine: Engine) -> TetrisState {
-
-
-
-        let mut board = [[TetrisBlockType::Empty;10];40];
+        let mut board = [[TetrisBlockType::Empty; 10]; 40];
         engine.window_clear_color(storm::color::BLACK);
 
         let screen = engine.batch_create(&BatchSettings::default());
-     
+
         let mut sprites = Vec::new();
         let clock = Clock::new(144);
 
@@ -48,9 +45,9 @@ impl TetrisState {
                 sprite.pos.x = (x * 20) as f32 - 100.0f32;
                 sprite.pos.y = (y * 20) as f32 - 400.0f32;
                 sprites.push(sprite);
-            }            
+            }
         }
-        
+
         let mut strings = Vec::new();
         let mut text = Text::default();
 
@@ -110,10 +107,9 @@ impl TetrisState {
             is_paused: false,
             audio: bruback,
             main_sink,
-            effect_sink
+            effect_sink,
         }
     }
-
 
     pub fn update(&mut self) {
         while self.is_active {
@@ -121,18 +117,20 @@ impl TetrisState {
             self.rotation_direction = 0;
 
             if self.generate_new_cluster == true {
-                self.current_cluster = TetrisCluster::new(Pos::new(4, 38), TetrisBlockType::random_tetris_block());
+                self.current_cluster =
+                    TetrisCluster::new(Pos::new(4, 38), TetrisBlockType::random_tetris_block());
                 self.generate_new_cluster = false;
             }
 
-            
             self.check_input();
 
             if self.is_paused == false {
-                if self.update_count == (20 - self.total_lines_cleared / 10) || self.lateral_move || self.rotation_direction != 0 {
+                if self.update_count == (20 - self.total_lines_cleared / 10)
+                    || self.lateral_move
+                    || self.rotation_direction != 0
+                {
                     self.attempt_to_move_block();
-                }
-                else {
+                } else {
                     self.update_count += 1;
                 }
             }
@@ -142,11 +140,10 @@ impl TetrisState {
             if self.generate_new_cluster {
                 self.read_and_clear_map();
             }
-            
+
             if self.is_paused == false {
                 self.engine.sprite_set(&self.screen, &self.sprites);
-            }
-            else {
+            } else {
                 self.draw_menu_text();
             }
 
@@ -213,7 +210,7 @@ impl TetrisState {
     }
 
     pub fn attempt_to_move_block(&mut self) {
-       let mut position = self.current_cluster.current_position;
+        let mut position = self.current_cluster.current_position;
 
         //test the set of board positions under the current ones, are they occupied/the end of the board
         //first we need to erase of current postions so we don't set off the check

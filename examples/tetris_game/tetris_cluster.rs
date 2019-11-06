@@ -273,7 +273,4 @@ impl TetrisBlockType {
             _ => TetrisBlockType::Line,
         }
     }
-
 }
-
-

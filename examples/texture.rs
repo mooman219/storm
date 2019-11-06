@@ -3,6 +3,7 @@ use storm::*;
 
 /// Run with: cargo run --example texture --release
 fn main() {
+    simple_logger::init().unwrap();
     Engine::start(
         WindowSettings {
             title: String::from("Storm: Texture"),

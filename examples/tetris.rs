@@ -1,5 +1,4 @@
 extern crate rand;
-use storm::time::*;
 use storm::*;
 mod tetris_game;
 
@@ -7,6 +6,7 @@ use tetris_game::*;
 
 /// Run with: cargo run --example tetris --release
 fn main() {
+    simple_logger::init().unwrap();
     Engine::start(
         WindowSettings {
             title: String::from("Storm: Tetris"),
@@ -25,7 +25,6 @@ fn game(engine: Engine) {
     let mut tetris_state = TetrisState::new(engine);
     tetris_state.update();
 }
-
 
 //todos:
 //1. Pause music, with current track being paused
