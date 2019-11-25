@@ -3,30 +3,39 @@ use crate::utility::bounded_spsc;
 use beryllium::*;
 use cgmath::prelude::*;
 use cgmath::*;
+use std::collections::HashMap;
+use std::time::Instant;
+
+struct ControllerState {
+    joystick_id: JoystickID,
+}
 
 struct InputState {
     cursor_pos: Vector2<f32>,
     window_size: Vector2<f32>,
 }
 
-pub struct InputServer {
+pub struct InputServer<'a> {
     input_producer: bounded_spsc::Producer<InputMessage>,
+    controllers: HashMap<JoystickID, Controller<'a>>,
     cursor_pos: Vector2<f32>,
     window_size: Vector2<f32>,
 }
 
-impl InputServer {
-    pub fn new(input_producer: bounded_spsc::Producer<InputMessage>) -> InputServer {
+impl<'a> InputServer<'a> {
+    pub fn new(input_producer: bounded_spsc::Producer<InputMessage>) -> InputServer<'a> {
         InputServer {
             input_producer,
+            controllers: HashMap::new(),
             cursor_pos: Vector2::zero(),
             window_size: Vector2::zero(),
         }
     }
 
-    pub fn tick(&mut self, sdl: &SDLToken) {
+    pub fn tick(&mut self, sdl: &'a SDLToken) {
         let last_cursor_pos = self.cursor_pos;
         let last_window_size = self.window_size;
+        
         while let Some(event) = sdl.poll_event() {
             match event {
                 // Window
@@ -120,9 +129,20 @@ impl InputServer {
                 } => {
                     self.input_producer.push(InputMessage::CursorLeft);
                 }
+                Event::ControllerDeviceAdded { joystick_id, .. } => {
+                    self.controllers.insert(joystick_id, sdl.open_controller(joystick_id).unwrap());
+                }
+                Event::ControllerButton { pressed, button, joystick_id, .. } => {
+                    if pressed {
+                        self.input_producer.push(InputMessage::ButtonPressed(joystick_id, button));
+                    } else {
+                        self.input_producer.push(InputMessage::ButtonReleased(joystick_id, button));
+                    }
+                }
                 _ => {}
             }
         }
+
         if self.cursor_pos != last_cursor_pos {
             let delta = self.cursor_pos - last_cursor_pos;
             self.input_producer.push(InputMessage::CursorMoved {
@@ -130,6 +150,7 @@ impl InputServer {
                 delta,
             });
         }
+
         if self.window_size != last_window_size {
             self.input_producer.push(InputMessage::WindowResized(self.window_size));
         }

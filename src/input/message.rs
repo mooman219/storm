@@ -3,11 +3,17 @@ use cgmath::*;
 // Re-exports.
 pub use beryllium::Keycode as KeyboardButton;
 pub use beryllium::MouseButton as CursorButton;
+pub use beryllium::ControllerButton;
+pub use beryllium::JoystickID as ControllerID;
 
 /// An input event. These are represented as an enumeration to preserve
 /// ordering when stored in a vector and read sequentially.
 #[derive(Copy, Clone, Debug)]
 pub enum InputMessage {
+    /// Controller button press event.
+    ButtonPressed(ControllerID, ControllerButton),
+    /// Controller button release event.
+    ButtonReleased(ControllerID, ControllerButton),
     /// The window has requested it close.
     CloseRequested,
     /// Keyboard press event.
