@@ -185,6 +185,14 @@ impl Sprite {
             rotation: (rotation.fract() * 65536.0) as u16,
         }
     }
+    
+    pub fn from_texture(texture: Texture) -> Sprite {
+        let mut sprite = Sprite::default();
+        sprite.size = texture.size();
+        sprite.texture = texture;
+        
+        sprite
+    }
 
     /// Creates a new sprite. This does not perform conversions and represents exactly the members
     /// of the sprite type.
@@ -361,5 +369,17 @@ impl Texture {
         }
 
         Ok(Texture(subset))
+    }
+    
+    pub fn size(&self) -> Vector2<u16> {
+        // UV Layout: xmin xmax ymin ymax
+        let bounds = Vector4::new(
+            std::cmp::min(self.0.x, self.0.y), // Left
+            std::cmp::max(self.0.x, self.0.y), // Right
+            std::cmp::min(self.0.z, self.0.w), // Top
+            std::cmp::max(self.0.z, self.0.w), // Bottom
+        );
+
+        Vector2::new(((bounds.y - bounds.x) / (PIXEL_SIZE as u16)), ((bounds.w - bounds.z) / (PIXEL_SIZE as u16)))
     }
 }
