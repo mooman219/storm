@@ -22,7 +22,7 @@ maintenance = { status = "experimental" }
 
 [dependencies]
 gl = "0.13"
-beryllium = "0.0.17"
+beryllium = "0.1.3"
 cgmath = "0.17"
 log = "0.4.7"
 png = "0.14"
