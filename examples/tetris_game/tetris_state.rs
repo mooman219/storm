@@ -27,7 +27,7 @@ pub struct TetrisState {
 impl TetrisState {
     pub fn new(mut engine: Engine) -> TetrisState {
         let mut board = [[TetrisBlockType::Empty; 10]; 40];
-        engine.window_clear_color(storm::color::BLACK);
+        engine.window_clear_color(storm::colors::BLACK);
 
         let screen = engine.batch_create(&BatchSettings::default());
 
@@ -53,7 +53,7 @@ impl TetrisState {
 
         {
             text.set_string("Score: 0");
-            text.color = color::WHITE;
+            text.color = colors::WHITE;
             text.pos.x = 125.0;
             text.pos.y += 375.0;
             strings.push(text);
@@ -62,7 +62,7 @@ impl TetrisState {
             let mut menu_text = Text::default();
             //test string for menu text
             menu_text.set_string("Hey");
-            menu_text.color = color::WHITE;
+            menu_text.color = colors::WHITE;
             menu_text.pos.x = 0.0;
             menu_text.pos.y = 0.0;
             strings.push(menu_text);

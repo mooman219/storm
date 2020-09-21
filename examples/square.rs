@@ -1,3 +1,4 @@
+use storm::cgmath::*;
 use storm::time::*;
 use storm::*;
 
@@ -24,21 +25,29 @@ fn game(mut engine: Engine) {
     let mut clock = Clock::new(144);
     // Create a batch to draw on. Batches persist between engine.window_commit()'s.
     let screen = engine.batch_create(&BatchSettings::default());
-    // Add all the sprites we want to draw to a vec.
+
     let mut sprites = Vec::new();
-    sprites.push(Sprite::default());
-    // Assign the sprites we want to draw to a batch.
+    sprites.push(Sprite {
+        pos: Vector3::new(-200.0, -300.0, 0.0),
+        size: Vector2::new(500, 500),
+        color: colors::WHITE,
+        ..Sprite::default()
+    });
     engine.sprite_set(&screen, &sprites);
     // Add all the strings we want to draw to a vec.
     let mut strings = Vec::new();
     let mut text = Text::default();
-    text.set_string("Hello world!");
-    text.pos.z = 0.5;
-    text.pos.y += 50.0;
-    text.max_width = Some(65.0);
+    text.set_string("Rasterized with Fontdue. oagc");
+    text.pos.x = -200.0;
+    text.pos.z = 1.0;
+    text.pos.y = 200.0;
+    text.max_width = Some(500.0);
+    text.scale = 20;
+    text.color = colors::BLACK;
     strings.push(text);
     // Assign the strings we want to draw to a batch.
     engine.text_set(&screen, &strings);
+    engine.window_clear_color(colors::BLACK);
 
     let mut is_active = true;
     while is_active {
@@ -59,3 +68,4 @@ fn game(mut engine: Engine) {
         clock.tick();
     }
 }
+// Run with: cargo run --example square --release

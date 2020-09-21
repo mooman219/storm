@@ -1,6 +1,6 @@
 use crate::cgmath::prelude::*;
 use crate::cgmath::*;
-use storm::color::*;
+use storm::colors::*;
 use storm::time::*;
 use storm::*;
 
@@ -30,8 +30,8 @@ fn game(mut engine: Engine) {
     let screen = engine.batch_create(&screen_settings);
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
-    for x in -1000..1000 {
-        for y in -250..250 {
+    for x in -500..500 {
+        for y in -50..50 {
             let (sprite, particle) = Particle::new(Vector3::new(x as f32 * 5.0, y as f32 * 5.0, 0.0));
             sprites.push(sprite);
             particles.push(particle);

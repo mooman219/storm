@@ -233,31 +233,31 @@ impl TetrisBlockType {
         }
     }
 
-    pub fn color(&self) -> storm::color::RGBA8 {
+    pub fn color(&self) -> storm::RGBA8 {
         match self {
             TetrisBlockType::L => {
-                return storm::color::BLUE;
+                return storm::colors::BLUE;
             }
             TetrisBlockType::S => {
-                return storm::color::GREEN;
+                return storm::colors::GREEN;
             }
             TetrisBlockType::Z => {
-                return storm::color::ORANGE;
+                return storm::colors::ORANGE;
             }
             TetrisBlockType::T => {
-                return storm::color::RED;
+                return storm::colors::RED;
             }
             TetrisBlockType::ReverseL => {
-                return storm::color::MAGENTA;
+                return storm::colors::MAGENTA;
             }
             TetrisBlockType::Square => {
-                return storm::color::RGBA8::new_raw(125, 125, 0, 255);
+                return storm::RGBA8::new_raw(125, 125, 0, 255);
             }
             TetrisBlockType::Line => {
-                return storm::color::PURPLE;
+                return storm::colors::PURPLE;
             }
             TetrisBlockType::Empty => {
-                return storm::color::WHITE;
+                return storm::colors::WHITE;
             }
         }
     }

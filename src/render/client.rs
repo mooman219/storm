@@ -1,5 +1,5 @@
-use crate::color::RGBA8;
 use crate::render::message::*;
+use crate::text::*;
 use crate::texture::*;
 use crate::types::*;
 use crate::utility::swap_spsc;
@@ -9,20 +9,18 @@ use std::ptr;
 
 pub struct RenderClient {
     render_producer: swap_spsc::Producer<RenderState>,
-    texture_atlas: TextureAtlas,
-    font_atlas: FontAtlas,
+    atlas: TextureAtlas,
+    text_cache: TextCache,
     batch_tracker: UnorderedTracker<BatchToken>,
-    font_count: usize,
 }
 
 impl RenderClient {
     pub fn new(render_producer: swap_spsc::Producer<RenderState>) -> RenderClient {
         RenderClient {
             render_producer,
-            texture_atlas: TextureAtlas::new(),
-            font_atlas: FontAtlas::new(),
+            atlas: TextureAtlas::new(),
+            text_cache: TextCache::new(),
             batch_tracker: UnorderedTracker::new(),
-            font_count: 0,
         }
     }
 
@@ -88,9 +86,7 @@ impl RenderClient {
     // ////////////////////////////////////////////////////////
 
     pub fn font_create(&mut self, path: &str) -> FontToken {
-        self.font_atlas.add_font_path(path);
-        self.font_count += 1;
-        FontToken::new(self.font_count)
+        FontToken::new(self.text_cache.add_font_path(path))
     }
 
     pub fn string_set(&mut self, batch: &BatchToken, descs: &Vec<Text>) {
@@ -100,9 +96,8 @@ impl RenderClient {
         batch.dirty_strings = true;
         unsafe { batch.strings.set_len(0) };
         for desc in descs {
-            self.font_atlas.rasterize(desc, &mut batch.strings);
+            self.text_cache.rasterize(&mut self.atlas, desc, &mut batch.strings);
         }
-        state.font_atlas = self.font_atlas.sync();
     }
 
     pub fn string_clear(&mut self, batch: &BatchToken) {
@@ -119,9 +114,7 @@ impl RenderClient {
 
     pub fn texture_create<R: Read>(&mut self, bytes: R, format: TextureFormat) -> Texture {
         let image = Image::from_raw(bytes, format);
-        let uv = self.texture_atlas.add(image);
-        let state = self.render_producer.get();
-        state.texture_atlas = self.texture_atlas.sync();
+        let uv = self.atlas.add(image);
         Texture(uv)
     }
 
@@ -150,6 +143,8 @@ impl RenderClient {
     }
 
     pub fn commit(&mut self) {
+        let state = self.render_producer.get();
+        state.atlas = self.atlas.sync();
         if self.render_producer.try_next() {
             let state = self.render_producer.get();
             while state.batches.len() < self.batch_tracker.len() {

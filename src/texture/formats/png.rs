@@ -1,5 +1,5 @@
-use crate::color::RGBA8;
 use crate::texture::image::Image;
+use crate::RGBA8;
 use png::{ColorType, Decoder};
 use std::io::Read;
 

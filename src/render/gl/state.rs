@@ -1,4 +1,3 @@
-use crate::color::RGBA8;
 use crate::render::gl::buffer::*;
 use crate::render::gl::raw::*;
 use crate::render::gl::shader::*;
@@ -21,7 +20,6 @@ pub struct OpenGLState {
     window: OpenGLWindow,
     shader: TextureShader,
     texture_atlas: TextureHandle,
-    texture_font: TextureHandle,
     batches: Vec<Batch>,
     matrix_bounds: Matrix4<f32>,
     current_logical_size: Vector2<f32>,
@@ -41,13 +39,13 @@ impl OpenGLState {
             window,
             shader: TextureShader::new(),
             texture_atlas: TextureHandle::new(TextureUnit::Atlas),
-            texture_font: TextureHandle::new(TextureUnit::Font),
             batches: Vec::new(),
             matrix_bounds: matrix_from_bounds(&logical_size),
             current_logical_size: Vector2::zero(),
         };
         // Bind shader once.
         state.shader.bind();
+        state.shader.texture(TextureUnit::Atlas);
         // Setup cabilities.
         enable(Capability::CullFace);
         enable(Capability::Blend);
@@ -79,10 +77,6 @@ impl OpenGLState {
 
     pub fn upload_texture_atlas(&mut self, texture: &Image) {
         self.texture_atlas.set_texture(texture);
-    }
-
-    pub fn upload_font_atlas(&mut self, texture: &Image) {
-        self.texture_font.set_texture(texture);
     }
 
     pub fn batch_create(&mut self, desc: &BatchSettings) {
@@ -140,11 +134,9 @@ impl OpenGLState {
             if batch.desc.visible {
                 self.shader.ortho(&batch.matrix_full);
                 if batch.sprites.len() > 0 {
-                    self.shader.texture(TextureUnit::Atlas);
                     batch.sprites.draw();
                 }
                 if batch.strings.len() > 0 {
-                    self.shader.texture(TextureUnit::Font);
                     batch.strings.draw();
                 }
             }

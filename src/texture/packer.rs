@@ -1,10 +1,5 @@
-use crate::color::*;
-use crate::texture::image::*;
-use cgmath::*;
-use std::cmp::max;
-
 #[derive(Copy, Clone, Debug)]
-struct Rect {
+pub struct Rect {
     pub x: u32,
     pub y: u32,
     pub w: u32,
@@ -12,7 +7,7 @@ struct Rect {
 }
 
 impl Rect {
-    fn new(x: u32, y: u32, w: u32, h: u32) -> Rect {
+    pub fn new(x: u32, y: u32, w: u32, h: u32) -> Rect {
         Rect {
             x,
             y,
@@ -48,11 +43,6 @@ impl Rect {
             && self.top() <= other.top()
             && self.bottom() >= other.bottom()
     }
-
-    #[inline(always)]
-    fn contains_point(&self, x: u32, y: u32) -> bool {
-        self.left() <= x && self.right() >= x && self.top() <= y && self.bottom() >= y
-    }
 }
 
 struct Skyline {
@@ -73,28 +63,23 @@ impl Skyline {
     }
 }
 
-const MAX: u32 = 65536;
-const SIZE: u32 = 4096;
-pub(crate) const PIXEL_SIZE: u32 = MAX / SIZE;
-const PADDING: u32 = 0;
-
-struct SkylinePacker {
+pub struct Packer {
     border: Rect,
     // The skylines are sorted by their `x` position.
     skylines: Vec<Skyline>,
 }
 
-impl SkylinePacker {
-    fn new() -> SkylinePacker {
+impl Packer {
+    pub fn new(w: u32, h: u32) -> Packer {
         let mut skylines = Vec::new();
         skylines.push(Skyline {
             x: 0,
             y: 0,
-            w: SIZE,
+            w,
         });
 
-        SkylinePacker {
-            border: Rect::new(0, 0, SIZE, SIZE),
+        Packer {
+            border: Rect::new(0, 0, w, h),
             skylines,
         }
     }
@@ -104,7 +89,7 @@ impl SkylinePacker {
         let mut rect = Rect::new(self.skylines[i].x, 0, w, h);
         let mut width_left = rect.w;
         loop {
-            rect.y = max(rect.y, self.skylines[i].y);
+            rect.y = rect.y.max(self.skylines[i].y);
             // The source rect is too large.
             if !self.border.contains(&rect) {
                 return None;
@@ -186,46 +171,12 @@ impl SkylinePacker {
         }
     }
 
-    fn pack(&mut self, width: u32, height: u32) -> Rect {
-        if let Some((i, mut rect)) = self.find_skyline(width + PADDING, height + PADDING) {
+    pub fn pack(&mut self, width: u32, height: u32) -> Option<Rect> {
+        if let Some((i, rect)) = self.find_skyline(width, height) {
             self.split(i, &rect);
             self.merge();
-            rect.w -= PADDING;
-            rect.h -= PADDING;
-            rect
-        } else {
-            panic!("Unable to find space for the texture.");
+            return Some(rect);
         }
-    }
-}
-
-pub struct TexturePacker {
-    packer: SkylinePacker,
-    texture: Image,
-}
-
-impl TexturePacker {
-    pub fn new() -> TexturePacker {
-        TexturePacker {
-            packer: SkylinePacker::new(),
-            texture: Image::from_color(TRANSPARENT, SIZE, SIZE),
-        }
-    }
-
-    pub fn pack(&mut self, texture: &Image) -> Vector4<u16> {
-        let rect = self.packer.pack(texture.width(), texture.height());
-        self.texture.set_texture(rect.x, rect.y, texture);
-
-        // UV Layout: xmin xmax ymin ymax
-        Vector4::new(
-            (rect.x * PIXEL_SIZE) as u16,            // Left
-            ((rect.x + rect.w) * PIXEL_SIZE) as u16, // Right
-            (rect.y * PIXEL_SIZE) as u16,            // Top
-            ((rect.y + rect.h) * PIXEL_SIZE) as u16, // Bottom
-        )
-    }
-
-    pub fn export(&self) -> Image {
-        self.texture.clone()
+        None
     }
 }

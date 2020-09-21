@@ -1,6 +1,5 @@
-use crate::color::RGBA8;
 use crate::texture::formats;
-use crate::types::TextureFormat;
+use crate::{TextureFormat, RGBA8};
 use std::io::Read;
 
 #[derive(Clone, Debug)]

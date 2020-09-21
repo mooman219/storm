@@ -9,17 +9,15 @@ pub mod math;
 pub mod time;
 
 pub use crate::input::*;
-pub use crate::texture::*;
 pub use crate::types::*;
 
-mod font;
 mod input;
 mod render;
+mod text;
 mod texture;
 mod types;
 mod utility;
 
-use crate::color::RGBA8;
 use crate::render::{RenderClient, RenderServer};
 use crate::utility::{bounded_spsc, control, swap_spsc};
 use std::fs::File;
@@ -151,14 +149,15 @@ impl Engine {
     // Texture
     // ////////////////////////////////////////////////////////
 
-    // TODO: Non panicing API for texture loading.
-
     /// Loads a new texture from a given path. If there is an issue loading the texture, this
     /// function will panic.
-    pub fn texture_load<P: AsRef<Path>>(&mut self, path: P, format: TextureFormat) -> Texture {
-        let f = File::open(path).expect("Unable to open file to read path.");
-        let reader = BufReader::new(f);
-        self.render_client.texture_create(reader, format)
+    pub fn texture_load<P: AsRef<Path>>(&mut self, path: P, format: TextureFormat) -> Result<Texture, &str> {
+        if let Ok(f) = File::open(path) {
+            let reader = BufReader::new(f);
+            Ok(self.render_client.texture_create(reader, format))
+        } else {
+            Err("Unable to open file to read path.")
+        }
     }
 
     /// Loads a new texture from an in memory source. If there is an issue loading the texture, this

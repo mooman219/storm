@@ -63,10 +63,10 @@ in vec2 v_uv;
 in vec4 v_color;
 out vec4 a_color;
 
-uniform sampler2D tex;
+uniform sampler2D tex[1];
 
 void main() {
-    a_color = texture(tex, v_uv) * v_color;
+    a_color = texture(tex[0], v_uv) * v_color;
     if (a_color.a <= 0.0) {
         discard;
     }
@@ -83,7 +83,7 @@ impl TextureShader {
     pub fn new() -> TextureShader {
         let program = ShaderProgram::new(VERTEX, FRAGMENT);
         let uniform_ortho = program.get_uniform_location("ortho");
-        let uniform_texture = program.get_uniform_location("tex");
+        let uniform_texture = program.get_uniform_location("tex[0]");
         TextureShader {
             program,
             uniform_ortho,

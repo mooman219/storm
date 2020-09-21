@@ -79,7 +79,7 @@ impl OpenGLWindow {
     }
 
     pub fn set_title(&self, title: &str) {
-        (**self.inner).set_title(title);;
+        (**self.inner).set_title(title);
     }
 
     pub fn set_display_mode(&self, display_mode: DisplayMode) {

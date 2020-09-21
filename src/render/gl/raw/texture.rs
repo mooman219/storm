@@ -4,7 +4,6 @@ use std::os::raw::c_void;
 #[derive(Copy, Clone)]
 pub enum TextureUnit {
     Atlas = gl::TEXTURE0,
-    Font = gl::TEXTURE1,
 }
 
 #[repr(u32)]

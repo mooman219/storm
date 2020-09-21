@@ -43,7 +43,7 @@ const RAD_FULL: f32 = PI * 2f32;
 const DEG_FULL: f32 = 360f32;
 const RAD_INDEX: f32 = (SIN_COUNT as f32) / RAD_FULL;
 const DEG_INDEX: f32 = (SIN_COUNT as f32) / DEG_FULL;
-const SIZE: usize = (SIN_COUNT as usize);
+const SIZE: usize = SIN_COUNT as usize;
 
 /// Average error of 0.00060 radians.
 /// Largest error of 0.00229 radians.

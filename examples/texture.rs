@@ -22,10 +22,10 @@ fn game(mut engine: Engine) {
     let mut clock = Clock::new(144);
 
     let texture_1 = engine.texture_create(include_bytes!("resources/1.png").as_ref(), TextureFormat::PNG);
-    let texture_2 = engine.texture_load("./examples/resources/2.png", TextureFormat::PNG);
+    let texture_2 = engine.texture_load("./examples/resources/2.png", TextureFormat::PNG).unwrap();
     let texture_2 = texture_2.sub_texture(0, 0, 16, 16).unwrap();
 
-    engine.window_clear_color(storm::color::BLUE);
+    engine.window_clear_color(storm::colors::BLUE);
     let screen = engine.batch_create(&BatchSettings::default());
     let mut sprites = Vec::new();
     let mut sprite = Sprite::default();

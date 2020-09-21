@@ -1,12 +1,11 @@
-use crate::color::RGBA8;
 use crate::texture::*;
 use crate::types::*;
+use crate::RGBA8;
 
 pub struct RenderState {
     pub batches: Vec<BatchState>,
     pub batch_changes: Vec<BatchMessage>,
-    pub texture_atlas: Option<Image>,
-    pub font_atlas: Option<Image>,
+    pub atlas: Option<Image>,
     pub window: WindowState,
 }
 
@@ -15,8 +14,7 @@ impl Default for RenderState {
         RenderState {
             batches: Vec::new(),
             batch_changes: Vec::new(),
-            texture_atlas: None,
-            font_atlas: None,
+            atlas: None,
             window: WindowState::default(),
         }
     }
