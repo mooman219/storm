@@ -47,10 +47,4 @@ pub enum Vsync {
     Disabled,
     /// Vsync will be enabled.
     Enabled,
-    /// Adaptive vsync works the same as vsync, but if you've already missed the vertical retrace
-    /// for a given frame, it swaps buffers immediately, which might be less jarring for the user
-    /// during occasional framerate drops.
-    ///
-    /// If adaptive vsync isn't supported, this defaults to normal vsync.
-    Adaptive,
 }

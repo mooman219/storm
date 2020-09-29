@@ -1,89 +1,82 @@
-use crate::render::gl::raw::*;
+use crate::render::gl::raw::{AttributeType, OpenGL};
 use crate::types::*;
-use std::mem;
+use core::mem;
 
 pub trait VertexDescription {
     const VERTEX_SIZE: usize;
 
-    fn configure_vertex_attribute();
+    fn configure_vertex_attribute(gl: &OpenGL);
 }
 
 impl VertexDescription for Sprite {
     const VERTEX_SIZE: usize = mem::size_of::<Self>();
 
-    fn configure_vertex_attribute() {
+    fn configure_vertex_attribute(gl: &OpenGL) {
         let mut index = 0;
         let mut size = 0;
 
         // Position
-        enable_vertex_attrib_array(index);
-        vertex_attrib_divisor(index, 1);
-        vertex_attrib_pointer(
-            index,                    // Index
-            3,                        // Count
-            AttributeType::Float,     // Type
-            false,                    // Normalized
-            Self::VERTEX_SIZE as i32, // Stride
-            size as *const _,         // Offset
-        );
+        gl.enable_vertex_attrib_array(index);
+        gl.vertex_attrib_divisor(index, 1);
+        gl.vertex_attrib_pointer_f32(index, 3, AttributeType::Float, false, Self::VERTEX_SIZE as i32, size);
         index += 1;
-        size += 3 * 4; // Count * Bytes
+        size += 3 * 4;
 
         // Size
-        enable_vertex_attrib_array(index);
-        vertex_attrib_divisor(index, 1);
-        vertex_attrib_pointer(
-            index,                        // Index
-            2,                            // Count
-            AttributeType::UnsignedShort, // Type
-            true,                         // Normalized
-            Self::VERTEX_SIZE as i32,     // Stride
-            size as *const _,             // Offset
+        gl.enable_vertex_attrib_array(index);
+        gl.vertex_attrib_divisor(index, 1);
+        gl.vertex_attrib_pointer_f32(
+            index,
+            2,
+            AttributeType::UnsignedShort,
+            true,
+            Self::VERTEX_SIZE as i32,
+            size,
         );
         index += 1;
-        size += 2 * 2; // Count * Bytes
+        size += 2 * 2;
 
         // UV
-        enable_vertex_attrib_array(index);
-        vertex_attrib_divisor(index, 1);
-        vertex_attrib_pointer(
-            index,                        // Index
-            4,                            // Count
-            AttributeType::UnsignedShort, // Type
-            true,                         // Normalized
-            Self::VERTEX_SIZE as i32,     // Stride
-            size as *const _,             // Offset
+        gl.enable_vertex_attrib_array(index);
+        gl.vertex_attrib_divisor(index, 1);
+        gl.vertex_attrib_pointer_f32(
+            index,
+            4,
+            AttributeType::UnsignedShort,
+            true,
+            Self::VERTEX_SIZE as i32,
+            size,
         );
         index += 1;
-        size += 4 * 2; // Count * Bytes
+        size += 4 * 2;
 
         // RGBA8
-        enable_vertex_attrib_array(index);
-        vertex_attrib_divisor(index, 1);
-        vertex_attrib_pointer(
-            index,                       // Index
-            4,                           // Count
-            AttributeType::UnsignedByte, // Type
-            true,                        // Normalized
-            Self::VERTEX_SIZE as i32,    // Stride
-            size as *const _,            // Offset
+        gl.enable_vertex_attrib_array(index);
+        gl.vertex_attrib_divisor(index, 1);
+        gl.vertex_attrib_pointer_f32(
+            index,
+            4,
+            AttributeType::UnsignedByte,
+            true,
+            Self::VERTEX_SIZE as i32,
+            size,
         );
         index += 1;
-        size += 4 * 1; // Count * Bytes
+        size += 4 * 1;
 
         // Rotation
-        enable_vertex_attrib_array(index);
-        vertex_attrib_divisor(index, 1);
-        vertex_attrib_pointer(
-            index,                        // Index
-            1,                            // Count
-            AttributeType::UnsignedShort, // Type
-            true,                         // Normalized
-            Self::VERTEX_SIZE as i32,     // Stride
-            size as *const _,             // Offset
+        gl.enable_vertex_attrib_array(index);
+        gl.vertex_attrib_divisor(index, 1);
+        gl.vertex_attrib_pointer_f32(
+            index,
+            1,
+            AttributeType::UnsignedShort,
+            true,
+            Self::VERTEX_SIZE as i32,
+            size,
         );
         //index += 1;
-        // size += 1 * 2; // Count * Bytes
+        // size += 1 * 2;
         // warn!("{}, {}", size, std::mem::size_of::<Sprite>()); // DEBUG
     }
 }

@@ -21,15 +21,13 @@ default-target = "x86_64-pc-windows-msvc"
 maintenance = { status = "experimental" }
 
 [dependencies]
-gl = "0.13"
-beryllium = "0.0.17"
+glutin = "0.24"
+glow = "0.6"
 cgmath = "0.17"
 log = "0.4.7"
 png = "0.14"
 hashbrown = "0.5"
-# fontdue = "0.0.4"
 fontdue = { path = "../fontdue2" }
-rusttype = "0.7.7"
 unicode-normalization = "0.1.8"
 
 [dev-dependencies]

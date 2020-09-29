@@ -52,8 +52,8 @@ impl Image {
         self.height
     }
 
-    pub fn as_ptr(&self) -> *const RGBA8 {
-        self.pixels.as_ptr()
+    pub fn as_slice(&self) -> &[RGBA8] {
+        self.pixels.as_slice()
     }
 
     pub fn get(&self, x: u32, y: u32) -> RGBA8 {

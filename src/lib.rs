@@ -39,8 +39,8 @@ impl Engine {
     pub fn start(desc: WindowSettings, mut game_loop: impl FnMut(Engine) + Send + 'static) {
         info!("Engine started.");
 
-        // Init SDL2
-        let sdl = beryllium::init().expect("Unable to init beryllium (SDL).");
+        // Init winit
+        let event_loop = glutin::event_loop::EventLoop::new();
 
         // Inter-thread messaging.
         let (render_producer_pipe, render_consumer_pipe) = swap_spsc::make();
@@ -48,7 +48,7 @@ impl Engine {
         let (engine_watcher, engine_probe) = control::make_probe();
 
         // Rendering and input
-        let mut render_server = RenderServer::new(&desc, &sdl, render_consumer_pipe);
+        let mut render_server = RenderServer::new(&desc, &event_loop, render_consumer_pipe);
         let mut input_server = InputServer::new(input_producer_pipe);
 
         thread::spawn(move || {
@@ -62,11 +62,29 @@ impl Engine {
             engine_probe.finalize();
         });
 
-        while engine_watcher.alive() {
-            render_server.tick();
-            input_server.tick(&sdl);
-            thread::sleep(time::MICROSECOND);
-        }
+        event_loop.run(move |event, _, control_flow| {
+            use glutin::event::Event;
+            use glutin::event_loop::ControlFlow;
+            *control_flow = ControlFlow::Poll;
+            match event {
+                Event::WindowEvent {
+                    window_id,
+                    event,
+                } => {}
+                Event::DeviceEvent {
+                    device_id,
+                    event,
+                } => {}
+                Event::MainEventsCleared => {
+                    render_server.tick();
+                }
+                Event::LoopDestroyed => {}
+                _ => {}
+            }
+            if !engine_watcher.alive() {
+                *control_flow = ControlFlow::Exit;
+            }
+        });
     }
 
     // ////////////////////////////////////////////////////////

@@ -1,4 +1,4 @@
-use crate::render::gl::raw::*;
+use crate::render::gl::raw::{resource, OpenGL, TextureUnit};
 use crate::render::gl::shader::shader_program::*;
 use cgmath::*;
 
@@ -74,17 +74,19 @@ void main() {
 "#;
 
 pub struct TextureShader {
+    gl: OpenGL,
     program: ShaderProgram,
-    uniform_ortho: i32,
-    uniform_texture: i32,
+    uniform_ortho: resource::UniformLocation,
+    uniform_texture: resource::UniformLocation,
 }
 
 impl TextureShader {
-    pub fn new() -> TextureShader {
-        let program = ShaderProgram::new(VERTEX, FRAGMENT);
+    pub fn new(gl: OpenGL) -> TextureShader {
+        let program = ShaderProgram::new(gl.clone(), VERTEX, FRAGMENT);
         let uniform_ortho = program.get_uniform_location("ortho");
         let uniform_texture = program.get_uniform_location("tex[0]");
         TextureShader {
+            gl,
             program,
             uniform_ortho,
             uniform_texture,
@@ -97,12 +99,12 @@ impl TextureShader {
 
     /// Updates the ortho uniform in the shader.
     pub fn ortho(&self, matrix: &Matrix4<f32>) {
-        uniform_matrix_4fv(self.uniform_ortho, 1, false, matrix.as_ptr());
+        self.gl.uniform_matrix_4fv(Some(&self.uniform_ortho), false, matrix.as_ref());
     }
 
     /// Updates the texture uniform in the shader.
     pub fn texture(&self, unit: TextureUnit) {
         let unit = (unit as u32 - TextureUnit::Atlas as u32) as i32;
-        uniform_1i(self.uniform_texture, unit);
+        self.gl.uniform_1i(Some(&self.uniform_texture), unit);
     }
 }

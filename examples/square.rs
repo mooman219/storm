@@ -37,12 +37,12 @@ fn game(mut engine: Engine) {
     // Add all the strings we want to draw to a vec.
     let mut strings = Vec::new();
     let mut text = Text::default();
-    text.set_string("Rasterized with Fontdue. oagc");
+    text.set_string("Hello world!");
     text.pos.x = -200.0;
     text.pos.z = 1.0;
     text.pos.y = 200.0;
     text.max_width = Some(500.0);
-    text.scale = 20;
+    text.scale = 50;
     text.color = colors::BLACK;
     strings.push(text);
     // Assign the strings we want to draw to a batch.

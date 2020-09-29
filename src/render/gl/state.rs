@@ -1,11 +1,12 @@
 use crate::render::gl::buffer::*;
-use crate::render::gl::raw::*;
+use crate::render::gl::raw::{
+    BlendFactor, BufferBindingTarget, Capability, ClearBit, CullFace, DepthTest, OpenGL, TextureUnit,
+};
 use crate::render::gl::shader::*;
 use crate::render::gl::texture_handle::*;
 use crate::render::gl::window::*;
 use crate::texture::*;
 use crate::types::*;
-use beryllium::SDLToken;
 use cgmath::*;
 
 struct Batch {
@@ -18,6 +19,7 @@ struct Batch {
 
 pub struct OpenGLState {
     window: OpenGLWindow,
+    gl: OpenGL,
     shader: TextureShader,
     texture_atlas: TextureHandle,
     batches: Vec<Batch>,
@@ -32,13 +34,17 @@ fn matrix_from_bounds(bounds: &Vector2<f32>) -> Matrix4<f32> {
 }
 
 impl OpenGLState {
-    pub fn new(desc: &WindowSettings, sdl: &SDLToken) -> OpenGLState {
-        let window = OpenGLWindow::new(desc, sdl);
+    pub fn new(desc: &WindowSettings, event_loop: &glutin::event_loop::EventLoop<()>) -> OpenGLState {
+        let (window, gl) = OpenGLWindow::new(desc, event_loop);
+        let gl = OpenGL::new(gl);
         let logical_size = window.logical_size();
+        let shader = TextureShader::new(gl.clone());
+        let texture_atlas = TextureHandle::new(gl.clone(), TextureUnit::Atlas);
         let state = OpenGLState {
             window,
-            shader: TextureShader::new(),
-            texture_atlas: TextureHandle::new(TextureUnit::Atlas),
+            gl,
+            shader,
+            texture_atlas,
             batches: Vec::new(),
             matrix_bounds: matrix_from_bounds(&logical_size),
             current_logical_size: Vector2::zero(),
@@ -47,13 +53,13 @@ impl OpenGLState {
         state.shader.bind();
         state.shader.texture(TextureUnit::Atlas);
         // Setup cabilities.
-        enable(Capability::CullFace);
-        enable(Capability::Blend);
-        enable(Capability::DepthTest);
-        clear_color(0.0, 0.0, 0.0, 1.0);
-        depth_func(DepthTest::Less);
-        blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
-        cull_face(CullFace::Back);
+        state.gl.enable(Capability::CullFace);
+        state.gl.enable(Capability::Blend);
+        state.gl.enable(Capability::DepthTest);
+        state.gl.clear_color(0.0, 0.0, 0.0, 1.0);
+        state.gl.depth_func(DepthTest::Less);
+        state.gl.blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
+        state.gl.cull_face(CullFace::Back);
         // State is setup.
         state
     }
@@ -64,7 +70,7 @@ impl OpenGLState {
 
     pub fn window_clear_color(&mut self, color: RGBA8) {
         let color: Vector4<f32> = color.into();
-        clear_color(color.x, color.y, color.z, color.w);
+        self.gl.clear_color(color.x, color.y, color.z, color.w);
     }
 
     pub fn window_display_mode(&self, display_mode: DisplayMode) {
@@ -84,8 +90,8 @@ impl OpenGLState {
         let matrix_full = self.matrix_bounds * matrix_transform;
         self.batches.push(Batch {
             desc: *desc,
-            sprites: Buffer::new(BufferBindingTarget::ArrayBuffer),
-            strings: Buffer::new(BufferBindingTarget::ArrayBuffer),
+            sprites: Buffer::new(self.gl.clone(), BufferBindingTarget::ArrayBuffer),
+            strings: Buffer::new(self.gl.clone(), BufferBindingTarget::ArrayBuffer),
             matrix_transform,
             matrix_full,
         });
@@ -119,7 +125,7 @@ impl OpenGLState {
             let new_physical_size = self.window.physical_size();
             info!("Window resized {:?}", new_physical_size);
             self.current_logical_size = new_logical_size;
-            viewport(0, 0, new_physical_size.x as i32, new_physical_size.y as i32);
+            self.gl.viewport(0, 0, new_physical_size.x as i32, new_physical_size.y as i32);
             self.matrix_bounds = matrix_from_bounds(&new_logical_size);
             for batch in &mut self.batches {
                 batch.matrix_full = self.matrix_bounds * batch.matrix_transform;
@@ -129,7 +135,7 @@ impl OpenGLState {
 
     pub fn draw(&mut self) {
         self.resize();
-        clear(ClearBit::ColorBuffer | ClearBit::DepthBuffer);
+        self.gl.clear(ClearBit::ColorBuffer | ClearBit::DepthBuffer);
         for batch in &mut self.batches {
             if batch.desc.visible {
                 self.shader.ortho(&batch.matrix_full);

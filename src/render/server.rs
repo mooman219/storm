@@ -3,7 +3,6 @@ use crate::render::message::*;
 use crate::time::*;
 use crate::types::WindowSettings;
 use crate::utility::swap_spsc;
-use beryllium::SDLToken;
 
 pub struct RenderServer {
     render_consumer: swap_spsc::Consumer<RenderState>,
@@ -14,12 +13,12 @@ pub struct RenderServer {
 impl RenderServer {
     pub fn new(
         desc: &WindowSettings,
-        sdl: &SDLToken,
+        event_loop: &glutin::event_loop::EventLoop<()>,
         render_consumer: swap_spsc::Consumer<RenderState>,
     ) -> RenderServer {
         RenderServer {
             render_consumer,
-            state: OpenGLState::new(desc, sdl),
+            state: OpenGLState::new(desc, event_loop),
             timer_render: Timer::new("[R] Frame"),
         }
     }
