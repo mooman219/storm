@@ -20,6 +20,8 @@ mod utility;
 
 use crate::render::{RenderClient, RenderServer};
 use crate::utility::{bounded_spsc, control, swap_spsc};
+use glutin::event::Event;
+use glutin::event_loop::ControlFlow;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::Read;
@@ -31,6 +33,14 @@ use std::thread;
 pub struct Engine {
     render_client: RenderClient,
     input_client: InputClient,
+}
+
+trait Program {
+    fn create(engine: &mut Engine) -> Self;
+
+    fn input(&mut self, event: InputMessage, engine: &mut Engine);
+
+    fn update(&mut self, engine: &mut Engine);
 }
 
 impl Engine {
@@ -49,7 +59,7 @@ impl Engine {
 
         // Rendering and input
         let mut render_server = RenderServer::new(&desc, &event_loop, render_consumer_pipe);
-        let mut input_server = InputServer::new(input_producer_pipe);
+        let mut input_server = InputServer::new(input_producer_pipe, desc);
 
         thread::spawn(move || {
             let engine = Engine {
@@ -63,22 +73,21 @@ impl Engine {
         });
 
         event_loop.run(move |event, _, control_flow| {
-            use glutin::event::Event;
-            use glutin::event_loop::ControlFlow;
             *control_flow = ControlFlow::Poll;
             match event {
                 Event::WindowEvent {
-                    window_id,
                     event,
-                } => {}
-                Event::DeviceEvent {
-                    device_id,
-                    event,
-                } => {}
+                    ..
+                } => {
+                    input_server.push(event);
+                }
                 Event::MainEventsCleared => {
+                    input_server.finalize();
                     render_server.tick();
                 }
-                Event::LoopDestroyed => {}
+                Event::LoopDestroyed => {
+                    return;
+                }
                 _ => {}
             }
             if !engine_watcher.alive() {

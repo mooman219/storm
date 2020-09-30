@@ -4,8 +4,8 @@ use crate::texture::*;
 use crate::types::*;
 use crate::utility::swap_spsc;
 use crate::utility::unordered_tracker::*;
+use core::ptr;
 use std::io::Read;
-use std::ptr;
 
 pub struct RenderClient {
     render_producer: swap_spsc::Producer<RenderState>,

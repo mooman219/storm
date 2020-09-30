@@ -40,10 +40,7 @@ fn game(mut engine: Engine) {
 
     let mut is_active = true;
     let mut is_dragging = false;
-
-    let mut timer = storm::time::Timer::new("New thread");
     while is_active {
-        timer.start();
         while let Some(message) = engine.input_poll() {
             match message {
                 InputMessage::CloseRequested => is_active = false,
@@ -94,7 +91,6 @@ fn game(mut engine: Engine) {
 
         engine.window_commit();
         clock.tick();
-        timer.stop()
     }
 }
 

@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Key<T> {

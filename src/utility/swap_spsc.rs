@@ -1,4 +1,4 @@
-use std::mem;
+use core::mem;
 use std::sync::atomic::{AtomicBool, AtomicPtr, Ordering};
 use std::sync::Arc;
 

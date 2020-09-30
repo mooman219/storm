@@ -1,4 +1,5 @@
 use crate::input::message::*;
+use crate::types::WindowSettings;
 use crate::utility::bounded_spsc;
 use cgmath::prelude::*;
 use cgmath::*;
@@ -18,7 +19,7 @@ pub struct InputServer {
 }
 
 impl InputServer {
-    pub fn new(input_producer: bounded_spsc::Producer<InputMessage>) -> InputServer {
+    pub fn new(input_producer: bounded_spsc::Producer<InputMessage>, _: WindowSettings) -> InputServer {
         InputServer {
             input_producer,
             last_cursor_pos: Vector2::zero(),
@@ -31,67 +32,60 @@ impl InputServer {
     pub fn push(&mut self, event: WindowEvent) {
         match event {
             // Window
-            // Event::WindowClosed {
-            //     ..
-            // } => {
-            //     self.input_producer.push(InputMessage::CloseRequested);
-            // }
-            // Event::WindowSizeChanged {
-            //     width,
-            //     height,
-            //     ..
-            // } => {
-            //     self.window_size = Vector2::new(width as f32, height as f32);
-            // }
+            WindowEvent::CloseRequested {} => {
+                self.input_producer.push(InputMessage::CloseRequested);
+            }
+            WindowEvent::Resized(size) => {
+                self.window_size = Vector2::new(size.width as f32, size.height as f32);
+            }
 
-            // // Keyboard
-            // Event::Keyboard {
-            //     is_key_down,
-            //     repeat_count,
-            //     key_info,
-            //     ..
-            // } => {
-            //     if repeat_count == 0 {
-            //         if let Some(keycode) = key_info.keycode {
-            //             if is_key_down {
-            //                 self.input_producer.push(InputMessage::KeyPressed(keycode));
-            //             } else {
-            //                 self.input_producer.push(InputMessage::KeyReleased(keycode));
-            //             }
-            //         }
-            //     }
-            // }
+            // Keyboard
+            WindowEvent::KeyboardInput {
+                input,
+                ..
+            } => {
+                if let Some(keycode) = input.virtual_keycode {
+                    println!("{:?}", input);
+                    match input.state {
+                        glutin::event::ElementState::Pressed => {
+                            self.input_producer.push(InputMessage::KeyPressed(keycode))
+                        }
+                        glutin::event::ElementState::Released => {
+                            self.input_producer.push(InputMessage::KeyReleased(keycode))
+                        }
+                    }
+                }
+            }
 
-            // // Cursor
-            // Event::MouseMotion {
-            //     x,
-            //     y,
-            //     ..
-            // } => {
-            //     self.cursor_pos =
-            //         Vector2::new(x as f32 - self.window_size.x / 2.0, -y as f32 + self.window_size.y / 2.0);
-            // }
-            // Event::MouseWheel {
-            //     mut x,
-            //     mut y,
-            //     is_flipped,
-            //     ..
-            // } => {
-            //     if is_flipped {
-            //         x *= -1;
-            //         y *= -1;
-            //     }
-            //     if x < 0 {
-            //         self.input_producer.push(InputMessage::CursorScroll(ScrollDirection::Left));
-            //     } else if x > 0 {
-            //         self.input_producer.push(InputMessage::CursorScroll(ScrollDirection::Right));
-            //     }
-            //     if y < 0 {
-            //         self.input_producer.push(InputMessage::CursorScroll(ScrollDirection::Down));
-            //     } else if y > 0 {
-            //         self.input_producer.push(InputMessage::CursorScroll(ScrollDirection::Up));
-            //     }
-            // }
+            // Cursor
+            WindowEvent::CursorMoved {
+                position,
+                ..
+            } => {
+                self.cursor_pos = Vector2::new(
+                    position.x as f32 - (self.window_size.x / 2.0),
+                    -position.y as f32 + (self.window_size.y / 2.0),
+                );
+            }
+            WindowEvent::MouseWheel {
+                delta,
+                ..
+            } => {
+                let (x, y) = match delta {
+                    glutin::event::MouseScrollDelta::LineDelta(x, y) => (x, y),
+                    glutin::event::MouseScrollDelta::PixelDelta(pos) => (pos.x as f32, pos.y as f32),
+                };
+                if x < 0.0 {
+                    self.input_producer.push(InputMessage::CursorScroll(ScrollDirection::Left));
+                } else if x > 0.0 {
+                    self.input_producer.push(InputMessage::CursorScroll(ScrollDirection::Right));
+                }
+                if y < 0.0 {
+                    self.input_producer.push(InputMessage::CursorScroll(ScrollDirection::Down));
+                } else if y > 0.0 {
+                    self.input_producer.push(InputMessage::CursorScroll(ScrollDirection::Up));
+                }
+            }
             WindowEvent::MouseInput {
                 state,
                 button,

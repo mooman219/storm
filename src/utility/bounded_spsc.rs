@@ -1,10 +1,10 @@
 use core::alloc::Layout;
+use core::usize;
 use core::{mem, ptr};
 use std::alloc;
 use std::cell::Cell;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::usize;
 
 const CACHELINE_LEN: usize = 64;
 

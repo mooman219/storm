@@ -1,6 +1,6 @@
 use crate::render::gl::raw::{resource, OpenGL};
 use crate::render::gl::vertex::*;
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
 pub struct VertexArray<T: VertexDescription> {
     gl: OpenGL,
@@ -27,7 +27,6 @@ impl<T: VertexDescription> VertexArray<T> {
 
 impl<'a, T: VertexDescription> Drop for VertexArray<T> {
     fn drop(&mut self) {
-        warn!("Dropping vertex array.");
         self.gl.delete_vertex_array(self.vao);
     }
 }
