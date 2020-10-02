@@ -39,10 +39,10 @@ impl TextureAtlas {
         }
     }
 
-    pub fn sync(&mut self) -> Option<Image> {
+    pub fn sync(&mut self) -> Option<&Image> {
         if self.dirty {
             self.dirty = false;
-            Some(self.atlas.clone())
+            Some(&self.atlas)
         } else {
             None
         }

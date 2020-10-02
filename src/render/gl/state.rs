@@ -36,6 +36,7 @@ fn matrix_from_bounds(bounds: &Vector2<f32>) -> Matrix4<f32> {
 impl OpenGLState {
     pub fn new(desc: &WindowSettings, event_loop: &glutin::event_loop::EventLoop<()>) -> OpenGLState {
         let (window, gl) = OpenGLWindow::new(desc, event_loop);
+        let current_logical_size = window.logical_size();
         let gl = OpenGL::new(gl);
         let logical_size = window.logical_size();
         let shader = TextureShader::new(gl.clone());
@@ -47,7 +48,7 @@ impl OpenGLState {
             texture_atlas,
             batches: Vec::new(),
             matrix_bounds: matrix_from_bounds(&logical_size),
-            current_logical_size: Vector2::zero(),
+            current_logical_size,
         };
         // Bind shader once.
         state.shader.bind();
@@ -64,6 +65,10 @@ impl OpenGLState {
         state
     }
 
+    pub fn current_logical_size(&self) -> Vector2<f32> {
+        self.current_logical_size
+    }
+
     pub fn window_title(&mut self, title: &str) {
         self.window.set_title(title);
     }
@@ -73,7 +78,7 @@ impl OpenGLState {
         self.gl.clear_color(color.x, color.y, color.z, color.w);
     }
 
-    pub fn window_display_mode(&self, display_mode: DisplayMode) {
+    pub fn window_display_mode(&mut self, display_mode: DisplayMode) {
         self.window.set_display_mode(display_mode);
     }
 
@@ -123,7 +128,7 @@ impl OpenGLState {
         let new_logical_size = self.window.logical_size();
         if self.current_logical_size != new_logical_size {
             let new_physical_size = self.window.physical_size();
-            info!("Window resized {:?}", new_physical_size);
+            trace!("Window resized {:?}", new_physical_size);
             self.current_logical_size = new_logical_size;
             self.gl.viewport(0, 0, new_physical_size.x as i32, new_physical_size.y as i32);
             self.matrix_bounds = matrix_from_bounds(&new_logical_size);
