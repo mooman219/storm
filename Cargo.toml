@@ -11,7 +11,7 @@ repository = "https://github.com/mooman219/storm"
 keywords = ["game", "engine", "2D", "graphics"]
 categories = ["game-engines"]
 edition = "2018"
-exclude = ["examples_old/**", "examples/**"]
+exclude = ["examples_older/**", "examples_old/**", "examples/**"]
 
 # This forces docs.rs to build us on windows, which has the simplest build for docs.rs to perform.
 [package.metadata.docs.rs]
@@ -21,13 +21,14 @@ default-target = "x86_64-pc-windows-msvc"
 maintenance = { status = "experimental" }
 
 [dependencies]
-glutin = "0.24"
+glutin = "0.25"
 glow = "0.6"
 cgmath = "0.17"
 log = "0.4.7"
 png = "0.14"
 hashbrown = "0.5"
-fontdue = { path = "../fontdue2" }
+# fontdue = "0.4"
+fontdue = { path = "../fontdue" }
 unicode-normalization = "0.1.8"
 
 [dev-dependencies]

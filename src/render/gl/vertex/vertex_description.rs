@@ -77,6 +77,6 @@ impl VertexDescription for Sprite {
         );
         //index += 1;
         // size += 1 * 2;
-        // warn!("{}, {}", size, std::mem::size_of::<Sprite>()); // DEBUG
+        // warn!("{}, {}", size, core::mem::size_of::<Sprite>()); // DEBUG
     }
 }

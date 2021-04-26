@@ -2,7 +2,7 @@ mod message;
 
 pub use crate::input::message::*;
 
-use crate::{Engine, Program};
+use crate::Engine;
 use cgmath::prelude::*;
 use cgmath::*;
 use glutin::event::WindowEvent;
@@ -20,16 +20,24 @@ impl InputConverter {
         }
     }
 
-    pub fn push(&mut self, event: WindowEvent, program: &mut impl Program, engine: &mut Engine) {
+    pub fn push<T: 'static + FnMut(InputMessage, &mut Engine)>(
+        &mut self,
+        event: WindowEvent,
+        event_handler: &mut T,
+        engine: &mut Engine,
+    ) {
         match event {
             // Window
-            WindowEvent::CloseRequested => program.input(InputMessage::CloseRequested, engine),
+            WindowEvent::CloseRequested => event_handler(InputMessage::CloseRequested, engine),
             WindowEvent::Resized(size) => {
                 self.window_size = Vector2::new(size.width as f32, size.height as f32);
-                program.input(InputMessage::WindowResized(self.window_size), engine);
+                event_handler(InputMessage::WindowResized(self.window_size), engine);
             }
 
             // Keyboard
+            WindowEvent::ReceivedCharacter(char) => {
+                event_handler(InputMessage::ReceivedCharacter(char), engine);
+            }
             WindowEvent::KeyboardInput {
                 input,
                 ..
@@ -37,10 +45,10 @@ impl InputConverter {
                 if let Some(keycode) = input.virtual_keycode {
                     match input.state {
                         glutin::event::ElementState::Pressed => {
-                            program.input(InputMessage::KeyPressed(keycode), engine);
+                            event_handler(InputMessage::KeyPressed(keycode), engine);
                         }
                         glutin::event::ElementState::Released => {
-                            program.input(InputMessage::KeyReleased(keycode), engine);
+                            event_handler(InputMessage::KeyReleased(keycode), engine);
                         }
                     }
                 }
@@ -57,7 +65,7 @@ impl InputConverter {
                 );
                 let delta = cursor_pos - self.cursor_pos;
                 self.cursor_pos = cursor_pos;
-                program.input(
+                event_handler(
                     InputMessage::CursorMoved {
                         pos: self.cursor_pos,
                         delta,
@@ -74,14 +82,14 @@ impl InputConverter {
                     glutin::event::MouseScrollDelta::PixelDelta(pos) => (pos.x as f32, pos.y as f32),
                 };
                 if x < 0.0 {
-                    program.input(InputMessage::CursorScroll(ScrollDirection::Left), engine);
+                    event_handler(InputMessage::CursorScroll(ScrollDirection::Left), engine);
                 } else if x > 0.0 {
-                    program.input(InputMessage::CursorScroll(ScrollDirection::Right), engine);
+                    event_handler(InputMessage::CursorScroll(ScrollDirection::Right), engine);
                 }
                 if y < 0.0 {
-                    program.input(InputMessage::CursorScroll(ScrollDirection::Down), engine);
+                    event_handler(InputMessage::CursorScroll(ScrollDirection::Down), engine);
                 } else if y > 0.0 {
-                    program.input(InputMessage::CursorScroll(ScrollDirection::Up), engine);
+                    event_handler(InputMessage::CursorScroll(ScrollDirection::Up), engine);
                 }
             }
             WindowEvent::MouseInput {
@@ -90,7 +98,7 @@ impl InputConverter {
                 ..
             } => match state {
                 glutin::event::ElementState::Pressed => {
-                    program.input(
+                    event_handler(
                         InputMessage::CursorPressed {
                             button,
                             pos: self.cursor_pos,
@@ -99,7 +107,7 @@ impl InputConverter {
                     );
                 }
                 glutin::event::ElementState::Released => {
-                    program.input(
+                    event_handler(
                         InputMessage::CursorReleased {
                             button,
                             pos: self.cursor_pos,
@@ -111,12 +119,12 @@ impl InputConverter {
             WindowEvent::CursorEntered {
                 ..
             } => {
-                program.input(InputMessage::CursorEntered, engine);
+                event_handler(InputMessage::CursorEntered, engine);
             }
             WindowEvent::CursorLeft {
                 ..
             } => {
-                program.input(InputMessage::CursorLeft, engine);
+                event_handler(InputMessage::CursorLeft, engine);
             }
             _ => {}
         }

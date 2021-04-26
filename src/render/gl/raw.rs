@@ -415,7 +415,7 @@ pub mod resource {
     pub type TransformFeedback = glow::TransformFeedback;
 }
 
-use std::rc::Rc;
+use alloc::rc::Rc;
 pub struct OpenGL {
     gl: Rc<glow::Context>,
 }
@@ -578,7 +578,16 @@ impl OpenGL {
             let len = core::mem::size_of::<T>() * data.len();
             let ptr = data.as_ptr() as *const u8;
             let slice = core::slice::from_raw_parts(ptr, len);
-            self.gl.buffer_data_u8_slice(target as u32, slice, usage as u32)
+            self.gl.buffer_data_u8_slice(target as u32, slice, usage as u32);
+        };
+    }
+
+    pub fn buffer_sub_data<T: Sized>(&self, target: BufferBindingTarget, data: &[T]) {
+        unsafe {
+            let len = core::mem::size_of::<T>() * data.len();
+            let ptr = data.as_ptr() as *const u8;
+            let slice = core::slice::from_raw_parts(ptr, len);
+            self.gl.buffer_sub_data_u8_slice(target as u32, 0, slice);
         };
     }
 

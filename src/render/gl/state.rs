@@ -69,13 +69,13 @@ impl OpenGLState {
         self.current_logical_size
     }
 
-    pub fn window_title(&mut self, title: &str) {
-        self.window.set_title(title);
-    }
-
-    pub fn window_clear_color(&mut self, color: RGBA8) {
+    pub fn clear_color(&mut self, color: RGBA8) {
         let color: Vector4<f32> = color.into();
         self.gl.clear_color(color.x, color.y, color.z, color.w);
+    }
+
+    pub fn window_title(&mut self, title: &str) {
+        self.window.set_title(title);
     }
 
     pub fn window_display_mode(&mut self, display_mode: DisplayMode) {
@@ -147,6 +147,7 @@ impl OpenGLState {
                 if batch.sprites.len() > 0 {
                     batch.sprites.draw();
                 }
+                self.gl.clear(ClearBit::DepthBuffer);
                 if batch.strings.len() > 0 {
                     batch.strings.draw();
                 }

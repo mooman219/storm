@@ -1,5 +1,17 @@
+use crate::types::Sprite;
 use crate::utility::unordered_tracker::*;
 use cgmath::*;
+
+pub struct Batch {
+    pub translation: Vector2<f32>,
+    pub scale: f32,
+    pub rotation: f32,
+    pub visible: bool,
+    pub sprites: Vec<Sprite>,
+    // private member
+}
+
+impl Batch {}
 
 /// Token to reference a batch with.
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -51,6 +63,6 @@ impl BatchSettings {
     pub fn transform_matrix(&self) -> Matrix4<f32> {
         Matrix4::from_scale(self.scale)
             * Matrix4::from_translation(self.translation.extend(0.0))
-            * Matrix4::from_angle_z(Rad(std::f32::consts::PI * 2.0 * self.rotation))
+            * Matrix4::from_angle_z(Rad(core::f32::consts::PI * 2.0 * self.rotation))
     }
 }

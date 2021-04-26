@@ -10,6 +10,8 @@ pub use glutin::event::VirtualKeyCode as KeyboardButton;
 pub enum InputMessage {
     /// The window has requested it close.
     CloseRequested,
+    /// Received a character.
+    ReceivedCharacter(char),
     /// Keyboard press event.
     KeyPressed(KeyboardButton),
     /// Keyboard release event.
@@ -44,6 +46,8 @@ pub enum InputMessage {
     CursorEntered,
     /// Window resized event. Contains the new dimensions of the window.
     WindowResized(Vector2<f32>),
+    /// There are no more input events to handle.
+    MainEventsCleared,
 }
 
 /// A cursor wheel movement. Some mice have left and right scroll options.

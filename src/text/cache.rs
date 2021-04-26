@@ -1,7 +1,9 @@
 use crate::texture::*;
 use crate::*;
 use cgmath::*;
-use fontdue::layout::{GlyphRasterConfig, HorizontalAlign, Layout, LayoutSettings, TextStyle, VerticalAlign};
+use fontdue::layout::{
+    CoordinateSystem, GlyphRasterConfig, HorizontalAlign, Layout, LayoutSettings, TextStyle, VerticalAlign,
+};
 use fontdue::{Font, FontSettings};
 use hashbrown::HashMap;
 use std::fs::File;
@@ -16,6 +18,7 @@ struct CharCacheValue {
 
 pub struct TextCache {
     cache: HashMap<GlyphRasterConfig, CharCacheValue>,
+    layout: Layout,
     fonts: Vec<Font>,
     dirty: bool,
 }
@@ -24,6 +27,7 @@ impl TextCache {
     pub fn new() -> TextCache {
         let mut manager = TextCache {
             cache: HashMap::new(),
+            layout: Layout::new(CoordinateSystem::PositiveYUp),
             fonts: Vec::new(),
             dirty: true,
         };
@@ -34,7 +38,7 @@ impl TextCache {
     pub fn add_font_bytes(&mut self, bytes: &[u8]) -> usize {
         let index = self.fonts.len();
         let settings = FontSettings {
-            scale: 20.0,
+            scale: 50.0,
             ..FontSettings::default()
         };
         self.fonts.push(Font::from_bytes(bytes, settings).expect("Unable to parse font."));
@@ -51,10 +55,9 @@ impl TextCache {
     }
 
     pub fn rasterize(&mut self, atlas: &mut TextureAtlas, desc: &Text, quads: &mut Vec<Sprite>) {
-        let mut layout = Layout::new();
         let font_index = desc.font.key();
         let font = &self.fonts[font_index];
-        let settings = LayoutSettings {
+        self.layout.reset(&LayoutSettings {
             x: desc.pos.x,
             y: desc.pos.y,
             max_width: desc.max_width,
@@ -62,12 +65,14 @@ impl TextCache {
             horizontal_align: HorizontalAlign::Center,
             vertical_align: VerticalAlign::Middle,
             ..LayoutSettings::default()
-        };
-        let styles = &[&TextStyle::new(&desc.string, desc.scale as f32, font_index)];
+        });
+        let style = TextStyle::new(&desc.string, desc.scale as f32, font_index);
+        self.layout.append(self.fonts.as_slice(), &style);
 
-        let mut positions = Vec::new();
-        layout.layout_horizontal(self.fonts.as_slice(), styles, &settings, &mut positions);
-        for &position in &positions {
+        for &position in self.layout.glyphs() {
+            if position.width == 0 {
+                continue;
+            }
             let value = match self.cache.get(&position.key).copied() {
                 Some(value) => value,
                 None => {

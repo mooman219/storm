@@ -4,7 +4,7 @@ use storm::*;
 
 /// Run with: cargo run --example square --release
 fn main() {
-    simple_logger::init().unwrap();
+    simple_logger::SimpleLogger::new().init().expect("Unable to init logger");
     // Create the engine context and describe the window.
     Engine::start(
         WindowSettings {
@@ -16,56 +16,95 @@ fn main() {
             },
             vsync: Vsync::Disabled,
         },
-        game,
+        run,
     );
 }
 
-fn game(mut engine: Engine) {
-    // Tick at 144 ticks per second.
+fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
     let mut clock = Clock::new(144);
+    let mut is_dragging = false;
     // Create a batch to draw on. Batches persist between engine.window_commit()'s.
-    let screen = engine.batch_create(&BatchSettings::default());
-
+    let mut screen_settings = BatchSettings {
+        ..BatchSettings::default()
+    };
+    let screen = engine.render.batch_create(&screen_settings);
     let mut sprites = Vec::new();
     sprites.push(Sprite {
-        pos: Vector3::new(-200.0, -300.0, 0.0),
+        pos: Vector3::new(600.0, 0.0, 0.0),
         size: Vector2::new(500, 500),
-        color: colors::WHITE,
+        color: colors::BLACK,
         ..Sprite::default()
     });
-    engine.sprite_set(&screen, &sprites);
+    engine.render.sprite_set(&screen, &sprites);
     // Add all the strings we want to draw to a vec.
+    let mut message = String::from("> ");
     let mut strings = Vec::new();
     let mut text = Text::default();
-    text.set_string("Hello world!");
-    text.pos.x = -200.0;
-    text.pos.z = 1.0;
-    text.pos.y = 200.0;
+    text.set_string(&message);
+    text.pos.x = 600.0;
+    text.pos.y = 500.0;
     text.max_width = Some(500.0);
-    text.scale = 50;
-    text.color = colors::BLACK;
+    text.scale = 16;
+    text.color = colors::WHITE;
     strings.push(text);
     // Assign the strings we want to draw to a batch.
-    engine.text_set(&screen, &strings);
-    engine.window_clear_color(colors::BLACK);
+    engine.render.text_set(&screen, &strings);
+    engine.render.clear_color(colors::WHITE);
 
-    let mut is_active = true;
-    while is_active {
-        // Input for closing the window.
-        while let Some(message) = engine.input_poll() {
-            match message {
-                InputMessage::CloseRequested => is_active = false,
-                InputMessage::KeyPressed(key) => match key {
-                    KeyboardButton::Escape => is_active = false,
-                    _ => {}
-                },
-                _ => {}
+    move |event, engine| match event {
+        InputMessage::ReceivedCharacter(char) => {
+            message.push(char);
+            let mut strings = Vec::new();
+            let mut text = Text::default();
+            text.set_string(&message);
+            text.pos.x = 600.0;
+            text.pos.y = 500.0;
+            text.max_width = Some(500.0);
+            text.scale = 16;
+            text.color = colors::WHITE;
+            strings.push(text);
+            engine.render.text_set(&screen, &strings);
+        }
+        InputMessage::CloseRequested => engine.stop(),
+        InputMessage::KeyPressed(key) => match key {
+            KeyboardButton::Escape => engine.stop(),
+            _ => {}
+        },
+        InputMessage::CursorPressed {
+            button,
+            ..
+        } => match button {
+            CursorButton::Left => is_dragging = true,
+            _ => {}
+        },
+        InputMessage::CursorReleased {
+            button,
+            ..
+        } => match button {
+            CursorButton::Left => is_dragging = false,
+            _ => {}
+        },
+        InputMessage::CursorMoved {
+            delta,
+            ..
+        } => {
+            if is_dragging {
+                screen_settings.translation += delta / screen_settings.scale;
+                engine.render.batch_update(&screen, &screen_settings);
             }
         }
-        // Commit any state we changed to the window. This will trigger a draw.
-        engine.window_commit();
-        // This sleeps until it's ready for the next tick, ensuring the 144 TPS we set earlier.
-        clock.tick();
+        InputMessage::CursorScroll(direction) => {
+            match direction {
+                ScrollDirection::Up => screen_settings.scale *= 1.1,
+                ScrollDirection::Down => screen_settings.scale /= 1.1,
+                _ => {}
+            }
+            engine.render.batch_update(&screen, &screen_settings);
+        }
+        InputMessage::MainEventsCleared => {
+            engine.render.draw();
+            clock.tick();
+        }
+        _ => {}
     }
 }
-// Run with: cargo run --example square --release
