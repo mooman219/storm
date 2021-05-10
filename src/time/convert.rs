@@ -1,4 +1,4 @@
-use std::time::Duration;
+use core::time::Duration;
 
 /// The number of nanoseconds per microsecond.
 pub const NANOS_PER_MICRO: u64 = 1_000;

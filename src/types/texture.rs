@@ -48,10 +48,10 @@ impl Texture {
 
         // UV Layout: xmin xmax ymin ymax
         let bounds = Vector4::new(
-            std::cmp::min(self.0.x, self.0.y), // Left
-            std::cmp::max(self.0.x, self.0.y), // Right
-            std::cmp::min(self.0.z, self.0.w), // Top
-            std::cmp::max(self.0.z, self.0.w), // Bottom
+            u16::min(self.0.x, self.0.y), // Left
+            u16::max(self.0.x, self.0.y), // Right
+            u16::min(self.0.z, self.0.w), // Top
+            u16::max(self.0.z, self.0.w), // Bottom
         );
         let subset = Vector4::new(
             bounds.x + (minx) * (PIXEL_SIZE as u16),          // Left

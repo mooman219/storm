@@ -1,6 +1,6 @@
 use crate::time::convert::*;
+use core::time::Duration;
 use std::thread::sleep;
-use std::time::Duration;
 use std::time::Instant;
 
 pub struct Clock {
