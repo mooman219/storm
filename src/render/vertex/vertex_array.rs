@@ -1,5 +1,5 @@
-use crate::render::gl::raw::{resource, OpenGL};
-use crate::render::gl::vertex::*;
+use crate::render::raw::{resource, OpenGL};
+use crate::render::vertex::*;
 use core::marker::PhantomData;
 
 pub struct VertexArray<T: VertexDescription> {

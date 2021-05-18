@@ -20,8 +20,8 @@ mod utility;
 
 use crate::input::InputConverter;
 use crate::render::Renderer;
-use glutin::event::Event;
-use glutin::event_loop::ControlFlow;
+use winit::event::Event;
+use winit::event_loop::ControlFlow;
 
 /// The main entry point into the Storm engine. All interactions with the engine are managed by the
 /// API on this type. The engine is send, and can be moved between threads.
@@ -37,7 +37,7 @@ impl Engine {
         event_handler_creator: fn(&mut Engine) -> T,
     ) {
         info!("Starting engine...");
-        let event_loop = glutin::event_loop::EventLoop::new();
+        let event_loop = winit::event_loop::EventLoop::new();
         let render = Renderer::new(&desc, &event_loop);
         let mut input = InputConverter::new(render.current_logical_size());
         let mut engine = Engine {

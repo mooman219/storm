@@ -1,9 +1,9 @@
-use crate::render::gl::raw::{resource, OpenGL, TextureUnit};
-use crate::render::gl::shader::shader_program::*;
+use crate::render::raw::{resource, OpenGL, TextureUnit};
+use crate::render::shader::shader_program::*;
 use cgmath::*;
 
-static VERTEX: &str = r#"
-#version 330
+static VERTEX: &str = r#"#version 300 es
+precision highp float;
 
 const float PI     = 3.141592653589793238462643383279;
 const float TWO_PI = 6.283185307179586476925286766559;
@@ -22,13 +22,13 @@ uniform mat4 ortho;
 // UV Layout: xmin xmax ymin ymax
 // ymin and ymax are swapped below because OpenGL reads images from bottom row to top row, but
 // they're stored top to bottom on upload, so this corrects that.
-uniform vec4 uv_lut[4] = vec4[4](
+vec4 uv_lut[4] = vec4[4](
     vec4(1.0, 0.0, 1.0, 0.0), // left bottom
     vec4(1.0, 0.0, 0.0, 1.0), // left top
     vec4(0.0, 1.0, 1.0, 0.0), // right bottom
     vec4(0.0, 1.0, 0.0, 1.0)); // right top
 
-uniform vec2 pos_lut[4] = vec2[4](
+vec2 pos_lut[4] = vec2[4](
     vec2(0.0, 65536.0),     // left top
     vec2(0.0, 0.0),         // left bottom
     vec2(65536.0, 65536.0), // right top
@@ -56,8 +56,8 @@ void main() {
     gl_Position = ortho * rotateZ(pos);
 }
 "#;
-static FRAGMENT: &str = r#"
-#version 330
+static FRAGMENT: &str = r#"#version 300 es
+precision highp float;
 
 in vec2 v_uv;
 in vec4 v_color;

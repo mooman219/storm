@@ -1,6 +1,5 @@
 use crate::texture::formats;
 use crate::{TextureFormat, RGBA8};
-use std::io::Read;
 
 #[derive(Clone, Debug)]
 pub struct Image {
@@ -10,7 +9,7 @@ pub struct Image {
 }
 
 impl Image {
-    pub fn from_raw<R: Read>(bytes: R, format: TextureFormat) -> Image {
+    pub fn from_raw(bytes: &[u8], format: TextureFormat) -> Image {
         match format {
             TextureFormat::PNG => formats::png::read(bytes),
         }

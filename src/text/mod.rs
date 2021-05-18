@@ -1,3 +1,3 @@
-pub(crate) use cache::TextCache;
-
 mod cache;
+
+pub(crate) use self::cache::TextCache;

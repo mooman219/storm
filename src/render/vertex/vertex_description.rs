@@ -1,4 +1,4 @@
-use crate::render::gl::raw::{AttributeType, OpenGL};
+use crate::render::raw::{AttributeType, OpenGL};
 use crate::types::*;
 use core::mem;
 

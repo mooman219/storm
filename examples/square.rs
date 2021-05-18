@@ -1,4 +1,3 @@
-use storm::cgmath::*;
 use storm::time::*;
 use storm::*;
 
@@ -28,24 +27,16 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
         ..BatchSettings::default()
     };
     let screen = engine.render.batch_create(&screen_settings);
-    let mut sprites = Vec::new();
-    sprites.push(Sprite {
-        pos: Vector3::new(600.0, 0.0, 0.0),
-        size: Vector2::new(500, 500),
-        color: colors::BLACK,
-        ..Sprite::default()
-    });
-    engine.render.sprite_set(&screen, &sprites);
     // Add all the strings we want to draw to a vec.
-    let mut message = String::from("> ");
+    let mut message = String::from("> the quick brown fox jumps over the lazy dog.");
     let mut strings = Vec::new();
     let mut text = Text::default();
     text.set_string(&message);
-    text.pos.x = 600.0;
+    text.pos.x = 100.0;
     text.pos.y = 500.0;
     text.max_width = Some(500.0);
     text.scale = 16;
-    text.color = colors::WHITE;
+    text.color = colors::BLACK;
     strings.push(text);
     // Assign the strings we want to draw to a batch.
     engine.render.text_set(&screen, &strings);
@@ -57,17 +48,21 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
             let mut strings = Vec::new();
             let mut text = Text::default();
             text.set_string(&message);
-            text.pos.x = 600.0;
+            text.pos.x = 100.0;
             text.pos.y = 500.0;
             text.max_width = Some(500.0);
             text.scale = 16;
-            text.color = colors::WHITE;
+            text.color = colors::BLACK;
             strings.push(text);
             engine.render.text_set(&screen, &strings);
         }
         InputMessage::CloseRequested => engine.stop(),
         InputMessage::KeyPressed(key) => match key {
             KeyboardButton::Escape => engine.stop(),
+            KeyboardButton::Tab => {
+                screen_settings.scale = 1.0;
+                engine.render.batch_update(&screen, &screen_settings);
+            }
             _ => {}
         },
         InputMessage::CursorPressed {

@@ -1,4 +1,4 @@
-use crate::render::gl::raw::{resource, OpenGL, ShaderType};
+use crate::render::raw::{resource, OpenGL, ShaderType};
 
 pub struct ShaderProgram {
     gl: OpenGL,

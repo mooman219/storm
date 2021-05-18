@@ -1,6 +1,9 @@
 use storm::time::*;
 use storm::*;
 
+static TEXTURE_A: &[u8] = include_bytes!("resources/1.png");
+static TEXTURE_B: &[u8] = include_bytes!("resources/1.png");
+
 /// Run with: cargo run --example texture --release
 fn main() {
     simple_logger::SimpleLogger::new().init().expect("Unable to init logger");
@@ -23,9 +26,8 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
     engine.render.clear_color(storm::colors::BLUE);
 
     let screen = engine.render.batch_create(&BatchSettings::default());
-    let texture_1 =
-        engine.render.texture_create(include_bytes!("resources/1.png").as_ref(), TextureFormat::PNG);
-    let texture_2 = engine.render.texture_load("./examples/resources/2.png", TextureFormat::PNG).unwrap();
+    let texture_1 = engine.render.texture_create(TEXTURE_A.as_ref(), TextureFormat::PNG);
+    let texture_2 = engine.render.texture_create(TEXTURE_B.as_ref(), TextureFormat::PNG);
     let texture_2 = texture_2.sub_texture(0, 0, 16, 16).unwrap();
 
     let mut sprites = Vec::new();

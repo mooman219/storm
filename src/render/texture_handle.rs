@@ -1,4 +1,4 @@
-use crate::render::gl::raw::{
+use crate::render::raw::{
     resource, OpenGL, PixelFormat, PixelInternalFormat, PixelType, TextureBindingTarget, TextureLoadTarget,
     TextureMagFilterValue, TextureMinFilterValue, TextureParameterTarget, TextureUnit, TextureWrapValue,
 };

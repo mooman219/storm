@@ -6,9 +6,6 @@ use fontdue::layout::{
 };
 use fontdue::{Font, FontSettings};
 use hashbrown::HashMap;
-use std::fs::File;
-use std::io::{BufReader, Read};
-use std::path::Path;
 
 #[derive(Debug, Copy, Clone)]
 struct CharCacheValue {
@@ -46,13 +43,13 @@ impl TextCache {
         index
     }
 
-    pub fn add_font_path(&mut self, path: &str) -> usize {
-        let file = File::open(Path::new(path)).expect("Unable to read path.");
-        let mut file = BufReader::new(file);
-        let mut bytes = Vec::new();
-        file.read_to_end(&mut bytes).expect("Unable to read bytes.");
-        self.add_font_bytes(&bytes)
-    }
+    // pub fn add_font_path(&mut self, path: &str) -> usize {
+    //     let file = File::open(Path::new(path)).expect("Unable to read path.");
+    //     let mut file = BufReader::new(file);
+    //     let mut bytes = Vec::new();
+    //     file.read_to_end(&mut bytes).expect("Unable to read bytes.");
+    //     self.add_font_bytes(&bytes)
+    // }
 
     pub fn rasterize(&mut self, atlas: &mut TextureAtlas, desc: &Text, quads: &mut Vec<Sprite>) {
         let font_index = desc.font.key();

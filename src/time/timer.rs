@@ -1,5 +1,5 @@
 use crate::time::convert::*;
-use std::time::Instant;
+use instant::Instant;
 
 pub struct Timer {
     label: &'static str,

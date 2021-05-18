@@ -1,10 +1,10 @@
-use crate::render::gl::buffer::*;
-use crate::render::gl::raw::{
+use crate::render::buffer::*;
+use crate::render::raw::{
     BlendFactor, BufferBindingTarget, Capability, ClearBit, CullFace, DepthTest, OpenGL, TextureUnit,
 };
-use crate::render::gl::shader::*;
-use crate::render::gl::texture_handle::*;
-use crate::render::gl::window::*;
+use crate::render::shader::*;
+use crate::render::texture_handle::*;
+use crate::render::window::*;
 use crate::texture::*;
 use crate::types::*;
 use cgmath::*;
@@ -34,7 +34,7 @@ fn matrix_from_bounds(bounds: &Vector2<f32>) -> Matrix4<f32> {
 }
 
 impl OpenGLState {
-    pub fn new(desc: &WindowSettings, event_loop: &glutin::event_loop::EventLoop<()>) -> OpenGLState {
+    pub fn new(desc: &WindowSettings, event_loop: &winit::event_loop::EventLoop<()>) -> OpenGLState {
         let (window, gl) = OpenGLWindow::new(desc, event_loop);
         let current_logical_size = window.logical_size();
         let gl = OpenGL::new(gl);
@@ -80,10 +80,6 @@ impl OpenGLState {
 
     pub fn window_display_mode(&mut self, display_mode: DisplayMode) {
         self.window.set_display_mode(display_mode);
-    }
-
-    pub fn window_vsync(&mut self, vsync: Vsync) {
-        self.window.set_vsync(vsync);
     }
 
     pub fn upload_texture_atlas(&mut self, texture: &Image) {

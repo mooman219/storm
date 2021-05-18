@@ -20,24 +20,27 @@ default-target = "x86_64-pc-windows-msvc"
 [badges]
 maintenance = { status = "experimental" }
 
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-sys = { version = "0.3", features=["HtmlCanvasElement", "WebGl2RenderingContext", "Window"] }
+wasm-bindgen = { version = "0.2" } 
+winit = { version = "0.24", features=["web-sys"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+glutin = "0.26"
+winit = "0.24" 
+
 [dependencies]
-glutin = "0.25"
-glow = "0.6"
-cgmath = "0.17"
+instant = { version = "0.1", features = ["wasm-bindgen"] }
+glow = "0.9"
+cgmath = "0.18"
 log = "0.4.7"
 png = "0.14"
-hashbrown = "0.5"
-# fontdue = "0.4"
-fontdue = { path = "../fontdue" }
+hashbrown = "0.11.2"
+fontdue = "0.5.2"
 unicode-normalization = "0.1.8"
 
 [dev-dependencies]
-rand = "0.7"
-rodio = "0.9"
 simple_logger = "1.3"
 
-[profile.dev]
-opt-level = 3
-
-[profile.test]
-opt-level = 3
+[profile.release]
+lto = "thin"

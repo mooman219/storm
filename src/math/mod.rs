@@ -1,5 +1,5 @@
 mod aabb;
 mod trigonometry;
 
-pub use crate::math::aabb::*;
-pub use crate::math::trigonometry::*;
+pub use self::aabb::*;
+pub use self::trigonometry::*;

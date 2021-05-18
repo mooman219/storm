@@ -1,16 +1,18 @@
-mod gl;
+mod buffer;
+mod raw;
+mod shader;
+mod state;
+mod texture_handle;
+mod vertex;
+mod window;
 
-use crate::render::gl::OpenGLState;
+use crate::render::state::OpenGLState;
 use crate::text::*;
 use crate::texture::*;
 use crate::time::*;
 use crate::types::*;
 use crate::utility::unordered_tracker::*;
 use cgmath::*;
-
-use std::fs::File;
-use std::io::{BufReader, Read};
-use std::path::Path;
 
 pub struct Renderer {
     state: OpenGLState,
@@ -22,7 +24,7 @@ pub struct Renderer {
 }
 
 impl Renderer {
-    pub(crate) fn new(desc: &WindowSettings, event_loop: &glutin::event_loop::EventLoop<()>) -> Renderer {
+    pub(crate) fn new(desc: &WindowSettings, event_loop: &winit::event_loop::EventLoop<()>) -> Renderer {
         Renderer {
             state: OpenGLState::new(desc, event_loop),
             timer_render: Timer::new("[R] Frame"),
@@ -86,9 +88,15 @@ impl Renderer {
     // String
     // ////////////////////////////////////////////////////////
 
-    /// Loads a new font and returns a token to reference it with later.
-    pub fn font_load(&mut self, path: &str) -> FontToken {
-        FontToken::new(self.text_cache.add_font_path(path))
+    // /// Loads a new font and returns a token to reference it with later.
+    // pub fn font_load(&mut self, path: &str) -> FontToken {
+    //     FontToken::new(self.text_cache.add_font_path(path))
+    // }
+
+    /// Creates a new font from bytes. If there is an issue loading the font, this function will
+    /// panic.
+    pub fn font_create(&mut self, bytes: &[u8]) -> FontToken {
+        FontToken::new(self.text_cache.add_font_bytes(bytes))
     }
 
     /// Sets the text to render for a given batch. If the token references an invalid or removed
@@ -113,24 +121,24 @@ impl Renderer {
     // Texture
     // ////////////////////////////////////////////////////////
 
-    /// Loads a new texture from a given path. If there is an issue loading the texture, this
-    /// function will panic.
-    pub fn texture_load<P: AsRef<Path>>(
-        &mut self,
-        path: P,
-        format: TextureFormat,
-    ) -> Result<Texture, &'static str> {
-        if let Ok(f) = File::open(path) {
-            let reader = BufReader::new(f);
-            Ok(self.texture_create(reader, format))
-        } else {
-            Err("Unable to open file to read path.")
-        }
-    }
+    // /// Loads a new texture from a given path. If there is an issue loading the texture, this
+    // /// function will panic.
+    // pub fn texture_load<P: AsRef<Path>>(
+    //     &mut self,
+    //     path: P,
+    //     format: TextureFormat,
+    // ) -> Result<Texture, &'static str> {
+    //     if let Ok(f) = File::open(path) {
+    //         let reader = BufReader::new(f);
+    //         Ok(self.texture_create(reader, format))
+    //     } else {
+    //         Err("Unable to open file to read path.")
+    //     }
+    // }
 
-    /// Loads a new texture from a given path. If there is an issue loading the texture, this
-    /// function will panic.
-    pub fn texture_create<R: Read>(&mut self, bytes: R, format: TextureFormat) -> Texture {
+    /// Creates a new texture from bytes. If there is an issue loading the texture, this function
+    /// will panic.
+    pub fn texture_create(&mut self, bytes: &[u8], format: TextureFormat) -> Texture {
         let image = Image::from_raw(bytes, format);
         let uv = self.atlas.add(image);
         Texture(uv)
@@ -148,11 +156,6 @@ impl Renderer {
     /// Sets the display mode of the window.
     pub fn window_display_mode(&mut self, display_mode: DisplayMode) {
         self.state.window_display_mode(display_mode);
-    }
-
-    /// Sets the vsync setting for the window.
-    pub fn window_vsync(&mut self, vsync: Vsync) {
-        self.state.window_vsync(vsync);
     }
 
     /// Sets the clear color for the window.

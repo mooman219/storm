@@ -1,5 +1,5 @@
-use crate::render::gl::raw::{resource, BufferBindingTarget, BufferUsage, DrawMode, OpenGL};
-use crate::render::gl::vertex::*;
+use crate::render::raw::{resource, BufferBindingTarget, BufferUsage, DrawMode, OpenGL};
+use crate::render::vertex::*;
 
 pub struct Buffer<T: VertexDescription + Copy> {
     gl: OpenGL,

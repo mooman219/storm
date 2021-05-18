@@ -1,36 +1,36 @@
 use crate::types::*;
 use cgmath::*;
+use glutin::ContextBuilder;
+use winit::dpi::LogicalSize;
+use winit::event_loop::EventLoop;
+use winit::window::{Fullscreen, Window, WindowBuilder};
 
 pub struct OpenGLWindow {
-    inner: glutin::ContextWrapper<glutin::PossiblyCurrent, glutin::window::Window>,
+    inner: glutin::ContextWrapper<glutin::PossiblyCurrent, Window>,
 }
 
 impl OpenGLWindow {
-    pub fn new(
-        desc: &WindowSettings,
-        event_loop: &glutin::event_loop::EventLoop<()>,
-    ) -> (OpenGLWindow, glow::Context) {
-        let mut window_builder = glutin::window::WindowBuilder::new().with_title(&desc.title);
+    pub fn new(desc: &WindowSettings, event_loop: &EventLoop<()>) -> (OpenGLWindow, glow::Context) {
+        let mut window_builder = WindowBuilder::new().with_title(&desc.title);
         match desc.display_mode {
             DisplayMode::Windowed {
                 width,
                 height,
                 resizable,
             } => {
-                window_builder = window_builder
-                    .with_resizable(resizable)
-                    .with_inner_size(glutin::dpi::LogicalSize::new(width, height))
+                window_builder =
+                    window_builder.with_resizable(resizable).with_inner_size(LogicalSize::new(width, height))
             }
             DisplayMode::WindowedFullscreen => {
-                let fullscreen = glutin::window::Fullscreen::Borderless(event_loop.primary_monitor());
+                let fullscreen = Fullscreen::Borderless(event_loop.primary_monitor());
                 window_builder = window_builder.with_fullscreen(Some(fullscreen));
             }
             DisplayMode::Fullscreen => {
-                let fullscreen = glutin::window::Fullscreen::Borderless(event_loop.primary_monitor());
+                let fullscreen = Fullscreen::Borderless(event_loop.primary_monitor());
                 window_builder = window_builder.with_fullscreen(Some(fullscreen));
             }
         }
-        let mut context_builder = glutin::ContextBuilder::new();
+        let mut context_builder = ContextBuilder::new();
         match desc.vsync {
             Vsync::Disabled => {
                 context_builder = context_builder.with_vsync(false);
@@ -87,39 +87,18 @@ impl OpenGLWindow {
                 height,
                 resizable,
             } => {
-                self.inner.window().set_inner_size(glutin::dpi::LogicalSize::new(width, height));
+                self.inner.window().set_inner_size(LogicalSize::new(width, height));
                 self.inner.window().set_resizable(resizable);
                 self.inner.window().set_fullscreen(None);
             }
             DisplayMode::WindowedFullscreen => {
-                let fullscreen =
-                    glutin::window::Fullscreen::Borderless(self.inner.window().primary_monitor());
+                let fullscreen = Fullscreen::Borderless(self.inner.window().primary_monitor());
                 self.inner.window().set_fullscreen(Some(fullscreen));
             }
             DisplayMode::Fullscreen => {
-                let fullscreen =
-                    glutin::window::Fullscreen::Borderless(self.inner.window().primary_monitor());
+                let fullscreen = Fullscreen::Borderless(self.inner.window().primary_monitor());
                 self.inner.window().set_fullscreen(Some(fullscreen));
             }
         }
-    }
-
-    pub fn set_vsync(&self, _vsync: Vsync) {
-        // let setting = match vsync {
-        //     Vsync::Disabled => 0,
-        //     Vsync::Enabled => 1,
-        //     Vsync::Adaptive => -1,
-        // };
-        // let result = unsafe { self.inner.set_swap_interval(setting) };
-        // if result.is_err() {
-        //     warn!("Failed to set vsync to {:?}", vsync);
-        //     match vsync {
-        //         Vsync::Disabled => warn!("Unable to configure vsync."),
-        //         Vsync::Enabled => self.set_vsync(Vsync::Disabled),
-        //         Vsync::Adaptive => self.set_vsync(Vsync::Enabled),
-        //     }
-        // } else {
-        //     info!("Set vsync to {:?}", vsync);
-        // }
     }
 }

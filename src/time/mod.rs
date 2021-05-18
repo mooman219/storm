@@ -1,7 +1,9 @@
 mod clock;
 mod convert;
+mod platform;
 mod timer;
 
-pub use crate::time::clock::*;
-pub use crate::time::convert::*;
-pub use crate::time::timer::*;
+pub use self::clock::*;
+pub use self::convert::*;
+pub use self::platform::*;
+pub use self::timer::*;

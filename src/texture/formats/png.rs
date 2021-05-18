@@ -1,9 +1,8 @@
 use crate::texture::image::Image;
 use crate::RGBA8;
 use png::{ColorType, Decoder};
-use std::io::Read;
 
-pub fn read<R: Read>(bytes: R) -> Image {
+pub fn read(bytes: &[u8]) -> Image {
     let decoder = Decoder::new(bytes);
     let (info, mut reader) = decoder.read_info().expect("Unable to read PNG info.");
     let mut input = vec![0; info.buffer_size()];
