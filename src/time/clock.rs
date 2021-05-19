@@ -1,7 +1,7 @@
 use crate::time::convert::*;
-use crate::time::platform::sleep;
+use crate::time::sleep;
+use crate::time::Instant;
 use core::time::Duration;
-use instant::Instant;
 
 pub struct Clock {
     last_tick: Instant,
@@ -49,21 +49,9 @@ impl Clock {
     /// 10ms. If 4ms is spent outside of this function, then calling tick will
     /// sleep for 6ms.
     pub fn tick(&mut self) {
-        // Find the duration since ticked last.
-        let duration = as_nanoseconds(&self.last_tick.elapsed());
-        // OS Sleep logic.
-        if duration < self.target {
-            let diff = self.target - duration;
-            if diff > 1_250_000 {
-                sleep(Duration::new(0, (diff - 1_250_000) as u32));
-            }
-        }
-        // Spin sleep logic.
         let duration = as_nanoseconds(&self.last_tick.elapsed());
         if duration < self.target {
-            let diff = self.target - duration;
-            let spin_start = Instant::now();
-            while as_nanoseconds(&spin_start.elapsed()) < diff {}
+            sleep(Duration::from_nanos(self.target - duration));
         }
         self.delta = Clock::duration_to_delta(&self.last_tick.elapsed());
         self.last_tick = Instant::now();
