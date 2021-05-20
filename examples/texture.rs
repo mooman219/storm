@@ -1,4 +1,4 @@
-use storm::time::*;
+use core::time::Duration;
 use storm::*;
 
 static TEXTURE_A: &[u8] = include_bytes!("resources/1.png");
@@ -22,7 +22,7 @@ fn main() {
 }
 
 fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
-    let mut clock = Clock::new(144);
+    engine.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     engine.render.clear_color(storm::colors::BLUE);
 
     let screen = engine.render.batch_create(&BatchSettings::default());
@@ -71,9 +71,8 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
             sprite.pos = pos.extend(0.1);
             engine.render.sprite_set(&screen, &sprites);
         }
-        InputMessage::MainEventsCleared => {
+        InputMessage::Update(_delta) => {
             engine.render.draw();
-            clock.tick();
         }
         _ => {}
     }

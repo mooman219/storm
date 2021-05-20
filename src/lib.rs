@@ -20,6 +20,8 @@ mod utility;
 
 use crate::input::InputConverter;
 use crate::render::Renderer;
+use crate::time::Instant;
+use core::time::Duration;
 use winit::event::Event;
 use winit::event_loop::ControlFlow;
 
@@ -27,7 +29,11 @@ use winit::event_loop::ControlFlow;
 /// API on this type. The engine is send, and can be moved between threads.
 pub struct Engine {
     pub render: Renderer,
-    control_flow: ControlFlow,
+    stop: bool,
+    control_flow: Option<ControlFlow>,
+    last_update: Instant,
+    wait_next: Instant,
+    wait_periodic: Option<Duration>,
 }
 
 impl Engine {
@@ -42,7 +48,11 @@ impl Engine {
         let mut input = InputConverter::new(render.current_logical_size());
         let mut engine = Engine {
             render,
-            control_flow: ControlFlow::Poll,
+            stop: false,
+            control_flow: Some(ControlFlow::Poll),
+            last_update: Instant::now(),
+            wait_next: Instant::now(),
+            wait_periodic: None,
         };
         info!("Starting handler...");
         let mut event_handler = event_handler_creator(&mut engine);
@@ -56,22 +66,57 @@ impl Engine {
                     input.push(event, &mut event_handler, &mut engine);
                 }
                 Event::MainEventsCleared => {
-                    event_handler(InputMessage::MainEventsCleared, &mut engine);
+                    let now = Instant::now();
+                    if now >= engine.wait_next {
+                        if let Some(duration) = engine.wait_periodic {
+                            engine.wait_next = now + duration;
+                            engine.control_flow = Some(ControlFlow::WaitUntil(engine.wait_next));
+                        }
+                        let delta = (now - engine.last_update).as_secs_f32();
+                        event_handler(InputMessage::Update(delta), &mut engine);
+                        engine.last_update = now;
+                    }
                 }
                 Event::LoopDestroyed => {
-                    engine.control_flow = ControlFlow::Exit;
+                    engine.stop = true;
                 }
                 _ => {}
             }
-            *control_flow = engine.control_flow;
+            if engine.stop {
+                *control_flow = ControlFlow::Exit;
+            } else if let Some(next_control_flow) = engine.control_flow {
+                *control_flow = next_control_flow;
+                engine.control_flow = None;
+            }
         });
     }
-
-    // TODO: Audio
 
     /// Stops the engine after the next update.
     pub fn stop(&mut self) {
         info!("Stopping engine...");
-        self.control_flow = ControlFlow::Exit;
+        self.stop = true;
+    }
+
+    /// Prevents the update event from being sent for at least the duration. If a periodic wait is
+    /// active, this wait will temporarily override only if it causes the next update event to
+    /// happen later than the periodic wait would have.
+    pub fn wait_for(&mut self, duration: Duration) {
+        self.wait_until(Instant::now() + duration);
+    }
+
+    /// Prevents the update event from being sent until at least the given instant. If a periodic
+    /// wait is active, this wait will temporarily override only if it causes the next update event
+    /// to happen later than the periodic wait would have.
+    pub fn wait_until(&mut self, instant: Instant) {
+        if instant > self.wait_next {
+            self.wait_next = instant;
+            self.control_flow = Some(ControlFlow::WaitUntil(self.wait_next));
+        }
+    }
+
+    /// Prevents the update event from being sent more frequently than the given duration. Set this
+    /// to None to disable the periodic wait.
+    pub fn wait_periodic(&mut self, duration: Option<Duration>) {
+        self.wait_periodic = duration;
     }
 }

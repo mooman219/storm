@@ -1,4 +1,4 @@
-use storm::time::*;
+use core::time::Duration;
 use storm::*;
 
 /// Run with: cargo run --example square --release
@@ -20,7 +20,7 @@ fn main() {
 }
 
 fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
-    let mut clock = Clock::new(144);
+    engine.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
     // Create a batch to draw on. Batches persist between engine.window_commit()'s.
     let mut screen_settings = BatchSettings {
@@ -96,9 +96,8 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
             }
             engine.render.batch_update(&screen, &screen_settings);
         }
-        InputMessage::MainEventsCleared => {
+        InputMessage::Update(_delta) => {
             engine.render.draw();
-            clock.tick();
         }
         _ => {}
     }

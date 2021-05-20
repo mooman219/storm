@@ -38,13 +38,14 @@ glutin = "0.26"
 winit = "0.24" 
 
 [dependencies]
+instant = "0.1.9"
 glow = "0.9"
 cgmath = "0.18"
-log = "0.4.7"
+log = "0.4"
 png = "0.14"
 hashbrown = "0.11"
 fontdue = "0.5"
-unicode-normalization = "0.1.8"
+unicode-normalization = "0.1"
 
 [dev-dependencies]
 simple_logger = "1.3"

@@ -43,7 +43,7 @@ impl OpenGLWindow {
             .dyn_into::<web_sys::WebGl2RenderingContext>()
             .expect("Get webgl2 context C");
         let gl = glow::Context::from_webgl2_context(webgl2_context);
-
+        document.set_title(&desc.title);
         body.append_child(&canvas).expect("Append canvas to HTML body");
 
         (
@@ -69,6 +69,7 @@ impl OpenGLWindow {
     }
     pub fn set_title(&self, title: &str) {
         self.inner.set_title(title);
+        web_sys::window().unwrap().document().unwrap().set_title(title);
     }
     pub fn set_display_mode(&self, _display_mode: DisplayMode) {}
 }

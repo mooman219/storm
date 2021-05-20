@@ -1,7 +1,7 @@
 use crate::cgmath::prelude::*;
 use crate::cgmath::*;
+use core::time::Duration;
 use storm::colors::*;
-use storm::time::*;
 use storm::*;
 
 /// Run with: cargo run --example particles --release
@@ -22,9 +22,9 @@ fn main() {
 }
 
 fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
-    let mut clock = Clock::new(144);
+    engine.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
-    engine.render.clear_color(WHITE);
+    engine.render.clear_color(BLACK);
     let mut screen_settings = BatchSettings {
         rotation: 0.125,
         ..BatchSettings::default()
@@ -32,13 +32,10 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
     let screen = engine.render.batch_create(&screen_settings);
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
-    let texture_1 =
-        engine.render.texture_create(include_bytes!("resources/1.png").as_ref(), TextureFormat::PNG);
     const RANGE: i32 = 250;
     for x in -RANGE..RANGE {
         for y in -RANGE..RANGE {
-            let (mut sprite, particle) = Particle::new(Vector3::new(x as f32 * 5.0, y as f32 * 5.0, 0.0));
-            sprite.texture = texture_1;
+            let (sprite, particle) = Particle::new(Vector3::new(x as f32 * 5.0, y as f32 * 5.0, 0.0));
             sprites.push(sprite);
             particles.push(particle);
         }
@@ -82,14 +79,12 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
             }
             engine.render.batch_update(&screen, &screen_settings);
         }
-        InputMessage::MainEventsCleared => {
-            let delta = clock.get_delta();
+        InputMessage::Update(delta) => {
             for index in 0..sprites.len() {
                 Particle::tick(&mut sprites[index], &mut particles[index], delta);
             }
             engine.render.sprite_set(&screen, &sprites);
             engine.render.draw();
-            clock.tick();
         }
         _ => {}
     }
