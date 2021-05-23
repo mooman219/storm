@@ -21,11 +21,7 @@ impl OpenGLWindow {
                 window_builder =
                     window_builder.with_resizable(resizable).with_inner_size(LogicalSize::new(width, height))
             }
-            DisplayMode::WindowedFullscreen => {
-                let fullscreen = Fullscreen::Borderless(event_loop.primary_monitor());
-                window_builder = window_builder.with_fullscreen(Some(fullscreen));
-            }
-            DisplayMode::Fullscreen => {
+            DisplayMode::WindowedFullscreen | DisplayMode::Fullscreen => {
                 let fullscreen = Fullscreen::Borderless(event_loop.primary_monitor());
                 window_builder = window_builder.with_fullscreen(Some(fullscreen));
             }
@@ -91,13 +87,8 @@ impl OpenGLWindow {
                 self.inner.window().set_resizable(resizable);
                 self.inner.window().set_fullscreen(None);
             }
-            DisplayMode::WindowedFullscreen => {
+            DisplayMode::WindowedFullscreen | DisplayMode::Fullscreen => {
                 let fullscreen = Fullscreen::Borderless(self.inner.window().primary_monitor());
-                self.inner.window().set_fullscreen(Some(fullscreen));
-            }
-            DisplayMode::Fullscreen => {
-                let fullscreen = Fullscreen::Borderless(self.inner.window().primary_monitor());
-                self.inner.window().set_fullscreen(Some(fullscreen));
             }
         }
     }

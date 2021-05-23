@@ -36,7 +36,6 @@ fn matrix_from_bounds(bounds: &Vector2<f32>) -> Matrix4<f32> {
 impl OpenGLState {
     pub fn new(desc: &WindowSettings, event_loop: &winit::event_loop::EventLoop<()>) -> OpenGLState {
         let (window, gl) = OpenGLWindow::new(desc, event_loop);
-        let current_logical_size = window.logical_size();
         let gl = OpenGL::new(gl);
         let logical_size = window.logical_size();
         let shader = TextureShader::new(gl.clone());
@@ -48,7 +47,7 @@ impl OpenGLState {
             texture_atlas,
             batches: Vec::new(),
             matrix_bounds: matrix_from_bounds(&logical_size),
-            current_logical_size,
+            current_logical_size: logical_size,
         };
         // Bind shader once.
         state.shader.bind();
