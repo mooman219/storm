@@ -41,3 +41,9 @@ impl<T: VertexDescription + Copy> Buffer<T> {
         self.gl.draw_arrays_instanced(DrawMode::TriangleStrip, 0, 4, self.vertices as i32);
     }
 }
+
+impl<T: VertexDescription + Copy> Drop for Buffer<T> {
+    fn drop(&mut self) {
+        self.gl.delete_buffer(self.vbo);
+    }
+}
