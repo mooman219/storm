@@ -89,6 +89,7 @@ impl OpenGLWindow {
             }
             DisplayMode::WindowedFullscreen | DisplayMode::Fullscreen => {
                 let fullscreen = Fullscreen::Borderless(self.inner.window().primary_monitor());
+                self.inner.window().set_fullscreen(Some(fullscreen));
             }
         }
     }
