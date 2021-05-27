@@ -6,6 +6,7 @@ use cgmath::*;
 const MAX: u32 = 65536;
 const SIZE: u32 = 4096;
 pub(crate) const PIXEL_SIZE: u32 = MAX / SIZE;
+const NUDGE: u16 = 4;
 
 pub struct TextureAtlas {
     packer: Packer,
@@ -29,10 +30,10 @@ impl TextureAtlas {
             self.atlas.set_texture(rect.x, rect.y, &texture);
             self.dirty = true;
             Vector4::new(
-                (rect.x * PIXEL_SIZE) as u16,            // Left
-                ((rect.x + rect.w) * PIXEL_SIZE) as u16, // Right
-                (rect.y * PIXEL_SIZE) as u16,            // Top
-                ((rect.y + rect.h) * PIXEL_SIZE) as u16, // Bottom
+                (rect.x * PIXEL_SIZE) as u16 + NUDGE,            // Left
+                ((rect.x + rect.w) * PIXEL_SIZE) as u16 - NUDGE, // Right
+                (rect.y * PIXEL_SIZE) as u16 + NUDGE,            // Top
+                ((rect.y + rect.h) * PIXEL_SIZE) as u16 - NUDGE, // Bottom
             )
         } else {
             panic!("Unable to fit texture into atlas.");
