@@ -104,8 +104,8 @@ impl Engine {
     // Batch
     // ////////////////////////////////////////////////////////
 
-    /// Creates a new batch with the given settings and returns a token to reference the batch by
-    /// later. The returned token can be freely copied.
+    /// Creates a new batch. Batches represent draw calls and hold configuration associated with
+    /// drawing to the screen.
     pub fn batch_create(&mut self) -> Batch {
         self.render.batch_create()
     }

@@ -1,5 +1,6 @@
 use cgmath::*;
 
+/// Utility type to create simple transformation matrices.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct BatchTransform {
     /// The translation of the batch.

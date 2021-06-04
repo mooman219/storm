@@ -22,6 +22,7 @@ struct Inner {
     ortho_transform: Matrix4<f32>,
 }
 
+/// Batches represent draw calls and hold configuration associated with drawing to the screen.
 pub struct Batch {
     inner: UnsafeShared<Inner>,
 }
@@ -44,10 +45,6 @@ impl Batch {
             inner,
         };
         (a, b)
-    }
-
-    pub(crate) fn count(&self) -> usize {
-        self.inner.count()
     }
 
     pub(crate) fn set_ortho(&mut self, ortho: &Matrix4<f32>) {
