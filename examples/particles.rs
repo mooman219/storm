@@ -15,7 +15,7 @@ fn main() {
                 height: 1024,
                 resizable: true,
             },
-            vsync: Vsync::Enabled,
+            vsync: Vsync::Disabled,
         },
         run,
     );
@@ -23,16 +23,17 @@ fn main() {
 
 fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
     engine.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
+    engine.clear_color(BLACK);
     let mut is_dragging = false;
-    engine.render.clear_color(BLACK);
-    let mut screen_settings = BatchSettings {
-        rotation: 0.125,
-        ..BatchSettings::default()
-    };
-    let screen = engine.render.batch_create(&screen_settings);
+
+    let mut screen = engine.batch_create();
+    let mut screen_transform = BatchTransform::new();
+    screen_transform.rotation = 0.125;
+    screen.set_transform(&screen_transform);
+
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
-    const RANGE: i32 = 250;
+    const RANGE: i32 = 500;
     for x in -RANGE..RANGE {
         for y in -RANGE..RANGE {
             let (sprite, particle) = Particle::new(Vector3::new(x as f32 * 5.0, y as f32 * 5.0, 0.0));
@@ -40,7 +41,7 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
             particles.push(particle);
         }
     }
-    engine.render.sprite_set(&screen, &sprites);
+    screen.set_sprites(&sprites);
 
     move |event, engine| match event {
         InputMessage::CloseRequested => engine.stop(),
@@ -67,24 +68,24 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
             ..
         } => {
             if is_dragging {
-                screen_settings.translation += delta / screen_settings.scale;
-                engine.render.batch_update(&screen, &screen_settings);
+                screen_transform.translation += delta / screen_transform.scale;
+                screen.set_transform(&screen_transform);
             }
         }
         InputMessage::CursorScroll(direction) => {
             match direction {
-                ScrollDirection::Up => screen_settings.scale *= 1.1,
-                ScrollDirection::Down => screen_settings.scale /= 1.1,
+                ScrollDirection::Up => screen_transform.scale *= 1.1,
+                ScrollDirection::Down => screen_transform.scale /= 1.1,
                 _ => {}
             }
-            engine.render.batch_update(&screen, &screen_settings);
+            screen.set_transform(&screen_transform);
         }
         InputMessage::Update(delta) => {
             for index in 0..sprites.len() {
                 Particle::tick(&mut sprites[index], &mut particles[index], delta);
             }
-            engine.render.sprite_set(&screen, &sprites);
-            engine.render.draw();
+            screen.set_sprites(&sprites);
+            engine.draw();
         }
         _ => {}
     }

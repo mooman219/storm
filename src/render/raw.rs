@@ -1,3 +1,4 @@
+use crate::utility::bad::UnsafeShared;
 use glow::HasContext;
 
 #[repr(u32)]
@@ -80,9 +81,9 @@ pub enum DepthTest {
 
 #[allow(non_snake_case, non_upper_case_globals)]
 pub mod ClearBit {
-    pub const ColorBuffer: u32 = 0x0000_4000; // glow::COLOR_BUFFER_BIT;
-    pub const DepthBuffer: u32 = 0x0000_0100; // glow::DEPTH_BUFFER_BIT;
-    pub const StencilBuffer: u32 = 0x0000_0400; // glow::STENCIL_BUFFER_BIT;
+    pub const ColorBuffer: u32 = glow::COLOR_BUFFER_BIT;
+    pub const DepthBuffer: u32 = glow::DEPTH_BUFFER_BIT;
+    pub const StencilBuffer: u32 = glow::STENCIL_BUFFER_BIT;
 }
 
 #[repr(u32)]
@@ -415,15 +416,14 @@ pub mod resource {
     pub type TransformFeedback = glow::TransformFeedback;
 }
 
-use alloc::rc::Rc;
 pub struct OpenGL {
-    gl: Rc<glow::Context>,
+    gl: UnsafeShared<glow::Context>,
 }
 
 impl OpenGL {
     pub fn new(gl: glow::Context) -> OpenGL {
         OpenGL {
-            gl: Rc::new(gl),
+            gl: UnsafeShared::new(gl),
         }
     }
 
@@ -444,43 +444,32 @@ impl OpenGL {
         }
     }
 
-    pub fn create_program(&self) -> resource::Program {
-        unsafe { self.gl.create_program().unwrap() }
+    pub fn shader_program(&self, vertex_shader: &str, fragment_shader: &str) -> resource::Program {
+        unsafe {
+            let vertex = self.gl.create_shader(ShaderType::Vertex as u32).unwrap();
+            self.gl.shader_source(vertex, vertex_shader);
+            self.gl.compile_shader(vertex);
+            self.check_shader(vertex).unwrap();
+
+            let fragment = self.gl.create_shader(ShaderType::Fragment as u32).unwrap();
+            self.gl.shader_source(fragment, fragment_shader);
+            self.gl.compile_shader(fragment);
+            self.check_shader(fragment).unwrap();
+
+            let program = self.gl.create_program().unwrap();
+            self.gl.attach_shader(program, vertex);
+            self.gl.attach_shader(program, fragment);
+            self.gl.link_program(program);
+            self.check_program(program).unwrap();
+
+            self.gl.delete_shader(vertex);
+            self.gl.delete_shader(fragment);
+
+            program
+        }
     }
 
-    pub fn create_shader(&self, shader_type: ShaderType) -> resource::Shader {
-        unsafe { self.gl.create_shader(shader_type as u32).unwrap() }
-    }
-
-    pub fn attach_shader(&self, program: resource::Program, shader: resource::Shader) {
-        unsafe { self.gl.attach_shader(program, shader) };
-    }
-
-    pub fn link_program(&self, program: resource::Program) {
-        unsafe { self.gl.link_program(program) };
-    }
-
-    pub fn delete_shader(&self, shader: resource::Shader) {
-        unsafe { self.gl.delete_shader(shader) };
-    }
-
-    pub fn use_program(&self, program: Option<resource::Program>) {
-        unsafe { self.gl.use_program(program) };
-    }
-
-    pub fn delete_program(&self, program: resource::Program) {
-        unsafe { self.gl.delete_program(program) };
-    }
-
-    pub fn shader_source(&self, shader: resource::Shader, source: &str) {
-        unsafe { self.gl.shader_source(shader, source) };
-    }
-
-    pub fn compile_shader(&self, shader: resource::Shader) {
-        unsafe { self.gl.compile_shader(shader) };
-    }
-
-    pub fn check_program(&self, program: resource::Program) -> Result<(), String> {
+    fn check_program(&self, program: resource::Program) -> Result<(), String> {
         unsafe {
             if self.gl.get_program_link_status(program) {
                 Ok(())
@@ -490,7 +479,7 @@ impl OpenGL {
         }
     }
 
-    pub fn check_shader(&self, shader: resource::Shader) -> Result<(), String> {
+    fn check_shader(&self, shader: resource::Shader) -> Result<(), String> {
         unsafe {
             if self.gl.get_shader_compile_status(shader) {
                 Ok(())
@@ -498,6 +487,14 @@ impl OpenGL {
                 Err(self.gl.get_shader_info_log(shader))
             }
         }
+    }
+
+    pub fn use_program(&self, program: Option<resource::Program>) {
+        unsafe { self.gl.use_program(program) };
+    }
+
+    pub fn delete_program(&self, program: resource::Program) {
+        unsafe { self.gl.delete_program(program) };
     }
 
     pub fn get_uniform_location(

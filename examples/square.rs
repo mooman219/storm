@@ -22,11 +22,11 @@ fn main() {
 fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
     engine.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
+
     // Create a batch to draw on. Batches persist between engine.window_commit()'s.
-    let mut screen_settings = BatchSettings {
-        ..BatchSettings::default()
-    };
-    let screen = engine.render.batch_create(&screen_settings);
+    let mut screen = engine.batch_create();
+    let mut screen_transform = BatchTransform::new();
+    let mut sprites = Vec::new();
     // Add all the strings we want to draw to a vec.
     let mut message = String::from("> the quick brown fox jumps over the lazy dog.");
     let mut strings = Vec::new();
@@ -39,8 +39,10 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
     text.color = colors::BLACK;
     strings.push(text);
     // Assign the strings we want to draw to a batch.
-    engine.render.text_set(&screen, &strings);
-    engine.render.clear_color(colors::WHITE);
+    engine.text_clear(&strings, &mut sprites);
+    screen.set_sprites(&sprites);
+
+    engine.clear_color(colors::WHITE);
 
     move |event, engine| match event {
         InputMessage::ReceivedCharacter(char) => {
@@ -54,14 +56,15 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
             text.scale = 16;
             text.color = colors::BLACK;
             strings.push(text);
-            engine.render.text_set(&screen, &strings);
+            engine.text_clear(&strings, &mut sprites);
+            screen.set_sprites(&sprites);
         }
         InputMessage::CloseRequested => engine.stop(),
         InputMessage::KeyPressed(key) => match key {
             KeyboardButton::Escape => engine.stop(),
             KeyboardButton::Tab => {
-                screen_settings.scale = 1.0;
-                engine.render.batch_update(&screen, &screen_settings);
+                screen_transform.scale = 1.0;
+                screen.set_transform(&screen_transform);
             }
             _ => {}
         },
@@ -84,20 +87,20 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
             ..
         } => {
             if is_dragging {
-                screen_settings.translation += delta / screen_settings.scale;
-                engine.render.batch_update(&screen, &screen_settings);
+                screen_transform.translation += delta / screen_transform.scale;
+                screen.set_transform(&screen_transform);
             }
         }
         InputMessage::CursorScroll(direction) => {
             match direction {
-                ScrollDirection::Up => screen_settings.scale *= 1.1,
-                ScrollDirection::Down => screen_settings.scale /= 1.1,
+                ScrollDirection::Up => screen_transform.scale *= 1.1,
+                ScrollDirection::Down => screen_transform.scale /= 1.1,
                 _ => {}
             }
-            engine.render.batch_update(&screen, &screen_settings);
+            screen.set_transform(&screen_transform);
         }
         InputMessage::Update(_delta) => {
-            engine.render.draw();
+            engine.draw();
         }
         _ => {}
     }

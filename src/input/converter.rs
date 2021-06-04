@@ -27,8 +27,14 @@ impl InputConverter {
             // Window
             WindowEvent::CloseRequested => event_handler(InputMessage::CloseRequested, engine),
             WindowEvent::Resized(size) => {
+                engine.window_check_resize();
                 self.window_size = Vector2::new(size.width as f32, size.height as f32);
                 event_handler(InputMessage::WindowResized(self.window_size), engine);
+            }
+            WindowEvent::ScaleFactorChanged {
+                ..
+            } => {
+                engine.window_check_resize();
             }
 
             // Keyboard

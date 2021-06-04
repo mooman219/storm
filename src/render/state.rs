@@ -1,21 +1,13 @@
-use crate::render::buffer::*;
-use crate::render::raw::{
-    BlendFactor, BufferBindingTarget, Capability, ClearBit, CullFace, DepthTest, OpenGL, TextureUnit,
-};
-use crate::render::shader::*;
+use crate::render::raw::{BlendFactor, Capability, ClearBit, CullFace, DepthTest, OpenGL, TextureUnit};
+use crate::render::shader::TextureShader;
 use crate::render::texture_handle::*;
 use crate::render::window::*;
+use crate::render::Batch;
 use crate::texture::*;
 use crate::types::*;
 use cgmath::*;
 
-struct Batch {
-    desc: BatchSettings,
-    sprites: Buffer<Sprite>,
-    strings: Buffer<Sprite>,
-    matrix_transform: Matrix4<f32>,
-    matrix_full: Matrix4<f32>,
-}
+struct Resources {}
 
 pub struct OpenGLState {
     window: OpenGLWindow,
@@ -24,7 +16,7 @@ pub struct OpenGLState {
     texture_atlas: TextureHandle,
     batches: Vec<Batch>,
     matrix_bounds: Matrix4<f32>,
-    current_logical_size: Vector2<f32>,
+    logical_size: Vector2<f32>,
 }
 
 fn matrix_from_bounds(bounds: &Vector2<f32>) -> Matrix4<f32> {
@@ -36,10 +28,24 @@ fn matrix_from_bounds(bounds: &Vector2<f32>) -> Matrix4<f32> {
 impl OpenGLState {
     pub fn new(desc: &WindowSettings, event_loop: &winit::event_loop::EventLoop<()>) -> OpenGLState {
         let (window, gl) = OpenGLWindow::new(desc, event_loop);
+
+        // Setup cabilities.
         let gl = OpenGL::new(gl);
-        let logical_size = window.logical_size();
+        gl.enable(Capability::CullFace);
+        gl.enable(Capability::Blend);
+        gl.enable(Capability::DepthTest);
+        gl.clear_color(0.0, 0.0, 0.0, 1.0);
+        gl.depth_func(DepthTest::Less);
+        gl.blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
+        gl.cull_face(CullFace::Back);
+
+        // Bind shader once.
         let shader = TextureShader::new(gl.clone());
+        shader.bind();
+        shader.texture(TextureUnit::Atlas);
+
         let texture_atlas = TextureHandle::new(gl.clone(), TextureUnit::Atlas);
+        let logical_size = window.logical_size();
         let state = OpenGLState {
             window,
             gl,
@@ -47,25 +53,15 @@ impl OpenGLState {
             texture_atlas,
             batches: Vec::new(),
             matrix_bounds: matrix_from_bounds(&logical_size),
-            current_logical_size: logical_size,
+            logical_size,
         };
-        // Bind shader once.
-        state.shader.bind();
-        state.shader.texture(TextureUnit::Atlas);
-        // Setup cabilities.
-        state.gl.enable(Capability::CullFace);
-        state.gl.enable(Capability::Blend);
-        state.gl.enable(Capability::DepthTest);
-        state.gl.clear_color(0.0, 0.0, 0.0, 1.0);
-        state.gl.depth_func(DepthTest::Less);
-        state.gl.blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
-        state.gl.cull_face(CullFace::Back);
+
         // State is setup.
         state
     }
 
-    pub fn current_logical_size(&self) -> Vector2<f32> {
-        self.current_logical_size
+    pub fn logical_size(&self) -> Vector2<f32> {
+        self.logical_size
     }
 
     pub fn clear_color(&mut self, color: RGBA8) {
@@ -85,68 +81,39 @@ impl OpenGLState {
         self.texture_atlas.set_texture(texture);
     }
 
-    pub fn batch_create(&mut self, desc: &BatchSettings) {
-        let matrix_transform = desc.transform_matrix();
-        let matrix_full = self.matrix_bounds * matrix_transform;
-        self.batches.push(Batch {
-            desc: *desc,
-            sprites: Buffer::new(self.gl.clone(), BufferBindingTarget::ArrayBuffer),
-            strings: Buffer::new(self.gl.clone(), BufferBindingTarget::ArrayBuffer),
-            matrix_transform,
-            matrix_full,
-        });
+    pub fn batch_create(&mut self) -> Batch {
+        let (a, b) = Batch::new(self.gl.clone(), &self.matrix_bounds);
+        self.batches.push(a);
+        b
     }
 
-    pub fn batch_update(&mut self, index: usize, desc: &BatchSettings) {
-        let batch = &mut self.batches[index];
-        let matrix_transform = desc.transform_matrix();
-        let matrix_full = self.matrix_bounds * matrix_transform;
-        batch.desc = *desc;
-        batch.matrix_transform = matrix_transform;
-        batch.matrix_full = matrix_full;
-    }
-
-    pub fn batch_sprite_set(&mut self, index: usize, quads: &Vec<Sprite>) {
-        self.batches[index].sprites.set(quads);
-    }
-
-    pub fn batch_string_set(&mut self, index: usize, quads: &Vec<Sprite>) {
-        self.batches[index].strings.set(quads);
-    }
-
-    pub fn batch_remove(&mut self, index: usize) {
-        self.batches.swap_remove(index);
-    }
-
-    /// Helper function to resize the window.
-    fn resize(&mut self) {
+    pub fn window_check_resize(&mut self) {
         let new_logical_size = self.window.logical_size();
-        if self.current_logical_size != new_logical_size {
+        if self.logical_size != new_logical_size {
+            self.logical_size = new_logical_size;
             let new_physical_size = self.window.physical_size();
-            trace!("Window resized {:?}", new_physical_size);
-            self.current_logical_size = new_logical_size;
             self.gl.viewport(0, 0, new_physical_size.x as i32, new_physical_size.y as i32);
+
+            trace!("Window resized: Physical({:?}) Logical({:?})", new_physical_size, new_logical_size);
+
+            // Update the full transform of all the batches.
             self.matrix_bounds = matrix_from_bounds(&new_logical_size);
             for batch in &mut self.batches {
-                batch.matrix_full = self.matrix_bounds * batch.matrix_transform;
+                batch.set_ortho(&self.matrix_bounds);
             }
         }
     }
 
+    pub fn window_swap_buffers(&mut self) {
+        self.window.swap_buffers();
+    }
+
     pub fn draw(&mut self) {
-        self.resize();
         self.gl.clear(ClearBit::ColorBuffer | ClearBit::DepthBuffer);
         for batch in &mut self.batches {
-            if batch.desc.visible {
-                self.shader.ortho(&batch.matrix_full);
-                if batch.sprites.len() > 0 {
-                    batch.sprites.draw();
-                }
-                self.gl.clear(ClearBit::DepthBuffer);
-                if batch.strings.len() > 0 {
-                    batch.strings.draw();
-                }
-            }
+            // todo, cleanup batches with a count of 1
+            // can do it in drop
+            batch.draw(&self.shader);
         }
         self.window.swap_buffers();
     }

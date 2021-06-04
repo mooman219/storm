@@ -23,11 +23,11 @@ fn main() {
 
 fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
     engine.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
-    engine.render.clear_color(storm::colors::BLUE);
+    engine.clear_color(storm::colors::BLUE);
 
-    let screen = engine.render.batch_create(&BatchSettings::default());
-    let texture_1 = engine.render.texture_create(TEXTURE_A.as_ref(), TextureFormat::PNG);
-    let texture_2 = engine.render.texture_create(TEXTURE_B.as_ref(), TextureFormat::PNG);
+    let mut screen = engine.batch_create();
+    let texture_1 = engine.texture_create(TEXTURE_A.as_ref(), TextureFormat::PNG);
+    let texture_2 = engine.texture_create(TEXTURE_B.as_ref(), TextureFormat::PNG);
     let texture_2 = texture_2.sub_texture(0, 0, 16, 16).unwrap();
 
     let mut sprites = Vec::new();
@@ -48,7 +48,7 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
     sprite.pos.z = 0.1;
     sprites.push(sprite);
 
-    engine.render.sprite_set(&screen, &sprites);
+    screen.set_sprites(&sprites);
 
     move |event, engine| match event {
         InputMessage::CloseRequested => engine.stop(),
@@ -61,7 +61,7 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
         } => {
             let sprite = &mut sprites[4];
             sprite.texture = sprite.texture.mirror_x();
-            engine.render.sprite_set(&screen, &sprites);
+            screen.set_sprites(&sprites);
         }
         InputMessage::CursorMoved {
             pos,
@@ -69,10 +69,10 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
         } => {
             let sprite = &mut sprites[4];
             sprite.pos = pos.extend(0.1);
-            engine.render.sprite_set(&screen, &sprites);
+            screen.set_sprites(&sprites);
         }
         InputMessage::Update(_delta) => {
-            engine.render.draw();
+            engine.draw();
         }
         _ => {}
     }

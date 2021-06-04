@@ -1,5 +1,4 @@
 use crate::render::raw::{resource, OpenGL, TextureUnit};
-use crate::render::shader::shader_program::*;
 use cgmath::*;
 
 static VERTEX: &str = r#"#version 300 es
@@ -75,16 +74,16 @@ void main() {
 
 pub struct TextureShader {
     gl: OpenGL,
-    program: ShaderProgram,
+    program: resource::Program,
     uniform_ortho: resource::UniformLocation,
     uniform_texture: resource::UniformLocation,
 }
 
 impl TextureShader {
     pub fn new(gl: OpenGL) -> TextureShader {
-        let program = ShaderProgram::new(gl.clone(), VERTEX, FRAGMENT);
-        let uniform_ortho = program.get_uniform_location("ortho");
-        let uniform_texture = program.get_uniform_location("tex[0]");
+        let program = gl.shader_program(VERTEX, FRAGMENT);
+        let uniform_ortho = gl.get_uniform_location(program, "ortho").unwrap();
+        let uniform_texture = gl.get_uniform_location(program, "tex[0]").unwrap();
         TextureShader {
             gl,
             program,
@@ -94,7 +93,7 @@ impl TextureShader {
     }
 
     pub fn bind(&self) {
-        self.program.bind();
+        self.gl.use_program(Some(self.program));
     }
 
     /// Updates the ortho uniform in the shader.
@@ -106,5 +105,11 @@ impl TextureShader {
     pub fn texture(&self, unit: TextureUnit) {
         let unit = (unit as u32 - TextureUnit::Atlas as u32) as i32;
         self.gl.uniform_1i(Some(&self.uniform_texture), unit);
+    }
+}
+
+impl Drop for TextureShader {
+    fn drop(&mut self) {
+        self.gl.delete_program(self.program);
     }
 }

@@ -51,7 +51,7 @@ impl TextCache {
     //     self.add_font_bytes(&bytes)
     // }
 
-    pub fn rasterize(&mut self, atlas: &mut TextureAtlas, desc: &Text, quads: &mut Vec<Sprite>) {
+    pub fn rasterize(&mut self, atlas: &mut TextureAtlas, desc: &Text, sprites: &mut Vec<Sprite>) {
         let font_index = desc.font.key();
         let font = &self.fonts[font_index];
         self.layout.reset(&LayoutSettings {
@@ -84,7 +84,7 @@ impl TextCache {
                     value
                 }
             };
-            quads.push(Sprite::new(
+            sprites.push(Sprite::new(
                 Vector3::new(position.x, position.y, desc.pos.z),
                 value.size,
                 Texture(value.uv),
