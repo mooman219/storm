@@ -44,15 +44,17 @@ impl<T: VertexDescription + Copy> Buffer<T> {
     pub fn set(&mut self, items: &Vec<T>) {
         self.vertices = items.len();
         if self.vertices > 0 {
-            self.state.gl.bind_buffer(self.buffer_type, Some(self.vbo));
-            self.state.gl.buffer_data(self.buffer_type, items, BufferUsage::StaticDraw);
+            let gl = &self.state.gl;
+            gl.bind_buffer(self.buffer_type, Some(self.vbo));
+            gl.buffer_data(self.buffer_type, items, BufferUsage::StaticDraw);
         }
     }
 
     pub fn draw(&self) {
         if self.vertices > 0 {
-            self.state.gl.bind_vertex_array(Some(self.vao));
-            self.state.gl.draw_arrays_instanced(DrawMode::TriangleStrip, 0, 4, self.vertices as i32);
+            let gl = &self.state.gl;
+            gl.bind_vertex_array(Some(self.vao));
+            gl.draw_arrays_instanced(DrawMode::TriangleStrip, 0, 4, self.vertices as i32);
         }
     }
 }

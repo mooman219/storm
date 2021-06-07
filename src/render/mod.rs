@@ -11,6 +11,7 @@ use self::raw::{OpenGL, TextureUnit};
 use self::state::OpenGLState;
 use self::texture_handle::*;
 use self::window::*;
+use crate::math::ortho_from_bounds;
 use crate::text::*;
 use crate::texture::*;
 use crate::types::*;
@@ -19,12 +20,6 @@ use cgmath::*;
 
 pub use self::layer::Layer;
 pub use self::raw::ClearMode;
-
-pub fn matrix_from_bounds(bounds: &Vector2<f32>) -> Matrix4<f32> {
-    let w = bounds.x / 2.0;
-    let h = bounds.y / 2.0;
-    ortho(-w.floor(), w.ceil(), -h.floor(), h.ceil(), -1.0, 1.0)
-}
 
 pub struct Renderer {
     window: OpenGLWindow,
@@ -50,7 +45,7 @@ impl Renderer {
             window,
             state: state,
             texture_atlas,
-            matrix_bounds: matrix_from_bounds(&logical_size),
+            matrix_bounds: ortho_from_bounds(&logical_size),
             logical_size,
             atlas: TextureAtlas::new(),
             text_cache: TextCache::new(),
@@ -116,7 +111,7 @@ impl Renderer {
         if self.logical_size != new_logical_size {
             self.logical_size = new_logical_size;
             let new_physical_size = self.window.physical_size();
-            self.matrix_bounds = matrix_from_bounds(&new_logical_size);
+            self.matrix_bounds = ortho_from_bounds(&new_logical_size);
 
             trace!("Window resized: Physical({:?}) Logical({:?})", new_physical_size, new_logical_size);
 
