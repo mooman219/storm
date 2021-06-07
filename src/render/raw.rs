@@ -1,4 +1,3 @@
-use crate::utility::bad::UnsafeShared;
 use glow::HasContext;
 
 #[repr(u32)]
@@ -79,11 +78,31 @@ pub enum DepthTest {
     GreaterEqual = glow::GEQUAL,
 }
 
-#[allow(non_snake_case, non_upper_case_globals)]
-pub mod ClearBit {
-    pub const ColorBuffer: u32 = glow::COLOR_BUFFER_BIT;
-    pub const DepthBuffer: u32 = glow::DEPTH_BUFFER_BIT;
-    pub const StencilBuffer: u32 = glow::STENCIL_BUFFER_BIT;
+/// Describes how the screen will be cleared. Can be composed with other clear modes with the binary
+/// or operator. I.e. ClearMode::COLOR | ClearMode::DEPTH.
+pub struct ClearMode(u32);
+
+impl ClearMode {
+    /// Clears the color buffer.
+    pub const COLOR: ClearMode = ClearMode(glow::COLOR_BUFFER_BIT);
+    /// Clears the depth buffer.
+    pub const DEPTH: ClearMode = ClearMode(glow::DEPTH_BUFFER_BIT);
+    /// Clears the stencil buffer.
+    pub const STENCIL: ClearMode = ClearMode(glow::STENCIL_BUFFER_BIT);
+}
+
+impl core::ops::BitOr for ClearMode {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        ClearMode(self.0 | rhs.0)
+    }
+}
+
+impl core::ops::BitOrAssign for ClearMode {
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.0 |= rhs.0;
+    }
 }
 
 #[repr(u32)]
@@ -417,19 +436,13 @@ pub mod resource {
 }
 
 pub struct OpenGL {
-    gl: UnsafeShared<glow::Context>,
+    gl: glow::Context,
 }
 
 impl OpenGL {
     pub fn new(gl: glow::Context) -> OpenGL {
         OpenGL {
-            gl: UnsafeShared::new(gl),
-        }
-    }
-
-    pub fn clone(&self) -> OpenGL {
-        OpenGL {
-            gl: self.gl.clone(),
+            gl,
         }
     }
 
@@ -700,7 +713,7 @@ impl OpenGL {
         unsafe { self.gl.viewport(x, y, width, height) };
     }
 
-    pub fn clear(&self, mask: u32) {
-        unsafe { self.gl.clear(mask) };
+    pub fn clear(&self, mask: ClearMode) {
+        unsafe { self.gl.clear(mask.0) };
     }
 }

@@ -5,7 +5,7 @@ use cgmath::*;
 
 const MAX: u32 = 65536;
 const SIZE: u32 = 4096;
-pub(crate) const PIXEL_SIZE: u32 = MAX / SIZE;
+pub const PIXEL_SIZE: u32 = MAX / SIZE;
 const NUDGE: u16 = 4;
 
 pub struct TextureAtlas {

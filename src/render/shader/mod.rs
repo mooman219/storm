@@ -1,3 +1,1 @@
-mod texture;
-
-pub use self::texture::TextureShader;
+pub mod texture;

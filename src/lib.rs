@@ -8,7 +8,7 @@ pub mod math;
 pub mod time;
 
 pub use crate::input::*;
-pub use crate::render::Batch;
+pub use crate::render::{ClearMode, Layer};
 pub use crate::types::*;
 pub use cgmath;
 
@@ -77,6 +77,7 @@ impl Engine {
                         let delta = (now - engine.last_update).as_secs_f32();
                         update_timer.start();
                         event_handler(InputMessage::Update(delta), &mut engine);
+                        engine.render.window_swap_buffers();
                         update_timer.stop();
                         engine.last_update = now;
                     }
@@ -101,13 +102,13 @@ impl Engine {
     }
 
     // ////////////////////////////////////////////////////////
-    // Batch
+    // Layer
     // ////////////////////////////////////////////////////////
 
-    /// Creates a new batch. Batches represent draw calls and hold configuration associated with
+    /// Creates a new layer. Layers represent draw calls and hold configuration associated with
     /// drawing to the screen.
-    pub fn batch_create(&mut self) -> Batch {
-        self.render.batch_create()
+    pub fn layer_create(&mut self) -> Layer {
+        self.render.layer_create()
     }
 
     // ////////////////////////////////////////////////////////
@@ -159,9 +160,9 @@ impl Engine {
         self.render.clear_color(clear_color);
     }
 
-    /// Draws the current renderer state to the screen.
-    pub fn draw(&mut self) {
-        self.render.draw();
+    /// Clears the screen buffers according to the clear mode.
+    pub fn clear(&mut self, clear_mode: ClearMode) {
+        self.render.clear(clear_mode);
     }
 
     // ////////////////////////////////////////////////////////

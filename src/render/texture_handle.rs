@@ -1,23 +1,25 @@
 use crate::render::raw::{
-    resource, OpenGL, PixelFormat, PixelInternalFormat, PixelType, TextureBindingTarget, TextureLoadTarget,
+    resource, PixelFormat, PixelInternalFormat, PixelType, TextureBindingTarget, TextureLoadTarget,
     TextureMagFilterValue, TextureMinFilterValue, TextureParameterTarget, TextureUnit, TextureWrapValue,
 };
+use crate::render::OpenGLState;
 use crate::texture::*;
+use crate::utility::bad::UnsafeShared;
 
 static DEFAULT: [u8; 4] = [255u8, 255u8, 255u8, 255u8];
 
 pub struct TextureHandle {
-    gl: OpenGL,
+    state: UnsafeShared<OpenGLState>,
     id: resource::Texture,
     unit: TextureUnit,
 }
 
 impl TextureHandle {
-    pub fn new(gl: OpenGL, texture_unit: TextureUnit) -> TextureHandle {
-        let id = gl.create_texture();
+    pub fn new(state: UnsafeShared<OpenGLState>, texture_unit: TextureUnit) -> TextureHandle {
+        let id = state.gl.create_texture();
         let unit = texture_unit;
         let texture = TextureHandle {
-            gl,
+            state,
             id,
             unit,
         };
@@ -33,9 +35,10 @@ impl TextureHandle {
     }
 
     fn set_raw<T: Sized>(&self, width: i32, height: i32, buffer: &[T]) {
-        self.gl.active_texture(self.unit);
-        self.gl.bind_texture(TextureBindingTarget::Texture2D, Some(self.id));
-        self.gl.tex_image_2d(
+        let gl = &self.state.gl;
+        gl.active_texture(self.unit);
+        gl.bind_texture(TextureBindingTarget::Texture2D, Some(self.id));
+        gl.tex_image_2d(
             TextureLoadTarget::Texture2D,
             0,
             width,
@@ -46,15 +49,15 @@ impl TextureHandle {
             PixelType::UnsignedByte,
             buffer,
         );
-        self.gl.tex_parameter_wrap_s(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
-        self.gl.tex_parameter_wrap_t(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
-        self.gl.tex_parameter_min_filter(TextureParameterTarget::Texture2D, TextureMinFilterValue::Nearest);
-        self.gl.tex_parameter_mag_filter(TextureParameterTarget::Texture2D, TextureMagFilterValue::Nearest);
+        gl.tex_parameter_wrap_s(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
+        gl.tex_parameter_wrap_t(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
+        gl.tex_parameter_min_filter(TextureParameterTarget::Texture2D, TextureMinFilterValue::Nearest);
+        gl.tex_parameter_mag_filter(TextureParameterTarget::Texture2D, TextureMagFilterValue::Nearest);
     }
 }
 
 impl Drop for TextureHandle {
     fn drop(&mut self) {
-        self.gl.delete_texture(self.id);
+        self.state.gl.delete_texture(self.id);
     }
 }

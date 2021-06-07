@@ -2,10 +2,10 @@ use cgmath::*;
 
 /// Utility type to create simple transformation matrices.
 #[derive(Copy, Clone, Debug, PartialEq)]
-pub struct BatchTransform {
-    /// The translation of the batch.
+pub struct LayerTransform {
+    /// The translation of the layer.
     pub translation: Vector2<f32>,
-    /// The zoom level of the batch. This is 1.0 by default, meaning 1 pixel takes up 1x1 pixels on
+    /// The zoom level of the layer. This is 1.0 by default, meaning 1 pixel takes up 1x1 pixels on
     /// screen.
     pub scale: f32,
     /// Rotation is measured in turns from [0, 1). Values outside of the range are wrapped into the
@@ -13,16 +13,16 @@ pub struct BatchTransform {
     pub rotation: f32,
 }
 
-impl BatchTransform {
-    pub fn new() -> BatchTransform {
-        BatchTransform {
+impl LayerTransform {
+    pub fn new() -> LayerTransform {
+        LayerTransform {
             translation: Vector2::new(0.0, 0.0),
             scale: 1.0,
             rotation: 0.0,
         }
     }
 
-    /// Creates a new transform matix based on the parameters of the BatchSettings. The transform
+    /// Creates a new transform matix based on the parameters of the LayerTransform. The transform
     /// matrix is built in this order: Scale * Translation * Rotation.
     pub fn to_matrix(&self) -> Matrix4<f32> {
         let mut translation = self.translation;

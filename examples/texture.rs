@@ -25,7 +25,7 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
     engine.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     engine.clear_color(storm::colors::BLUE);
 
-    let mut screen = engine.batch_create();
+    let mut screen = engine.layer_create();
     let texture_1 = engine.texture_create(TEXTURE_A.as_ref(), TextureFormat::PNG);
     let texture_2 = engine.texture_create(TEXTURE_B.as_ref(), TextureFormat::PNG);
     let texture_2 = texture_2.sub_texture(0, 0, 16, 16).unwrap();
@@ -72,7 +72,8 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
             screen.set_sprites(&sprites);
         }
         InputMessage::Update(_delta) => {
-            engine.draw();
+            engine.clear(ClearMode::COLOR | ClearMode::DEPTH);
+            screen.draw();
         }
         _ => {}
     }

@@ -23,9 +23,9 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
     engine.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
 
-    // Create a batch to draw on. Batches persist between engine.window_commit()'s.
-    let mut screen = engine.batch_create();
-    let mut screen_transform = BatchTransform::new();
+    // Create a Layers to draw on.
+    let mut screen = engine.layer_create();
+    let mut screen_transform = LayerTransform::new();
     let mut sprites = Vec::new();
     // Add all the strings we want to draw to a vec.
     let mut message = String::from("> the quick brown fox jumps over the lazy dog.");
@@ -100,7 +100,8 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
             screen.set_transform(&screen_transform);
         }
         InputMessage::Update(_delta) => {
-            engine.draw();
+            engine.clear(ClearMode::COLOR | ClearMode::DEPTH);
+            screen.draw();
         }
         _ => {}
     }

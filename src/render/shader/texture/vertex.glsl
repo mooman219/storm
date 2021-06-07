@@ -1,7 +1,4 @@
-use crate::render::raw::{resource, OpenGL, TextureUnit};
-use cgmath::*;
-
-static VERTEX: &str = r#"#version 300 es
+#version 300 es
 precision highp float;
 
 const float PI     = 3.141592653589793238462643383279;
@@ -53,63 +50,4 @@ void main() {
     vec3 size = vec3(a_size * pos_lut[gl_VertexID], 0.0);
     vec3 pos = a_pos + size;
     gl_Position = ortho * rotateZ(pos);
-}
-"#;
-static FRAGMENT: &str = r#"#version 300 es
-precision mediump float;
-
-in vec2 v_uv;
-in vec4 v_color;
-out vec4 a_color;
-
-uniform sampler2D tex[1];
-
-void main() {
-    a_color = texture(tex[0], v_uv) * v_color;
-    if (a_color.a <= 0.0) {
-        discard;
-    }
-}
-"#;
-
-pub struct TextureShader {
-    gl: OpenGL,
-    program: resource::Program,
-    uniform_ortho: resource::UniformLocation,
-    uniform_texture: resource::UniformLocation,
-}
-
-impl TextureShader {
-    pub fn new(gl: OpenGL) -> TextureShader {
-        let program = gl.shader_program(VERTEX, FRAGMENT);
-        let uniform_ortho = gl.get_uniform_location(program, "ortho").unwrap();
-        let uniform_texture = gl.get_uniform_location(program, "tex[0]").unwrap();
-        TextureShader {
-            gl,
-            program,
-            uniform_ortho,
-            uniform_texture,
-        }
-    }
-
-    pub fn bind(&self) {
-        self.gl.use_program(Some(self.program));
-    }
-
-    /// Updates the ortho uniform in the shader.
-    pub fn ortho(&self, matrix: &Matrix4<f32>) {
-        self.gl.uniform_matrix_4fv(Some(&self.uniform_ortho), false, matrix.as_ref());
-    }
-
-    /// Updates the texture uniform in the shader.
-    pub fn texture(&self, unit: TextureUnit) {
-        let unit = (unit as u32 - TextureUnit::Atlas as u32) as i32;
-        self.gl.uniform_1i(Some(&self.uniform_texture), unit);
-    }
-}
-
-impl Drop for TextureShader {
-    fn drop(&mut self) {
-        self.gl.delete_program(self.program);
-    }
 }

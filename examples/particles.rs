@@ -26,8 +26,8 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
     engine.clear_color(BLACK);
     let mut is_dragging = false;
 
-    let mut screen = engine.batch_create();
-    let mut screen_transform = BatchTransform::new();
+    let mut screen = engine.layer_create();
+    let mut screen_transform = LayerTransform::new();
     screen_transform.rotation = 0.125;
     screen.set_transform(&screen_transform);
 
@@ -85,7 +85,8 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
                 Particle::tick(&mut sprites[index], &mut particles[index], delta);
             }
             screen.set_sprites(&sprites);
-            engine.draw();
+            engine.clear(ClearMode::COLOR | ClearMode::DEPTH);
+            screen.draw();
         }
         _ => {}
     }
