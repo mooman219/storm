@@ -4,22 +4,19 @@ use crate::render::raw::{
 };
 use crate::render::OpenGLState;
 use crate::texture::*;
-use crate::utility::bad::UnsafeShared;
 
 static DEFAULT: [u8; 4] = [255u8, 255u8, 255u8, 255u8];
 
 pub struct TextureHandle {
-    state: UnsafeShared<OpenGLState>,
     id: resource::Texture,
     unit: TextureUnit,
 }
 
 impl TextureHandle {
-    pub fn new(state: UnsafeShared<OpenGLState>, texture_unit: TextureUnit) -> TextureHandle {
-        let id = state.gl.create_texture();
+    pub fn new(texture_unit: TextureUnit) -> TextureHandle {
+        let id = OpenGLState::ctx().gl.create_texture();
         let unit = texture_unit;
         let texture = TextureHandle {
-            state,
             id,
             unit,
         };
@@ -35,7 +32,7 @@ impl TextureHandle {
     }
 
     fn set_raw<T: Sized>(&self, width: i32, height: i32, buffer: &[T]) {
-        let gl = &self.state.gl;
+        let gl = &OpenGLState::ctx().gl;
         gl.active_texture(self.unit);
         gl.bind_texture(TextureBindingTarget::Texture2D, Some(self.id));
         gl.tex_image_2d(
@@ -58,6 +55,6 @@ impl TextureHandle {
 
 impl Drop for TextureHandle {
     fn drop(&mut self) {
-        self.state.gl.delete_texture(self.id);
+        OpenGLState::ctx().gl.delete_texture(self.id);
     }
 }

@@ -8,7 +8,7 @@ pub mod math;
 pub mod time;
 
 pub use crate::input::*;
-pub use crate::render::{ClearMode, Layer};
+pub use crate::render::SpriteLayer;
 pub use crate::types::*;
 pub use cgmath;
 
@@ -26,9 +26,9 @@ use core::time::Duration;
 use winit::event::Event;
 use winit::event_loop::ControlFlow;
 
-/// The main entry point into the Storm engine. All interactions with the engine are managed by the
-/// API on this type. The engine is send, and can be moved between threads.
-pub struct Engine {
+/// The main entry point into the engine context. All interactions with the context are managed by
+/// the API on this type.
+pub struct Context {
     render: Renderer,
     stop: bool,
     control_flow: Option<ControlFlow>,
@@ -37,17 +37,16 @@ pub struct Engine {
     wait_periodic: Option<Duration>,
 }
 
-impl Engine {
-    // 'static + FnMut(&mut Engine) -> FnMut(InputMessage, &mut Engine)
-    pub fn start<T: 'static + FnMut(InputMessage, &mut Engine)>(
+impl Context {
+    // 'static + FnMut(&mut Context) -> FnMut(InputMessage, &mut Context)
+    pub fn start<T: 'static + FnMut(InputMessage, &mut Context)>(
         desc: WindowSettings,
-        event_handler_creator: fn(&mut Engine) -> T,
-    ) {
-        info!("Starting engine");
+        event_handler_creator: fn(&mut Context) -> T,
+    ) -> ! {
         let event_loop = winit::event_loop::EventLoop::new();
         let render = Renderer::new(&desc, &event_loop);
         let mut input = InputConverter::new(render.window_logical_size());
-        let mut engine = Engine {
+        let mut context = Context {
             render,
             stop: false,
             control_flow: Some(ControlFlow::Poll),
@@ -55,44 +54,41 @@ impl Engine {
             wait_next: Instant::now(),
             wait_periodic: None,
         };
-        info!("Starting handler");
-        let mut event_handler = event_handler_creator(&mut engine);
+        let mut event_handler = event_handler_creator(&mut context);
         let mut update_timer = Timer::new("InputMessage::Update");
-        info!("Starting loop");
         event_loop.run(move |event, _, control_flow| {
             match event {
                 Event::WindowEvent {
                     event,
                     ..
                 } => {
-                    input.push(event, &mut event_handler, &mut engine);
+                    input.push(event, &mut event_handler, &mut context);
                 }
                 Event::MainEventsCleared => {
                     let now = Instant::now();
-                    if now >= engine.wait_next {
-                        if let Some(duration) = engine.wait_periodic {
-                            engine.wait_next = now + duration;
-                            engine.control_flow = Some(ControlFlow::WaitUntil(engine.wait_next));
+                    if now >= context.wait_next {
+                        if let Some(duration) = context.wait_periodic {
+                            context.wait_next = now + duration;
+                            context.control_flow = Some(ControlFlow::WaitUntil(context.wait_next));
                         }
-                        let delta = (now - engine.last_update).as_secs_f32();
+                        let delta = (now - context.last_update).as_secs_f32();
                         update_timer.start();
-                        event_handler(InputMessage::Update(delta), &mut engine);
-                        engine.render.window_swap_buffers();
+                        event_handler(InputMessage::Update(delta), &mut context);
+                        context.render.window_swap_buffers();
                         update_timer.stop();
-                        engine.last_update = now;
+                        context.last_update = now;
                     }
                 }
                 Event::LoopDestroyed => {
-                    info!("Stopped engine");
-                    engine.stop = true;
+                    context.stop = true;
                 }
                 _ => {}
             }
-            if engine.stop {
+            if context.stop {
                 *control_flow = ControlFlow::Exit;
-            } else if let Some(next_control_flow) = engine.control_flow {
+            } else if let Some(next_control_flow) = context.control_flow {
                 *control_flow = next_control_flow;
-                engine.control_flow = None;
+                context.control_flow = None;
             }
         });
     }
@@ -105,10 +101,10 @@ impl Engine {
     // Layer
     // ////////////////////////////////////////////////////////
 
-    /// Creates a new layer. Layers represent draw calls and hold configuration associated with
-    /// drawing to the screen.
-    pub fn layer_create(&mut self) -> Layer {
-        self.render.layer_create()
+    /// Creates a new sprite layer. Layers represent draw calls and hold configuration associated
+    /// with drawing to the screen.
+    pub fn layer_sprite(&mut self) -> SpriteLayer {
+        self.render.layer_sprite()
     }
 
     // ////////////////////////////////////////////////////////
@@ -155,23 +151,12 @@ impl Engine {
         self.render.window_display_mode(display_mode);
     }
 
-    /// Sets the clear color for the window.
-    pub fn clear_color(&mut self, clear_color: RGBA8) {
-        self.render.clear_color(clear_color);
-    }
-
-    /// Clears the screen buffers according to the clear mode.
-    pub fn clear(&mut self, clear_mode: ClearMode) {
-        self.render.clear(clear_mode);
-    }
-
     // ////////////////////////////////////////////////////////
     // Control
     // ////////////////////////////////////////////////////////
 
-    /// Stops the engine after the next update.
+    /// Stops the context after the next update.
     pub fn stop(&mut self) {
-        info!("Stopping engine");
         self.stop = true;
     }
 

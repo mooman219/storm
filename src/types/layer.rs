@@ -24,7 +24,7 @@ impl LayerTransform {
 
     /// Creates a new transform matix based on the parameters of the LayerTransform. The transform
     /// matrix is built in this order: Scale * Translation * Rotation.
-    pub fn to_matrix(&self) -> Matrix4<f32> {
+    pub fn matrix(&self) -> Matrix4<f32> {
         let mut translation = self.translation;
         translation.x = (translation.x * self.scale).floor() / self.scale;
         translation.y = (translation.y * self.scale).floor() / self.scale;

@@ -1,3 +1,4 @@
+use crate::RGBA8;
 use glow::HasContext;
 
 #[repr(u32)]
@@ -78,31 +79,10 @@ pub enum DepthTest {
     GreaterEqual = glow::GEQUAL,
 }
 
-/// Describes how the screen will be cleared. Can be composed with other clear modes with the binary
-/// or operator. I.e. ClearMode::COLOR | ClearMode::DEPTH.
-pub struct ClearMode(u32);
-
-impl ClearMode {
-    /// Clears the color buffer.
-    pub const COLOR: ClearMode = ClearMode(glow::COLOR_BUFFER_BIT);
-    /// Clears the depth buffer.
-    pub const DEPTH: ClearMode = ClearMode(glow::DEPTH_BUFFER_BIT);
-    /// Clears the stencil buffer.
-    pub const STENCIL: ClearMode = ClearMode(glow::STENCIL_BUFFER_BIT);
-}
-
-impl core::ops::BitOr for ClearMode {
-    type Output = Self;
-
-    fn bitor(self, rhs: Self) -> Self::Output {
-        ClearMode(self.0 | rhs.0)
-    }
-}
-
-impl core::ops::BitOrAssign for ClearMode {
-    fn bitor_assign(&mut self, rhs: Self) {
-        self.0 |= rhs.0;
-    }
+pub mod ClearMode {
+    pub const COLOR: u32 = glow::COLOR_BUFFER_BIT;
+    pub const DEPTH: u32 = glow::DEPTH_BUFFER_BIT;
+    pub const STENCIL: u32 = glow::STENCIL_BUFFER_BIT;
 }
 
 #[repr(u32)]
@@ -693,7 +673,8 @@ impl OpenGL {
         unsafe { self.gl.enable(capability as u32) };
     }
 
-    pub fn clear_color(&self, red: f32, green: f32, blue: f32, alpha: f32) {
+    pub fn clear_color(&self, color: RGBA8) {
+        let (red, green, blue, alpha) = color.into();
         unsafe { self.gl.clear_color(red, green, blue, alpha) };
     }
 
@@ -713,7 +694,7 @@ impl OpenGL {
         unsafe { self.gl.viewport(x, y, width, height) };
     }
 
-    pub fn clear(&self, mask: ClearMode) {
-        unsafe { self.gl.clear(mask.0) };
+    pub fn clear(&self, mask: u32) {
+        unsafe { self.gl.clear(mask) };
     }
 }

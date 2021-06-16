@@ -7,7 +7,7 @@ static TEXTURE_B: &[u8] = include_bytes!("resources/1.png");
 /// Run with: cargo run --example texture --release
 fn main() {
     simple_logger::SimpleLogger::new().init().expect("Unable to init logger");
-    Engine::start(
+    Context::start(
         WindowSettings {
             title: String::from("Storm: Texture"),
             display_mode: DisplayMode::Windowed {
@@ -21,13 +21,13 @@ fn main() {
     );
 }
 
-fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
-    engine.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
-    engine.clear_color(storm::colors::BLUE);
+fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
+    ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
-    let mut screen = engine.layer_create();
-    let texture_1 = engine.texture_create(TEXTURE_A.as_ref(), TextureFormat::PNG);
-    let texture_2 = engine.texture_create(TEXTURE_B.as_ref(), TextureFormat::PNG);
+    let mut screen = ctx.layer_sprite();
+    screen.clear_mode(Some(ClearMode::color_depth(colors::BLUE)));
+    let texture_1 = ctx.texture_create(TEXTURE_A.as_ref(), TextureFormat::PNG);
+    let texture_2 = ctx.texture_create(TEXTURE_B.as_ref(), TextureFormat::PNG);
     let texture_2 = texture_2.sub_texture(0, 0, 16, 16).unwrap();
 
     let mut sprites = Vec::new();
@@ -72,7 +72,6 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
             screen.set_sprites(&sprites);
         }
         InputMessage::Update(_delta) => {
-            engine.clear(ClearMode::COLOR | ClearMode::DEPTH);
             screen.draw();
         }
         _ => {}

@@ -54,3 +54,9 @@ impl Into<Vector4<f32>> for RGBA8 {
         )
     }
 }
+
+impl Into<(f32, f32, f32, f32)> for RGBA8 {
+    fn into(self) -> (f32, f32, f32, f32) {
+        ((self.r as f32) / 255.0, (self.g as f32) / 255.0, (self.b as f32) / 255.0, (self.a as f32) / 255.0)
+    }
+}

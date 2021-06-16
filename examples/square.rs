@@ -5,7 +5,7 @@ use storm::*;
 fn main() {
     simple_logger::SimpleLogger::new().init().expect("Unable to init logger");
     // Create the engine context and describe the window.
-    Engine::start(
+    Context::start(
         WindowSettings {
             title: String::from("Storm: Square"),
             display_mode: DisplayMode::Windowed {
@@ -19,16 +19,17 @@ fn main() {
     );
 }
 
-fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
-    engine.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
+fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
+    ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
 
     // Create a Layers to draw on.
-    let mut screen = engine.layer_create();
+    let mut screen = ctx.layer_sprite();
+    screen.clear_mode(Some(ClearMode::color_depth(colors::WHITE)));
     let mut screen_transform = LayerTransform::new();
     let mut sprites = Vec::new();
     // Add all the strings we want to draw to a vec.
-    let mut message = String::from("> the quick brown fox jumps over the lazy dog.");
+    let mut message = String::from("> Teh quick brown fox jumps over the lazy dog.");
     let mut strings = Vec::new();
     let mut text = Text::default();
     text.set_string(&message);
@@ -39,10 +40,8 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
     text.color = colors::BLACK;
     strings.push(text);
     // Assign the strings we want to draw to a batch.
-    engine.text_clear(&strings, &mut sprites);
+    ctx.text_clear(&strings, &mut sprites);
     screen.set_sprites(&sprites);
-
-    engine.clear_color(colors::WHITE);
 
     move |event, engine| match event {
         InputMessage::ReceivedCharacter(char) => {
@@ -64,7 +63,7 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
             KeyboardButton::Escape => engine.stop(),
             KeyboardButton::Tab => {
                 screen_transform.scale = 1.0;
-                screen.set_transform(&screen_transform);
+                screen.set_transform(screen_transform.matrix());
             }
             _ => {}
         },
@@ -88,7 +87,7 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
         } => {
             if is_dragging {
                 screen_transform.translation += delta / screen_transform.scale;
-                screen.set_transform(&screen_transform);
+                screen.set_transform(screen_transform.matrix());
             }
         }
         InputMessage::CursorScroll(direction) => {
@@ -97,10 +96,9 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
                 ScrollDirection::Down => screen_transform.scale /= 1.1,
                 _ => {}
             }
-            screen.set_transform(&screen_transform);
+            screen.set_transform(screen_transform.matrix());
         }
         InputMessage::Update(_delta) => {
-            engine.clear(ClearMode::COLOR | ClearMode::DEPTH);
             screen.draw();
         }
         _ => {}

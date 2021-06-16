@@ -1,5 +1,5 @@
 use crate::input::{InputMessage, ScrollDirection};
-use crate::Engine;
+use crate::Context;
 use cgmath::prelude::*;
 use cgmath::*;
 use winit::event::WindowEvent;
@@ -17,29 +17,29 @@ impl InputConverter {
         }
     }
 
-    pub fn push<T: 'static + FnMut(InputMessage, &mut Engine)>(
+    pub fn push<T: 'static + FnMut(InputMessage, &mut Context)>(
         &mut self,
         event: WindowEvent,
         event_handler: &mut T,
-        engine: &mut Engine,
+        context: &mut Context,
     ) {
         match event {
             // Window
-            WindowEvent::CloseRequested => event_handler(InputMessage::CloseRequested, engine),
+            WindowEvent::CloseRequested => event_handler(InputMessage::CloseRequested, context),
             WindowEvent::Resized(size) => {
-                engine.window_check_resize();
+                context.window_check_resize();
                 self.window_size = Vector2::new(size.width as f32, size.height as f32);
-                event_handler(InputMessage::WindowResized(self.window_size), engine);
+                event_handler(InputMessage::WindowResized(self.window_size), context);
             }
             WindowEvent::ScaleFactorChanged {
                 ..
             } => {
-                engine.window_check_resize();
+                context.window_check_resize();
             }
 
             // Keyboard
             WindowEvent::ReceivedCharacter(char) => {
-                event_handler(InputMessage::ReceivedCharacter(char), engine);
+                event_handler(InputMessage::ReceivedCharacter(char), context);
             }
             WindowEvent::KeyboardInput {
                 input,
@@ -48,10 +48,10 @@ impl InputConverter {
                 if let Some(keycode) = input.virtual_keycode {
                     match input.state {
                         winit::event::ElementState::Pressed => {
-                            event_handler(InputMessage::KeyPressed(keycode), engine);
+                            event_handler(InputMessage::KeyPressed(keycode), context);
                         }
                         winit::event::ElementState::Released => {
-                            event_handler(InputMessage::KeyReleased(keycode), engine);
+                            event_handler(InputMessage::KeyReleased(keycode), context);
                         }
                     }
                 }
@@ -73,7 +73,7 @@ impl InputConverter {
                         pos: self.cursor_pos,
                         delta,
                     },
-                    engine,
+                    context,
                 );
             }
             WindowEvent::MouseWheel {
@@ -85,14 +85,14 @@ impl InputConverter {
                     winit::event::MouseScrollDelta::PixelDelta(pos) => (pos.x as f32, pos.y as f32),
                 };
                 if x < 0.0 {
-                    event_handler(InputMessage::CursorScroll(ScrollDirection::Left), engine);
+                    event_handler(InputMessage::CursorScroll(ScrollDirection::Left), context);
                 } else if x > 0.0 {
-                    event_handler(InputMessage::CursorScroll(ScrollDirection::Right), engine);
+                    event_handler(InputMessage::CursorScroll(ScrollDirection::Right), context);
                 }
                 if y < 0.0 {
-                    event_handler(InputMessage::CursorScroll(ScrollDirection::Down), engine);
+                    event_handler(InputMessage::CursorScroll(ScrollDirection::Down), context);
                 } else if y > 0.0 {
-                    event_handler(InputMessage::CursorScroll(ScrollDirection::Up), engine);
+                    event_handler(InputMessage::CursorScroll(ScrollDirection::Up), context);
                 }
             }
             WindowEvent::MouseInput {
@@ -106,7 +106,7 @@ impl InputConverter {
                             button,
                             pos: self.cursor_pos,
                         },
-                        engine,
+                        context,
                     );
                 }
                 winit::event::ElementState::Released => {
@@ -115,19 +115,19 @@ impl InputConverter {
                             button,
                             pos: self.cursor_pos,
                         },
-                        engine,
+                        context,
                     );
                 }
             },
             WindowEvent::CursorEntered {
                 ..
             } => {
-                event_handler(InputMessage::CursorEntered, engine);
+                event_handler(InputMessage::CursorEntered, context);
             }
             WindowEvent::CursorLeft {
                 ..
             } => {
-                event_handler(InputMessage::CursorLeft, engine);
+                event_handler(InputMessage::CursorLeft, context);
             }
             _ => {}
         }

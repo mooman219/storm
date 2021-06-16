@@ -1,24 +1,36 @@
-use super::layer::SharedLayer;
 use super::raw::{resource, BlendFactor, Capability, CullFace, DepthTest, OpenGL, TextureUnit};
 use super::shader;
-use crate::utility::bad::UnsafeShared;
+use super::window::OpenGLWindow;
+use crate::colors;
+use crate::math::ortho_from_bounds;
+use crate::types::WindowSettings;
 use cgmath::*;
+
+#[no_mangle]
+static mut STATE: Option<OpenGLState> = None;
 
 pub struct OpenGLState {
     pub gl: OpenGL,
-    layers: Vec<UnsafeShared<SharedLayer>>,
+    matrix_ortho: Matrix4<f32>,
+    logical_size: Vector2<f32>,
     program: resource::Program,
     uniform_ortho: resource::UniformLocation,
     uniform_texture: resource::UniformLocation,
 }
 
 impl OpenGLState {
-    pub fn new(gl: OpenGL) -> OpenGLState {
+    pub fn init(desc: &WindowSettings, event_loop: &winit::event_loop::EventLoop<()>) -> OpenGLWindow {
+        if unsafe { STATE.is_some() } {
+            panic!("State already initialized");
+        }
+        let (window, gl) = OpenGLWindow::new(desc, event_loop);
+        let gl = OpenGL::new(gl);
+
         // Setup cabilities.
         gl.enable(Capability::CullFace);
         gl.enable(Capability::Blend);
         gl.enable(Capability::DepthTest);
-        gl.clear_color(0.0, 0.0, 0.0, 1.0);
+        gl.clear_color(colors::BLACK);
         gl.depth_func(DepthTest::Less);
         gl.blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
         gl.cull_face(CullFace::Back);
@@ -28,9 +40,12 @@ impl OpenGLState {
         let uniform_ortho = gl.get_uniform_location(program, "ortho").unwrap();
         let uniform_texture = gl.get_uniform_location(program, "tex[0]").unwrap();
 
+        let logical_size = window.logical_size();
+
         let mut state = OpenGLState {
             gl,
-            layers: Vec::new(),
+            matrix_ortho: ortho_from_bounds(&logical_size),
+            logical_size,
             program,
             uniform_ortho,
             uniform_texture,
@@ -40,27 +55,33 @@ impl OpenGLState {
         state.shader_bind();
         state.shader_texture(TextureUnit::Atlas);
 
-        state
+        unsafe { STATE = Some(state) };
+        window
     }
 
-    /// Subscribes the layer into getting state updates like resizes.
-    pub fn layer_add(&mut self, mut layer: UnsafeShared<SharedLayer>) {
-        layer.set_index(self.layers.len());
-        self.layers.push(layer);
-    }
-
-    /// Unsubscribes the layer at the given index from getting state updates like resizes.
-    pub fn layer_drop(&mut self, index: usize) {
-        self.layers.swap_remove(index);
-        if let Some(layer) = self.layers.get_mut(index) {
-            layer.set_index(index);
+    pub fn ctx() -> &'static mut OpenGLState {
+        unsafe {
+            match STATE.as_mut() {
+                Some(ctx) => ctx,
+                None => panic!("State not initialized"),
+            }
         }
     }
 
-    pub fn resize(&mut self, physical: &Vector2<f32>, ortho: &Matrix4<f32>) {
-        self.gl.viewport(0, 0, physical.x as i32, physical.y as i32);
-        for layer in &mut self.layers {
-            layer.set_ortho(ortho);
+    pub fn logical_size(&self) -> Vector2<f32> {
+        self.logical_size
+    }
+
+    pub fn ortho(&self) -> Matrix4<f32> {
+        self.matrix_ortho
+    }
+
+    pub fn resize(&mut self, physical: Vector2<f32>, logical: Vector2<f32>) {
+        if self.logical_size != logical {
+            trace!("Window resized: Physical({:?}) Logical({:?})", physical, logical);
+            self.logical_size = logical;
+            self.gl.viewport(0, 0, physical.x as i32, physical.y as i32);
+            self.matrix_ortho = ortho_from_bounds(&logical);
         }
     }
 

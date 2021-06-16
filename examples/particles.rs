@@ -7,7 +7,7 @@ use storm::*;
 /// Run with: cargo run --example particles --release
 fn main() {
     simple_logger::SimpleLogger::new().init().expect("Unable to init logger");
-    Engine::start(
+    Context::start(
         WindowSettings {
             title: String::from("Storm: Particles"),
             display_mode: DisplayMode::Windowed {
@@ -21,15 +21,15 @@ fn main() {
     );
 }
 
-fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
-    engine.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
-    engine.clear_color(BLACK);
+fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
+    ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
 
-    let mut screen = engine.layer_create();
+    let mut screen = ctx.layer_sprite();
+    screen.clear_mode(Some(ClearMode::color_depth(BLACK)));
     let mut screen_transform = LayerTransform::new();
     screen_transform.rotation = 0.125;
-    screen.set_transform(&screen_transform);
+    screen.set_transform(screen_transform.matrix());
 
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
@@ -43,10 +43,10 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
     }
     screen.set_sprites(&sprites);
 
-    move |event, engine| match event {
-        InputMessage::CloseRequested => engine.stop(),
+    move |event, ctx| match event {
+        InputMessage::CloseRequested => ctx.stop(),
         InputMessage::KeyPressed(key) => match key {
-            KeyboardButton::Escape => engine.stop(),
+            KeyboardButton::Escape => ctx.stop(),
             _ => {}
         },
         InputMessage::CursorPressed {
@@ -69,7 +69,7 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
         } => {
             if is_dragging {
                 screen_transform.translation += delta / screen_transform.scale;
-                screen.set_transform(&screen_transform);
+                screen.set_transform(screen_transform.matrix());
             }
         }
         InputMessage::CursorScroll(direction) => {
@@ -78,14 +78,13 @@ fn run(engine: &mut Engine) -> impl FnMut(InputMessage, &mut Engine) {
                 ScrollDirection::Down => screen_transform.scale /= 1.1,
                 _ => {}
             }
-            screen.set_transform(&screen_transform);
+            screen.set_transform(screen_transform.matrix());
         }
         InputMessage::Update(delta) => {
             for index in 0..sprites.len() {
                 Particle::tick(&mut sprites[index], &mut particles[index], delta);
             }
             screen.set_sprites(&sprites);
-            engine.clear(ClearMode::COLOR | ClearMode::DEPTH);
             screen.draw();
         }
         _ => {}
