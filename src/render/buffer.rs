@@ -13,15 +13,14 @@ pub struct Buffer<T: VertexDescription + Copy> {
 
 impl<T: VertexDescription + Copy> Buffer<T> {
     pub fn new(buffer_type: BufferBindingTarget) -> Buffer<T> {
-        let gl = &OpenGLState::ctx().gl;
-
-        let vbo = gl.create_buffer();
-        gl.bind_buffer(buffer_type, Some(vbo));
-        gl.buffer_data_empty(buffer_type, 0, BufferUsage::StaticDraw);
+        let gl = &mut OpenGLState::ctx().gl;
 
         let vao = gl.create_vertex_array();
         gl.bind_vertex_array(Some(vao));
+        let vbo = gl.create_buffer();
+        gl.bind_buffer(buffer_type, Some(vbo));
         T::configure_vertex_attribute(gl);
+        gl.bind_vertex_array(None);
 
         Buffer {
             vbo,
@@ -51,7 +50,7 @@ impl<T: VertexDescription + Copy> Buffer<T> {
 
     pub fn draw(&self) {
         if self.vertices > 0 {
-            let gl = &OpenGLState::ctx().gl;
+            let gl = &mut OpenGLState::ctx().gl;
             gl.bind_vertex_array(Some(self.vao));
             gl.draw_arrays_instanced(DrawMode::TriangleStrip, 0, 4, self.vertices as i32);
         }

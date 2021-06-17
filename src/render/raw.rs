@@ -417,12 +417,16 @@ pub mod resource {
 
 pub struct OpenGL {
     gl: glow::Context,
+    clear_color: RGBA8,
+    vertex_array: Option<resource::VertexArray>,
 }
 
 impl OpenGL {
     pub fn new(gl: glow::Context) -> OpenGL {
         OpenGL {
             gl,
+            clear_color: RGBA8::new_raw(0, 0, 0, 0),
+            vertex_array: None,
         }
     }
 
@@ -517,8 +521,11 @@ impl OpenGL {
         unsafe { self.gl.create_vertex_array().unwrap() }
     }
 
-    pub fn bind_vertex_array(&self, vertex_array: Option<resource::VertexArray>) {
-        unsafe { self.gl.bind_vertex_array(vertex_array) };
+    pub fn bind_vertex_array(&mut self, vertex_array: Option<resource::VertexArray>) {
+        if self.vertex_array != vertex_array {
+            self.vertex_array = vertex_array;
+            unsafe { self.gl.bind_vertex_array(vertex_array) };
+        }
     }
 
     pub fn delete_vertex_array(&self, vertex_array: resource::VertexArray) {
@@ -673,9 +680,12 @@ impl OpenGL {
         unsafe { self.gl.enable(capability as u32) };
     }
 
-    pub fn clear_color(&self, color: RGBA8) {
-        let (red, green, blue, alpha) = color.into();
-        unsafe { self.gl.clear_color(red, green, blue, alpha) };
+    pub fn clear_color(&mut self, color: RGBA8) {
+        if self.clear_color != color {
+            self.clear_color = color;
+            let (red, green, blue, alpha) = color.into();
+            unsafe { self.gl.clear_color(red, green, blue, alpha) };
+        }
     }
 
     pub fn depth_func(&self, test: DepthTest) {

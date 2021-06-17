@@ -24,7 +24,7 @@ impl OpenGLState {
             panic!("State already initialized");
         }
         let (window, gl) = OpenGLWindow::new(desc, event_loop);
-        let gl = OpenGL::new(gl);
+        let mut gl = OpenGL::new(gl);
 
         // Setup cabilities.
         gl.enable(Capability::CullFace);
