@@ -85,7 +85,7 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
                 Particle::tick(&mut sprites[index], &mut particles[index], delta);
             }
             screen.set_sprites(&sprites);
-            screen.execute();
+            screen.draw();
         }
         _ => {}
     }

@@ -24,7 +24,7 @@ impl SpriteLayer {
     }
 
     /// Draws the layer to the screen.
-    pub fn execute(&mut self) {
+    pub fn draw(&mut self) {
         self.clear.execute();
         if self.is_visible && self.sprites.len() > 0 {
             let ctx = OpenGLState::ctx();

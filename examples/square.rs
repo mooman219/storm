@@ -99,7 +99,7 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
             screen.set_transform(screen_transform.matrix());
         }
         InputMessage::Update(_delta) => {
-            screen.execute();
+            screen.draw();
         }
         _ => {}
     }
