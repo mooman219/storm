@@ -1,12 +1,7 @@
+use super::VertexDescription;
 use crate::render::raw::{AttributeType, OpenGL};
 use crate::types::*;
 use core::mem;
-
-pub trait VertexDescription {
-    const VERTEX_SIZE: usize;
-
-    fn configure_vertex_attribute(gl: &OpenGL);
-}
 
 impl VertexDescription for Sprite {
     const VERTEX_SIZE: usize = mem::size_of::<Self>();

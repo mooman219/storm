@@ -36,7 +36,7 @@ impl OpenGLState {
         gl.cull_face(CullFace::Back);
 
         // Setup the shader.
-        let program = gl.shader_program(shader::texture::VERTEX, shader::texture::FRAGMENT);
+        let program = gl.shader_program(shader::sprite::VERTEX, shader::sprite::FRAGMENT);
         let uniform_ortho = gl.get_uniform_location(program, "ortho").unwrap();
         let uniform_texture = gl.get_uniform_location(program, "tex[0]").unwrap();
 

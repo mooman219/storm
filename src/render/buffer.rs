@@ -1,5 +1,5 @@
 use crate::render::raw::{resource, BufferBindingTarget, BufferUsage, DrawMode};
-use crate::render::vertex::*;
+use crate::render::vertex::VertexDescription;
 use crate::render::OpenGLState;
 use core::marker::PhantomData;
 
