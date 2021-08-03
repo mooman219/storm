@@ -8,7 +8,7 @@ pub mod math;
 pub mod time;
 
 pub use crate::input::*;
-pub use crate::render::SpriteLayer;
+pub use crate::render::layer::*;
 pub use crate::types::*;
 pub use cgmath;
 

@@ -8,20 +8,21 @@ use crate::types::ClearMode;
 use crate::RGBA8;
 use cgmath::*;
 
-pub struct ClearSubLayer {
+/// Holds screen clear parameters for a layer.
+pub struct ClearLayer {
     clear_color: Option<RGBA8>,
     clear_mode: Option<u32>,
 }
 
-impl ClearSubLayer {
-    pub(crate) fn new() -> ClearSubLayer {
-        ClearSubLayer {
+impl ClearLayer {
+    pub(crate) fn new() -> ClearLayer {
+        ClearLayer {
             clear_color: None,
             clear_mode: None,
         }
     }
 
-    pub fn execute(&mut self) {
+    pub(crate) fn execute(&mut self) {
         let ctx = OpenGLState::ctx();
         if let Some(clear_mode) = self.clear_mode {
             if let Some(clear_color) = self.clear_color {
@@ -31,6 +32,7 @@ impl ClearSubLayer {
         }
     }
 
+    /// Clears the screen buffers according to the clear mode before draw is called.
     pub fn set(&mut self, clear_mode: Option<ClearMode>) {
         self.clear_mode = match clear_mode {
             Some(mode) => {
@@ -60,16 +62,17 @@ const IDENTITY_MATRIX: Matrix4<f32> = Matrix4::new(
     0.0, 0.0, 0.0, 1.0, //
 );
 
-pub struct TransformSubLayer {
+/// Holds transform parameters for a layer.
+pub struct TransformLayer {
     transform: Matrix4<f32>,
     logical_size: Vector2<f32>,
     ortho: Matrix4<f32>,
     ortho_transform: Matrix4<f32>,
 }
 
-impl TransformSubLayer {
-    pub(crate) fn new() -> TransformSubLayer {
-        TransformSubLayer {
+impl TransformLayer {
+    pub(crate) fn new() -> TransformLayer {
+        TransformLayer {
             transform: IDENTITY_MATRIX,
             logical_size: Vector2::zero(),
             ortho: Matrix4::zero(),
@@ -77,12 +80,7 @@ impl TransformSubLayer {
         }
     }
 
-    pub fn set(&mut self, transform: Matrix4<f32>) {
-        self.transform = transform;
-        self.ortho_transform = self.ortho * transform;
-    }
-
-    pub fn ortho_transform(&mut self) -> &Matrix4<f32> {
+    pub(crate) fn ortho_transform(&mut self) -> &Matrix4<f32> {
         let ctx = OpenGLState::ctx();
         if ctx.logical_size() != self.logical_size {
             self.logical_size = ctx.logical_size();
@@ -90,5 +88,11 @@ impl TransformSubLayer {
             self.ortho_transform = ctx.ortho() * self.transform;
         }
         &self.ortho_transform
+    }
+
+    /// Sets the transformation matrix used when drawing this.
+    pub fn set(&mut self, transform: Matrix4<f32>) {
+        self.transform = transform;
+        self.ortho_transform = self.ortho * transform;
     }
 }

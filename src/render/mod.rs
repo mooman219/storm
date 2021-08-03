@@ -1,5 +1,4 @@
 mod buffer;
-mod layer;
 mod raw;
 mod shader;
 mod state;
@@ -7,6 +6,9 @@ mod texture_handle;
 mod vertex;
 mod window;
 
+pub mod layer;
+
+use self::layer::SpriteLayer;
 use self::raw::TextureUnit;
 use self::state::OpenGLState;
 use self::texture_handle::*;
@@ -15,8 +17,6 @@ use crate::text::*;
 use crate::texture::*;
 use crate::types::*;
 use cgmath::*;
-
-pub use self::layer::SpriteLayer;
 
 pub struct Renderer {
     window: OpenGLWindow,

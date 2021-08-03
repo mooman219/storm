@@ -25,7 +25,7 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
 
     // Create a Layers to draw on.
     let mut screen = ctx.layer_sprite();
-    screen.clear_mode(Some(ClearMode::color_depth(colors::WHITE)));
+    screen.clear().set(Some(ClearMode::color_depth(colors::WHITE)));
     let mut screen_transform = LayerTransform::new();
     let mut sprites = Vec::new();
     // Add all the strings we want to draw to a vec.
@@ -63,7 +63,7 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
             KeyboardButton::Escape => engine.stop(),
             KeyboardButton::Tab => {
                 screen_transform.scale = 1.0;
-                screen.set_transform(screen_transform.matrix());
+                screen.transform().set(screen_transform.matrix());
             }
             _ => {}
         },
@@ -87,7 +87,7 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
         } => {
             if is_dragging {
                 screen_transform.translation += delta / screen_transform.scale;
-                screen.set_transform(screen_transform.matrix());
+                screen.transform().set(screen_transform.matrix());
             }
         }
         InputMessage::CursorScroll(direction) => {
@@ -96,7 +96,7 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
                 ScrollDirection::Down => screen_transform.scale /= 1.1,
                 _ => {}
             }
-            screen.set_transform(screen_transform.matrix());
+            screen.transform().set(screen_transform.matrix());
         }
         InputMessage::Update(_delta) => {
             screen.draw();

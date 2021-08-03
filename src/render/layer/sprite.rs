@@ -1,24 +1,21 @@
-use super::{ClearSubLayer, TransformSubLayer};
+use super::{ClearLayer, TransformLayer};
 use crate::render::buffer::Buffer;
 use crate::render::raw::BufferBindingTarget;
 use crate::render::OpenGLState;
-use crate::types::{ClearMode, Sprite};
-use cgmath::*;
+use crate::types::Sprite;
 
-/// Layers represent draw calls and hold configuration associated with drawing to the screen.
+/// Simple layer which draws sprites to the screen.
 pub struct SpriteLayer {
-    clear: ClearSubLayer,
-    transform: TransformSubLayer,
-    is_visible: bool,
+    clear: ClearLayer,
+    transform: TransformLayer,
     sprites: Buffer<Sprite>,
 }
 
 impl SpriteLayer {
     pub(crate) fn new() -> SpriteLayer {
         SpriteLayer {
-            clear: ClearSubLayer::new(),
-            transform: TransformSubLayer::new(),
-            is_visible: true,
+            clear: ClearLayer::new(),
+            transform: TransformLayer::new(),
             sprites: Buffer::new(BufferBindingTarget::ArrayBuffer),
         }
     }
@@ -26,16 +23,11 @@ impl SpriteLayer {
     /// Draws the layer to the screen.
     pub fn draw(&mut self) {
         self.clear.execute();
-        if self.is_visible && self.sprites.len() > 0 {
+        if self.sprites.len() > 0 {
             let ctx = OpenGLState::ctx();
             ctx.shader_ortho(self.transform.ortho_transform());
             self.sprites.draw();
         }
-    }
-
-    /// Clears the screen buffers according to the clear mode before draw is called.
-    pub fn clear_mode(&mut self, clear_mode: Option<ClearMode>) {
-        self.clear.set(clear_mode);
     }
 
     /// Sets the sprites that will be drawn.
@@ -48,13 +40,13 @@ impl SpriteLayer {
         self.sprites.clear();
     }
 
-    /// Sets the transformation matrix used when drawing this.
-    pub fn set_transform(&mut self, transform: Matrix4<f32>) {
-        self.transform.set(transform);
+    /// Gets the clear settings for this layer.
+    pub fn clear(&mut self) -> &mut ClearLayer {
+        &mut self.clear
     }
 
-    /// If the renderer should render this layer or not when draw is called.
-    pub fn set_visible(&mut self, is_visible: bool) {
-        self.is_visible = is_visible;
+    /// Gets the transform settings for this layer.
+    pub fn transform(&mut self) -> &mut TransformLayer {
+        &mut self.transform
     }
 }

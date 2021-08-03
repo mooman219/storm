@@ -2,7 +2,7 @@ use core::time::Duration;
 use storm::*;
 
 static TEXTURE_A: &[u8] = include_bytes!("resources/1.png");
-static TEXTURE_B: &[u8] = include_bytes!("resources/1.png");
+static TEXTURE_B: &[u8] = include_bytes!("resources/2.png");
 
 /// Run with: cargo run --example texture --release
 fn main() {
@@ -25,7 +25,8 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
     ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
     let mut screen = ctx.layer_sprite();
-    screen.clear_mode(Some(ClearMode::color_depth(colors::BLUE)));
+    let mut other = ctx.layer_sprite();
+    screen.clear().set(Some(ClearMode::color_depth(colors::BLUE)));
     let texture_1 = ctx.texture_create(TEXTURE_A.as_ref(), TextureFormat::PNG);
     let texture_2 = ctx.texture_create(TEXTURE_B.as_ref(), TextureFormat::PNG);
     let texture_2 = texture_2.sub_texture(0, 0, 16, 16).unwrap();
@@ -47,8 +48,16 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
     sprite.texture = texture_2;
     sprite.pos.z = 0.1;
     sprites.push(sprite);
-
     screen.set_sprites(&sprites);
+
+    let mut others = Vec::new();
+    sprite.texture = texture_1.mirror_x().mirror_y();
+    sprite.pos.y -= 100.0;
+    others.push(sprite);
+    sprite.texture = texture_2;
+    sprite.pos.y -= 100.0;
+    others.push(sprite);
+    other.set_sprites(&others);
 
     move |event, engine| match event {
         InputMessage::CloseRequested => engine.stop(),
@@ -73,6 +82,7 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
         }
         InputMessage::Update(_delta) => {
             screen.draw();
+            other.draw();
         }
         _ => {}
     }

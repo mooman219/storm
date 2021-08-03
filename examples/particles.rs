@@ -26,10 +26,10 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
     let mut is_dragging = false;
 
     let mut screen = ctx.layer_sprite();
-    screen.clear_mode(Some(ClearMode::color_depth(BLACK)));
+    screen.clear().set(Some(ClearMode::color_depth(BLACK)));
     let mut screen_transform = LayerTransform::new();
     screen_transform.rotation = 0.125;
-    screen.set_transform(screen_transform.matrix());
+    screen.transform().set(screen_transform.matrix());
 
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
@@ -69,7 +69,7 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
         } => {
             if is_dragging {
                 screen_transform.translation += delta / screen_transform.scale;
-                screen.set_transform(screen_transform.matrix());
+                screen.transform().set(screen_transform.matrix());
             }
         }
         InputMessage::CursorScroll(direction) => {
@@ -78,7 +78,7 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
                 ScrollDirection::Down => screen_transform.scale /= 1.1,
                 _ => {}
             }
-            screen.set_transform(screen_transform.matrix());
+            screen.transform().set(screen_transform.matrix());
         }
         InputMessage::Update(delta) => {
             for index in 0..sprites.len() {

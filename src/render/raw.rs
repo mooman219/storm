@@ -707,4 +707,8 @@ impl OpenGL {
     pub fn clear(&self, mask: u32) {
         unsafe { self.gl.clear(mask) };
     }
+
+    pub fn get_max_texture_size(&self) -> i32 {
+        unsafe { self.gl.get_parameter_i32(glow::MAX_TEXTURE_SIZE) }
+    }
 }

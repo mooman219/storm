@@ -1,5 +1,6 @@
 use crate::RGBA8;
 
+/// Parameters for how the screen should be cleared.
 pub struct ClearMode {
     pub color: Option<RGBA8>,
     pub depth: bool,

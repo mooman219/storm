@@ -34,6 +34,7 @@ impl OpenGLState {
         gl.depth_func(DepthTest::Less);
         gl.blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
         gl.cull_face(CullFace::Back);
+        info!("MAX_TEXTURE_SIZE: {}", gl.get_max_texture_size());
 
         // Setup the shader.
         let program = gl.shader_program(shader::sprite::VERTEX, shader::sprite::FRAGMENT);
