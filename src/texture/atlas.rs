@@ -1,6 +1,6 @@
 use crate::colors::*;
 use crate::texture::packer::Packer;
-use crate::texture::*;
+use crate::Image;
 use cgmath::*;
 
 const MAX: u32 = 65536;
@@ -27,7 +27,7 @@ impl TextureAtlas {
 
     pub fn add(&mut self, texture: Image) -> Vector4<u16> {
         if let Some(rect) = self.packer.pack(texture.width(), texture.height()) {
-            self.atlas.set_texture(rect.x, rect.y, &texture);
+            self.atlas.set_subsection(rect.x, rect.y, &texture);
             self.dirty = true;
             Vector4::new(
                 (rect.x * PIXEL_SIZE) as u16 + NUDGE,            // Left
@@ -40,7 +40,7 @@ impl TextureAtlas {
         }
     }
 
-    pub fn sync(&mut self) -> Option<&Image> {
+    pub(crate) fn sync(&mut self) -> Option<&Image> {
         if self.dirty {
             self.dirty = false;
             Some(&self.atlas)

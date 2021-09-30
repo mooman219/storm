@@ -1,4 +1,4 @@
-use crate::texture::image::Image;
+use super::Image;
 use crate::RGBA8;
 use png::{ColorType, Decoder};
 

@@ -1,1 +1,3 @@
-pub mod sprite;
+mod sprite;
+
+pub use sprite::SpriteShader;

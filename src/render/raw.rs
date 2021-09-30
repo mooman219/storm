@@ -1,5 +1,5 @@
 use crate::RGBA8;
-use glow::HasContext;
+use glow::{HasContext, PixelUnpackData};
 
 #[repr(u32)]
 #[derive(Copy, Clone)]
@@ -118,9 +118,20 @@ pub enum BlendFactor {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub enum TextureUnit {
-    Atlas = glow::TEXTURE0,
+    Temporary = glow::TEXTURE0,
+    Alpha = glow::TEXTURE1,
+    Beta = glow::TEXTURE2,
+    Charlie = glow::TEXTURE3,
+    Delta = glow::TEXTURE4,
+    Echo = glow::TEXTURE5,
+}
+
+impl TextureUnit {
+    pub fn index(self) -> i32 {
+        (self as u32 - glow::TEXTURE0) as i32
+    }
 }
 
 #[repr(u32)]
@@ -418,7 +429,10 @@ pub mod resource {
 pub struct OpenGL {
     gl: glow::Context,
     clear_color: RGBA8,
+    shader_program: Option<resource::Program>,
     vertex_array: Option<resource::VertexArray>,
+    active_texture_unit: TextureUnit,
+    bound_textures: [Option<resource::Texture>; 16],
 }
 
 impl OpenGL {
@@ -426,7 +440,10 @@ impl OpenGL {
         OpenGL {
             gl,
             clear_color: RGBA8::new_raw(0, 0, 0, 0),
+            shader_program: None,
             vertex_array: None,
+            active_texture_unit: TextureUnit::Temporary,
+            bound_textures: [None; 16],
         }
     }
 
@@ -486,8 +503,11 @@ impl OpenGL {
         }
     }
 
-    pub fn use_program(&self, program: Option<resource::Program>) {
-        unsafe { self.gl.use_program(program) };
+    pub fn use_program(&mut self, program: Option<resource::Program>) {
+        if self.shader_program != program {
+            self.shader_program = program;
+            unsafe { self.gl.use_program(program) };
+        }
     }
 
     pub fn delete_program(&self, program: resource::Program) {
@@ -596,16 +616,23 @@ impl OpenGL {
         unsafe { self.gl.create_texture().unwrap() }
     }
 
-    pub fn active_texture(&self, unit: TextureUnit) {
-        unsafe { self.gl.active_texture(unit as u32) };
+    pub fn active_texture(&mut self, unit: TextureUnit) {
+        if self.active_texture_unit != unit {
+            self.active_texture_unit = unit;
+            unsafe { self.gl.active_texture(unit as u32) };
+        }
     }
 
     pub fn delete_texture(&self, texture: resource::Texture) {
         unsafe { self.gl.delete_texture(texture) };
     }
 
-    pub fn bind_texture(&self, target: TextureBindingTarget, texture: Option<resource::Texture>) {
-        unsafe { self.gl.bind_texture(target as u32, texture) };
+    pub fn bind_texture(&mut self, target: TextureBindingTarget, texture: Option<resource::Texture>) {
+        let index = self.active_texture_unit.index() as usize;
+        if self.bound_textures[index] != texture {
+            self.bound_textures[index] = texture;
+            unsafe { self.gl.bind_texture(target as u32, texture) };
+        }
     }
 
     pub fn tex_image_2d<T: Sized>(
@@ -635,6 +662,36 @@ impl OpenGL {
                 ty as u32,
                 Some(slice),
             )
+        };
+    }
+
+    pub fn tex_sub_image_2d<T: Sized>(
+        &self,
+        target: TextureLoadTarget,
+        level: i32,
+        x_offset: i32,
+        y_offset: i32,
+        width: i32,
+        height: i32,
+        format: PixelFormat,
+        ty: PixelType,
+        pixels: &[T],
+    ) {
+        unsafe {
+            let len = core::mem::size_of::<T>() * pixels.len();
+            let ptr = pixels.as_ptr() as *const u8;
+            let slice = core::slice::from_raw_parts(ptr, len);
+            self.gl.tex_sub_image_2d(
+                target as u32,
+                level,
+                x_offset,
+                y_offset,
+                width,
+                height,
+                format as u32,
+                ty as u32,
+                PixelUnpackData::Slice(slice),
+            );
         };
     }
 

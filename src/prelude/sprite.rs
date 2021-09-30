@@ -12,7 +12,7 @@ pub struct Sprite {
     /// Units are measured in pixels.
     pub size: Vector2<u16>,
     /// Texture to apply to the sprite. The default is a plain white texture.
-    pub texture: Texture,
+    pub texture: TextureSection,
     /// Color multiplier to apply to the sprite. The default is white.
     pub color: RGBA8,
     /// Rotation of the sprite. Units are 1/65536th of a turn.
@@ -24,7 +24,7 @@ impl Default for Sprite {
         Sprite {
             pos: Vector3::new(0.0, 0.0, 0.0),
             size: Vector2::new(100, 100),
-            texture: Texture::default(),
+            texture: TextureSection::default(),
             color: WHITE,
             rotation: 0,
         }
@@ -39,7 +39,7 @@ impl Sprite {
     pub fn new(
         pos: Vector3<f32>,
         size: Vector2<f32>,
-        texture: Texture,
+        texture: TextureSection,
         color: RGBA8,
         rotation: f32,
     ) -> Sprite {
@@ -61,7 +61,7 @@ impl Sprite {
     pub fn new_raw(
         pos: Vector3<f32>,
         size: Vector2<u16>,
-        texture: Texture,
+        texture: TextureSection,
         color: RGBA8,
         rotation: u16,
     ) -> Sprite {

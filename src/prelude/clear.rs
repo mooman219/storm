@@ -1,30 +1,31 @@
+use crate::render::raw::ClearMode as RawClearMode;
 use crate::RGBA8;
 
 /// Parameters for how the screen should be cleared.
 pub struct ClearMode {
-    pub color: Option<RGBA8>,
-    pub depth: bool,
+    pub(crate) color: Option<RGBA8>,
+    pub(crate) mode: u32,
 }
 
 impl ClearMode {
     pub fn color_depth(color: RGBA8) -> ClearMode {
         ClearMode {
             color: Some(color),
-            depth: true,
+            mode: RawClearMode::COLOR | RawClearMode::DEPTH,
         }
     }
 
     pub fn color(color: RGBA8) -> ClearMode {
         ClearMode {
             color: Some(color),
-            depth: false,
+            mode: RawClearMode::COLOR,
         }
     }
 
     pub fn depth() -> ClearMode {
         ClearMode {
             color: None,
-            depth: true,
+            mode: RawClearMode::DEPTH,
         }
     }
 }

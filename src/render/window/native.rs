@@ -1,4 +1,4 @@
-use crate::types::*;
+use crate::prelude::*;
 use cgmath::*;
 use glutin::ContextBuilder;
 use winit::dpi::LogicalSize;

@@ -1,5 +1,5 @@
 mod converter;
-mod message;
+mod event;
 
 pub use self::converter::*;
-pub use self::message::*;
+pub use self::event::*;

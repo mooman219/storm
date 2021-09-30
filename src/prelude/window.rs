@@ -23,7 +23,7 @@ impl Default for WindowSettings {
     }
 }
 
-/// Parameters for how the window is displayed.
+/// Enumeration for window display options.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum DisplayMode {
     /// Normal windowed mode.

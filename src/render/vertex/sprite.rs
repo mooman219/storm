@@ -1,6 +1,6 @@
 use super::VertexDescription;
+use crate::prelude::*;
 use crate::render::raw::{AttributeType, OpenGL};
-use crate::types::*;
 use core::mem;
 
 impl VertexDescription for Sprite {

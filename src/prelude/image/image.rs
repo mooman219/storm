@@ -1,7 +1,13 @@
-use crate::texture::formats;
-use crate::{TextureFormat, RGBA8};
+use super::png;
+use crate::RGBA8;
 
-#[derive(Clone, Debug)]
+/// Enumeration for all the loadable texture formats. Currently only PNG is supported.
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum ImageFormat {
+    PNG,
+}
+
+#[derive(Clone)]
 pub struct Image {
     pixels: Vec<RGBA8>,
     width: u32,
@@ -9,9 +15,9 @@ pub struct Image {
 }
 
 impl Image {
-    pub fn from_raw(bytes: &[u8], format: TextureFormat) -> Image {
+    pub fn from_bytes(bytes: &[u8], format: ImageFormat) -> Image {
         match format {
-            TextureFormat::PNG => formats::png::read(bytes),
+            ImageFormat::PNG => png::read(bytes),
         }
     }
 
@@ -39,7 +45,7 @@ impl Image {
     }
 
     #[inline(always)]
-    fn index_for(&self, x: u32, y: u32) -> usize {
+    pub fn index_for(&self, x: u32, y: u32) -> usize {
         (y * self.width + x) as usize
     }
 
@@ -55,16 +61,28 @@ impl Image {
         self.pixels.as_slice()
     }
 
-    pub fn get(&self, x: u32, y: u32) -> RGBA8 {
-        self.pixels[self.index_for(x, y)]
+    pub fn into_vec(self) -> Vec<RGBA8> {
+        self.pixels
     }
 
-    pub fn set(&mut self, x: u32, y: u32, val: RGBA8) {
-        let index = self.index_for(x, y);
+    pub fn get_indexed(&self, index: usize) -> RGBA8 {
+        self.pixels[index]
+    }
+
+    pub fn get(&self, x: u32, y: u32) -> RGBA8 {
+        self.get_indexed(self.index_for(x, y))
+    }
+
+    pub fn set_indexed(&mut self, index: usize, val: RGBA8) {
         self.pixels[index] = val;
     }
 
-    pub fn set_texture(&mut self, offset_x: u32, offset_y: u32, tex: &Image) {
+    pub fn set(&mut self, x: u32, y: u32, val: RGBA8) {
+        self.set_indexed(self.index_for(x, y), val);
+    }
+
+    pub fn set_subsection(&mut self, offset_x: u32, offset_y: u32, tex: &Image) {
+        assert!(tex.width + offset_x <= self.width && tex.height + offset_y <= self.height);
         for x in 0..tex.width {
             for y in 0..tex.height {
                 let index_self = self.index_for(x + offset_x, y + offset_y);

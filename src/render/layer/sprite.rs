@@ -1,33 +1,42 @@
-use super::{ClearLayer, TransformLayer};
+use super::TransformLayer;
+use crate::prelude::Sprite;
 use crate::render::buffer::Buffer;
-use crate::render::raw::BufferBindingTarget;
+use crate::render::raw::{BufferBindingTarget, TextureUnit};
 use crate::render::OpenGLState;
-use crate::types::Sprite;
+use crate::Texture;
+use cgmath::Matrix4;
 
 /// Simple layer which draws sprites to the screen.
 pub struct SpriteLayer {
-    clear: ClearLayer,
     transform: TransformLayer,
     sprites: Buffer<Sprite>,
+    atlas: Texture,
 }
 
 impl SpriteLayer {
     pub(crate) fn new() -> SpriteLayer {
+        let ctx = OpenGLState::ctx();
         SpriteLayer {
-            clear: ClearLayer::new(),
             transform: TransformLayer::new(),
             sprites: Buffer::new(BufferBindingTarget::ArrayBuffer),
+            atlas: ctx.default_texture(),
         }
     }
 
     /// Draws the layer to the screen.
     pub fn draw(&mut self) {
-        self.clear.execute();
         if self.sprites.len() > 0 {
             let ctx = OpenGLState::ctx();
-            ctx.shader_ortho(self.transform.ortho_transform());
+            self.atlas.bind(TextureUnit::Alpha);
+            ctx.sprite.bind();
+            ctx.sprite.set_ortho(self.transform.ortho_transform());
+            ctx.sprite.set_texture(TextureUnit::Alpha);
             self.sprites.draw();
         }
+    }
+
+    pub fn set_atlas(&mut self, handle: &Texture) {
+        self.atlas = handle.clone();
     }
 
     /// Sets the sprites that will be drawn.
@@ -40,13 +49,8 @@ impl SpriteLayer {
         self.sprites.clear();
     }
 
-    /// Gets the clear settings for this layer.
-    pub fn clear(&mut self) -> &mut ClearLayer {
-        &mut self.clear
-    }
-
     /// Gets the transform settings for this layer.
-    pub fn transform(&mut self) -> &mut TransformLayer {
-        &mut self.transform
+    pub fn set_transform(&mut self, transform: Matrix4<f32>) {
+        self.transform.set(transform);
     }
 }

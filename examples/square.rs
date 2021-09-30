@@ -19,7 +19,7 @@ fn main() {
     );
 }
 
-fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
+fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
 
@@ -44,7 +44,7 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
     screen.set_sprites(&sprites);
 
     move |event, engine| match event {
-        InputMessage::ReceivedCharacter(char) => {
+        Event::ReceivedCharacter(char) => {
             message.push(char);
             let mut strings = Vec::new();
             let mut text = Text::default();
@@ -58,8 +58,8 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
             engine.text_clear(&strings, &mut sprites);
             screen.set_sprites(&sprites);
         }
-        InputMessage::CloseRequested => engine.stop(),
-        InputMessage::KeyPressed(key) => match key {
+        Event::CloseRequested => engine.stop(),
+        Event::KeyPressed(key) => match key {
             KeyboardButton::Escape => engine.stop(),
             KeyboardButton::Tab => {
                 screen_transform.scale = 1.0;
@@ -67,21 +67,21 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
             }
             _ => {}
         },
-        InputMessage::CursorPressed {
+        Event::CursorPressed {
             button,
             ..
         } => match button {
             CursorButton::Left => is_dragging = true,
             _ => {}
         },
-        InputMessage::CursorReleased {
+        Event::CursorReleased {
             button,
             ..
         } => match button {
             CursorButton::Left => is_dragging = false,
             _ => {}
         },
-        InputMessage::CursorMoved {
+        Event::CursorMoved {
             delta,
             ..
         } => {
@@ -90,7 +90,7 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
                 screen.transform().set(screen_transform.matrix());
             }
         }
-        InputMessage::CursorScroll(direction) => {
+        Event::CursorScroll(direction) => {
             match direction {
                 ScrollDirection::Up => screen_transform.scale *= 1.1,
                 ScrollDirection::Down => screen_transform.scale /= 1.1,
@@ -98,7 +98,7 @@ fn run(ctx: &mut Context) -> impl FnMut(InputMessage, &mut Context) {
             }
             screen.transform().set(screen_transform.matrix());
         }
-        InputMessage::Update(_delta) => {
+        Event::Update(_delta) => {
             screen.draw();
         }
         _ => {}
