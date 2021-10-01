@@ -6,7 +6,6 @@ use storm::*;
 
 /// Run with: cargo run --example particles --release
 fn main() {
-    simple_logger::SimpleLogger::new().init().expect("Unable to init logger");
     Context::start(
         WindowSettings {
             title: String::from("Storm: Particles"),

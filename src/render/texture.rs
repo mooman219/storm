@@ -42,7 +42,7 @@ impl Texture {
         gl.tex_parameter_wrap_t(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
         gl.tex_parameter_min_filter(TextureParameterTarget::Texture2D, TextureMinFilterValue::Nearest);
         gl.tex_parameter_mag_filter(TextureParameterTarget::Texture2D, TextureMagFilterValue::Nearest);
-        gl.bind_texture(TextureBindingTarget::Texture2D, Some(0));
+        gl.bind_texture(TextureBindingTarget::Texture2D, None);
         texture
     }
 
@@ -60,11 +60,12 @@ impl Texture {
         TextureSection::from_texture(&self, left, right, top, bottom)
     }
 
-    /// Sets a subsection of the texture to the given image.
+    /// Sets a subsection of the texture to the given image. (0, 0) is the top left of the texture,
+    /// and (width, height) is the bottom right of the texture.
     /// # Arguments
     ///
-    /// * `offset_x` - The lower left texel x coordinate to offset the image by.
-    /// * `offset_y` - The lower left texel y coordinate to offset the image by.
+    /// * `offset_x` - The top left texel x coordinate to offset the image by.
+    /// * `offset_y` - The top left texel y coordinate to offset the image by.
     /// * `image` - The image to overwrite the texture with.
     pub fn set_subsection(&self, offset_x: u32, offset_y: u32, image: &Image) {
         assert!(image.width() + offset_x <= self.width && image.height() + offset_y <= self.height);
@@ -76,13 +77,13 @@ impl Texture {
             0,
             offset_x as i32,
             offset_y as i32,
-            self.width as i32,
-            self.height as i32,
+            image.width() as i32,
+            image.height() as i32,
             PixelFormat::RGBA,
             PixelType::UnsignedByte,
             image.as_slice(),
         );
-        gl.bind_texture(TextureBindingTarget::Texture2D, Some(0));
+        gl.bind_texture(TextureBindingTarget::Texture2D, None);
     }
 
     pub(crate) fn bind(&self, unit: TextureUnit) {

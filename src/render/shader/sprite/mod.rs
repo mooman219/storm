@@ -43,6 +43,6 @@ impl SpriteShader {
 impl Drop for SpriteShader {
     fn drop(&mut self) {
         let gl = &mut OpenGLState::ctx().gl;
-        gl.delete_program(self.uniform_ortho);
+        gl.delete_program(self.program);
     }
 }

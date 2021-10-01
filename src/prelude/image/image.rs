@@ -61,6 +61,10 @@ impl Image {
         self.pixels.as_slice()
     }
 
+    pub fn as_mut_slice(&mut self) -> &mut [RGBA8] {
+        self.pixels.as_mut_slice()
+    }
+
     pub fn into_vec(self) -> Vec<RGBA8> {
         self.pixels
     }

@@ -27,6 +27,22 @@ use core::time::Duration;
 use winit::event::Event as WinitEvent;
 use winit::event_loop::ControlFlow;
 
+#[cfg(not(target_arch = "wasm32"))]
+fn init_logger() {
+    match simple_logger::init_with_level(log::Level::Trace) {
+        Ok(_) => info!("Using the default logger: simple_logger."),
+        Err(_) => info!("Using the provided logger."),
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn init_logger() {
+    match console_log::init_with_level(log::Level::Trace) {
+        Ok(_) => info!("Using the default logger: console_log."),
+        Err(_) => info!("Using the provided logger."),
+    }
+}
+
 /// The main entry point into the engine context. All interactions with the context are managed by
 /// the API on this type.
 pub struct Context {
@@ -44,6 +60,7 @@ impl Context {
         desc: WindowSettings,
         event_handler_creator: fn(&mut Context) -> T,
     ) -> ! {
+        init_logger();
         let event_loop = winit::event_loop::EventLoop::new();
         let window = OpenGLState::init(&desc, &event_loop);
         let mut input = EventConverter::new(window.logical_size());

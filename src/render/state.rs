@@ -31,7 +31,7 @@ impl OpenGLState {
         gl.depth_func(DepthTest::Less);
         gl.blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
         gl.cull_face(CullFace::Back);
-        info!("MAX_TEXTURE_SIZE: {}", gl.get_max_texture_size());
+        trace!("MAX_TEXTURE_SIZE: {}", gl.get_max_texture_size());
 
         let logical_size = window.logical_size();
         let sprite = SpriteShader::new(&mut gl);

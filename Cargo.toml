@@ -2,7 +2,7 @@
 name = "storm"
 version = "0.5.0"
 authors = ["Joe Cumbo <mooman219@gmail.com>"]
-description = "2D game engine designed for performance"
+description = "A personal 2D game engine designed for performance"
 license = "MIT"
 readme = "README.md"
 documentation = "https://docs.rs/storm"
@@ -17,12 +17,12 @@ exclude = ["examples_older/**", "examples_old/**", "examples/**"]
 maintenance = { status = "experimental" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
+console_log = { version = "0.2", features = ["color"] }
 js-sys = "0.3"
 web-sys = { version = "0.3", features = [
     "HtmlCanvasElement",
     "WebGl2RenderingContext",
     "Window",
-    "Performance",
 ]}
 wasm-bindgen = { version = "0.2" } 
 winit = { version = "0.24", features = [
@@ -34,6 +34,7 @@ glutin = "0.26"
 winit = "0.24" 
 
 [dependencies]
+simple_logger = "1.13"
 instant = "0.1.9"
 glow = "0.9"
 cgmath = "0.18"
@@ -42,9 +43,6 @@ png = "0.14"
 hashbrown = "0.11"
 fontdue = "0.5"
 unicode-normalization = "0.1"
-
-[dev-dependencies]
-simple_logger = "1.3"
 
 [profile.release]
 lto = "thin"

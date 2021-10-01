@@ -1,4 +1,4 @@
-use crate::types::*;
+use crate::prelude::*;
 use cgmath::*;
 use wasm_bindgen::JsCast;
 use winit::dpi::LogicalSize;

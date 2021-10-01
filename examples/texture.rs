@@ -1,12 +1,11 @@
 use core::time::Duration;
 use storm::*;
 
-static TEXTURE_A: &[u8] = include_bytes!("resources/1.png");
+static TEXTURE_A: &[u8] = include_bytes!("resources/4.png");
 static TEXTURE_B: &[u8] = include_bytes!("resources/2.png");
 
 /// Run with: cargo run --example texture --release
 fn main() {
-    simple_logger::SimpleLogger::new().init().expect("Unable to init logger");
     Context::start(
         WindowSettings {
             title: String::from("Storm: Texture"),
@@ -49,9 +48,10 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     back.set_sprites(&back_sprites);
 
     let mut front = ctx.sprite_layer();
-    let front_texture = ctx.texture(&Image::from_bytes(TEXTURE_B, ImageFormat::PNG));
+    let front_texture = ctx.texture(&Image::from_bytes(TEXTURE_A, ImageFormat::PNG));
+    front_texture.set_subsection(0, 0, &Image::from_bytes(TEXTURE_B, ImageFormat::PNG));
     front.set_atlas(&front_texture);
-    let front_texture_section = front_texture.subsection(16, 32, 0, 16);
+    let front_texture_section = front_texture.subsection(0, 32, 0, 32);
     let mut front_sprites = Vec::new();
     sprite.texture = front_texture_section;
     sprite.pos.y -= 100.0;
