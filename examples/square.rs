@@ -1,5 +1,9 @@
 use core::time::Duration;
+use storm::fontdue::layout::{LayoutSettings, TextStyle};
+use storm::fontdue::Font;
 use storm::*;
+
+static FONT: &[u8] = include_bytes!("resources/Roboto-Regular.ttf");
 
 /// Run with: cargo run --example square --release
 fn main() {
@@ -24,46 +28,49 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     let mut is_dragging = false;
 
     // Create a Layers to draw on.
-    let mut screen = ctx.layer_sprite();
-    screen.clear().set(Some(ClearMode::color_depth(colors::WHITE)));
+    let mut screen = ctx.text_layer();
     let mut screen_transform = LayerTransform::new();
-    let mut sprites = Vec::new();
     // Add all the strings we want to draw to a vec.
     let mut message = String::from("> Teh quick brown fox jumps over the lazy dog.");
-    let mut strings = Vec::new();
-    let mut text = Text::default();
-    text.set_string(&message);
-    text.pos.x = 100.0;
-    text.pos.y = 500.0;
-    text.max_width = Some(500.0);
-    text.scale = 16;
-    text.color = colors::BLACK;
-    strings.push(text);
-    // Assign the strings we want to draw to a batch.
-    ctx.text_clear(&strings, &mut sprites);
-    screen.set_sprites(&sprites);
+    let fonts = [Font::from_bytes(FONT, Default::default()).unwrap()];
+    let layout_settings = LayoutSettings {
+        x: 100.0,
+        y: 500.0,
+        max_width: Some(500.0),
+        ..Default::default()
+    };
+    screen.append(
+        &fonts,
+        &layout_settings,
+        &[TextStyle {
+            text: &message,
+            font_index: 0,
+            px: 16.0,
+            user_data: colors::BLACK,
+        }],
+    );
 
-    move |event, engine| match event {
+    move |event, ctx| match event {
         Event::ReceivedCharacter(char) => {
             message.push(char);
-            let mut strings = Vec::new();
-            let mut text = Text::default();
-            text.set_string(&message);
-            text.pos.x = 100.0;
-            text.pos.y = 500.0;
-            text.max_width = Some(500.0);
-            text.scale = 16;
-            text.color = colors::BLACK;
-            strings.push(text);
-            engine.text_clear(&strings, &mut sprites);
-            screen.set_sprites(&sprites);
+            screen.clear_text();
+            screen.append(
+                &fonts,
+                &layout_settings,
+                &[TextStyle {
+                    text: &message,
+                    font_index: 0,
+                    px: 16.0,
+                    user_data: colors::BLACK,
+                }],
+            );
         }
-        Event::CloseRequested => engine.stop(),
+        Event::CloseRequested => ctx.stop(),
         Event::KeyPressed(key) => match key {
-            KeyboardButton::Escape => engine.stop(),
+            KeyboardButton::Escape => ctx.stop(),
             KeyboardButton::Tab => {
                 screen_transform.scale = 1.0;
-                screen.transform().set(screen_transform.matrix());
+                screen.set_transform(screen_transform.matrix());
             }
             _ => {}
         },
@@ -87,7 +94,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
         } => {
             if is_dragging {
                 screen_transform.translation += delta / screen_transform.scale;
-                screen.transform().set(screen_transform.matrix());
+                screen.set_transform(screen_transform.matrix());
             }
         }
         Event::CursorScroll(direction) => {
@@ -96,9 +103,10 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                 ScrollDirection::Down => screen_transform.scale /= 1.1,
                 _ => {}
             }
-            screen.transform().set(screen_transform.matrix());
+            screen.set_transform(screen_transform.matrix());
         }
         Event::Update(_delta) => {
+            ctx.clear(ClearMode::color_depth(colors::WHITE));
             screen.draw();
         }
         _ => {}

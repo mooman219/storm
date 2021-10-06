@@ -7,7 +7,6 @@ use crate::{Image, TextureSection};
 use alloc::rc::Rc;
 
 /// Represents a GPU resource for a texture.
-#[derive(Clone)]
 pub struct Texture {
     id: resource::Texture,
     width: u32,
@@ -16,13 +15,38 @@ pub struct Texture {
 }
 
 impl Texture {
-    pub(crate) fn new(image: &Image) -> Texture {
+    pub(crate) fn clone(&self) -> Texture {
+        Texture {
+            id: self.id,
+            width: self.width,
+            height: self.height,
+            rc: self.rc.clone(),
+        }
+    }
+
+    pub(crate) fn from_image(image: &Image) -> Texture {
+        Texture::new(
+            image.as_slice(),
+            image.width(),
+            image.height(),
+            PixelFormat::RGBA,
+            PixelInternalFormat::RGBA,
+        )
+    }
+
+    fn new<T: Sized>(
+        slice: &[T],
+        width: u32,
+        height: u32,
+        input_format: PixelFormat,
+        gpu_format: PixelInternalFormat,
+    ) -> Texture {
         let gl = &mut OpenGLState::ctx().gl;
         let id = gl.create_texture();
         let texture = Texture {
             id,
-            width: image.width(),
-            height: image.height(),
+            width,
+            height,
             rc: Rc::new(()),
         };
         gl.active_texture(TextureUnit::Temporary);
@@ -30,13 +54,13 @@ impl Texture {
         gl.tex_image_2d(
             TextureLoadTarget::Texture2D,
             0,
-            image.width() as i32,
-            image.height() as i32,
+            width as i32,
+            height as i32,
             0,
-            PixelInternalFormat::RGBA,
-            PixelFormat::RGBA,
+            gpu_format,
+            input_format,
             PixelType::UnsignedByte,
-            image.as_slice(),
+            slice,
         );
         gl.tex_parameter_wrap_s(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
         gl.tex_parameter_wrap_t(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);

@@ -7,6 +7,7 @@ pub enum ImageFormat {
     PNG,
 }
 
+/// Basic image type.
 #[derive(Clone)]
 pub struct Image {
     pixels: Vec<RGBA8>,

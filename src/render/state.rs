@@ -14,6 +14,7 @@ pub struct OpenGLState {
     matrix_ortho: Matrix4<f32>,
     logical_size: Vector2<f32>,
     default_texture: Option<Texture>,
+    max_texture_size: i32,
     pub sprite: SpriteShader,
 }
 
@@ -24,6 +25,7 @@ impl OpenGLState {
         }
         let (window, gl) = OpenGLWindow::new(desc, event_loop);
         let mut gl = OpenGL::new(gl);
+        let max_texture_size = gl.get_max_texture_size();
         gl.enable(Capability::CullFace);
         gl.enable(Capability::Blend);
         gl.enable(Capability::DepthTest);
@@ -31,7 +33,7 @@ impl OpenGLState {
         gl.depth_func(DepthTest::Less);
         gl.blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
         gl.cull_face(CullFace::Back);
-        trace!("MAX_TEXTURE_SIZE: {}", gl.get_max_texture_size());
+        trace!("MAX_TEXTURE_SIZE: {}", max_texture_size);
 
         let logical_size = window.logical_size();
         let sprite = SpriteShader::new(&mut gl);
@@ -40,6 +42,7 @@ impl OpenGLState {
             matrix_ortho: ortho_from_bounds(&logical_size),
             logical_size,
             default_texture: None,
+            max_texture_size,
             sprite,
         };
         unsafe { STATE = Some(state) };
@@ -63,11 +66,15 @@ impl OpenGLState {
         self.matrix_ortho
     }
 
+    pub fn max_texture_size(&self) -> i32 {
+        self.max_texture_size
+    }
+
     pub fn default_texture(&mut self) -> Texture {
         match &self.default_texture {
             Some(texture) => texture.clone(),
             None => {
-                let texture = Texture::new(&Image::from_color(colors::WHITE, 2, 2));
+                let texture = Texture::from_image(&Image::from_color(colors::WHITE, 2, 2));
                 self.default_texture = Some(texture.clone());
                 texture
             }

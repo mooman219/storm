@@ -12,11 +12,11 @@ pub use crate::prelude::*;
 pub use crate::render::layer::*;
 pub use crate::render::texture::Texture;
 pub use cgmath;
+pub use fontdue;
 
 mod event;
 mod prelude;
 mod render;
-mod texture;
 mod utility;
 
 use crate::event::EventConverter;
@@ -125,12 +125,18 @@ impl Context {
         SpriteLayer::new()
     }
 
+    /// Creates a new text layer. Layers represent draw calls and hold configuration associated
+    /// with drawing to the screen.
+    pub fn text_layer(&mut self) -> TextLayer {
+        TextLayer::new()
+    }
+
     // ////////////////////////////////////////////////////////
     // Texture
 
     /// Uploads an image to the GPU, creating a texture.
     pub fn texture(&mut self, image: &Image) -> Texture {
-        Texture::new(image)
+        Texture::from_image(image)
     }
 
     // ////////////////////////////////////////////////////////

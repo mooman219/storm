@@ -26,9 +26,11 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     let mut sprite = Sprite::default();
 
     let mut back = ctx.sprite_layer();
+
     let back_texture = ctx.texture(&Image::from_bytes(TEXTURE_A, ImageFormat::PNG));
     back.set_atlas(&back_texture);
     let back_texture_section = TextureSection::full();
+
     let mut back_sprites = Vec::new();
     sprite.texture = back_texture_section;
     back_sprites.push(sprite);

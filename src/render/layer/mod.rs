@@ -1,6 +1,8 @@
 mod sprite;
+mod text;
 
 pub use sprite::*;
+pub use text::*;
 
 use crate::render::OpenGLState;
 use cgmath::*;

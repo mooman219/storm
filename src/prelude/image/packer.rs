@@ -1,3 +1,4 @@
+/// A basic rectangle type.
 #[derive(Copy, Clone, Debug)]
 pub struct Rect {
     pub x: u32,
@@ -63,6 +64,7 @@ impl Skyline {
     }
 }
 
+/// Rectangle packer using the skyline algorithm.
 pub struct Packer {
     border: Rect,
     // The skylines are sorted by their `x` position.
@@ -70,6 +72,7 @@ pub struct Packer {
 }
 
 impl Packer {
+    /// Creates a new packer with the given width and height.
     pub fn new(w: u32, h: u32) -> Packer {
         let mut skylines = Vec::new();
         skylines.push(Skyline {
@@ -82,6 +85,27 @@ impl Packer {
             border: Rect::new(0, 0, w, h),
             skylines,
         }
+    }
+
+    /// Clears all packed rectangles and starts with a fresh canvas.
+    pub fn clear(&mut self) {
+        self.skylines.clear();
+        self.skylines.push(Skyline {
+            x: 0,
+            y: 0,
+            w: self.border.w,
+        });
+    }
+
+    /// Packs a rectangle with a given width and height, returning the position of the rectangle in
+    /// the canvas if it could be packed.
+    pub fn pack(&mut self, width: u32, height: u32) -> Option<Rect> {
+        if let Some((i, rect)) = self.find_skyline(width, height) {
+            self.split(i, &rect);
+            self.merge();
+            return Some(rect);
+        }
+        None
     }
 
     // Return `rect` if rectangle (w, h) can fit the skyline started at `i`.
@@ -169,14 +193,5 @@ impl Packer {
             }
             i += 1;
         }
-    }
-
-    pub fn pack(&mut self, width: u32, height: u32) -> Option<Rect> {
-        if let Some((i, rect)) = self.find_skyline(width, height) {
-            self.split(i, &rect);
-            self.merge();
-            return Some(rect);
-        }
-        None
     }
 }

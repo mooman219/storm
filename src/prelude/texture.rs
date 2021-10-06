@@ -20,8 +20,8 @@ impl TextureSection {
     pub fn from_texture(texture: &Texture, left: u32, right: u32, top: u32, bottom: u32) -> TextureSection {
         let h_size = MAX / texture.width();
         let v_size = MAX / texture.height();
-        let h_nudge = h_size >> 4;
-        let v_nudge = v_size >> 4;
+        let h_nudge = h_size >> 2;
+        let v_nudge = v_size >> 2;
         TextureSection(Vector4::new(
             ((left * h_size) + h_nudge) as u16,   // Left
             ((right * h_size) - h_nudge) as u16,  // Right
