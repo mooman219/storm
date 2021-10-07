@@ -30,8 +30,12 @@ impl Texture {
             image.width(),
             image.height(),
             PixelFormat::RGBA,
-            PixelInternalFormat::RGBA,
+            PixelInternalFormat::RGBA8,
         )
+    }
+
+    pub(crate) fn from_coverage(coverage: &[u8], width: u32, height: u32) -> Texture {
+        Texture::new(coverage, width, height, PixelFormat::RED, PixelInternalFormat::R8)
     }
 
     fn new<T: Sized>(
@@ -70,10 +74,12 @@ impl Texture {
         texture
     }
 
+    /// The width of the texture.
     pub fn width(&self) -> u32 {
         self.width
     }
 
+    /// The height of the texture.
     pub fn height(&self) -> u32 {
         self.height
     }
@@ -91,8 +97,31 @@ impl Texture {
     /// * `offset_x` - The top left texel x coordinate to offset the image by.
     /// * `offset_y` - The top left texel y coordinate to offset the image by.
     /// * `image` - The image to overwrite the texture with.
-    pub fn set_subsection(&self, offset_x: u32, offset_y: u32, image: &Image) {
-        assert!(image.width() + offset_x <= self.width && image.height() + offset_y <= self.height);
+    pub fn set_image(&self, offset_x: u32, offset_y: u32, image: &Image) {
+        self.set_subsections(
+            offset_x,
+            offset_y,
+            image.as_slice(),
+            image.width(),
+            image.height(),
+            PixelFormat::RGBA,
+        );
+    }
+
+    pub(crate) fn set_coverage(&self, offset_x: u32, offset_y: u32, slice: &[u8], width: u32, height: u32) {
+        self.set_subsections(offset_x, offset_y, slice, width, height, PixelFormat::RED);
+    }
+
+    fn set_subsections<T: Sized>(
+        &self,
+        offset_x: u32,
+        offset_y: u32,
+        slice: &[T],
+        width: u32,
+        height: u32,
+        format: PixelFormat,
+    ) {
+        assert!(width + offset_x <= self.width && height + offset_y <= self.height);
         let gl = &mut OpenGLState::ctx().gl;
         gl.active_texture(TextureUnit::Temporary);
         gl.bind_texture(TextureBindingTarget::Texture2D, Some(self.id));
@@ -101,11 +130,11 @@ impl Texture {
             0,
             offset_x as i32,
             offset_y as i32,
-            image.width() as i32,
-            image.height() as i32,
-            PixelFormat::RGBA,
+            width as i32,
+            height as i32,
+            format,
             PixelType::UnsignedByte,
-            image.as_slice(),
+            slice,
         );
         gl.bind_texture(TextureBindingTarget::Texture2D, None);
     }

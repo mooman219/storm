@@ -7,7 +7,6 @@ static FONT: &[u8] = include_bytes!("resources/Roboto-Regular.ttf");
 
 /// Run with: cargo run --example square --release
 fn main() {
-    simple_logger::SimpleLogger::new().init().expect("Unable to init logger");
     // Create the engine context and describe the window.
     Context::start(
         WindowSettings {
@@ -28,10 +27,10 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     let mut is_dragging = false;
 
     // Create a Layers to draw on.
-    let mut screen = ctx.text_layer();
-    let mut screen_transform = LayerTransform::new();
-    // Add all the strings we want to draw to a vec.
-    let mut message = String::from("> Teh quick brown fox jumps over the lazy dog.");
+    let mut text_layer = ctx.text_layer();
+    let mut text_transform = LayerTransform::new();
+
+    // Setup the layout for our text.
     let fonts = [Font::from_bytes(FONT, Default::default()).unwrap()];
     let layout_settings = LayoutSettings {
         x: 100.0,
@@ -39,22 +38,29 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
         max_width: Some(500.0),
         ..Default::default()
     };
-    screen.append(
+
+    // Append some text with our layout settings.
+    let mut message = String::from("abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    text_layer.append(
         &fonts,
         &layout_settings,
         &[TextStyle {
             text: &message,
             font_index: 0,
             px: 16.0,
-            user_data: colors::BLACK,
+            user_data: colors::RED,
         }],
     );
 
     move |event, ctx| match event {
         Event::ReceivedCharacter(char) => {
+            // Backspace
+            if char == '\u{08}' {
+                return;
+            }
             message.push(char);
-            screen.clear_text();
-            screen.append(
+            text_layer.clear_text();
+            text_layer.append(
                 &fonts,
                 &layout_settings,
                 &[TextStyle {
@@ -69,8 +75,22 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
         Event::KeyPressed(key) => match key {
             KeyboardButton::Escape => ctx.stop(),
             KeyboardButton::Tab => {
-                screen_transform.scale = 1.0;
-                screen.set_transform(screen_transform.matrix());
+                text_transform.scale = 1.0;
+                text_layer.set_transform(text_transform.matrix());
+            }
+            KeyboardButton::Back => {
+                message.pop();
+                text_layer.clear_text();
+                text_layer.append(
+                    &fonts,
+                    &layout_settings,
+                    &[TextStyle {
+                        text: &message,
+                        font_index: 0,
+                        px: 16.0,
+                        user_data: colors::BLACK,
+                    }],
+                );
             }
             _ => {}
         },
@@ -93,21 +113,21 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             ..
         } => {
             if is_dragging {
-                screen_transform.translation += delta / screen_transform.scale;
-                screen.set_transform(screen_transform.matrix());
+                text_transform.translation += delta / text_transform.scale;
+                text_layer.set_transform(text_transform.matrix());
             }
         }
         Event::CursorScroll(direction) => {
             match direction {
-                ScrollDirection::Up => screen_transform.scale *= 1.1,
-                ScrollDirection::Down => screen_transform.scale /= 1.1,
+                ScrollDirection::Up => text_transform.scale *= 1.1,
+                ScrollDirection::Down => text_transform.scale /= 1.1,
                 _ => {}
             }
-            screen.set_transform(screen_transform.matrix());
+            text_layer.set_transform(text_transform.matrix());
         }
         Event::Update(_delta) => {
             ctx.clear(ClearMode::color_depth(colors::WHITE));
-            screen.draw();
+            text_layer.draw();
         }
         _ => {}
     }

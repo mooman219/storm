@@ -411,6 +411,13 @@ pub enum ShaderType {
     Compute = glow::COMPUTE_SHADER,
 }
 
+#[repr(u32)]
+#[derive(Copy, Clone)]
+pub enum PixelStoreAlignment {
+    PackAlignment = glow::PACK_ALIGNMENT,
+    UnpackAlignment = glow::UNPACK_ALIGNMENT,
+}
+
 pub mod resource {
     pub type Shader = glow::Shader;
     pub type Program = glow::Program;
@@ -731,6 +738,10 @@ impl OpenGL {
                 value as i32,
             )
         };
+    }
+
+    pub fn pixel_store(&self, param: PixelStoreAlignment, value: i32) {
+        unsafe { self.gl.pixel_store_i32(param as u32, value) };
     }
 
     pub fn enable(&self, capability: Capability) {

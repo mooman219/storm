@@ -1,5 +1,5 @@
-use super::raw::{BlendFactor, Capability, CullFace, DepthTest, OpenGL};
-use super::shader::SpriteShader;
+use super::raw::{BlendFactor, Capability, CullFace, DepthTest, OpenGL, PixelStoreAlignment};
+use super::shader::{SpriteShader, TextShader};
 use super::window::OpenGLWindow;
 use crate::math::ortho_from_bounds;
 use crate::prelude::WindowSettings;
@@ -16,6 +16,7 @@ pub struct OpenGLState {
     default_texture: Option<Texture>,
     max_texture_size: i32,
     pub sprite: SpriteShader,
+    pub text: TextShader,
 }
 
 impl OpenGLState {
@@ -26,6 +27,7 @@ impl OpenGLState {
         let (window, gl) = OpenGLWindow::new(desc, event_loop);
         let mut gl = OpenGL::new(gl);
         let max_texture_size = gl.get_max_texture_size();
+        gl.pixel_store(PixelStoreAlignment::UnpackAlignment, 1);
         gl.enable(Capability::CullFace);
         gl.enable(Capability::Blend);
         gl.enable(Capability::DepthTest);
@@ -37,6 +39,7 @@ impl OpenGLState {
 
         let logical_size = window.logical_size();
         let sprite = SpriteShader::new(&mut gl);
+        let text = TextShader::new(&mut gl);
         let state = OpenGLState {
             gl,
             matrix_ortho: ortho_from_bounds(&logical_size),
@@ -44,6 +47,7 @@ impl OpenGLState {
             default_texture: None,
             max_texture_size,
             sprite,
+            text,
         };
         unsafe { STATE = Some(state) };
         window
@@ -74,7 +78,7 @@ impl OpenGLState {
         match &self.default_texture {
             Some(texture) => texture.clone(),
             None => {
-                let texture = Texture::from_image(&Image::from_color(colors::WHITE, 2, 2));
+                let texture = Texture::from_image(&Image::from_color(colors::WHITE, 1, 1));
                 self.default_texture = Some(texture.clone());
                 texture
             }

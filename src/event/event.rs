@@ -10,7 +10,7 @@ pub use winit::event::VirtualKeyCode as KeyboardButton;
 pub enum Event {
     /// The window has requested it close.
     CloseRequested,
-    /// Received a character.
+    /// Received a character. This includes control characters.
     ReceivedCharacter(char),
     /// Keyboard press event.
     KeyPressed(KeyboardButton),
