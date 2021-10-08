@@ -1,16 +1,13 @@
+use crate::cgmath::prelude::*;
+use crate::cgmath::*;
 use core::time::Duration;
-use storm::fontdue::layout::{LayoutSettings, TextStyle};
-use storm::fontdue::Font;
 use storm::*;
 
-static FONT: &[u8] = include_bytes!("resources/Roboto-Regular.ttf");
-
-/// Run with: cargo run --example square --release
+/// Run with: cargo run --example particles --release
 fn main() {
-    // Create the engine context and describe the window.
     Context::start(
         WindowSettings {
-            title: String::from("Storm: Square"),
+            title: String::from("Storm: Particles"),
             display_mode: DisplayMode::Windowed {
                 width: 1280,
                 height: 1024,
@@ -26,74 +23,27 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
 
-    // Create a Layers to draw on.
-    let mut text_layer = ctx.text_layer();
-    let mut text_transform = LayerTransform::new();
+    let mut screen = ctx.sprite_layer();
+    let mut screen_transform = LayerTransform::new();
+    screen_transform.rotation = 0.125;
+    screen.set_transform(screen_transform.matrix());
 
-    // Setup the layout for our text.
-    let fonts = [Font::from_bytes(FONT, Default::default()).unwrap()];
-    let layout_settings = LayoutSettings {
-        x: 100.0,
-        y: 500.0,
-        max_width: Some(500.0),
-        ..Default::default()
-    };
-
-    // Append some text with our layout settings.
-    let mut message = String::from("abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ");
-    text_layer.append(
-        &fonts,
-        &layout_settings,
-        &[TextStyle {
-            text: &message,
-            font_index: 0,
-            px: 16.0,
-            user_data: RGBA8::RED,
-        }],
-    );
-
-    // ___
+    let mut sprites = Vec::new();
+    let mut particles = Vec::new();
+    const RANGE: i32 = 100;
+    for x in -RANGE..RANGE {
+        for y in -RANGE..RANGE {
+            let (sprite, particle) = Particle::new(Vector3::new(x as f32 * 5.0, y as f32 * 5.0, 0.0));
+            sprites.push(sprite);
+            particles.push(particle);
+        }
+    }
+    screen.set_sprites(&sprites);
 
     move |event, ctx| match event {
-        Event::ReceivedCharacter(char) => {
-            // Backspace
-            if char == '\u{08}' {
-                return;
-            }
-            message.push(char);
-            text_layer.clear_text();
-            text_layer.append(
-                &fonts,
-                &layout_settings,
-                &[TextStyle {
-                    text: &message,
-                    font_index: 0,
-                    px: 16.0,
-                    user_data: RGBA8::BLACK,
-                }],
-            );
-        }
         Event::CloseRequested => ctx.stop(),
         Event::KeyPressed(key) => match key {
             KeyboardButton::Escape => ctx.stop(),
-            KeyboardButton::Tab => {
-                text_transform.scale = 1.0;
-                text_layer.set_transform(text_transform.matrix());
-            }
-            KeyboardButton::Back => {
-                message.pop();
-                text_layer.clear_text();
-                text_layer.append(
-                    &fonts,
-                    &layout_settings,
-                    &[TextStyle {
-                        text: &message,
-                        font_index: 0,
-                        px: 16.0,
-                        user_data: RGBA8::BLACK,
-                    }],
-                );
-            }
             _ => {}
         },
         Event::CursorPressed {
@@ -115,22 +65,63 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             ..
         } => {
             if is_dragging {
-                text_transform.translation += delta / text_transform.scale;
-                text_layer.set_transform(text_transform.matrix());
+                screen_transform.translation += delta / screen_transform.scale;
+                screen.set_transform(screen_transform.matrix());
             }
         }
         Event::CursorScroll(direction) => {
             match direction {
-                ScrollDirection::Up => text_transform.scale *= 1.1,
-                ScrollDirection::Down => text_transform.scale /= 1.1,
+                ScrollDirection::Up => screen_transform.scale *= 1.1,
+                ScrollDirection::Down => screen_transform.scale /= 1.1,
                 _ => {}
             }
-            text_layer.set_transform(text_transform.matrix());
+            screen.set_transform(screen_transform.matrix());
         }
-        Event::Update(_delta) => {
-            ctx.clear(ClearMode::color_depth(RGBA8::WHITE));
-            text_layer.draw();
+        Event::Update(delta) => {
+            for index in 0..sprites.len() {
+                Particle::tick(&mut sprites[index], &mut particles[index], delta);
+            }
+            screen.set_sprites(&sprites);
+            ctx.clear(ClearMode::color_depth(RGBA8::BLACK));
+            screen.draw();
         }
         _ => {}
+    }
+}
+
+pub struct Particle {
+    pos: Vector2<f32>,
+    velocity: Vector2<f32>,
+    acceleration: Vector2<f32>,
+}
+
+impl Particle {
+    const G: f32 = 10.674;
+    const MASS: f32 = 500.0;
+
+    pub fn new(pos: Vector3<f32>) -> (Sprite, Particle) {
+        let sprite = Sprite::new(pos, Vector2::new(2.0, 2.0), TextureSection::full(), RGBA8::WHITE, 0.0);
+        let velocity = if pos.y < 0.0 {
+            Vector2::new(20.0, 0.0)
+        } else {
+            Vector2::new(-20.0, 0.0)
+        };
+        let particle = Particle {
+            pos: pos.truncate(),
+            velocity: velocity,
+            acceleration: Vector2::zero(),
+        };
+        (sprite, particle)
+    }
+
+    pub fn tick(sprite: &mut Sprite, particle: &mut Particle, delta: f32) {
+        let length_squared = particle.pos.x * particle.pos.x + particle.pos.y * particle.pos.y;
+        let length = f32::sqrt(length_squared);
+        let norm = particle.pos / length;
+        particle.acceleration = -(norm * (Self::G * Self::MASS)) / length_squared.max(1000.0);
+
+        particle.velocity += particle.acceleration;
+        particle.pos += particle.velocity * delta;
+        sprite.pos = particle.pos.extend(0.0);
     }
 }
