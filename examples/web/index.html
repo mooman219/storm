@@ -1,0 +1,24 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <style>
+        body {
+            margin: 0;
+            background-color: black;
+        }
+    </style>
+    <script src='./web.js'></script>
+    <script>
+        window.onload = (event) => {
+            document.getElementById("load").remove();
+            wasm_bindgen('./web_bg.wasm').catch(console.error);
+        }
+    </script>
+</head>
+
+<body>
+    <a href="#" id="load"><img src="start.png"></a>
+</body>
+
+</html>
