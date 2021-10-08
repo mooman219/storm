@@ -446,7 +446,7 @@ impl OpenGL {
     pub fn new(gl: glow::Context) -> OpenGL {
         OpenGL {
             gl,
-            clear_color: RGBA8::new_raw(0, 0, 0, 0),
+            clear_color: RGBA8::new(0, 0, 0, 0),
             shader_program: None,
             vertex_array: None,
             active_texture_unit: TextureUnit::Temporary,

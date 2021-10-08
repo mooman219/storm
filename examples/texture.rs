@@ -27,7 +27,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
 
     let mut back = ctx.sprite_layer();
 
-    let back_texture = ctx.texture(&Image::from_bytes(TEXTURE_A, ImageFormat::PNG));
+    let back_texture = ctx.texture(&read_png(TEXTURE_A));
     back.set_atlas(&back_texture);
     let back_texture_section = TextureSection::full();
 
@@ -50,8 +50,8 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     back.set_sprites(&back_sprites);
 
     let mut front = ctx.sprite_layer();
-    let front_texture = ctx.texture(&Image::from_bytes(TEXTURE_A, ImageFormat::PNG));
-    front_texture.set_image(0, 0, &Image::from_bytes(TEXTURE_B, ImageFormat::PNG));
+    let front_texture = ctx.texture(&read_png(TEXTURE_A));
+    front_texture.set_image(0, 0, &read_png(TEXTURE_B));
     front.set_atlas(&front_texture);
     let front_texture_section = front_texture.subsection(0, 32, 0, 32);
     let mut front_sprites = Vec::new();
@@ -85,7 +85,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             back.set_sprites(&back_sprites);
         }
         Event::Update(_delta) => {
-            ctx.clear(ClearMode::color_depth(colors::BLUE));
+            ctx.clear(ClearMode::color_depth(RGBA8::BLUE));
             back.draw();
             front.draw();
         }

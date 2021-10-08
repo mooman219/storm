@@ -1,7 +1,6 @@
 use crate::cgmath::prelude::*;
 use crate::cgmath::*;
 use core::time::Duration;
-use storm::colors::*;
 use storm::*;
 
 /// Run with: cargo run --example particles --release
@@ -83,7 +82,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                 Particle::tick(&mut sprites[index], &mut particles[index], delta);
             }
             screen.set_sprites(&sprites);
-            ctx.clear(ClearMode::color_depth(BLACK));
+            ctx.clear(ClearMode::color_depth(RGBA8::BLACK));
             screen.draw();
         }
         _ => {}
@@ -101,7 +100,7 @@ impl Particle {
     const MASS: f32 = 500.0;
 
     pub fn new(pos: Vector3<f32>) -> (Sprite, Particle) {
-        let sprite = Sprite::new(pos, Vector2::new(2.0, 2.0), TextureSection::full(), WHITE, 0.0);
+        let sprite = Sprite::new(pos, Vector2::new(2.0, 2.0), TextureSection::full(), RGBA8::WHITE, 0.0);
         let velocity = if pos.y < 0.0 {
             Vector2::new(20.0, 0.0)
         } else {

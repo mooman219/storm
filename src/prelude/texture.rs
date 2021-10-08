@@ -1,4 +1,4 @@
-use crate::Texture;
+use crate::{ColorDescription, Texture};
 use cgmath::*;
 
 const MAX: u32 = 65536;
@@ -17,7 +17,13 @@ impl Default for TextureSection {
 impl TextureSection {
     /// Coordinates relative to the top left corner of the texture. (0, 0) is the top left of the
     /// texture, and (width, height) is the bottom right of the texture.
-    pub fn from_texture(texture: &Texture, left: u32, right: u32, top: u32, bottom: u32) -> TextureSection {
+    pub fn from_texture<T: ColorDescription>(
+        texture: &Texture<T>,
+        left: u32,
+        right: u32,
+        top: u32,
+        bottom: u32,
+    ) -> TextureSection {
         let h_size = MAX / texture.width();
         let v_size = MAX / texture.height();
         let h_nudge = h_size >> 2;

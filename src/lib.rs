@@ -9,6 +9,7 @@ pub mod time;
 
 pub use crate::event::*;
 pub use crate::prelude::*;
+pub use crate::render::color::*;
 pub use crate::render::layer::*;
 pub use crate::render::texture::Texture;
 pub use cgmath;
@@ -135,7 +136,7 @@ impl Context {
     // Texture
 
     /// Uploads an image to the GPU, creating a texture.
-    pub fn texture(&mut self, image: &Image) -> Texture {
+    pub fn texture<T: ColorDescription>(&mut self, image: &Image<T>) -> Texture<T> {
         Texture::from_image(image)
     }
 

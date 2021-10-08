@@ -3,7 +3,7 @@ use super::shader::{SpriteShader, TextShader};
 use super::window::OpenGLWindow;
 use crate::math::ortho_from_bounds;
 use crate::prelude::WindowSettings;
-use crate::{colors, Image, Texture};
+use crate::{Image, Texture, RGBA8};
 use cgmath::*;
 
 #[no_mangle]
@@ -13,7 +13,7 @@ pub struct OpenGLState {
     pub gl: OpenGL,
     matrix_ortho: Matrix4<f32>,
     logical_size: Vector2<f32>,
-    default_texture: Option<Texture>,
+    default_texture: Option<Texture<RGBA8>>,
     max_texture_size: i32,
     pub sprite: SpriteShader,
     pub text: TextShader,
@@ -31,7 +31,7 @@ impl OpenGLState {
         gl.enable(Capability::CullFace);
         gl.enable(Capability::Blend);
         gl.enable(Capability::DepthTest);
-        gl.clear_color(colors::BLACK);
+        gl.clear_color(RGBA8::BLACK);
         gl.depth_func(DepthTest::Less);
         gl.blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
         gl.cull_face(CullFace::Back);
@@ -74,11 +74,11 @@ impl OpenGLState {
         self.max_texture_size
     }
 
-    pub fn default_texture(&mut self) -> Texture {
+    pub fn default_texture(&mut self) -> Texture<RGBA8> {
         match &self.default_texture {
             Some(texture) => texture.clone(),
             None => {
-                let texture = Texture::from_image(&Image::from_color(colors::WHITE, 1, 1));
+                let texture = Texture::from_image(&Image::from_color(RGBA8::WHITE, 1, 1));
                 self.default_texture = Some(texture.clone());
                 texture
             }

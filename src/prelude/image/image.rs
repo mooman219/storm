@@ -1,31 +1,16 @@
-use super::png;
-use crate::RGBA8;
-
-/// Enumeration for all the loadable texture formats. Currently only PNG is supported.
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum ImageFormat {
-    PNG,
-}
+use crate::ColorDescription;
 
 /// Basic image type.
 #[derive(Clone)]
-pub struct Image {
-    pixels: Vec<RGBA8>,
+pub struct Image<T: ColorDescription> {
+    pixels: Vec<T>,
     width: u32,
     height: u32,
 }
 
-impl Image {
-    pub fn from_bytes(bytes: &[u8], format: ImageFormat) -> Image {
-        match format {
-            ImageFormat::PNG => png::read(bytes),
-        }
-    }
-
-    pub fn from_color(color: RGBA8, width: u32, height: u32) -> Image {
-        if width == 0 || height == 0 {
-            panic!("Neither width or height can be 0.");
-        }
+impl<T: ColorDescription> Image<T> {
+    pub fn from_color(color: T, width: u32, height: u32) -> Image<T> {
+        assert!(width > 0 && height > 0, "Neither width or height can be 0.");
         let pixels = vec![color; (width * height) as usize];
         Image {
             pixels,
@@ -34,10 +19,9 @@ impl Image {
         }
     }
 
-    pub fn from_vec(buf: Vec<RGBA8>, width: u32, height: u32) -> Image {
-        if width == 0 || height == 0 {
-            panic!("Neither width or height can be 0.");
-        }
+    pub fn from_vec(buf: Vec<T>, width: u32, height: u32) -> Image<T> {
+        assert!(width > 0 && height > 0, "Neither width or height can be 0.");
+        assert!(buf.len() == (width * height) as usize, "Buffer length must match image dimensions.");
         Image {
             pixels: buf,
             width,
@@ -58,35 +42,35 @@ impl Image {
         self.height
     }
 
-    pub fn as_slice(&self) -> &[RGBA8] {
+    pub fn as_slice(&self) -> &[T] {
         self.pixels.as_slice()
     }
 
-    pub fn as_mut_slice(&mut self) -> &mut [RGBA8] {
+    pub fn as_mut_slice(&mut self) -> &mut [T] {
         self.pixels.as_mut_slice()
     }
 
-    pub fn into_vec(self) -> Vec<RGBA8> {
+    pub fn into_vec(self) -> Vec<T> {
         self.pixels
     }
 
-    pub fn get_indexed(&self, index: usize) -> RGBA8 {
+    pub fn get_indexed(&self, index: usize) -> T {
         self.pixels[index]
     }
 
-    pub fn get(&self, x: u32, y: u32) -> RGBA8 {
+    pub fn get(&self, x: u32, y: u32) -> T {
         self.get_indexed(self.index_for(x, y))
     }
 
-    pub fn set_indexed(&mut self, index: usize, val: RGBA8) {
+    pub fn set_indexed(&mut self, index: usize, val: T) {
         self.pixels[index] = val;
     }
 
-    pub fn set(&mut self, x: u32, y: u32, val: RGBA8) {
+    pub fn set(&mut self, x: u32, y: u32, val: T) {
         self.set_indexed(self.index_for(x, y), val);
     }
 
-    pub fn set_subsection(&mut self, offset_x: u32, offset_y: u32, tex: &Image) {
+    pub fn set_subsection(&mut self, offset_x: u32, offset_y: u32, tex: &Image<T>) {
         assert!(tex.width + offset_x <= self.width && tex.height + offset_y <= self.height);
         for x in 0..tex.width {
             for y in 0..tex.height {

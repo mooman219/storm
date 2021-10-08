@@ -1,70 +1,55 @@
+use super::color::ColorDescription;
 use crate::render::raw::{
-    resource, PixelFormat, PixelInternalFormat, PixelType, TextureBindingTarget, TextureLoadTarget,
-    TextureMagFilterValue, TextureMinFilterValue, TextureParameterTarget, TextureUnit, TextureWrapValue,
+    resource, TextureBindingTarget, TextureLoadTarget, TextureMagFilterValue, TextureMinFilterValue,
+    TextureParameterTarget, TextureUnit, TextureWrapValue,
 };
 use crate::render::OpenGLState;
 use crate::{Image, TextureSection};
 use alloc::rc::Rc;
+use core::marker::PhantomData;
 
 /// Represents a GPU resource for a texture.
-pub struct Texture {
+pub struct Texture<T: ColorDescription> {
     id: resource::Texture,
     width: u32,
     height: u32,
     rc: Rc<()>,
+    _pixel: PhantomData<T>,
 }
 
-impl Texture {
-    pub(crate) fn clone(&self) -> Texture {
+impl<T: ColorDescription> Texture<T> {
+    pub(crate) fn clone(&self) -> Texture<T> {
         Texture {
             id: self.id,
             width: self.width,
             height: self.height,
             rc: self.rc.clone(),
+            _pixel: PhantomData,
         }
     }
 
-    pub(crate) fn from_image(image: &Image) -> Texture {
-        Texture::new(
-            image.as_slice(),
-            image.width(),
-            image.height(),
-            PixelFormat::RGBA,
-            PixelInternalFormat::RGBA8,
-        )
-    }
-
-    pub(crate) fn from_coverage(coverage: &[u8], width: u32, height: u32) -> Texture {
-        Texture::new(coverage, width, height, PixelFormat::RED, PixelInternalFormat::R8)
-    }
-
-    fn new<T: Sized>(
-        slice: &[T],
-        width: u32,
-        height: u32,
-        input_format: PixelFormat,
-        gpu_format: PixelInternalFormat,
-    ) -> Texture {
+    pub(crate) fn from_image(image: &Image<T>) -> Texture<T> {
         let gl = &mut OpenGLState::ctx().gl;
         let id = gl.create_texture();
         let texture = Texture {
             id,
-            width,
-            height,
+            width: image.width(),
+            height: image.height(),
             rc: Rc::new(()),
+            _pixel: PhantomData,
         };
         gl.active_texture(TextureUnit::Temporary);
         gl.bind_texture(TextureBindingTarget::Texture2D, Some(id));
         gl.tex_image_2d(
             TextureLoadTarget::Texture2D,
             0,
-            width as i32,
-            height as i32,
+            image.width() as i32,
+            image.height() as i32,
             0,
-            gpu_format,
-            input_format,
-            PixelType::UnsignedByte,
-            slice,
+            T::layout().gpu_format(),
+            T::layout().cpu_format(),
+            T::component_type().pixel_type(),
+            image.as_slice(),
         );
         gl.tex_parameter_wrap_s(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
         gl.tex_parameter_wrap_t(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
@@ -97,30 +82,11 @@ impl Texture {
     /// * `offset_x` - The top left texel x coordinate to offset the image by.
     /// * `offset_y` - The top left texel y coordinate to offset the image by.
     /// * `image` - The image to overwrite the texture with.
-    pub fn set_image(&self, offset_x: u32, offset_y: u32, image: &Image) {
-        self.set_subsections(
-            offset_x,
-            offset_y,
-            image.as_slice(),
-            image.width(),
-            image.height(),
-            PixelFormat::RGBA,
-        );
+    pub fn set_image<Z: ColorDescription>(&self, offset_x: u32, offset_y: u32, image: &Image<Z>) {
+        self.set(offset_x, offset_y, image.as_slice(), image.width(), image.height());
     }
 
-    pub(crate) fn set_coverage(&self, offset_x: u32, offset_y: u32, slice: &[u8], width: u32, height: u32) {
-        self.set_subsections(offset_x, offset_y, slice, width, height, PixelFormat::RED);
-    }
-
-    fn set_subsections<T: Sized>(
-        &self,
-        offset_x: u32,
-        offset_y: u32,
-        slice: &[T],
-        width: u32,
-        height: u32,
-        format: PixelFormat,
-    ) {
+    fn set<Z: ColorDescription>(&self, offset_x: u32, offset_y: u32, slice: &[Z], width: u32, height: u32) {
         assert!(width + offset_x <= self.width && height + offset_y <= self.height);
         let gl = &mut OpenGLState::ctx().gl;
         gl.active_texture(TextureUnit::Temporary);
@@ -132,8 +98,8 @@ impl Texture {
             offset_y as i32,
             width as i32,
             height as i32,
-            format,
-            PixelType::UnsignedByte,
+            Z::layout().cpu_format(),
+            Z::component_type().pixel_type(),
             slice,
         );
         gl.bind_texture(TextureBindingTarget::Texture2D, None);
@@ -146,7 +112,7 @@ impl Texture {
     }
 }
 
-impl Drop for Texture {
+impl<T: ColorDescription> Drop for Texture<T> {
     fn drop(&mut self) {
         if Rc::<()>::strong_count(&self.rc) == 1 {
             OpenGLState::ctx().gl.delete_texture(self.id);

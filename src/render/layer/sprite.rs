@@ -4,13 +4,14 @@ use crate::render::buffer::Buffer;
 use crate::render::raw::{BufferBindingTarget, TextureUnit};
 use crate::render::OpenGLState;
 use crate::Texture;
+use crate::RGBA8;
 use cgmath::Matrix4;
 
 /// Simple layer which draws sprites to the screen.
 pub struct SpriteLayer {
     transform: TransformLayer,
     sprites: Buffer<Sprite>,
-    atlas: Texture,
+    atlas: Texture<RGBA8>,
 }
 
 impl SpriteLayer {
@@ -35,7 +36,7 @@ impl SpriteLayer {
         }
     }
 
-    pub fn set_atlas(&mut self, handle: &Texture) {
+    pub fn set_atlas(&mut self, handle: &Texture<RGBA8>) {
         self.atlas = handle.clone();
     }
 

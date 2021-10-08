@@ -1,5 +1,5 @@
-use super::colors::WHITE;
 use super::*;
+use crate::RGBA8;
 use cgmath::*;
 
 /// Configuration settings for a sprite.
@@ -25,7 +25,7 @@ impl Default for Sprite {
             pos: Vector3::new(0.0, 0.0, 0.0),
             size: Vector2::new(100, 100),
             texture: TextureSection::default(),
-            color: WHITE,
+            color: RGBA8::WHITE,
             rotation: 0,
         }
     }

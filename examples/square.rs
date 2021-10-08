@@ -48,7 +48,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             text: &message,
             font_index: 0,
             px: 16.0,
-            user_data: colors::RED,
+            user_data: RGBA8::WHITE,
         }],
     );
 
@@ -67,7 +67,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                     text: &message,
                     font_index: 0,
                     px: 16.0,
-                    user_data: colors::BLACK,
+                    user_data: RGBA8::WHITE,
                 }],
             );
         }
@@ -88,7 +88,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                         text: &message,
                         font_index: 0,
                         px: 16.0,
-                        user_data: colors::BLACK,
+                        user_data: RGBA8::WHITE,
                     }],
                 );
             }
@@ -126,7 +126,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             text_layer.set_transform(text_transform.matrix());
         }
         Event::Update(_delta) => {
-            ctx.clear(ClearMode::color_depth(colors::WHITE));
+            ctx.clear(ClearMode::color_depth(RGBA8::BLACK));
             text_layer.draw();
         }
         _ => {}

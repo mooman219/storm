@@ -6,6 +6,7 @@ mod window;
 
 pub(crate) mod raw;
 
+pub mod color;
 pub mod layer;
 pub mod texture;
 
