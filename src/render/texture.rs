@@ -82,12 +82,8 @@ impl<T: ColorDescription> Texture<T> {
     /// * `offset_x` - The top left texel x coordinate to offset the image by.
     /// * `offset_y` - The top left texel y coordinate to offset the image by.
     /// * `image` - The image to overwrite the texture with.
-    pub fn set_image<Z: ColorDescription>(&self, offset_x: u32, offset_y: u32, image: &Image<Z>) {
-        self.set(offset_x, offset_y, image.as_slice(), image.width(), image.height());
-    }
-
-    fn set<Z: ColorDescription>(&self, offset_x: u32, offset_y: u32, slice: &[Z], width: u32, height: u32) {
-        assert!(width + offset_x <= self.width && height + offset_y <= self.height);
+    pub fn set<Z: ColorDescription>(&self, offset_x: u32, offset_y: u32, image: &Image<Z>) {
+        assert!(image.width() + offset_x <= self.width && image.height() + offset_y <= self.height);
         let gl = &mut OpenGLState::ctx().gl;
         gl.active_texture(TextureUnit::Temporary);
         gl.bind_texture(TextureBindingTarget::Texture2D, Some(self.id));
@@ -96,11 +92,11 @@ impl<T: ColorDescription> Texture<T> {
             0,
             offset_x as i32,
             offset_y as i32,
-            width as i32,
-            height as i32,
+            image.width() as i32,
+            image.height() as i32,
             Z::layout().cpu_format(),
             Z::component_type().pixel_type(),
-            slice,
+            image.as_slice(),
         );
         gl.bind_texture(TextureBindingTarget::Texture2D, None);
     }

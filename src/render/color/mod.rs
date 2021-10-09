@@ -21,25 +21,25 @@ pub trait ColorDescription: Sized + Copy {
 
 /// Represents the type of each color component.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[repr(u32)]
 pub enum ColorComponentType {
-    UnsignedByte,
+    UnsignedByte = PixelType::UnsignedByte as u32,
 }
 
 impl ColorComponentType {
     pub(crate) fn pixel_type(&self) -> PixelType {
-        match self {
-            ColorComponentType::UnsignedByte => PixelType::UnsignedByte,
-        }
+        unsafe { core::mem::transmute(*self) }
     }
 }
 
 /// Represents the layout of the color components.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[repr(u32)]
 pub enum ColorLayoutFormat {
-    R,
-    RG,
-    RGB,
-    RGBA,
+    R = PixelFormat::RED as u32,
+    RG = PixelFormat::RG as u32,
+    RGB = PixelFormat::RGB as u32,
+    RGBA = PixelFormat::RGBA as u32,
 }
 
 impl ColorLayoutFormat {
@@ -53,12 +53,7 @@ impl ColorLayoutFormat {
     }
 
     pub(crate) fn cpu_format(&self) -> PixelFormat {
-        match self {
-            ColorLayoutFormat::R => PixelFormat::RED,
-            ColorLayoutFormat::RG => PixelFormat::RG,
-            ColorLayoutFormat::RGB => PixelFormat::RGB,
-            ColorLayoutFormat::RGBA => PixelFormat::RGBA,
-        }
+        unsafe { core::mem::transmute(*self) }
     }
 }
 

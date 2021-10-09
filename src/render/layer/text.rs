@@ -82,7 +82,7 @@ impl TextLayer {
                         .packer
                         .pack(metrics.width as u32, metrics.height as u32)
                         .expect("Text packer is full.");
-                    self.atlas.set_image(
+                    self.atlas.set(
                         rect.x,
                         rect.y,
                         &Image::from_vec(bitmap, metrics.width as u32, metrics.height as u32),
