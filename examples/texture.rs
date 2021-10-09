@@ -51,7 +51,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
 
     let mut front = ctx.sprite_layer();
     let front_texture = ctx.texture(&read_png(TEXTURE_A));
-    front_texture.set_image(0, 0, &read_png(TEXTURE_B));
+    front_texture.set(0, 0, &read_png(TEXTURE_B));
     front.set_atlas(&front_texture);
     let front_texture_section = front_texture.subsection(0, 32, 0, 32);
     let mut front_sprites = Vec::new();
