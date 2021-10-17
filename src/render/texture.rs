@@ -1,9 +1,8 @@
-use super::color::ColorDescription;
 use crate::render::raw::{
     resource, TextureBindingTarget, TextureLoadTarget, TextureMagFilterValue, TextureMinFilterValue,
     TextureParameterTarget, TextureUnit, TextureWrapValue,
 };
-use crate::render::OpenGLState;
+use crate::render::{ColorDescription, OpenGLState};
 use crate::{Image, TextureSection};
 use alloc::rc::Rc;
 use core::marker::PhantomData;

@@ -29,7 +29,7 @@ impl Into<f32> for R8 {
 
 impl ColorDescription for R8 {
     fn component_type() -> ColorComponentType {
-        ColorComponentType::UnsignedByte
+        ColorComponentType::U8
     }
     fn layout() -> ColorLayoutFormat {
         ColorLayoutFormat::R

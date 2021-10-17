@@ -23,7 +23,8 @@ pub trait ColorDescription: Sized + Copy {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[repr(u32)]
 pub enum ColorComponentType {
-    UnsignedByte = PixelType::UnsignedByte as u32,
+    U8 = PixelType::UnsignedByte as u32,
+    F32 = PixelType::Float as u32,
 }
 
 impl ColorComponentType {
@@ -59,7 +60,7 @@ impl ColorLayoutFormat {
 
 impl ColorDescription for u8 {
     fn component_type() -> ColorComponentType {
-        ColorComponentType::UnsignedByte
+        ColorComponentType::U8
     }
     fn layout() -> ColorLayoutFormat {
         ColorLayoutFormat::R

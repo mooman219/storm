@@ -49,7 +49,7 @@ impl Into<(f32, f32, f32, f32)> for RGBA8 {
 
 impl ColorDescription for RGBA8 {
     fn component_type() -> ColorComponentType {
-        ColorComponentType::UnsignedByte
+        ColorComponentType::U8
     }
     fn layout() -> ColorLayoutFormat {
         ColorLayoutFormat::RGBA

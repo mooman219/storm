@@ -1,8 +1,8 @@
-use super::raw::{BlendFactor, Capability, CullFace, DepthTest, OpenGL, PixelStoreAlignment};
-use super::shader::{SpriteShader, TextShader};
-use super::window::OpenGLWindow;
 use crate::math::ortho_from_bounds;
 use crate::prelude::WindowSettings;
+use crate::render::raw::{BlendFactor, Capability, CullFace, DepthTest, OpenGL, PixelStoreAlignment};
+use crate::render::shader::{SpriteShader, TextShader};
+use crate::render::window::OpenGLWindow;
 use crate::{Image, Texture, RGBA8};
 use cgmath::*;
 

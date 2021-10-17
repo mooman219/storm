@@ -28,10 +28,13 @@ wasm-bindgen = { version = "0.2" }
 winit = { version = "0.25", features = [
     "web-sys"
 ]}
+console_error_panic_hook = "0.1.6"
+cpal = { version = "0.13.4", features = ["wasm-bindgen"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 glutin = "0.27"
-winit = "0.25" 
+winit = "0.25"
+cpal = "0.13.4"
 
 [dependencies]
 simple_logger = "1.13"
@@ -39,10 +42,14 @@ instant = "0.1.11"
 glow = "0.11"
 cgmath = "0.18.0"
 log = "0.4"
-png = "0.14"
 hashbrown = "0.11.2"
 fontdue = "0.6.2"
 unicode-normalization = "0.1"
+oddio = "0.4.1"
+
+png = "0.14"
+
+claxon = "0.4.3"
 
 [profile.release]
 lto = "thin"

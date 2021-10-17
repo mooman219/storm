@@ -1,5 +1,5 @@
 use core::time::Duration;
-use storm::fontdue::layout::{LayoutSettings, TextStyle};
+use storm::fontdue::layout::LayoutSettings;
 use storm::fontdue::Font;
 use storm::*;
 
@@ -44,11 +44,11 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     text_layer.append(
         &fonts,
         &layout_settings,
-        &[TextStyle {
+        &[Text {
             text: &message,
             font_index: 0,
             px: 16.0,
-            user_data: RGBA8::WHITE,
+            color: RGBA8::WHITE,
         }],
     );
 
@@ -63,11 +63,11 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             text_layer.append(
                 &fonts,
                 &layout_settings,
-                &[TextStyle {
+                &[Text {
                     text: &message,
                     font_index: 0,
                     px: 16.0,
-                    user_data: RGBA8::WHITE,
+                    color: RGBA8::WHITE,
                 }],
             );
         }
@@ -84,11 +84,11 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                 text_layer.append(
                     &fonts,
                     &layout_settings,
-                    &[TextStyle {
+                    &[Text {
                         text: &message,
                         font_index: 0,
                         px: 16.0,
-                        user_data: RGBA8::WHITE,
+                        color: RGBA8::WHITE,
                     }],
                 );
             }

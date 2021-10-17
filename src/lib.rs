@@ -7,21 +7,19 @@ extern crate alloc;
 pub mod math;
 pub mod time;
 
+pub use crate::audio::*;
 pub use crate::event::*;
 pub use crate::prelude::*;
-pub use crate::render::color::*;
-pub use crate::render::layer::*;
-pub use crate::render::texture::Texture;
+pub use crate::render::*;
 pub use cgmath;
 pub use fontdue;
 
+mod audio;
 mod event;
 mod prelude;
 mod render;
-mod utility;
 
 use crate::event::EventConverter;
-use crate::render::{OpenGLState, OpenGLWindow};
 use crate::time::{Instant, Timer};
 use cgmath::Vector2;
 use core::time::Duration;
@@ -38,6 +36,7 @@ fn init_logger() {
 
 #[cfg(target_arch = "wasm32")]
 fn init_logger() {
+    std::panic::set_hook(Box::new(console_error_panic_hook::hook));
     match console_log::init_with_level(log::Level::Trace) {
         Ok(_) => info!("Using the default logger: console_log."),
         Err(_) => info!("Using the provided logger."),
@@ -64,6 +63,7 @@ impl Context {
         init_logger();
         let event_loop = winit::event_loop::EventLoop::new();
         let window = OpenGLState::init(&desc, &event_loop);
+        AudioState::init();
         let mut input = EventConverter::new(window.logical_size());
         let mut context = Context {
             window,
@@ -117,9 +117,6 @@ impl Context {
         ctx.resize(self.window.physical_size(), self.window.logical_size());
     }
 
-    // ////////////////////////////////////////////////////////
-    // Layer
-
     /// Creates a new sprite layer. Layers represent draw calls and hold configuration associated
     /// with drawing to the screen.
     pub fn sprite_layer(&mut self) -> SpriteLayer {
@@ -132,16 +129,12 @@ impl Context {
         TextLayer::new()
     }
 
-    // ////////////////////////////////////////////////////////
-    // Texture
-
     /// Uploads an image to the GPU, creating a texture.
     pub fn texture<T: ColorDescription>(&mut self, image: &Image<T>) -> Texture<T> {
         Texture::from_image(image)
     }
 
-    // ////////////////////////////////////////////////////////
-    // Window
+    pub fn sound(&mut self) {}
 
     /// Clears the screen buffers according to the clear mode.
     pub fn clear(&mut self, clear_mode: ClearMode) {
@@ -166,9 +159,6 @@ impl Context {
     pub fn window_display_mode(&mut self, display_mode: DisplayMode) {
         self.window.set_display_mode(display_mode);
     }
-
-    // ////////////////////////////////////////////////////////
-    // Control
 
     /// Stops the context after the next update.
     pub fn stop(&mut self) {

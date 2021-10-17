@@ -3,12 +3,10 @@ use crate::prelude::Sprite;
 use crate::render::buffer::Buffer;
 use crate::render::raw::{BufferBindingTarget, TextureUnit};
 use crate::render::OpenGLState;
-use crate::Image;
-use crate::{Packer, Texture};
-use crate::{TextureSection, RGBA8};
+use crate::{Image, Packer, Text, Texture, TextureSection, RGBA8};
 use cgmath::Matrix4;
 use cgmath::*;
-use fontdue::layout::{CoordinateSystem, GlyphRasterConfig, Layout, LayoutSettings, TextStyle};
+use fontdue::layout::{CoordinateSystem, GlyphRasterConfig, Layout, LayoutSettings};
 use fontdue::Font;
 use hashbrown::HashMap;
 
@@ -64,10 +62,10 @@ impl TextLayer {
     }
 
     /// Appends text to the layer.
-    pub fn append(&mut self, fonts: &[Font], layout: &LayoutSettings, styles: &[TextStyle<RGBA8>]) {
+    pub fn append(&mut self, fonts: &[Font], layout: &LayoutSettings, styles: &[Text]) {
         self.layout.reset(layout);
         for style in styles {
-            self.layout.append(fonts, style);
+            self.layout.append(fonts, &style.into());
         }
         for glyph in self.layout.glyphs() {
             if glyph.width == 0 {

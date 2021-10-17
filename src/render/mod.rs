@@ -1,14 +1,17 @@
 mod buffer;
+mod color;
+mod layer;
 mod shader;
 mod state;
+mod texture;
 mod vertex;
 mod window;
 
 pub(crate) mod raw;
 
-pub mod color;
-pub mod layer;
-pub mod texture;
+pub use self::color::*;
+pub use self::layer::*;
+pub use self::texture::Texture;
 
-pub use self::state::OpenGLState;
-pub use self::window::OpenGLWindow;
+pub(crate) use self::state::OpenGLState;
+pub(crate) use self::window::OpenGLWindow;
