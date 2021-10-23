@@ -1,45 +1,127 @@
-//! A minimal example of a dynamic real-time mixer; a good place to start.
+use crate::cgmath::prelude::*;
+use crate::cgmath::*;
+use core::time::Duration;
+use storm::*;
 
-use std::{thread, time::Duration};
-
-use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-
+/// Run with: cargo run --example particles --release
 fn main() {
-    // Configure cpal
-    let host = cpal::default_host();
-    let device = host.default_output_device().expect("no output device available");
-    let sample_rate = device.default_output_config().unwrap().sample_rate();
-    let config = cpal::StreamConfig {
-        channels: 2,
-        sample_rate,
-        buffer_size: cpal::BufferSize::Default,
-    };
-
-    // Create the root mixer, and divide it into two parts: a handle that we can use to add new
-    // signals to play, and an object we can pass to `oddio::run` in cpal's callback to generate
-    // output frames.
-    let (mut mixer_handle, mixer) = oddio::split(oddio::Mixer::new());
-
-    // Start cpal, taking care not to drop its stream early
-    let stream = device
-        .build_output_stream(
-            &config,
-            move |out_flat: &mut [f32], _: &cpal::OutputCallbackInfo| {
-                let out_stereo: &mut [[f32; 2]] = oddio::frame_stereo(out_flat);
-                oddio::run(&mixer, sample_rate.0, out_stereo);
+    Context::start(
+        WindowSettings {
+            title: String::from("Storm: Particles"),
+            display_mode: DisplayMode::Windowed {
+                width: 1280,
+                height: 1024,
+                resizable: true,
             },
-            move |err| {
-                eprintln!("{}", err);
-            },
-        )
-        .unwrap();
-    stream.play().unwrap();
+            vsync: Vsync::Disabled,
+        },
+        run,
+    );
+}
 
-    // Start a 200Hz sine wave. We can do this as many times as we like, whenever we like, with
-    // different types of signals as needed.
-    mixer_handle.control::<oddio::Mixer<_>, _>().play(oddio::MonoToStereo::new(oddio::Sine::new(0.0, 440.0)));
-    mixer_handle.control::<oddio::Mixer<_>, _>().play(oddio::MonoToStereo::new(oddio::Sine::new(0.0, 261.6)));
+fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
+    ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
+    let mut is_dragging = false;
 
-    // Wait a bit before exiting
-    thread::sleep(Duration::from_secs(3));
+    let mut screen = ctx.sprite_layer();
+    let mut screen_transform = LayerTransform::new();
+    screen_transform.rotation = 0.125;
+    screen.set_transform(screen_transform.matrix());
+
+    let mut sprites = Vec::new();
+    let mut particles = Vec::new();
+    const RANGE: i32 = 100;
+    for x in -RANGE..RANGE {
+        for y in -RANGE..RANGE {
+            let (sprite, particle) = Particle::new(Vector3::new(x as f32 * 5.0, y as f32 * 5.0, 0.0));
+            sprites.push(sprite);
+            particles.push(particle);
+        }
+    }
+    screen.set_sprites(&sprites);
+
+    move |event, ctx| match event {
+        Event::CloseRequested => ctx.stop(),
+        Event::KeyPressed(key) => match key {
+            KeyboardButton::Escape => ctx.stop(),
+            _ => {}
+        },
+        Event::CursorPressed {
+            button,
+            ..
+        } => match button {
+            CursorButton::Left => is_dragging = true,
+            _ => {}
+        },
+        Event::CursorReleased {
+            button,
+            ..
+        } => match button {
+            CursorButton::Left => is_dragging = false,
+            _ => {}
+        },
+        Event::CursorMoved {
+            delta,
+            ..
+        } => {
+            if is_dragging {
+                screen_transform.translation += delta / screen_transform.scale;
+                screen.set_transform(screen_transform.matrix());
+            }
+        }
+        Event::CursorScroll(direction) => {
+            match direction {
+                ScrollDirection::Up => screen_transform.scale *= 1.1,
+                ScrollDirection::Down => screen_transform.scale /= 1.1,
+                _ => {}
+            }
+            screen.set_transform(screen_transform.matrix());
+        }
+        Event::Update(delta) => {
+            for index in 0..sprites.len() {
+                Particle::tick(&mut sprites[index], &mut particles[index], delta);
+            }
+            screen.set_sprites(&sprites);
+            ctx.clear(ClearMode::color_depth(RGBA8::BLACK));
+            screen.draw();
+        }
+        _ => {}
+    }
+}
+
+pub struct Particle {
+    pos: Vector2<f32>,
+    velocity: Vector2<f32>,
+    acceleration: Vector2<f32>,
+}
+
+impl Particle {
+    const G: f32 = 10.674;
+    const MASS: f32 = 500.0;
+
+    pub fn new(pos: Vector3<f32>) -> (Sprite, Particle) {
+        let sprite = Sprite::new(pos, Vector2::new(2.0, 2.0), TextureSection::full(), RGBA8::WHITE, 0.0);
+        let velocity = if pos.y < 0.0 {
+            Vector2::new(20.0, 0.0)
+        } else {
+            Vector2::new(-20.0, 0.0)
+        };
+        let particle = Particle {
+            pos: pos.truncate(),
+            velocity: velocity,
+            acceleration: Vector2::zero(),
+        };
+        (sprite, particle)
+    }
+
+    pub fn tick(sprite: &mut Sprite, particle: &mut Particle, delta: f32) {
+        let length_squared = particle.pos.x * particle.pos.x + particle.pos.y * particle.pos.y;
+        let length = f32::sqrt(length_squared);
+        let norm = particle.pos / length;
+        particle.acceleration = -(norm * (Self::G * Self::MASS)) / length_squared.max(1000.0);
+
+        particle.velocity += particle.acceleration;
+        particle.pos += particle.velocity * delta;
+        sprite.pos = particle.pos.extend(0.0);
+    }
 }

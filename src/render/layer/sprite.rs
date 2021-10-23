@@ -15,6 +15,8 @@ pub struct SpriteLayer {
 }
 
 impl SpriteLayer {
+    /// Creates a new sprite layer. Layers represent draw calls and hold configuration associated
+    /// with drawing to the screen.
     pub(crate) fn new() -> SpriteLayer {
         let ctx = OpenGLState::ctx();
         SpriteLayer {

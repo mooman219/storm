@@ -29,6 +29,8 @@ pub struct TextLayer {
 }
 
 impl TextLayer {
+    /// Creates a new text layer. Layers represent draw calls and hold configuration associated
+    /// with drawing to the screen.
     pub(crate) fn new() -> TextLayer {
         let ctx = OpenGLState::ctx();
         let max = ctx.max_texture_size().min(4096) as u32;

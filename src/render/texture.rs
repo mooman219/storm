@@ -27,6 +27,7 @@ impl<T: ColorDescription> Texture<T> {
         }
     }
 
+    /// Uploads an image to the GPU, creating a texture.
     pub(crate) fn from_image(image: &Image<T>) -> Texture<T> {
         let gl = &mut OpenGLState::ctx().gl;
         let id = gl.create_texture();

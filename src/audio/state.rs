@@ -24,11 +24,7 @@ impl AudioState {
             sample_rate,
             buffer_size: cpal::BufferSize::Default,
         };
-
-        // Create the root mixer, and divide it into two parts: a handle that we can use to add new
-        // signals to play, and an object we can pass to `oddio::run` in cpal's callback to generate
-        // output frames.
-        let (mut mixer_handle, mixer) = oddio::split(oddio::Mixer::new());
+        let (mut handle, mixer) = oddio::split(oddio::Mixer::new());
 
         // Start cpal, taking care not to drop its stream early
         let stream = device
@@ -49,7 +45,7 @@ impl AudioState {
         // different types of signals as needed.
         let sine = oddio::Sine::new(0.0, 400.0);
         let gain = oddio::Gain::new(sine, 0.01);
-        mixer_handle.control::<oddio::Mixer<_>, _>().play(oddio::MonoToStereo::new(gain));
+        handle.control::<oddio::Mixer<_>, _>().play(oddio::MonoToStereo::new(gain));
 
         let state = AudioState {
             stream,

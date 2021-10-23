@@ -36,6 +36,8 @@ impl Sound {
             _ => Err(SoundError::UnsupportedChannelCount),
         }
     }
+
+    pub fn play(&self) {}
 }
 
 #[derive(Debug)]
