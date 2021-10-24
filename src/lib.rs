@@ -130,8 +130,24 @@ impl Context {
     }
 
     /// Uploads an image to the GPU, creating a texture.
-    pub fn texture<T: ColorDescription>(&mut self, image: &Image<T>) -> Texture<T> {
+    pub fn load_image<T: ColorDescription>(&mut self, image: &Image<T>) -> Texture<T> {
         Texture::from_image(image)
+    }
+
+    /// Interpret a slice of bytes as a PNG and decodes it into an RGBA image.
+    pub fn read_png(&mut self, bytes: &[u8]) -> Image<RGBA8> {
+        read_png(bytes)
+    }
+
+    /// Interpret a slice of bytes as a PNG, decodes it into an RGBA image, then uploads it image to
+    /// the GPU, creating a texture.
+    pub fn load_png(&mut self, bytes: &[u8]) -> Texture<RGBA8> {
+        Texture::from_image(&read_png(bytes))
+    }
+
+    /// Interpret a slice of bytes as a FLAC file and decodes it into a sound.
+    pub fn load_flac(&mut self, bytes: &[u8]) -> Result<Sound, SoundError> {
+        read_flac(bytes)
     }
 
     /// Clears the screen buffers according to the clear mode.

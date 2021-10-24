@@ -23,7 +23,7 @@ fn main() {
 fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
-    let mut back_sprite = Sprite::default();
+    let back_sprite = Sprite::default();
     let slider = Sprite {
         pos: Vector3::new(-200.0, -62.0, 0.0),
         size: Vector2::new(25, 25),
@@ -38,12 +38,8 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     };
 
     let mut back = ctx.sprite_layer();
-
-    let back_texture = ctx.texture(&read_png(TEXTURE_A));
-    back.set_atlas(&back_texture);
-    let back_texture_section = TextureSection::full();
+    back.set_atlas(&ctx.load_png(TEXTURE_A));
     let mut back_sprites = Vec::new();
-    back_sprite.texture = back_texture_section;
     back_sprites.push(back_sprite);
     back_sprites.push(slider);
     back_sprites.push(line);
