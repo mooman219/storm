@@ -7,6 +7,9 @@ jobs:
       matrix:
         rust: [stable, beta]
     steps:
+    - name: Linux audio support
+      run: |
+        sudo apt-get install -y libasound2-dev
     - uses: hecrj/setup-rust-action@v1
       with:
         rust-version: ${{ matrix.rust }}
