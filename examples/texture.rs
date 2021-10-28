@@ -75,8 +75,13 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             pos,
             ..
         } => {
-            let x = pos.x - 12.0;
-            if clicking && x >= -200.0 && x <= 175.0 {
+            let mut x = pos.x - 12.0;
+            if clicking {
+                if x < -200.0 {
+                    x = -200.0;
+                } else if x > 175.0 {
+                    x = 175.0
+                }
                 back_sprites[1].pos.x = x;
                 back.set_sprites(&back_sprites);
             }
