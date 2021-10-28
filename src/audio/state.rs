@@ -3,10 +3,17 @@ use cpal::{
     Stream,
 };
 
+use super::{
+    mixer::Mixer,
+    sound::SoundInstance,
+    spsc::{self, Producer},
+};
+
 #[no_mangle]
 static mut AUDIO: Option<AudioState> = None;
 
 pub struct AudioState {
+    sender: Producer<SoundInstance>,
     stream: Stream,
 }
 
@@ -24,37 +31,33 @@ impl AudioState {
             sample_rate,
             buffer_size: cpal::BufferSize::Default,
         };
-        let (mut handle, mixer) = oddio::split(oddio::Mixer::new());
+        let (sender, receiver) = spsc::make(256);
+        let mut mixer = Mixer::new(sample_rate.0, receiver);
 
-        // Start cpal, taking care not to drop its stream early
         let stream = device
             .build_output_stream(
                 &config,
                 move |out_flat: &mut [f32], _: &cpal::OutputCallbackInfo| {
-                    let out_stereo: &mut [[f32; 2]] = oddio::frame_stereo(out_flat);
-                    oddio::run(&mixer, sample_rate.0, out_stereo);
+                    mixer.sample(as_stereo(out_flat));
                 },
                 move |err| {
-                    eprintln!("{}", err);
+                    log::error!("{}", err);
                 },
             )
             .unwrap();
         stream.play().unwrap();
 
-        // Start a 200Hz sine wave. We can do this as many times as we like, whenever we like, with
-        // different types of signals as needed.
-        let sine = oddio::Sine::new(0.0, 400.0);
-        let gain = oddio::Gain::new(sine, 0.01);
-        handle.control::<oddio::Mixer<_>, _>().play(oddio::MonoToStereo::new(gain));
-
         let state = AudioState {
+            sender,
             stream,
         };
         unsafe { AUDIO = Some(state) };
     }
-}
 
-impl AudioState {
+    pub fn send(&mut self, instance: SoundInstance) {
+        self.sender.push(instance);
+    }
+
     pub fn ctx() -> &'static mut AudioState {
         unsafe {
             match AUDIO.as_mut() {
@@ -63,4 +66,8 @@ impl AudioState {
             }
         }
     }
+}
+
+fn as_stereo(xs: &mut [f32]) -> &mut [[f32; 2]] {
+    unsafe { std::slice::from_raw_parts_mut(xs.as_mut_ptr() as _, xs.len() / 2) }
 }

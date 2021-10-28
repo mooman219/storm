@@ -1,6 +1,7 @@
 use crate::RGBA8;
 use fontdue::layout::TextStyle;
 
+/// Configuration settings for text.
 pub struct Text<'a> {
     /// The text to layout.
     pub text: &'a str,

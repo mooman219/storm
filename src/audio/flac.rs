@@ -11,10 +11,24 @@ pub fn read_flac(bytes: &[u8]) -> Result<Sound, SoundError> {
     };
     let scale = (1 << reader.streaminfo().bits_per_sample) / 2;
     let scale = 1.0 / scale as f32;
-    for sample in reader.samples() {
-        buffer.push(sample.unwrap() as f32 * scale);
+    match reader.streaminfo().channels {
+        1 => {
+            for sample in reader.samples() {
+                let x = sample.unwrap() as f32 * scale;
+                buffer.push([x, x]);
+            }
+        }
+        2 => {
+            let mut iter = reader.samples();
+            while let Some(sample) = iter.next() {
+                let x = sample.unwrap() as f32 * scale;
+                let y = iter.next().unwrap().unwrap() as f32 * scale;
+                buffer.push([x, y]);
+            }
+        }
+        _ => return Err(SoundError::UnsupportedChannelCount),
     }
-    Sound::new(reader.streaminfo().channels, reader.streaminfo().sample_rate, buffer)
+    Sound::new(reader.streaminfo().sample_rate, buffer)
 }
 
 fn map(error: ClaxonError) -> SoundError {

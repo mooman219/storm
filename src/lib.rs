@@ -63,7 +63,7 @@ impl Context {
         init_logger();
         let event_loop = winit::event_loop::EventLoop::new();
         let window = OpenGLState::init(&desc, &event_loop);
-        // AudioState::init();
+        AudioState::init();
         let mut input = EventConverter::new(window.logical_size());
         let mut context = Context {
             window,

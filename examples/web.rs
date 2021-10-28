@@ -20,7 +20,7 @@ fn main() {
 }
 
 fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
-    log::info!("10/23/2021 4:16PM");
+    log::info!("10/28/2021");
     ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
 

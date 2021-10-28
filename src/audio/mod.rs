@@ -1,8 +1,10 @@
 mod flac;
+mod mixer;
 mod sound;
+mod spsc;
 mod state;
 
-pub use sound::{Sound, SoundError};
+pub use sound::{Sound, SoundControl, SoundError};
 
 pub(crate) use flac::read_flac;
 pub(crate) use state::AudioState;
