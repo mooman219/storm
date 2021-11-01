@@ -1,4 +1,4 @@
-use super::sound::{Sound, SoundError};
+use crate::audio::sound::{Sound, SoundError};
 use claxon::{Error as ClaxonError, FlacReader};
 
 /// Interpret a slice of bytes as a FLAC file and decodes it into a sound.

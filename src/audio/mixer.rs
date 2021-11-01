@@ -1,4 +1,4 @@
-use super::{sound::SoundInstance, spsc::Consumer};
+use crate::audio::{sound::SoundInstance, spsc::Consumer};
 
 pub struct Mixer {
     receiver: Consumer<SoundInstance>,
@@ -22,8 +22,16 @@ impl Mixer {
         for target in out.iter_mut() {
             *target = [0.0, 0.0];
         }
-        for instance in self.active.iter_mut() {
+
+        let mut index = 0;
+        while index < self.active.len() {
+            let instance = &mut self.active[index];
             instance.mix(self.sample_interval, out);
+            if instance.is_complete() {
+                self.active.swap_remove(index);
+            } else {
+                index += 1;
+            }
         }
     }
 }
