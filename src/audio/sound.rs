@@ -62,6 +62,7 @@ impl Sound {
             duration: self.duration(),
         };
         let instance = SoundInstance {
+            test: SineTest::new(261.63),
             shared: shared,
             source: self.clone(),
             time: 0.0,
@@ -93,26 +94,57 @@ struct Shared {
 }
 
 pub struct SoundInstance {
+    test: SineTest,
     shared: Arc<Shared>,
     source: Sound,
     time: f64,
     volume: Smoothed,
 }
 
+pub struct SineTest {
+    phase: f32,
+    frequency: f32,
+}
+impl SineTest {
+    pub fn new(frequency: f32) -> SineTest {
+        SineTest {
+            phase: 0.0,
+            frequency: frequency * core::f32::consts::TAU,
+        }
+    }
+
+    pub fn mix(&mut self, interval: f64, volume: &mut Smoothed, out: &mut [[f32; 2]]) {
+        volume.set_increment(interval);
+        let interval = interval as f32;
+        for (i, target) in out.iter_mut().enumerate() {
+            let time = interval * i as f32;
+            let result = (time * self.frequency + self.phase).sin() * volume.next();
+            target[0] += result;
+            target[1] += result;
+        }
+        let time = interval * (out.len() as f32);
+        self.phase = (self.phase + time * self.frequency) % core::f32::consts::TAU;
+    }
+}
+
 impl SoundInstance {
     pub fn mix(&mut self, interval: f64, out: &mut [[f32; 2]]) {
-        self.volume.set_increment(interval);
-        let mut current_sample = self.time * self.source.sample_rate;
-        let sample_rate = interval * self.source.sample_rate;
-
-        for target in out.iter_mut() {
-            self.source.mix(current_sample, self.volume.next(), target);
-            current_sample += sample_rate;
-        }
-
-        let elapsed = interval * (out.len() as f64);
-        self.time += elapsed;
+        self.test.mix(interval, &mut self.volume, out);
     }
+
+    // pub fn mix(&mut self, interval: f64, out: &mut [[f32; 2]]) {
+    //     self.volume.set_increment(interval);
+    //     let mut current_sample = self.time * self.source.sample_rate;
+    //     let sample_rate = interval * self.source.sample_rate;
+
+    //     for target in out.iter_mut() {
+    //         self.source.mix(current_sample, self.volume.next(), target);
+    //         current_sample += sample_rate;
+    //     }
+
+    //     let elapsed = interval * (out.len() as f64);
+    //     self.time += elapsed;
+    // }
 
     pub fn is_complete(&self) -> bool {
         self.time >= self.source.duration()
@@ -147,7 +179,7 @@ impl Smoothed {
             target: volume,
             t: 0.0,
             inc: 0.0,
-            smooth: 10.0,
+            smooth: 5.0,
         }
     }
 
@@ -165,6 +197,6 @@ impl Smoothed {
     }
 
     fn convert(volume: f32) -> f32 {
-        volume * volume * volume
+        volume * volume
     }
 }
