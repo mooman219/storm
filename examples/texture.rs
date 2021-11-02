@@ -3,6 +3,7 @@ use core::time::Duration;
 use storm::*;
 
 static TEXTURE_A: &[u8] = include_bytes!("resources/4.png");
+static SOUND: &[u8] = include_bytes!("resources/test.flac");
 
 /// Run with: cargo run --example texture --release
 fn main() {
@@ -22,6 +23,9 @@ fn main() {
 
 fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
+
+    let sound = ctx.load_flac(SOUND).unwrap();
+    let mut sound = sound.play(0.0, 0.1);
 
     let back_sprite = Sprite::default();
     let slider = Sprite {
@@ -82,6 +86,8 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                 } else if x > 175.0 {
                     x = 175.0
                 }
+                let volume = (x + 200.0) / 375.0;
+                sound.set_volume(volume, 0.1);
                 back_sprites[1].pos.x = x;
                 back.set_sprites(&back_sprites);
             }

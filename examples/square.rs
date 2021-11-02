@@ -77,7 +77,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
         Event::CloseRequested => ctx.stop(),
         Event::KeyPressed(key) => match key {
             KeyboardButton::F1 => {
-                let _ = sound.play(0.25);
+                let _ = sound.play(0.5, 0.1);
             }
             KeyboardButton::Escape => ctx.stop(),
             KeyboardButton::Tab => {

@@ -1,7 +1,8 @@
-use std::sync::atomic::{AtomicBool, AtomicU32};
-
 use alloc::sync::Arc;
+use core::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::AtomicU64;
 
+use crate::audio::smoothed::Smoothed;
 use crate::math::lerp;
 use crate::AudioState;
 
@@ -51,36 +52,38 @@ impl Sound {
     /// # Returns
     ///
     /// * `SoundControl` - A handle to control sound properties during play.
-    pub fn play(&self, volume: f32) -> SoundControl {
+    pub fn play(&self, volume: f32, smooth: f32) -> SoundControl {
+        let packed_smoothed = Smoothed::pack(volume, smooth);
         let shared = Arc::new(Shared {
             active: AtomicBool::new(false),
-            gain: AtomicU32::new(f32::to_bits(0.2)),
-            smooth: AtomicU32::new(f32::to_bits(0.1)),
+            volume: AtomicU64::new(packed_smoothed),
         });
         let control = SoundControl {
             shared: shared.clone(),
             duration: self.duration(),
         };
         let instance = SoundInstance {
-            test: SineTest::new(261.63),
             shared: shared,
             source: self.clone(),
             time: 0.0,
-            volume: Smoothed::new(volume),
+            volume: Smoothed::new(packed_smoothed),
         };
         AudioState::ctx().send(instance);
         control
     }
 
     fn mix(&self, sample: f64, amplitude: f32, out: &mut [f32; 2]) {
-        if sample < 0.0 || sample + 1.0 >= self.samples.len() as f64 {
+        if sample < 0.0 {
             return;
         }
         let trunc = sample.trunc();
         let whole = trunc as usize;
+        if whole + 1 >= self.samples.len() {
+            return;
+        }
         let t = (sample - trunc) as f32;
-        let a = self.samples[whole];
-        let b = self.samples[whole + 1];
+        let a = unsafe { self.samples.get_unchecked(whole) };
+        let b = unsafe { self.samples.get_unchecked(whole + 1) };
         out[0] += lerp(a[0], b[0], t) * amplitude;
         out[1] += lerp(a[1], b[1], t) * amplitude;
     }
@@ -88,63 +91,30 @@ impl Sound {
 
 struct Shared {
     active: AtomicBool,
-    /// f32 encoded as a u32 that represents decibels.
-    gain: AtomicU32,
-    smooth: AtomicU32,
+    volume: AtomicU64,
 }
 
 pub struct SoundInstance {
-    test: SineTest,
     shared: Arc<Shared>,
     source: Sound,
     time: f64,
     volume: Smoothed,
 }
 
-pub struct SineTest {
-    phase: f32,
-    frequency: f32,
-}
-impl SineTest {
-    pub fn new(frequency: f32) -> SineTest {
-        SineTest {
-            phase: 0.0,
-            frequency: frequency * core::f32::consts::TAU,
-        }
-    }
-
-    pub fn mix(&mut self, interval: f64, volume: &mut Smoothed, out: &mut [[f32; 2]]) {
-        volume.set_increment(interval);
-        let interval = interval as f32;
-        for (i, target) in out.iter_mut().enumerate() {
-            let time = interval * i as f32;
-            let result = (time * self.frequency + self.phase).sin() * volume.next();
-            target[0] += result;
-            target[1] += result;
-        }
-        let time = interval * (out.len() as f32);
-        self.phase = (self.phase + time * self.frequency) % core::f32::consts::TAU;
-    }
-}
-
 impl SoundInstance {
-    pub fn mix(&mut self, interval: f64, out: &mut [[f32; 2]]) {
-        self.test.mix(interval, &mut self.volume, out);
+    pub fn mix(&mut self, interval: f32, out: &mut [[f32; 2]]) {
+        self.volume.set(self.shared.volume.load(Ordering::Relaxed));
+        let mut current = self.time * self.source.sample_rate;
+        let rate = (interval as f64) * self.source.sample_rate;
+
+        for target in out.iter_mut() {
+            let amplitude = self.volume.next(interval);
+            self.source.mix(current, amplitude, target);
+            current += rate;
+        }
+
+        self.time += (interval as f64) * (out.len() as f64);
     }
-
-    // pub fn mix(&mut self, interval: f64, out: &mut [[f32; 2]]) {
-    //     self.volume.set_increment(interval);
-    //     let mut current_sample = self.time * self.source.sample_rate;
-    //     let sample_rate = interval * self.source.sample_rate;
-
-    //     for target in out.iter_mut() {
-    //         self.source.mix(current_sample, self.volume.next(), target);
-    //         current_sample += sample_rate;
-    //     }
-
-    //     let elapsed = interval * (out.len() as f64);
-    //     self.time += elapsed;
-    // }
 
     pub fn is_complete(&self) -> bool {
         self.time >= self.source.duration()
@@ -162,41 +132,14 @@ impl SoundControl {
     pub fn duration(&self) -> f64 {
         self.duration
     }
-}
 
-pub struct Smoothed {
-    previous: f32,
-    target: f32,
-    t: f64,
-    inc: f64,
-    smooth: f64,
-}
-
-impl Smoothed {
-    pub fn new(volume: f32) -> Smoothed {
-        Smoothed {
-            previous: 0.0,
-            target: volume,
-            t: 0.0,
-            inc: 0.0,
-            smooth: 5.0,
-        }
-    }
-
-    pub fn set_increment(&mut self, duration: f64) {
-        self.inc = duration / self.smooth;
-    }
-
-    pub fn next(&mut self) -> f32 {
-        if self.t >= 1.0 {
-            return Smoothed::convert(self.target);
-        }
-        let result = lerp(self.previous, self.target, self.t as f32);
-        self.t += self.inc;
-        Smoothed::convert(result)
-    }
-
-    fn convert(volume: f32) -> f32 {
-        volume * volume
+    /// Sets the sound's volume.
+    /// # Arguments
+    ///
+    /// * `volume` - A value between [0, 1], where 0 is muted, and 1 is the sound's original volume.
+    /// * `smooth` - The duration in seconds to fade the change in volume from the current value to
+    /// the given value.
+    pub fn set_volume(&mut self, volume: f32, smooth: f32) {
+        self.shared.volume.store(Smoothed::pack(volume, smooth), Ordering::Relaxed);
     }
 }

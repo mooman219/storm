@@ -1,5 +1,6 @@
 mod flac;
 mod mixer;
+mod smoothed;
 mod sound;
 mod spsc;
 mod state;
