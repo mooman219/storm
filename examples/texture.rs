@@ -2,7 +2,7 @@ use cgmath::{Vector2, Vector3};
 use core::time::Duration;
 use storm::*;
 
-static TEXTURE_A: &[u8] = include_bytes!("resources/4.png");
+static TEXTURE_A: &[u8] = include_bytes!("resources/3.png");
 static SOUND: &[u8] = include_bytes!("resources/test.flac");
 
 /// Run with: cargo run --example texture --release

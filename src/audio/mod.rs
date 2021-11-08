@@ -1,9 +1,9 @@
 mod flac;
 mod mixer;
-mod smoothed;
 mod sound;
 mod spsc;
 mod state;
+mod volume;
 
 pub use sound::{Sound, SoundControl, SoundError};
 

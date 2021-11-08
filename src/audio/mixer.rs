@@ -19,6 +19,7 @@ impl Mixer {
         while let Some(instance) = self.receiver.try_pop() {
             self.active.push(instance);
         }
+
         for target in out.iter_mut() {
             *target = [0.0, 0.0];
         }

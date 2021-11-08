@@ -1,8 +1,7 @@
 use alloc::sync::Arc;
-use core::sync::atomic::{AtomicBool, Ordering};
-use std::sync::atomic::AtomicU64;
+use core::sync::atomic::AtomicBool;
 
-use crate::audio::smoothed::Smoothed;
+use crate::audio::volume::{VolumeInstance, VolumeShared};
 use crate::math::lerp;
 use crate::AudioState;
 
@@ -53,10 +52,12 @@ impl Sound {
     ///
     /// * `SoundControl` - A handle to control sound properties during play.
     pub fn play(&self, volume: f32, smooth: f32) -> SoundControl {
-        let packed_smoothed = Smoothed::pack(volume, smooth);
+        let volume_shared = VolumeShared::new(volume, smooth);
+        let volume = VolumeInstance::new(&volume_shared);
+
         let shared = Arc::new(Shared {
             active: AtomicBool::new(false),
-            volume: AtomicU64::new(packed_smoothed),
+            volume: volume_shared,
         });
         let control = SoundControl {
             shared: shared.clone(),
@@ -66,7 +67,7 @@ impl Sound {
             shared: shared,
             source: self.clone(),
             time: 0.0,
-            volume: Smoothed::new(packed_smoothed),
+            volume: volume,
         };
         AudioState::ctx().send(instance);
         control
@@ -91,26 +92,26 @@ impl Sound {
 
 struct Shared {
     active: AtomicBool,
-    volume: AtomicU64,
+    volume: VolumeShared,
 }
 
 pub struct SoundInstance {
     shared: Arc<Shared>,
     source: Sound,
     time: f64,
-    volume: Smoothed,
+    volume: VolumeInstance,
 }
 
 impl SoundInstance {
     pub fn mix(&mut self, interval: f32, out: &mut [[f32; 2]]) {
-        self.volume.set(self.shared.volume.load(Ordering::Relaxed));
-        let mut current = self.time * self.source.sample_rate;
+        self.volume.sync(&self.shared.volume);
+        let mut sample = self.time * self.source.sample_rate;
         let rate = (interval as f64) * self.source.sample_rate;
 
         for target in out.iter_mut() {
             let amplitude = self.volume.next(interval);
-            self.source.mix(current, amplitude, target);
-            current += rate;
+            self.source.mix(sample, amplitude, target);
+            sample += rate;
         }
 
         self.time += (interval as f64) * (out.len() as f64);
@@ -140,6 +141,6 @@ impl SoundControl {
     /// * `smooth` - The duration in seconds to fade the change in volume from the current value to
     /// the given value.
     pub fn set_volume(&mut self, volume: f32, smooth: f32) {
-        self.shared.volume.store(Smoothed::pack(volume, smooth), Ordering::Relaxed);
+        self.shared.volume.store(volume, smooth);
     }
 }
