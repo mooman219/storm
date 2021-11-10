@@ -4,8 +4,8 @@ use cpal::{
 };
 
 use super::{
+    control::SoundInstance,
     mixer::Mixer,
-    sound::SoundInstance,
     spsc::{self, Producer},
 };
 

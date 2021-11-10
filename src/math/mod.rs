@@ -1,9 +1,11 @@
 mod aabb;
+mod interpolation;
 mod trigonometry;
 
 use cgmath::*;
 
 pub use self::aabb::*;
+pub use self::interpolation::*;
 pub use self::trigonometry::*;
 
 /// Creates an orthographic matrix from screen bounds.
