@@ -43,7 +43,7 @@ impl SpriteLayer {
     }
 
     /// Sets the sprites that will be drawn.
-    pub fn set_sprites(&mut self, sprites: &Vec<Sprite>) {
+    pub fn set_sprites(&mut self, sprites: &[Sprite]) {
         self.sprites.set(sprites);
     }
 

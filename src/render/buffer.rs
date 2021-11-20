@@ -39,7 +39,7 @@ impl<T: VertexDescription + Copy> Buffer<T> {
         self.vertices = 0;
     }
 
-    pub fn set(&mut self, items: &Vec<T>) {
+    pub fn set(&mut self, items: &[T]) {
         self.vertices = items.len();
         if self.vertices > 0 {
             let gl = &OpenGLState::ctx().gl;

@@ -3,7 +3,7 @@ use core::time::Duration;
 use storm::*;
 
 static TEXTURE_A: &[u8] = include_bytes!("resources/3.png");
-static SOUND: &[u8] = include_bytes!("resources/test.flac");
+static SOUND: &[u8] = include_bytes!("resources/boop.flac");
 
 /// Run with: cargo run --example texture --release
 fn main() {
@@ -24,8 +24,8 @@ fn main() {
 fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
-    let sound = ctx.load_flac(SOUND).unwrap();
-    let sound = sound.play(0.0, 0.1);
+    let source = ctx.load_flac(SOUND).unwrap();
+    let sound = source.play(0.3, 0.1);
 
     let back_sprite = Sprite::default();
     let slider = Sprite {

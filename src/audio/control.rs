@@ -85,17 +85,18 @@ impl SoundInstance {
                 sample += rate;
             }
             self.paused = paused;
-        } else if self.volume.progress() >= 1.0 {
+        } else if self.volume.progress() == 1.0 {
             let amplitude = self.volume.get().perceptual();
             for target in out.iter_mut() {
                 self.source.mix(sample, amplitude, target);
                 sample += rate;
             }
         } else {
+            let progress = interval / self.smooth;
             for target in out.iter_mut() {
                 let amplitude = self.volume.get().perceptual();
                 self.source.mix(sample, amplitude, target);
-                self.volume.advance(interval * self.smooth);
+                self.volume.advance(progress);
                 sample += rate;
             }
         }
@@ -130,8 +131,8 @@ fn clamp_volume(volume: f32, smooth: f32) -> (f32, f32) {
     } else {
         volume
     };
-    let smooth = if smooth < 0.025 {
-        0.025
+    let smooth = if smooth < 0.02 {
+        0.02
     } else {
         smooth
     };

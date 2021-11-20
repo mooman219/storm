@@ -1,5 +1,7 @@
 use cgmath::*;
 
+use crate::Sprite;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AABB2D {
     pub min: Vector2<f32>,
@@ -41,7 +43,7 @@ impl AABB2D {
         self.min.x <= point.x && self.max.x >= point.x && self.min.y <= point.y && self.max.y >= point.y
     }
 
-    pub fn slide(&mut self, mov: &Vector2<f32>, others: &Vec<AABB2D>) -> bool {
+    pub fn slide(&mut self, mov: &Vector2<f32>, others: &[AABB2D]) -> bool {
         if mov.x == 0f32 && mov.y == 0f32 {
             return false;
         }
@@ -109,6 +111,17 @@ impl AABB2D {
         *self = aabb;
 
         result
+    }
+}
+
+impl From<Sprite> for AABB2D {
+    fn from(sprite: Sprite) -> Self {
+        AABB2D::new(
+            sprite.pos.x,
+            sprite.pos.y,
+            sprite.pos.x + sprite.size.x as f32,
+            sprite.pos.y + sprite.size.y as f32,
+        )
     }
 }
 
