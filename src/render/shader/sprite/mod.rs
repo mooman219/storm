@@ -15,7 +15,7 @@ impl SpriteShader {
     pub fn new(gl: &mut OpenGL) -> SpriteShader {
         let program = gl.shader_program(VERTEX, FRAGMENT);
         let uniform_ortho = gl.get_uniform_location(program, "ortho").unwrap();
-        let uniform_texture = gl.get_uniform_location(program, "tex[0]").unwrap();
+        let uniform_texture = gl.get_uniform_location(program, "tex").unwrap();
 
         SpriteShader {
             program,
