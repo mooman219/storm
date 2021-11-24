@@ -87,7 +87,7 @@ impl Context {
                     let now = Instant::now();
                     if now >= context.wait_next {
                         if let Some(duration) = context.wait_periodic {
-                            context.wait_next = now + duration;
+                            context.wait_next += duration;
                             context.control_flow = Some(ControlFlow::WaitUntil(context.wait_next));
                         }
                         let delta = (now - context.last_update).as_secs_f32();
