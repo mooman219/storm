@@ -17,10 +17,11 @@
     <script src='./web.js'></script>
     <script>
         window.onload = (event) => {
+            let start = document.getElementById("start");
             document.getElementById("load").remove();
-            document.getElementById("start").style.visibility = "visible"
-            window.onclick = (event) => {
-                document.getElementById("start").remove();
+            start.style.visibility = "visible"
+            start.onclick = (event) => {
+                start.remove();
                 wasm_bindgen('./web_bg.wasm').catch(console.error);
             }
         }
