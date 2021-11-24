@@ -37,13 +37,13 @@ impl VertexDescription for Sprite {
         gl.vertex_attrib_pointer_f32(
             index,
             4,
-            AttributeType::UnsignedShort,
+            AttributeType::UnsignedInt,
             true,
             Self::VERTEX_SIZE as i32,
             size,
         );
         index += 1;
-        size += 4 * 2;
+        size += 4 * 4;
 
         // RGBA8
         gl.enable_vertex_attrib_array(index);

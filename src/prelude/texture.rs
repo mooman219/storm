@@ -1,12 +1,12 @@
 use crate::{ColorDescription, Texture};
 use cgmath::*;
 
-const MAX: u32 = 65536;
+const MAX: u32 = u32::MAX;
 
 /// Token to reference a texture with. Has basic configuration settings.
 #[derive(Copy, Clone, Debug, PartialEq)]
 #[repr(transparent)]
-pub struct TextureSection(pub Vector4<u16>);
+pub struct TextureSection(pub Vector4<u32>);
 
 impl Default for TextureSection {
     fn default() -> TextureSection {
@@ -29,16 +29,16 @@ impl TextureSection {
         let h_nudge = h_size >> 2;
         let v_nudge = v_size >> 2;
         TextureSection(Vector4::new(
-            ((left * h_size) + h_nudge) as u16,   // Left
-            ((right * h_size) - h_nudge) as u16,  // Right
-            ((top * v_size) + v_nudge) as u16,    // Top
-            ((bottom * v_size) - v_nudge) as u16, // Bottom
+            (left * h_size) + h_nudge,   // Left
+            (right * h_size) - h_nudge,  // Right
+            (top * v_size) + v_nudge,    // Top
+            (bottom * v_size) - v_nudge, // Bottom
         ))
     }
 
     /// Creates a texture section that encompases the whole texture.
     pub fn full() -> TextureSection {
-        TextureSection(Vector4::new(0, u16::MAX, 0, u16::MAX))
+        TextureSection(Vector4::new(0, MAX, 0, MAX))
     }
 
     /// Mirrors the texture along the Y axis. Creates a new texture.
