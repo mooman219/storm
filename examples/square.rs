@@ -3,7 +3,6 @@ use storm::fontdue::layout::LayoutSettings;
 use storm::fontdue::Font;
 use storm::*;
 
-static SOUND: &[u8] = include_bytes!("resources/test.flac");
 static FONT: &[u8] = include_bytes!("resources/Roboto-Regular.ttf");
 
 /// Run with: cargo run --example square --release
@@ -26,8 +25,6 @@ fn main() {
 fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
-
-    let sound = ctx.load_flac(SOUND).unwrap();
 
     // Create a Layers to draw on.
     let mut text_layer = ctx.text_layer();
@@ -76,9 +73,6 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
         }
         Event::CloseRequested => ctx.stop(),
         Event::KeyPressed(key) => match key {
-            KeyboardButton::F1 => {
-                let _ = sound.play(0.5, 0.1);
-            }
             KeyboardButton::Escape => ctx.stop(),
             KeyboardButton::Tab => {
                 text_transform.scale = 1.0;

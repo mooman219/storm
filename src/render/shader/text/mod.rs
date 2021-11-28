@@ -2,7 +2,7 @@ use crate::render::raw::{resource, OpenGL, TextureUnit};
 use crate::render::OpenGLState;
 use cgmath::Matrix4;
 
-const VERTEX: &str = include_str!("vertex.glsl");
+const VERTEX: &str = include_str!("../sprite/vertex.glsl");
 const FRAGMENT: &str = include_str!("fragment.glsl");
 
 pub struct TextShader {

@@ -24,7 +24,7 @@ impl VertexDescription for Sprite {
             index,
             2,
             AttributeType::UnsignedShort,
-            true,
+            false,
             Self::VERTEX_SIZE as i32,
             size,
         );
@@ -37,13 +37,13 @@ impl VertexDescription for Sprite {
         gl.vertex_attrib_pointer_f32(
             index,
             4,
-            AttributeType::UnsignedInt,
+            AttributeType::UnsignedShort,
             true,
             Self::VERTEX_SIZE as i32,
             size,
         );
         index += 1;
-        size += 4 * 4;
+        size += 4 * 2;
 
         // RGBA8
         gl.enable_vertex_attrib_array(index);
@@ -72,6 +72,6 @@ impl VertexDescription for Sprite {
         );
         //index += 1;
         // size += 1 * 2;
-        // warn!("{}, {}", size, core::mem::size_of::<Sprite>()); // DEBUG
+        // warn!("Bytes {}, Size {}", size, core::mem::size_of::<Sprite>()); // DEBUG
     }
 }

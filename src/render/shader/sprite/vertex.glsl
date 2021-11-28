@@ -1,7 +1,6 @@
 #version 300 es
 precision highp float;
 
-const float PI     = 3.141592653589793238462643383279;
 const float TWO_PI = 6.283185307179586476925286766559;
 
 layout(location = 0) in vec3 a_pos;
@@ -19,25 +18,27 @@ uniform mat4 ortho;
 // ymin and ymax are swapped below because OpenGL reads images from bottom row to top row, but
 // they're stored top to bottom on upload, so this corrects that.
 vec4 uv_lut[4] = vec4[4](
-    vec4(1.0, 0.0, 1.0, 0.0), // left bottom
-    vec4(1.0, 0.0, 0.0, 1.0), // left top
-    vec4(0.0, 1.0, 1.0, 0.0), // right bottom
+    vec4(1.0, 0.0, 1.0, 0.0),  // left bottom
+    vec4(1.0, 0.0, 0.0, 1.0),  // left top
+    vec4(0.0, 1.0, 1.0, 0.0),  // right bottom
     vec4(0.0, 1.0, 0.0, 1.0)); // right top
 
-vec2 pos_lut[4] = vec2[4](
-    vec2(0.0, 65536.0),     // left top
-    vec2(0.0, 0.0),         // left bottom
-    vec2(65536.0, 65536.0), // right top
-    vec2(65536.0, 0.0));    // right bottom
+vec2 size_lut[4] = vec2[4](
+    vec2(0.0, 1.0),  // left top
+    vec2(0.0, 0.0),  // right top
+    vec2(1.0, 1.0),  // left bottom
+    vec2(1.0, 0.0)); // right bottom
 
 vec4 rotateZ(vec3 pos) {
     float psi = TWO_PI * a_rotation;
+    float sina = sin(psi);
+    float cosa = cos(psi);
     vec2 origin = vec2(
-        a_pos.x + (a_size.x * 32768.0),
-        a_pos.y + (a_size.y * 32768.0));
+        a_pos.x + (a_size.x * 0.5),
+        a_pos.y + (a_size.y * 0.5));
     return vec4(
-        (cos(psi) * (pos.x - origin.x)) - (sin(psi) * (pos.y - origin.y)) + origin.x,
-        (sin(psi) * (pos.x - origin.x)) + (cos(psi) * (pos.y - origin.y)) + origin.y,
+        (cosa * (pos.x - origin.x)) - (sina * (pos.y - origin.y)) + origin.x,
+        (sina * (pos.x - origin.x)) + (cosa * (pos.y - origin.y)) + origin.y,
         pos.z,
         1.0);
 }
@@ -47,7 +48,7 @@ void main() {
     v_uv = vec2(temp.x + temp.y, temp.z + temp.w);
     v_color = a_color;
 
-    vec3 size = vec3(a_size * pos_lut[gl_VertexID], 0.0);
+    vec3 size = vec3(a_size * size_lut[gl_VertexID], 0.0);
     vec3 pos = a_pos + size;
     gl_Position = ortho * rotateZ(pos);
 }

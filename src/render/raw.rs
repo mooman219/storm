@@ -581,6 +581,17 @@ impl OpenGL {
         };
     }
 
+    pub fn vertex_attrib_pointer_i32(
+        &self,
+        index: u32,
+        size: i32,
+        data_type: AttributeType,
+        stride: i32,
+        offset: i32,
+    ) {
+        unsafe { self.gl.vertex_attrib_pointer_i32(index, size, data_type as u32, stride, offset) };
+    }
+
     pub fn create_buffer(&self) -> resource::Buffer {
         unsafe { self.gl.create_buffer().unwrap() }
     }
