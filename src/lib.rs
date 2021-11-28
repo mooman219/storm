@@ -134,15 +134,10 @@ impl Context {
         Texture::from_image(image)
     }
 
-    /// Interpret a slice of bytes as a PNG and decodes it into an RGBA image.
-    pub fn read_png(&mut self, bytes: &[u8]) -> Image<RGBA8> {
-        read_png(bytes)
-    }
-
     /// Interpret a slice of bytes as a PNG, decodes it into an RGBA image, then uploads it image to
     /// the GPU, creating a texture.
     pub fn load_png(&mut self, bytes: &[u8]) -> Texture<RGBA8> {
-        Texture::from_image(&read_png(bytes))
+        Texture::from_image(&Image::from_png(bytes))
     }
 
     /// Interpret a slice of bytes as a FLAC file and decodes it into a sound.

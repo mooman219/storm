@@ -1,4 +1,5 @@
 use crate::ColorDescription;
+use crate::RGBA8;
 
 /// Basic image type.
 #[derive(Clone)]
@@ -8,7 +9,15 @@ pub struct Image<T: ColorDescription> {
     height: u32,
 }
 
+impl Image<RGBA8> {
+    /// Interpret a slice of bytes as a PNG and decodes it into an RGBA image.
+    pub fn from_png(bytes: &[u8]) -> Image<RGBA8> {
+        crate::prelude::image::png::read_png(bytes)
+    }
+}
+
 impl<T: ColorDescription> Image<T> {
+    /// Creates an image with the given color and size.
     pub fn from_color(color: T, width: u32, height: u32) -> Image<T> {
         assert!(width > 0 && height > 0, "Neither width or height can be 0.");
         let pixels = vec![color; (width * height) as usize];
@@ -19,6 +28,8 @@ impl<T: ColorDescription> Image<T> {
         }
     }
 
+    /// Creates an image with the given buffer and size. The buffer length must match the image
+    /// dimensions.
     pub fn from_vec(buf: Vec<T>, width: u32, height: u32) -> Image<T> {
         assert!(width > 0 && height > 0, "Neither width or height can be 0.");
         assert!(buf.len() == (width * height) as usize, "Buffer length must match image dimensions.");
