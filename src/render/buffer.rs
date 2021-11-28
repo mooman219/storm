@@ -59,7 +59,7 @@ impl<T: VertexDescription + Copy> Buffer<T> {
 
 impl<T: VertexDescription + Copy> Drop for Buffer<T> {
     fn drop(&mut self) {
-        let gl = &OpenGLState::ctx().gl;
+        let gl = &mut OpenGLState::ctx().gl;
         gl.delete_buffer(self.vbo);
         gl.delete_vertex_array(self.vao);
     }

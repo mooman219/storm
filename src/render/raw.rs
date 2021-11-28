@@ -517,7 +517,10 @@ impl OpenGL {
         }
     }
 
-    pub fn delete_program(&self, program: resource::Program) {
+    pub fn delete_program(&mut self, program: resource::Program) {
+        if self.shader_program == Some(program) {
+            self.shader_program = None;
+        }
         unsafe { self.gl.delete_program(program) };
     }
 
@@ -555,7 +558,10 @@ impl OpenGL {
         }
     }
 
-    pub fn delete_vertex_array(&self, vertex_array: resource::VertexArray) {
+    pub fn delete_vertex_array(&mut self, vertex_array: resource::VertexArray) {
+        if self.vertex_array == Some(vertex_array) {
+            self.vertex_array = None;
+        }
         unsafe { self.gl.delete_vertex_array(vertex_array) };
     }
 
