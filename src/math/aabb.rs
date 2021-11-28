@@ -48,8 +48,8 @@ impl AABB2D {
             return false;
         }
         let mut result = false;
-        let mut res = *mov; // Copy
-        let mut aabb = *self; // Copy
+        let mut res = *mov;
+        let mut aabb = *self;
 
         // Y movement
 
@@ -63,9 +63,7 @@ impl AABB2D {
                     }
                 }
             }
-        }
-
-        if mov.y > 0f32 {
+        } else if mov.y > 0f32 {
             for other in others {
                 if aabb.max.x > other.min.x && aabb.min.x < other.max.x && other.min.y >= aabb.max.y {
                     let max = other.min.y - aabb.max.y;
@@ -92,9 +90,7 @@ impl AABB2D {
                     }
                 }
             }
-        }
-
-        if mov.x > 0f32 {
+        } else if mov.x > 0f32 {
             for other in others {
                 if aabb.max.y > other.min.y && aabb.min.y < other.max.y && other.min.x >= aabb.max.x {
                     let max = other.min.x - aabb.max.x;
