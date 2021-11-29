@@ -9,6 +9,7 @@ pub mod time;
 
 pub use crate::audio::*;
 pub use crate::event::*;
+pub use crate::image::*;
 pub use crate::prelude::*;
 pub use crate::render::*;
 pub use cgmath;
@@ -16,6 +17,7 @@ pub use fontdue;
 
 mod audio;
 mod event;
+mod image;
 mod prelude;
 mod render;
 

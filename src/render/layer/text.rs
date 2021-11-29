@@ -1,9 +1,8 @@
 use super::TransformLayer;
-use crate::prelude::Sprite;
 use crate::render::buffer::Buffer;
 use crate::render::raw::{BufferBindingTarget, TextureUnit};
 use crate::render::OpenGLState;
-use crate::{Image, Packer, Text, Texture, TextureSection, RGBA8};
+use crate::{Image, Packer, Text, TextSprite, TextUserData, Texture, TextureSection};
 use cgmath::Matrix4;
 use cgmath::*;
 use fontdue::layout::{CoordinateSystem, GlyphRasterConfig, Layout, LayoutSettings};
@@ -19,9 +18,9 @@ struct CharCacheValue {
 /// Simple layer which draws text to the screen.
 pub struct TextLayer {
     transform: TransformLayer,
-    buffer: Buffer<Sprite>,
-    sprites: Vec<Sprite>,
-    layout: Layout<RGBA8>,
+    buffer: Buffer<TextSprite>,
+    sprites: Vec<TextSprite>,
+    layout: Layout<TextUserData>,
     packer: Packer,
     cache: HashMap<GlyphRasterConfig, CharCacheValue>,
     atlas: Texture<u8>,
@@ -95,12 +94,11 @@ impl TextLayer {
                     value
                 }
             };
-            self.sprites.push(Sprite::new(
-                Vector3::new(glyph.x, glyph.y, 0.0),
+            self.sprites.push(TextSprite::new(
+                Vector3::new(glyph.x, glyph.y, glyph.user_data.depth),
                 value.size,
                 value.uv,
-                glyph.user_data,
-                0.0,
+                glyph.user_data.color,
             ));
             self.dirty = true;
         }

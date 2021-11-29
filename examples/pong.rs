@@ -1,13 +1,15 @@
 use core::convert::{From, Into};
 use core::time::Duration;
 use storm::cgmath::{Vector2, Vector3};
+use storm::fontdue::layout::LayoutSettings;
+use storm::fontdue::Font;
 use storm::math::AABB2D;
 use storm::*;
 
 static SOUND: &[u8] = include_bytes!("resources/boop.flac");
-// static FONT: &[u8] = include_bytes!("../resources/Roboto-Regular.ttf");
+static FONT: &[u8] = include_bytes!("resources/Roboto-Regular.ttf");
 
-/// Run with: cargo run --example square --release
+/// Run with: cargo run --example pong --release
 fn main() {
     // Create the engine context and describe the window.
     Context::start(
@@ -28,6 +30,27 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
     let boop = ctx.load_flac(SOUND).unwrap();
+
+    let fonts = [Font::from_bytes(FONT, Default::default()).unwrap()];
+    let mut text_layer = ctx.text_layer();
+    let layout_settings = LayoutSettings {
+        x: 100.0,
+        y: 500.0,
+        max_width: Some(500.0),
+        ..Default::default()
+    };
+    let message = String::from("This is pong.\nYeet.");
+    text_layer.append(
+        &fonts,
+        &layout_settings,
+        &[Text {
+            text: &message,
+            font_index: 0,
+            px: 16.0,
+            color: RGBA8::WHITE,
+            depth: 0.0,
+        }],
+    );
 
     let mut background = ctx.sprite_layer();
     background.set_sprites(&[Sprite {
@@ -60,14 +83,14 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     let mut ball = ctx.sprite_layer();
     let mut ball_speed = Vector3::new(-300.0, 0.0, 0.0);
     let mut ball_sprites = [Sprite {
-        pos: Vector3::new(-15.0, -15.0, 0.0),
-        size: Vector2::new(30, 30),
+        pos: Vector3::new(-12.0, -12.0, 0.0),
+        size: Vector2::new(25, 25),
         color: RGBA8::WHITE,
         ..Default::default()
     }];
     ball.set_sprites(&ball_sprites);
 
-    const SPEED: f32 = 200.0;
+    const SPEED: f32 = 250.0;
     move |event, ctx| match event {
         Event::CloseRequested => ctx.stop(),
         Event::KeyPressed(key) => match key {
@@ -126,6 +149,8 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             paddles.draw();
             background.draw();
             ball.draw();
+            ctx.clear(ClearMode::depth());
+            text_layer.draw();
         }
         _ => {}
     }

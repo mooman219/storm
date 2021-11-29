@@ -1,4 +1,5 @@
 mod sprite;
+mod text;
 
 pub use self::sprite::*;
 

@@ -12,7 +12,7 @@ pub struct Image<T: ColorDescription> {
 impl Image<RGBA8> {
     /// Interpret a slice of bytes as a PNG and decodes it into an RGBA image.
     pub fn from_png(bytes: &[u8]) -> Image<RGBA8> {
-        crate::prelude::image::png::read_png(bytes)
+        crate::image::png::read_png(bytes)
     }
 }
 

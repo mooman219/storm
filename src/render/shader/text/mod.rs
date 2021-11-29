@@ -2,7 +2,7 @@ use crate::render::raw::{resource, OpenGL, TextureUnit};
 use crate::render::OpenGLState;
 use cgmath::Matrix4;
 
-const VERTEX: &str = include_str!("../sprite/vertex.glsl");
+const VERTEX: &str = include_str!("vertex.glsl");
 const FRAGMENT: &str = include_str!("fragment.glsl");
 
 pub struct TextShader {
@@ -15,7 +15,7 @@ impl TextShader {
     pub fn new(gl: &mut OpenGL) -> TextShader {
         let program = gl.shader_program(VERTEX, FRAGMENT);
         let uniform_ortho = gl.get_uniform_location(program, "ortho").unwrap();
-        let uniform_texture = gl.get_uniform_location(program, "tex[0]").unwrap();
+        let uniform_texture = gl.get_uniform_location(program, "tex").unwrap();
 
         TextShader {
             program,

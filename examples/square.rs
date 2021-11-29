@@ -49,6 +49,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             font_index: 0,
             px: 16.0,
             color: RGBA8::WHITE,
+            depth: 0.0,
         }],
     );
 
@@ -68,6 +69,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                     font_index: 0,
                     px: 16.0,
                     color: RGBA8::WHITE,
+                    depth: 0.0,
                 }],
             );
         }
@@ -89,6 +91,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                         font_index: 0,
                         px: 16.0,
                         color: RGBA8::WHITE,
+                        depth: 0.0,
                     }],
                 );
             }
