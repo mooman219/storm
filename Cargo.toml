@@ -40,7 +40,7 @@ cpal = "0.13.4"
 simple_logger = "1.13"
 instant = "0.1.11"
 glow = "0.11"
-cgmath = "0.18.0"
+cgmath = { version = "0.18.0", features = ["serde"] }
 log = "0.4"
 hashbrown = "0.11.2"
 fontdue = "0.6.2"
