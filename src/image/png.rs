@@ -1,5 +1,5 @@
 use super::Image;
-use crate::RGBA8;
+use crate::color::RGBA8;
 use png::{ColorType, Decoder};
 
 /// Interpret a slice of bytes as a PNG and decodes it into an RGBA image.

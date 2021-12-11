@@ -1,7 +1,5 @@
 use cgmath::*;
 
-use crate::Sprite;
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AABB2D {
     pub min: Vector2<f32>,
@@ -107,17 +105,6 @@ impl AABB2D {
         *self = aabb;
 
         result
-    }
-}
-
-impl From<Sprite> for AABB2D {
-    fn from(sprite: Sprite) -> Self {
-        AABB2D::new(
-            sprite.pos.x,
-            sprite.pos.y,
-            sprite.pos.x + sprite.size.x as f32,
-            sprite.pos.y + sprite.size.y as f32,
-        )
     }
 }
 

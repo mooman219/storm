@@ -1,5 +1,7 @@
 use cgmath::{Vector2, Vector3};
 use core::time::Duration;
+use storm::color::RGBA8;
+use storm::graphics::shaders::sprite::{Sprite, SpriteShader};
 use storm::*;
 
 static TEXTURE_A: &[u8] = include_bytes!("resources/3.png");
@@ -24,6 +26,7 @@ fn main() {
 fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
+    let mut sprite_shader = SpriteShader::new(ctx);
     let source = ctx.load_flac(SOUND).unwrap();
     let sound = source.play(0.3, 0.1);
 
@@ -41,7 +44,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
         ..Sprite::default()
     };
 
-    let mut back = ctx.sprite_layer();
+    let mut back = sprite_shader.new_instance();
     back.set_atlas(&ctx.load_png(TEXTURE_A));
     let mut back_sprites = Vec::new();
     back_sprites.push(back_sprite);
@@ -93,6 +96,12 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                 back_sprites[1].pos.x = x;
                 back.set_sprites(&back_sprites);
             }
+        }
+        Event::WindowResized {
+            logical_size,
+            ..
+        } => {
+            *back.transform().logical_size() = logical_size;
         }
         Event::Update(_delta) => {
             ctx.clear(ClearMode::color_depth(RGBA8::BLUE));

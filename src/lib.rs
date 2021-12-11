@@ -4,24 +4,35 @@
 pub extern crate log;
 extern crate alloc;
 
+/// Audio primitives.
+pub mod audio;
+/// Color primitives.
+pub mod color;
+/// Graphics primitives.
+pub mod graphics;
+/// Image utilities.
+pub mod image;
+/// Math utilities.
 pub mod math;
+/// Time utilities.
 pub mod time;
 
-pub use crate::audio::*;
 pub use crate::event::*;
-pub use crate::image::*;
 pub use crate::prelude::*;
-pub use crate::render::*;
 pub use cgmath;
+pub use crevice;
 pub use fontdue;
 
-mod audio;
 mod event;
-mod image;
 mod prelude;
 mod render;
 
+use crate::audio::{AudioState, Sound, SoundError};
+use crate::color::ColorDescriptor;
 use crate::event::EventConverter;
+use crate::graphics::Texture;
+use crate::image::Image;
+use crate::render::{OpenGLState, OpenGLWindow};
 use crate::time::{Instant, Timer};
 use cgmath::Vector2;
 use core::time::Duration;
@@ -119,32 +130,20 @@ impl Context {
         ctx.resize(self.window.physical_size(), self.window.logical_size());
     }
 
-    /// Creates a new sprite layer. Layers represent draw calls and hold configuration associated
-    /// with drawing to the screen.
-    pub fn sprite_layer(&mut self) -> SpriteLayer {
-        SpriteLayer::new()
-    }
-
-    /// Creates a new text layer. Layers represent draw calls and hold configuration associated
-    /// with drawing to the screen.
-    pub fn text_layer(&mut self) -> TextLayer {
-        TextLayer::new()
-    }
-
     /// Uploads an image to the GPU, creating a texture.
-    pub fn load_image<T: ColorDescription>(&mut self, image: &Image<T>) -> Texture<T> {
+    pub fn load_image<T: ColorDescriptor>(&mut self, image: &Image<T>) -> Texture {
         Texture::from_image(image)
     }
 
     /// Interpret a slice of bytes as a PNG, decodes it into an RGBA image, then uploads it image to
     /// the GPU, creating a texture.
-    pub fn load_png(&mut self, bytes: &[u8]) -> Texture<RGBA8> {
+    pub fn load_png(&mut self, bytes: &[u8]) -> Texture {
         Texture::from_image(&Image::from_png(bytes))
     }
 
     /// Interpret a slice of bytes as a FLAC file and decodes it into a sound.
     pub fn load_flac(&mut self, bytes: &[u8]) -> Result<Sound, SoundError> {
-        read_flac(bytes)
+        audio::read_flac(bytes)
     }
 
     /// Clears the screen buffers according to the clear mode.
@@ -163,6 +162,11 @@ impl Context {
 
     /// Gets the logical size of the window.
     pub fn window_logical_size(&self) -> Vector2<f32> {
+        self.window.logical_size()
+    }
+
+    /// Gets the physical size of the window.
+    pub fn window_physical_size(&self) -> Vector2<f32> {
         self.window.logical_size()
     }
 

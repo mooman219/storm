@@ -1,8 +1,13 @@
 use core::convert::{From, Into};
 use core::time::Duration;
 use storm::cgmath::{Vector2, Vector3};
+use storm::color::RGBA8;
 use storm::fontdue::layout::LayoutSettings;
 use storm::fontdue::Font;
+use storm::graphics::shaders::{
+    sprite::{Sprite, SpriteShader},
+    text::{Text, TextShader},
+};
 use storm::math::AABB2D;
 use storm::*;
 
@@ -30,16 +35,18 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
     let boop = ctx.load_flac(SOUND).unwrap();
+    let mut text_shader = TextShader::new(ctx);
+    let mut sprite_shader = SpriteShader::new(ctx);
 
     let fonts = [Font::from_bytes(FONT, Default::default()).unwrap()];
-    let mut text_layer = ctx.text_layer();
+    let mut text_layer = text_shader.new_instance();
     let layout_settings = LayoutSettings {
         x: 100.0,
         y: 500.0,
         max_width: Some(500.0),
         ..Default::default()
     };
-    let message = String::from("This is pong.\nYeet.");
+    let message = String::from("This is a test.\nNew line.");
     text_layer.append(
         &fonts,
         &layout_settings,
@@ -52,7 +59,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
         }],
     );
 
-    let mut background = ctx.sprite_layer();
+    let mut background = sprite_shader.new_instance();
     background.set_sprites(&[Sprite {
         pos: Vector3::new(-500.0, -400.0, -0.1),
         size: Vector2::new(1000, 800),
@@ -62,7 +69,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
 
     let mut up = false;
     let mut down = false;
-    let mut paddles = ctx.sprite_layer();
+    let mut paddles = sprite_shader.new_instance();
     let mut paddle_speed = [0.0f32; 2];
     let mut paddle_sprites = [
         Sprite {
@@ -80,7 +87,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ];
     paddles.set_sprites(&paddle_sprites);
 
-    let mut ball = ctx.sprite_layer();
+    let mut ball = sprite_shader.new_instance();
     let mut ball_speed = Vector3::new(-300.0, 0.0, 0.0);
     let mut ball_sprites = [Sprite {
         pos: Vector3::new(-12.0, -12.0, 0.0),

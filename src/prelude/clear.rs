@@ -1,5 +1,5 @@
+use crate::color::RGBA8;
 use crate::render::raw::ClearMode as RawClearMode;
-use crate::RGBA8;
 
 /// Parameters for how the screen should be cleared.
 pub struct ClearMode {

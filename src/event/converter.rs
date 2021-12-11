@@ -26,15 +26,27 @@ impl EventConverter {
         match event {
             // Window
             WindowEvent::CloseRequested => event_handler(Event::CloseRequested, context),
-            WindowEvent::Resized(size) => {
+            WindowEvent::Resized(_) => {
                 context.window_check_resize();
-                self.window_size = Vector2::new(size.width as f32, size.height as f32);
-                event_handler(Event::WindowResized(self.window_size), context);
+                event_handler(
+                    Event::WindowResized {
+                        physical_size: context.window_physical_size(),
+                        logical_size: context.window_logical_size(),
+                    },
+                    context,
+                );
             }
             WindowEvent::ScaleFactorChanged {
                 ..
             } => {
                 context.window_check_resize();
+                event_handler(
+                    Event::WindowResized {
+                        physical_size: context.window_physical_size(),
+                        logical_size: context.window_logical_size(),
+                    },
+                    context,
+                );
             }
 
             // Keyboard

@@ -1,9 +1,8 @@
-use crate::ColorDescription;
-use crate::RGBA8;
+use crate::color::{ColorDescriptor, RGBA8};
 
 /// Basic image type.
 #[derive(Clone)]
-pub struct Image<T: ColorDescription> {
+pub struct Image<T: ColorDescriptor> {
     pixels: Vec<T>,
     width: u32,
     height: u32,
@@ -16,7 +15,7 @@ impl Image<RGBA8> {
     }
 }
 
-impl<T: ColorDescription> Image<T> {
+impl<T: ColorDescriptor> Image<T> {
     /// Creates an image with the given color and size.
     pub fn from_color(color: T, width: u32, height: u32) -> Image<T> {
         assert!(width > 0 && height > 0, "Neither width or height can be 0.");

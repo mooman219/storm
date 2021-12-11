@@ -45,7 +45,10 @@ pub enum Event {
     /// Cursor entered the bounds of the window event.
     CursorEntered,
     /// Window resized event. Contains the new dimensions of the window.
-    WindowResized(Vector2<f32>),
+    WindowResized {
+        physical_size: Vector2<f32>,
+        logical_size: Vector2<f32>,
+    },
     /// This event is useful as a place to put your code that should be run after all state-changing
     /// events have been handled and you want to do stuff (updating state, performing calculations,
     /// etc) that happens as the "main body" of your event loop. The value is the time passed since

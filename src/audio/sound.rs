@@ -1,8 +1,7 @@
 use alloc::sync::Arc;
 
-use crate::audio::{control, control::SoundControl};
+use crate::audio::{control, control::SoundControl, AudioState};
 use crate::math::lerp;
-use crate::AudioState;
 
 #[derive(Copy, Clone, Debug)]
 /// An error that prevents successful decoding of an audio stream.

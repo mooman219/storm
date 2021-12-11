@@ -1,8 +1,8 @@
-use crate::RGBA8;
+use crate::color::RGBA8;
 use glow::{HasContext, PixelUnpackData};
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum BufferBindingTarget {
     ArrayBuffer = glow::ARRAY_BUFFER,
     AtomicCounterBuffer = glow::ATOMIC_COUNTER_BUFFER,
@@ -21,7 +21,14 @@ pub enum BufferBindingTarget {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum BufferBlockBindingTarget {
+    TransformFeedbackBuffer = glow::TRANSFORM_FEEDBACK_BUFFER,
+    UniformBuffer = glow::UNIFORM_BUFFER,
+}
+
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum BufferUsage {
     StreamDraw = glow::STREAM_DRAW,
     StreamRead = glow::STREAM_READ,
@@ -35,7 +42,7 @@ pub enum BufferUsage {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Capability {
     Blend = glow::BLEND,
     ColorLogicOp = glow::COLOR_LOGIC_OP,
@@ -67,7 +74,7 @@ pub enum Capability {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum DepthTest {
     Always = glow::ALWAYS,
     Never = glow::NEVER,
@@ -86,7 +93,7 @@ pub mod ClearMode {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum CullFace {
     Front = glow::FRONT,
     Back = glow::BACK,
@@ -94,7 +101,7 @@ pub enum CullFace {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum BlendFactor {
     Zero = glow::ZERO,
     One = glow::ONE,
@@ -118,24 +125,7 @@ pub enum BlendFactor {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone, PartialEq, Eq)]
-pub enum TextureUnit {
-    Temporary = glow::TEXTURE0,
-    Alpha = glow::TEXTURE1,
-    Beta = glow::TEXTURE2,
-    Charlie = glow::TEXTURE3,
-    Delta = glow::TEXTURE4,
-    Echo = glow::TEXTURE5,
-}
-
-impl TextureUnit {
-    pub fn index(self) -> i32 {
-        (self as u32 - glow::TEXTURE0) as i32
-    }
-}
-
-#[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum TextureLoadTarget {
     Texture2D = glow::TEXTURE_2D,
     ProxyTexture2D = glow::PROXY_TEXTURE_2D,
@@ -153,7 +143,7 @@ pub enum TextureLoadTarget {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum TextureBindingTarget {
     TextureBuffer = glow::TEXTURE_BUFFER,
     Texture1D = glow::TEXTURE_1D,
@@ -169,7 +159,7 @@ pub enum TextureBindingTarget {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum TextureParameterTarget {
     Texture1D = glow::TEXTURE_1D,
     Texture1DArray = glow::TEXTURE_1D_ARRAY,
@@ -184,7 +174,7 @@ pub enum TextureParameterTarget {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum PixelFormat {
     RED = glow::RED,
     RG = glow::RG,
@@ -204,7 +194,7 @@ pub enum PixelFormat {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum PixelInternalFormat {
     DepthComponent = glow::DEPTH_COMPONENT,
     DepthStencil = glow::DEPTH_STENCIL,
@@ -276,7 +266,7 @@ pub enum PixelInternalFormat {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum PixelType {
     UnsignedByte = glow::UNSIGNED_BYTE,
     Byte = glow::BYTE,
@@ -300,7 +290,7 @@ pub enum PixelType {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum TextureParameterName {
     DepthStencilTextureMode = glow::DEPTH_STENCIL_TEXTURE_MODE,
     TextureBaseLevel = glow::TEXTURE_BASE_LEVEL,
@@ -322,7 +312,7 @@ pub enum TextureParameterName {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum TextureWrapValue {
     ClampToEdge = glow::CLAMP_TO_EDGE,
     ClampToBorder = glow::CLAMP_TO_BORDER,
@@ -332,7 +322,7 @@ pub enum TextureWrapValue {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum TextureMinFilterValue {
     Nearest = glow::NEAREST,
     Linear = glow::LINEAR,
@@ -343,14 +333,14 @@ pub enum TextureMinFilterValue {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum TextureMagFilterValue {
     Nearest = glow::NEAREST,
     Linear = glow::LINEAR,
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum AttributeType {
     Byte = glow::BYTE,
     UnsignedByte = glow::UNSIGNED_BYTE,
@@ -368,7 +358,7 @@ pub enum AttributeType {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum IndiceType {
     UnsignedByte = glow::UNSIGNED_BYTE,
     UnsignedShort = glow::UNSIGNED_SHORT,
@@ -376,7 +366,7 @@ pub enum IndiceType {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum DrawMode {
     Points = glow::POINTS,
     LineStrip = glow::LINE_STRIP,
@@ -393,7 +383,7 @@ pub enum DrawMode {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum StringTarget {
     Vendor = glow::VENDOR,
     Renderer = glow::RENDERER,
@@ -403,7 +393,7 @@ pub enum StringTarget {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum ShaderType {
     Vertex = glow::VERTEX_SHADER,
     Fragment = glow::FRAGMENT_SHADER,
@@ -412,7 +402,7 @@ pub enum ShaderType {
 }
 
 #[repr(u32)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum PixelStoreAlignment {
     PackAlignment = glow::PACK_ALIGNMENT,
     UnpackAlignment = glow::UNPACK_ALIGNMENT,
@@ -438,7 +428,7 @@ pub struct OpenGL {
     clear_color: RGBA8,
     shader_program: Option<resource::Program>,
     vertex_array: Option<resource::VertexArray>,
-    active_texture_unit: TextureUnit,
+    active_texture_unit: u32,
     bound_textures: [Option<resource::Texture>; 16],
 }
 
@@ -449,7 +439,7 @@ impl OpenGL {
             clear_color: RGBA8::new(0, 0, 0, 0),
             shader_program: None,
             vertex_array: None,
-            active_texture_unit: TextureUnit::Temporary,
+            active_texture_unit: 0,
             bound_textures: [None; 16],
         }
     }
@@ -460,8 +450,20 @@ impl OpenGL {
 
     pub fn get_error(&self, context: &str) {
         let error = unsafe { self.gl.get_error() };
+        match error {
+            glow::INVALID_ENUM => error!("GL ERROR: INVALID_ENUM at {}", context),
+            glow::INVALID_VALUE => error!("GL ERROR: INVALID_VALUE at {}", context),
+            glow::INVALID_OPERATION => error!("GL ERROR: INVALID_OPERATION at {}", context),
+            glow::INVALID_FRAMEBUFFER_OPERATION => {
+                error!("GL ERROR: INVALID_FRAMEBUFFER_OPERATION at {}", context)
+            }
+            glow::OUT_OF_MEMORY => error!("GL ERROR: OUT_OF_MEMORY at {}", context),
+            glow::STACK_UNDERFLOW => error!("GL ERROR: STACK_UNDERFLOW at {}", context),
+            glow::STACK_OVERFLOW => error!("GL ERROR: STACK_OVERFLOW at {}", context),
+            _ => {}
+        }
         if error > 0 {
-            warn!("GL ERROR: {} at {}", error, context);
+            panic!("Rest in peace");
         }
     }
 
@@ -524,6 +526,10 @@ impl OpenGL {
         unsafe { self.gl.delete_program(program) };
     }
 
+    pub fn uniform_block_binding(&self, program: resource::Program, index: u32, binding: u32) {
+        unsafe { self.gl.uniform_block_binding(program, index, binding) }
+    }
+
     pub fn get_uniform_location(
         &self,
         program: resource::Program,
@@ -532,7 +538,33 @@ impl OpenGL {
         unsafe { self.gl.get_uniform_location(program, name) }
     }
 
-    pub fn uniform_matrix_4fv(
+    pub fn get_uniform_block_index(&self, program: resource::Program, name: &str) -> Option<u32> {
+        unsafe { self.gl.get_uniform_block_index(program, name) }
+    }
+
+    pub fn uniform_matrix_2x2_f32(
+        &self,
+        location: Option<&resource::UniformLocation>,
+        transpose: bool,
+        v: &[f32; 4],
+    ) {
+        unsafe {
+            self.gl.uniform_matrix_2_f32_slice(location, transpose, v);
+        }
+    }
+
+    pub fn uniform_matrix_3x3_f32(
+        &self,
+        location: Option<&resource::UniformLocation>,
+        transpose: bool,
+        v: &[f32; 9],
+    ) {
+        unsafe {
+            self.gl.uniform_matrix_3_f32_slice(location, transpose, v);
+        }
+    }
+
+    pub fn uniform_matrix_4x4_f32(
         &self,
         location: Option<&resource::UniformLocation>,
         transpose: bool,
@@ -543,8 +575,87 @@ impl OpenGL {
         }
     }
 
-    pub fn uniform_1i(&self, location: Option<&resource::UniformLocation>, x: i32) {
-        unsafe { self.gl.uniform_1_i32(location, x) };
+    pub fn uniform_1_i32(&self, location: Option<&resource::UniformLocation>, x: i32) {
+        unsafe {
+            self.gl.uniform_1_i32(location, x);
+        }
+    }
+    pub fn uniform_2_i32(&self, location: Option<&resource::UniformLocation>, x: i32, y: i32) {
+        unsafe {
+            self.gl.uniform_2_i32(location, x, y);
+        }
+    }
+    pub fn uniform_3_i32(&self, location: Option<&resource::UniformLocation>, x: i32, y: i32, z: i32) {
+        unsafe {
+            self.gl.uniform_3_i32(location, x, y, z);
+        }
+    }
+    pub fn uniform_4_i32(
+        &self,
+        location: Option<&resource::UniformLocation>,
+        x: i32,
+        y: i32,
+        z: i32,
+        w: i32,
+    ) {
+        unsafe {
+            self.gl.uniform_4_i32(location, x, y, z, w);
+        }
+    }
+    pub fn uniform_1_u32(&self, location: Option<&resource::UniformLocation>, x: u32) {
+        unsafe {
+            self.gl.uniform_1_u32(location, x);
+        }
+    }
+    pub fn uniform_2_u32(&self, location: Option<&resource::UniformLocation>, x: u32, y: u32) {
+        unsafe {
+            self.gl.uniform_2_u32(location, x, y);
+        }
+    }
+    pub fn uniform_3_u32(&self, location: Option<&resource::UniformLocation>, x: u32, y: u32, z: u32) {
+        unsafe {
+            self.gl.uniform_3_u32(location, x, y, z);
+        }
+    }
+    pub fn uniform_4_u32(
+        &self,
+        location: Option<&resource::UniformLocation>,
+        x: u32,
+        y: u32,
+        z: u32,
+        w: u32,
+    ) {
+        unsafe {
+            self.gl.uniform_4_u32(location, x, y, z, w);
+        }
+    }
+
+    pub fn uniform_1_f32(&self, location: Option<&resource::UniformLocation>, x: f32) {
+        unsafe {
+            self.gl.uniform_1_f32(location, x);
+        }
+    }
+    pub fn uniform_2_f32(&self, location: Option<&resource::UniformLocation>, x: f32, y: f32) {
+        unsafe {
+            self.gl.uniform_2_f32(location, x, y);
+        }
+    }
+    pub fn uniform_3_f32(&self, location: Option<&resource::UniformLocation>, x: f32, y: f32, z: f32) {
+        unsafe {
+            self.gl.uniform_3_f32(location, x, y, z);
+        }
+    }
+    pub fn uniform_4_f32(
+        &self,
+        location: Option<&resource::UniformLocation>,
+        x: f32,
+        y: f32,
+        z: f32,
+        w: f32,
+    ) {
+        unsafe {
+            self.gl.uniform_4_f32(location, x, y, z, w);
+        }
     }
 
     pub fn create_vertex_array(&self) -> resource::VertexArray {
@@ -606,12 +717,27 @@ impl OpenGL {
         unsafe { self.gl.bind_buffer(target as u32, buffer) };
     }
 
+    pub fn bind_buffer_base(
+        &self,
+        target: BufferBlockBindingTarget,
+        index: u32,
+        buffer: Option<resource::Buffer>,
+    ) {
+        unsafe { self.gl.bind_buffer_base(target as u32, index, buffer) };
+    }
+
     pub fn delete_buffer(&self, buffer: resource::Buffer) {
         unsafe { self.gl.delete_buffer(buffer) };
     }
 
     pub fn buffer_data_empty(&self, target: BufferBindingTarget, size: i32, usage: BufferUsage) {
         unsafe { self.gl.buffer_data_size(target as u32, size, usage as u32) };
+    }
+
+    pub fn buffer_data_u8_slice(&self, target: BufferBindingTarget, data: &[u8], usage: BufferUsage) {
+        unsafe {
+            self.gl.buffer_data_u8_slice(target as u32, data, usage as u32);
+        };
     }
 
     pub fn buffer_data<T: Sized>(&self, target: BufferBindingTarget, data: &[T], usage: BufferUsage) {
@@ -640,10 +766,10 @@ impl OpenGL {
         unsafe { self.gl.create_texture().unwrap() }
     }
 
-    pub fn active_texture(&mut self, unit: TextureUnit) {
+    pub fn active_texture(&mut self, unit: u32) {
         if self.active_texture_unit != unit {
             self.active_texture_unit = unit;
-            unsafe { self.gl.active_texture(unit as u32) };
+            unsafe { self.gl.active_texture(glow::TEXTURE0 + unit as u32) };
         }
     }
 
@@ -652,7 +778,7 @@ impl OpenGL {
     }
 
     pub fn bind_texture(&mut self, target: TextureBindingTarget, texture: Option<resource::Texture>) {
-        let index = self.active_texture_unit.index() as usize;
+        let index = self.active_texture_unit as usize;
         if self.bound_textures[index] != texture {
             self.bound_textures[index] = texture;
             unsafe { self.gl.bind_texture(target as u32, texture) };
@@ -795,5 +921,12 @@ impl OpenGL {
 
     pub fn get_max_texture_size(&self) -> i32 {
         unsafe { self.gl.get_parameter_i32(glow::MAX_TEXTURE_SIZE) }
+    }
+
+    pub fn debug_message_callback<F>(&self, callback: F)
+    where
+        F: FnMut(u32, u32, u32, u32, &str),
+    {
+        unsafe { self.gl.debug_message_callback(callback) };
     }
 }

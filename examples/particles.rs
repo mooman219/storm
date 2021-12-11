@@ -1,6 +1,9 @@
-use crate::cgmath::prelude::*;
-use crate::cgmath::*;
 use core::time::Duration;
+use storm::cgmath::prelude::*;
+use storm::cgmath::*;
+use storm::color::RGBA8;
+use storm::graphics::shaders::sprite::{Sprite, SpriteShader};
+use storm::graphics::TextureSection;
 use storm::*;
 
 /// Run with: cargo run --example particles --release
@@ -23,10 +26,9 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
 
-    let mut screen = ctx.sprite_layer();
-    let mut screen_transform = LayerTransform::new();
-    screen_transform.rotation = 0.125;
-    screen.set_transform(screen_transform.matrix());
+    let mut sprite_shader = SpriteShader::new(ctx);
+    let mut screen = sprite_shader.new_instance();
+    *screen.transform().rotation() = 0.125;
 
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
@@ -65,18 +67,21 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             ..
         } => {
             if is_dragging {
-                screen_transform.translation += delta / screen_transform.scale;
-                screen.set_transform(screen_transform.matrix());
+                let scale = *screen.transform().scale();
+                *screen.transform().translation() += delta / scale;
             }
         }
-        Event::CursorScroll(direction) => {
-            match direction {
-                ScrollDirection::Up => screen_transform.scale *= 1.1,
-                ScrollDirection::Down => screen_transform.scale /= 1.1,
-                _ => {}
-            }
-            screen.set_transform(screen_transform.matrix());
+        Event::WindowResized {
+            logical_size,
+            ..
+        } => {
+            *screen.transform().logical_size() = logical_size;
         }
+        Event::CursorScroll(direction) => match direction {
+            ScrollDirection::Up => *screen.transform().scale() *= 1.1,
+            ScrollDirection::Down => *screen.transform().scale() /= 1.1,
+            _ => {}
+        },
         Event::Update(delta) => {
             for index in 0..sprites.len() {
                 Particle::tick(&mut sprites[index], &mut particles[index], delta);
