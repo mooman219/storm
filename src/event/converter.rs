@@ -28,6 +28,7 @@ impl EventConverter {
             WindowEvent::CloseRequested => event_handler(Event::CloseRequested, context),
             WindowEvent::Resized(_) => {
                 context.window_check_resize();
+                self.window_size = context.window_physical_size();
                 event_handler(
                     Event::WindowResized {
                         physical_size: context.window_physical_size(),
@@ -40,6 +41,7 @@ impl EventConverter {
                 ..
             } => {
                 context.window_check_resize();
+                self.window_size = context.window_physical_size();
                 event_handler(
                     Event::WindowResized {
                         physical_size: context.window_physical_size(),

@@ -1,7 +1,5 @@
 use crate::color::RGBA8;
-use crate::graphics::{
-    TextureSection, VertexAttribute, VertexDescriptor, VertexInputFormat, VertexOutputFormat,
-};
+use crate::graphics::{TextureSection, VertexAttribute, VertexDescriptor, VertexInputType, VertexOutputType};
 use crate::math::AABB2D;
 use cgmath::*;
 
@@ -20,6 +18,17 @@ pub struct Sprite {
     pub color: RGBA8,
     /// Rotation of the sprite. Units are 1/65536th of a turn.
     pub rotation: u16,
+}
+
+impl VertexDescriptor for Sprite {
+    const ATTRIBUTES: &'static [VertexAttribute] = &[
+        // Pos, Size, Texture, Color::RGBA8, Rotation
+        VertexAttribute::new(3, VertexInputType::F32, VertexOutputType::F32),
+        VertexAttribute::new(2, VertexInputType::U16, VertexOutputType::F32),
+        VertexAttribute::new(4, VertexInputType::U16, VertexOutputType::NormalizedF32),
+        VertexAttribute::new(4, VertexInputType::U8, VertexOutputType::NormalizedF32),
+        VertexAttribute::new(1, VertexInputType::U16, VertexOutputType::NormalizedF32),
+    ];
 }
 
 impl Default for Sprite {
@@ -80,51 +89,6 @@ impl Sprite {
 
 impl From<Sprite> for AABB2D {
     fn from(sprite: Sprite) -> Self {
-        AABB2D::new(
-            sprite.pos.x,
-            sprite.pos.y,
-            sprite.pos.x + sprite.size.x as f32,
-            sprite.pos.y + sprite.size.y as f32,
-        )
+        AABB2D::from_pos_size(sprite.pos.truncate(), sprite.size.cast().unwrap())
     }
-}
-
-impl VertexDescriptor for Sprite {
-    const ATTRIBUTES: &'static [VertexAttribute] = &[
-        // Position
-        VertexAttribute {
-            count: 3,
-            normalized: false,
-            input: VertexInputFormat::Float,
-            output: VertexOutputFormat::Float,
-        },
-        // Size
-        VertexAttribute {
-            count: 2,
-            normalized: false,
-            input: VertexInputFormat::UnsignedShort,
-            output: VertexOutputFormat::Float,
-        },
-        // UV
-        VertexAttribute {
-            count: 4,
-            normalized: true,
-            input: VertexInputFormat::UnsignedShort,
-            output: VertexOutputFormat::Float,
-        },
-        // Color: RGBA8
-        VertexAttribute {
-            count: 4,
-            normalized: true,
-            input: VertexInputFormat::UnsignedByte,
-            output: VertexOutputFormat::Float,
-        },
-        // Rotation
-        VertexAttribute {
-            count: 1,
-            normalized: true,
-            input: VertexInputFormat::UnsignedShort,
-            output: VertexOutputFormat::Float,
-        },
-    ];
 }

@@ -7,7 +7,7 @@ pub struct AABB2D {
 }
 
 impl AABB2D {
-    pub fn new(minx: f32, miny: f32, maxx: f32, maxy: f32) -> AABB2D {
+    pub const fn new(minx: f32, miny: f32, maxx: f32, maxy: f32) -> AABB2D {
         AABB2D {
             min: Vector2 {
                 x: minx,
@@ -17,6 +17,20 @@ impl AABB2D {
                 x: maxx,
                 y: maxy,
             },
+        }
+    }
+
+    pub fn from_min_max(min: Vector2<f32>, max: Vector2<f32>) -> AABB2D {
+        AABB2D {
+            min,
+            max,
+        }
+    }
+
+    pub fn from_pos_size(pos: Vector2<f32>, size: Vector2<f32>) -> AABB2D {
+        AABB2D {
+            min: pos,
+            max: pos + size,
         }
     }
 

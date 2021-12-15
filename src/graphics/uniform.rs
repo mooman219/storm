@@ -4,13 +4,15 @@ use crate::render::OpenGLState;
 use core::marker::PhantomData;
 use crevice::std140::Std140;
 
-pub(crate) struct UniformBuffer<T: AsStd140> {
+/// Stores a uniform on the device.
+pub struct Uniform<T: AsStd140> {
     vbo: resource::Buffer,
     phantom: PhantomData<T>,
 }
 
-impl<T: AsStd140> UniformBuffer<T> {
-    pub fn new(uniform: T) -> UniformBuffer<T> {
+impl<T: AsStd140> Uniform<T> {
+    /// Creates a new uniform.
+    pub fn new(uniform: T) -> Uniform<T> {
         let gl = &mut OpenGLState::ctx().gl;
 
         let vbo = gl.create_buffer();
@@ -21,12 +23,30 @@ impl<T: AsStd140> UniformBuffer<T> {
             BufferUsage::StaticDraw,
         );
 
-        UniformBuffer {
+        Uniform {
             vbo,
             phantom: PhantomData,
         }
     }
 
+    pub(crate) fn new_internal() -> Uniform<T> {
+        let gl = &mut OpenGLState::ctx().gl;
+
+        let vbo = gl.create_buffer();
+        gl.bind_buffer(BufferBindingTarget::UniformBuffer, Some(vbo));
+        gl.buffer_data_empty(
+            BufferBindingTarget::UniformBuffer,
+            T::std140_size_static() as i32,
+            BufferUsage::StaticDraw,
+        );
+
+        Uniform {
+            vbo,
+            phantom: PhantomData,
+        }
+    }
+
+    /// Sets the value of the uniform.
     pub fn set(&mut self, uniform: T) {
         let gl = &OpenGLState::ctx().gl;
         gl.bind_buffer(BufferBindingTarget::UniformBuffer, Some(self.vbo));
@@ -37,13 +57,13 @@ impl<T: AsStd140> UniformBuffer<T> {
         );
     }
 
-    pub fn bind(&self, block: u32) {
+    pub(crate) fn bind(&self, block: u32) {
         let gl = &mut OpenGLState::ctx().gl;
         gl.bind_buffer_base(BufferBlockBindingTarget::UniformBuffer, block, Some(self.vbo));
     }
 }
 
-impl<T: AsStd140> Drop for UniformBuffer<T> {
+impl<T: AsStd140> Drop for Uniform<T> {
     fn drop(&mut self) {
         let gl = &mut OpenGLState::ctx().gl;
         gl.delete_buffer(self.vbo);

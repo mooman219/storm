@@ -1,8 +1,7 @@
-use crate::graphics::shaders::sprite::Sprite;
-use crate::graphics::{AsStd140, Shader, ShaderDescriptor, ShaderInstance};
-use crate::math::Transform;
-use crate::render::OpenGLState;
-use crate::{Context, Texture};
+use crate::default_texture;
+use crate::graphics::{
+    shaders::sprite::Sprite, AsStd140, Buffer, Shader, ShaderDescriptor, Texture, Uniform,
+};
 use cgmath::Matrix4;
 
 impl ShaderDescriptor<1> for SpriteShader {
@@ -10,21 +9,21 @@ impl ShaderDescriptor<1> for SpriteShader {
     const FRAGMENT_SHADER: &'static str = include_str!("fragment.glsl");
     const TEXTURE_NAMES: [&'static str; 1] = ["tex"];
     const VERTEX_UNIFORM_NAME: &'static str = "vertex";
-    const VERTEX_UNIFORM_DEFAULT: SpriteUniform = SpriteUniform {
-        ortho: Matrix4::new(
-            1.0, 0.0, 0.0, 0.0, //
-            0.0, 1.0, 0.0, 0.0, //
-            0.0, 0.0, 1.0, 0.0, //
-            0.0, 0.0, 0.0, 1.0, //
-        ),
-    };
     type VertexUniformType = SpriteUniform;
     type VertexDescriptor = Sprite;
 }
 
 #[derive(AsStd140)]
 pub struct SpriteUniform {
-    ortho: Matrix4<f32>,
+    pub ortho: Matrix4<f32>,
+}
+
+impl SpriteUniform {
+    pub fn new(ortho: Matrix4<f32>) -> SpriteUniform {
+        SpriteUniform {
+            ortho,
+        }
+    }
 }
 
 pub struct SpriteShader {
@@ -32,53 +31,35 @@ pub struct SpriteShader {
 }
 
 impl SpriteShader {
-    pub fn new(ctx: &mut Context) -> SpriteShader {
+    pub fn new() -> SpriteShader {
         SpriteShader {
-            shader: Shader::new(ctx),
+            shader: Shader::new(),
         }
     }
 
-    pub fn new_instance(&mut self) -> SpriteShaderInstance {
-        SpriteShaderInstance {
-            instance: self.shader.new_instance(),
-            transform: Transform::new(OpenGLState::ctx().logical_size()),
-        }
+    /// Draws to the screen.
+    pub fn draw(&self, uniform: &Uniform<SpriteUniform>, atlas: &Texture, buffer: &Buffer<Sprite>) {
+        self.shader.draw_instanced(uniform, [atlas], buffer, 4);
     }
 }
 
-pub struct SpriteShaderInstance {
-    instance: ShaderInstance<SpriteShader, 1>,
-    transform: Transform,
+pub struct SpriteShaderPass {
+    pub uniform: Uniform<SpriteUniform>,
+    pub atlas: Texture,
+    pub buffer: Buffer<Sprite>,
 }
 
-impl SpriteShaderInstance {
-    /// Sets the texture atlas to use during the draw.
-    pub fn set_atlas(&mut self, handle: &Texture) {
-        self.instance.set_textures([handle]);
-    }
-
-    /// Sets the sprites that will be drawn.
-    pub fn set_sprites(&mut self, sprites: &[Sprite]) {
-        self.instance.set_vertices(sprites);
-    }
-
-    /// Clears all the sprites, resulting in nothing being drawable.
-    pub fn clear_sprites(&mut self) {
-        self.instance.clear_vertices();
-    }
-
-    /// Gets a mutable reference the transform settings for this instance.
-    pub fn transform(&mut self) -> &mut Transform {
-        &mut self.transform
-    }
-
-    /// Draws the instance to the screen.
-    pub fn draw(&mut self) {
-        if let Some(transform) = self.transform.matrix() {
-            self.instance.set_vertex_uniform(SpriteUniform {
-                ortho: transform,
-            });
+impl SpriteShaderPass {
+    pub fn new(ortho: Matrix4<f32>) -> SpriteShaderPass {
+        SpriteShaderPass {
+            uniform: Uniform::new(SpriteUniform::new(ortho)),
+            atlas: default_texture(),
+            buffer: Buffer::new(),
         }
-        self.instance.draw_instanced();
+    }
+
+    /// Draws the pass to the screen.
+    pub fn draw(&mut self, shader: &SpriteShader) {
+        shader.draw(&self.uniform, &self.atlas, &self.buffer);
     }
 }

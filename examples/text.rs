@@ -2,10 +2,11 @@ use core::time::Duration;
 use storm::color::RGBA8;
 use storm::fontdue::layout::LayoutSettings;
 use storm::fontdue::Font;
-use storm::graphics::shaders::text::{Text, TextShader};
+use storm::graphics::shaders::text::{Text, TextShader, TextShaderPass, TextUniform};
+use storm::math::Transform;
 use storm::*;
 
-static FONT: &[u8] = include_bytes!("resources/Roboto-Regular.ttf");
+static FONT: &[u8] = include_bytes!("resources/wingding.ttf");
 
 /// Run with: cargo run --example text --release
 fn main() {
@@ -27,10 +28,11 @@ fn main() {
 fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
-    let mut text_shader = TextShader::new(ctx);
+    let mut transform = Transform::new(ctx.window_logical_size());
+    let text_shader = TextShader::new();
 
     // Create a Layers to draw on.
-    let mut text_layer = text_shader.new_instance();
+    let mut text_layer = TextShaderPass::new(transform.get_matrix());
 
     // Setup the layout for our text.
     let fonts = [Font::from_bytes(FONT, Default::default()).unwrap()];
@@ -42,14 +44,14 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     };
 
     // Append some text with our layout settings.
-    let mut message = String::from("abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    let mut message = String::from("=");
     text_layer.append(
         &fonts,
         &layout_settings,
         &[Text {
             text: &message,
             font_index: 0,
-            px: 16.0,
+            px: 209.0,
             color: RGBA8::WHITE,
             depth: 0.0,
         }],
@@ -69,7 +71,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                 &[Text {
                     text: &message,
                     font_index: 0,
-                    px: 16.0,
+                    px: 64.0,
                     color: RGBA8::WHITE,
                     depth: 0.0,
                 }],
@@ -79,7 +81,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
         Event::KeyPressed(key) => match key {
             KeyboardButton::Escape => ctx.stop(),
             KeyboardButton::Tab => {
-                *text_layer.transform().scale() = 1.0;
+                *transform.scale() = 1.0;
             }
             KeyboardButton::Back => {
                 message.pop();
@@ -90,7 +92,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                     &[Text {
                         text: &message,
                         font_index: 0,
-                        px: 16.0,
+                        px: 64.0,
                         color: RGBA8::WHITE,
                         depth: 0.0,
                     }],
@@ -117,24 +119,27 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             ..
         } => {
             if is_dragging {
-                let scale = *text_layer.transform().scale();
-                *text_layer.transform().translation() += delta / scale;
+                let scale = *transform.scale();
+                *transform.translation() += delta / scale;
             }
         }
         Event::CursorScroll(direction) => match direction {
-            ScrollDirection::Up => *text_layer.transform().scale() *= 1.1,
-            ScrollDirection::Down => *text_layer.transform().scale() /= 1.1,
+            ScrollDirection::Up => *transform.scale() *= 1.1,
+            ScrollDirection::Down => *transform.scale() /= 1.1,
             _ => {}
         },
         Event::WindowResized {
             logical_size,
             ..
         } => {
-            *text_layer.transform().logical_size() = logical_size;
+            *transform.logical_size() = logical_size;
         }
         Event::Update(_delta) => {
-            ctx.clear(ClearMode::color_depth(RGBA8::BLACK));
-            text_layer.draw();
+            if let Some(ortho) = transform.matrix() {
+                text_layer.uniform.set(TextUniform::new(ortho));
+            }
+            clear(ClearMode::color_depth(RGBA8::BLACK));
+            text_layer.draw(&text_shader);
         }
         _ => {}
     }

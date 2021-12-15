@@ -1,7 +1,5 @@
 use crate::color::RGBA8;
-use crate::graphics::{
-    TextureSection, VertexAttribute, VertexDescriptor, VertexInputFormat, VertexOutputFormat,
-};
+use crate::graphics::{TextureSection, VertexAttribute, VertexDescriptor, VertexInputType, VertexOutputType};
 use cgmath::{Vector2, Vector3};
 use fontdue::layout::TextStyle;
 
@@ -48,6 +46,16 @@ pub struct TextSprite {
     pub color: RGBA8,
 }
 
+impl VertexDescriptor for TextSprite {
+    const ATTRIBUTES: &'static [VertexAttribute] = &[
+        // Position, Size, UV, Color::RGBA8
+        VertexAttribute::new(3, VertexInputType::F32, VertexOutputType::F32),
+        VertexAttribute::new(2, VertexInputType::U16, VertexOutputType::F32),
+        VertexAttribute::new(4, VertexInputType::U16, VertexOutputType::NormalizedF32),
+        VertexAttribute::new(4, VertexInputType::U8, VertexOutputType::NormalizedF32),
+    ];
+}
+
 impl TextSprite {
     pub fn new(pos: Vector3<f32>, size: Vector2<f32>, texture: TextureSection, color: RGBA8) -> TextSprite {
         TextSprite {
@@ -61,37 +69,4 @@ impl TextSprite {
             color,
         }
     }
-}
-
-impl VertexDescriptor for TextSprite {
-    const ATTRIBUTES: &'static [VertexAttribute] = &[
-        // Position
-        VertexAttribute {
-            count: 3,
-            normalized: false,
-            input: VertexInputFormat::Float,
-            output: VertexOutputFormat::Float,
-        },
-        // Size
-        VertexAttribute {
-            count: 2,
-            normalized: false,
-            input: VertexInputFormat::UnsignedShort,
-            output: VertexOutputFormat::Float,
-        },
-        // UV
-        VertexAttribute {
-            count: 4,
-            normalized: true,
-            input: VertexInputFormat::UnsignedShort,
-            output: VertexOutputFormat::Float,
-        },
-        // Color: RGBA8
-        VertexAttribute {
-            count: 4,
-            normalized: true,
-            input: VertexInputFormat::UnsignedByte,
-            output: VertexOutputFormat::Float,
-        },
-    ];
 }

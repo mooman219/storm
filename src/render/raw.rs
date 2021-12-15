@@ -766,15 +766,15 @@ impl OpenGL {
         unsafe { self.gl.create_texture().unwrap() }
     }
 
+    pub fn delete_texture(&self, texture: resource::Texture) {
+        unsafe { self.gl.delete_texture(texture) };
+    }
+
     pub fn active_texture(&mut self, unit: u32) {
         if self.active_texture_unit != unit {
             self.active_texture_unit = unit;
             unsafe { self.gl.active_texture(glow::TEXTURE0 + unit as u32) };
         }
-    }
-
-    pub fn delete_texture(&self, texture: resource::Texture) {
-        unsafe { self.gl.delete_texture(texture) };
     }
 
     pub fn bind_texture(&mut self, target: TextureBindingTarget, texture: Option<resource::Texture>) {

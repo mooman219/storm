@@ -60,10 +60,10 @@ impl AudioState {
 
     pub fn ctx() -> &'static mut AudioState {
         unsafe {
-            match AUDIO.as_mut() {
-                Some(ctx) => ctx,
-                None => panic!("State not initialized"),
+            if let Some(ctx) = AUDIO.as_mut() {
+                return ctx;
             }
+            panic!("State not initialized")
         }
     }
 }

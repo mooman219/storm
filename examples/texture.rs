@@ -1,7 +1,9 @@
 use cgmath::{Vector2, Vector3};
 use core::time::Duration;
+use storm::audio::*;
 use storm::color::RGBA8;
-use storm::graphics::shaders::sprite::{Sprite, SpriteShader};
+use storm::graphics::{shaders::sprite::*, Texture};
+use storm::math::Transform;
 use storm::*;
 
 static TEXTURE_A: &[u8] = include_bytes!("resources/3.png");
@@ -26,32 +28,30 @@ fn main() {
 fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
-    let mut sprite_shader = SpriteShader::new(ctx);
-    let source = ctx.load_flac(SOUND).unwrap();
+    let mut transform = Transform::new(ctx.window_logical_size());
+    let sprite_shader = SpriteShader::new();
+    let mut pass = SpriteShaderPass::new(transform.get_matrix());
+    pass.atlas = Texture::from_png(TEXTURE_A);
+
+    let source = Sound::from_flac(SOUND).unwrap();
     let sound = source.play(0.3, 0.1);
 
-    let back_sprite = Sprite::default();
-    let slider = Sprite {
-        pos: Vector3::new(-200.0, -62.0, 0.0),
-        size: Vector2::new(25, 25),
-        color: RGBA8::WHITE,
-        ..Sprite::default()
-    };
-    let line = Sprite {
-        pos: Vector3::new(-200.0, -50.0, 0.0),
-        size: Vector2::new(400, 3),
-        color: RGBA8::BLACK,
-        ..Sprite::default()
-    };
-
-    let mut back = sprite_shader.new_instance();
-    back.set_atlas(&ctx.load_png(TEXTURE_A));
-    let mut back_sprites = Vec::new();
-    back_sprites.push(back_sprite);
-    back_sprites.push(slider);
-    back_sprites.push(line);
-
-    back.set_sprites(&back_sprites);
+    let mut back_sprites = [
+        Sprite::default(),
+        Sprite {
+            pos: Vector3::new(-200.0, -62.0, 0.0),
+            size: Vector2::new(25, 25),
+            color: RGBA8::WHITE,
+            ..Sprite::default()
+        },
+        Sprite {
+            pos: Vector3::new(-200.0, -50.0, 0.0),
+            size: Vector2::new(400, 3),
+            color: RGBA8::BLACK,
+            ..Sprite::default()
+        },
+    ];
+    pass.buffer.set(&back_sprites);
 
     let mut clicking = false;
 
@@ -94,18 +94,21 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                 let volume = (x + 200.0) / 375.0;
                 sound.set_volume(volume, 0.01);
                 back_sprites[1].pos.x = x;
-                back.set_sprites(&back_sprites);
+                pass.buffer.set(&back_sprites);
             }
         }
         Event::WindowResized {
             logical_size,
             ..
         } => {
-            *back.transform().logical_size() = logical_size;
+            *transform.logical_size() = logical_size;
         }
         Event::Update(_delta) => {
-            ctx.clear(ClearMode::color_depth(RGBA8::BLUE));
-            back.draw();
+            if let Some(ortho) = transform.matrix() {
+                pass.uniform.set(SpriteUniform::new(ortho));
+            }
+            clear(ClearMode::color_depth(RGBA8::BLUE));
+            pass.draw(&sprite_shader);
         }
         _ => {}
     }

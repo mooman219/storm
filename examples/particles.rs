@@ -2,8 +2,9 @@ use core::time::Duration;
 use storm::cgmath::prelude::*;
 use storm::cgmath::*;
 use storm::color::RGBA8;
-use storm::graphics::shaders::sprite::{Sprite, SpriteShader};
+use storm::graphics::shaders::sprite::{Sprite, SpriteShader, SpriteShaderPass, SpriteUniform};
 use storm::graphics::TextureSection;
+use storm::math::Transform;
 use storm::*;
 
 /// Run with: cargo run --example particles --release
@@ -26,9 +27,10 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
 
-    let mut sprite_shader = SpriteShader::new(ctx);
-    let mut screen = sprite_shader.new_instance();
-    *screen.transform().rotation() = 0.125;
+    let mut transform = Transform::new(ctx.window_logical_size());
+    let sprite_shader = SpriteShader::new();
+    let mut pass = SpriteShaderPass::new(transform.get_matrix());
+    *transform.rotation() = 0.125;
 
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
@@ -40,7 +42,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             particles.push(particle);
         }
     }
-    screen.set_sprites(&sprites);
+    pass.buffer.set(&sprites);
 
     move |event, ctx| match event {
         Event::CloseRequested => ctx.stop(),
@@ -67,28 +69,31 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             ..
         } => {
             if is_dragging {
-                let scale = *screen.transform().scale();
-                *screen.transform().translation() += delta / scale;
+                let scale = *transform.scale();
+                *transform.translation() += delta / scale;
             }
         }
         Event::WindowResized {
             logical_size,
             ..
         } => {
-            *screen.transform().logical_size() = logical_size;
+            *transform.logical_size() = logical_size;
         }
         Event::CursorScroll(direction) => match direction {
-            ScrollDirection::Up => *screen.transform().scale() *= 1.1,
-            ScrollDirection::Down => *screen.transform().scale() /= 1.1,
+            ScrollDirection::Up => *transform.scale() *= 1.1,
+            ScrollDirection::Down => *transform.scale() /= 1.1,
             _ => {}
         },
         Event::Update(delta) => {
             for index in 0..sprites.len() {
                 Particle::tick(&mut sprites[index], &mut particles[index], delta);
             }
-            screen.set_sprites(&sprites);
-            ctx.clear(ClearMode::color_depth(RGBA8::BLACK));
-            screen.draw();
+            pass.buffer.set(&sprites);
+            clear(ClearMode::color_depth(RGBA8::BLACK));
+            if let Some(ortho) = transform.matrix() {
+                pass.uniform.set(SpriteUniform::new(ortho));
+            }
+            pass.draw(&sprite_shader);
         }
         _ => {}
     }

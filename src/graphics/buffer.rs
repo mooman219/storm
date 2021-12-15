@@ -3,22 +3,23 @@ use crate::render::raw::{resource, BufferBindingTarget, BufferUsage};
 use crate::render::OpenGLState;
 use core::marker::PhantomData;
 
-pub(crate) struct Buffer<T: VertexDescriptor + Copy> {
+/// Buffers a set of elements on the device.
+pub struct Buffer<T: VertexDescriptor + Copy> {
     vbo: resource::Buffer,
     vao: resource::VertexArray,
     vertices: usize,
-    buffer_type: BufferBindingTarget,
     phantom: PhantomData<T>,
 }
 
 impl<T: VertexDescriptor + Copy> Buffer<T> {
-    pub fn new(buffer_type: BufferBindingTarget) -> Buffer<T> {
+    /// Creates a new buffer.
+    pub fn new() -> Buffer<T> {
         let gl = &mut OpenGLState::ctx().gl;
 
         let vao = gl.create_vertex_array();
         gl.bind_vertex_array(Some(vao));
         let vbo = gl.create_buffer();
-        gl.bind_buffer(buffer_type, Some(vbo));
+        gl.bind_buffer(BufferBindingTarget::ArrayBuffer, Some(vbo));
         configure_vertex::<T>(&T::ATTRIBUTES, gl);
         gl.bind_vertex_array(None);
 
@@ -26,29 +27,31 @@ impl<T: VertexDescriptor + Copy> Buffer<T> {
             vbo,
             vao,
             vertices: 0,
-            buffer_type,
             phantom: PhantomData,
         }
     }
 
+    /// Gets the number of elements in the buffer.
     pub fn len(&self) -> usize {
         self.vertices
     }
 
+    /// Clears all elements from the buffer.
     pub fn clear(&mut self) {
         self.vertices = 0;
     }
 
+    /// Sets the elements in the buffer.
     pub fn set(&mut self, items: &[T]) {
         self.vertices = items.len();
         if self.vertices > 0 {
             let gl = &OpenGLState::ctx().gl;
-            gl.bind_buffer(self.buffer_type, Some(self.vbo));
-            gl.buffer_data(self.buffer_type, items, BufferUsage::StaticDraw);
+            gl.bind_buffer(BufferBindingTarget::ArrayBuffer, Some(self.vbo));
+            gl.buffer_data(BufferBindingTarget::ArrayBuffer, items, BufferUsage::StaticDraw);
         }
     }
 
-    pub fn bind(&self) {
+    pub(crate) fn bind(&self) {
         let gl = &mut OpenGLState::ctx().gl;
         gl.bind_vertex_array(Some(self.vao));
     }

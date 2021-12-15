@@ -10,80 +10,103 @@ pub trait VertexDescriptor {
 pub struct VertexAttribute {
     /// Specifies the number of components per generic vertex attribute
     pub count: i32,
-    /// Specifies whether fixed-point data values should be normalized (true) or converted directly
-    /// as fixed-point values (false) when they are accessed.
-    pub normalized: bool,
     /// Specifies the data type of each component in the array.
-    pub input: VertexInputFormat,
+    pub input: VertexInputType,
     /// Specifies the output conversion in the shader.
-    pub output: VertexOutputFormat,
+    pub output: VertexOutputType,
+}
+
+impl VertexAttribute {
+    pub const fn new(count: i32, input: VertexInputType, output: VertexOutputType) -> VertexAttribute {
+        VertexAttribute {
+            count,
+            input,
+            output,
+        }
+    }
 }
 
 /// The output format a vertice will be converted into.
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub enum VertexOutputFormat {
-    Float,
-    Integer,
+pub struct VertexOutputType {
+    integer: bool,
+    normalized: bool,
+}
+
+#[allow(non_upper_case_globals)]
+impl VertexOutputType {
+    pub const NormalizedF32: VertexOutputType = VertexOutputType {
+        integer: false,
+        normalized: true,
+    };
+    pub const F32: VertexOutputType = VertexOutputType {
+        integer: false,
+        normalized: false,
+    };
+    pub const I32: VertexOutputType = VertexOutputType {
+        integer: true,
+        normalized: false,
+    };
 }
 
 /// The input format a vertice will be converted from.
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct VertexInputFormat {
+pub struct VertexInputType {
     size: i32,
     format: AttributeType,
 }
 
 #[allow(non_upper_case_globals)]
-impl VertexInputFormat {
-    pub const Byte: VertexInputFormat = VertexInputFormat {
+impl VertexInputType {
+    pub const I8: VertexInputType = VertexInputType {
         size: 1,
         format: AttributeType::Byte,
     };
-    pub const UnsignedByte: VertexInputFormat = VertexInputFormat {
+    pub const U8: VertexInputType = VertexInputType {
         size: 1,
         format: AttributeType::UnsignedByte,
     };
-    pub const Short: VertexInputFormat = VertexInputFormat {
+    pub const I16: VertexInputType = VertexInputType {
         size: 2,
         format: AttributeType::Short,
     };
-    pub const UnsignedShort: VertexInputFormat = VertexInputFormat {
+    pub const U16: VertexInputType = VertexInputType {
         size: 2,
         format: AttributeType::UnsignedShort,
     };
-    pub const Integer: VertexInputFormat = VertexInputFormat {
+    pub const I32: VertexInputType = VertexInputType {
         size: 4,
         format: AttributeType::Int,
     };
-    pub const UnsignedInteger: VertexInputFormat = VertexInputFormat {
+    pub const U32: VertexInputType = VertexInputType {
         size: 4,
         format: AttributeType::UnsignedInt,
     };
-    pub const HalfFloat: VertexInputFormat = VertexInputFormat {
+    pub const F16: VertexInputType = VertexInputType {
         size: 2,
         format: AttributeType::HalfFloat,
     };
-    pub const Float: VertexInputFormat = VertexInputFormat {
+    pub const F32: VertexInputType = VertexInputType {
         size: 4,
         format: AttributeType::Float,
     };
-    pub const Double: VertexInputFormat = VertexInputFormat {
+    pub const F64: VertexInputType = VertexInputType {
         size: 8,
         format: AttributeType::Double,
     };
-    pub const Fixed: VertexInputFormat = VertexInputFormat {
+    pub const Fixed: VertexInputType = VertexInputType {
         size: 4,
         format: AttributeType::Fixed,
     };
-    pub const Int2_10_10_10_rev: VertexInputFormat = VertexInputFormat {
+    pub const Int2_10_10_10_rev: VertexInputType = VertexInputType {
         size: 4,
         format: AttributeType::Int2_10_10_10_Rev,
     };
-    pub const UnsignedInt2_10_10_10_Rev: VertexInputFormat = VertexInputFormat {
+    pub const UnsignedInt2_10_10_10_Rev: VertexInputType = VertexInputType {
         size: 4,
         format: AttributeType::UnsignedInt2_10_10_10_Rev,
     };
-    pub const UnsignedInt10F_11f_11f_rev: VertexInputFormat = VertexInputFormat {
+    pub const UnsignedInt10F_11f_11f_rev: VertexInputType = VertexInputType {
         size: 4,
         format: AttributeType::UnsignedInt10f_11f_11f_Rev,
     };
@@ -96,18 +119,17 @@ pub(crate) fn configure_vertex<T: VertexDescriptor + Copy>(attributes: &[VertexA
     for attribute in attributes {
         gl.enable_vertex_attrib_array(index);
         gl.vertex_attrib_divisor(index, 1);
-        match attribute.output {
-            VertexOutputFormat::Float => gl.vertex_attrib_pointer_f32(
+        if attribute.output.integer {
+            gl.vertex_attrib_pointer_i32(index, attribute.count, attribute.input.format, stride, size);
+        } else {
+            gl.vertex_attrib_pointer_f32(
                 index,
                 attribute.count,
                 attribute.input.format,
-                attribute.normalized,
+                attribute.output.normalized,
                 stride,
                 size,
-            ),
-            VertexOutputFormat::Integer => {
-                gl.vertex_attrib_pointer_i32(index, attribute.count, attribute.input.format, stride, size)
-            }
+            );
         }
         size += attribute.count * attribute.input.size;
         index += 1;

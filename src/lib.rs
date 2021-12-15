@@ -27,8 +27,7 @@ mod event;
 mod prelude;
 mod render;
 
-use crate::audio::{AudioState, Sound, SoundError};
-use crate::color::ColorDescriptor;
+use crate::audio::AudioState;
 use crate::event::EventConverter;
 use crate::graphics::Texture;
 use crate::image::Image;
@@ -74,9 +73,9 @@ impl Context {
         event_handler_creator: fn(&mut Context) -> T,
     ) -> ! {
         init_logger();
+        AudioState::init();
         let event_loop = winit::event_loop::EventLoop::new();
         let window = OpenGLState::init(&desc, &event_loop);
-        AudioState::init();
         let mut input = EventConverter::new(window.logical_size());
         let mut context = Context {
             window,
@@ -130,31 +129,6 @@ impl Context {
         ctx.resize(self.window.physical_size(), self.window.logical_size());
     }
 
-    /// Uploads an image to the GPU, creating a texture.
-    pub fn load_image<T: ColorDescriptor>(&mut self, image: &Image<T>) -> Texture {
-        Texture::from_image(image)
-    }
-
-    /// Interpret a slice of bytes as a PNG, decodes it into an RGBA image, then uploads it image to
-    /// the GPU, creating a texture.
-    pub fn load_png(&mut self, bytes: &[u8]) -> Texture {
-        Texture::from_image(&Image::from_png(bytes))
-    }
-
-    /// Interpret a slice of bytes as a FLAC file and decodes it into a sound.
-    pub fn load_flac(&mut self, bytes: &[u8]) -> Result<Sound, SoundError> {
-        audio::read_flac(bytes)
-    }
-
-    /// Clears the screen buffers according to the clear mode.
-    pub fn clear(&mut self, clear_mode: ClearMode) {
-        let ctx = OpenGLState::ctx();
-        if let Some(clear_color) = clear_mode.color {
-            ctx.gl.clear_color(clear_color);
-        }
-        ctx.gl.clear(clear_mode.mode);
-    }
-
     /// Sets the title of the window.
     pub fn window_title(&mut self, title: &str) {
         self.window.set_title(title);
@@ -167,7 +141,7 @@ impl Context {
 
     /// Gets the physical size of the window.
     pub fn window_physical_size(&self) -> Vector2<f32> {
-        self.window.logical_size()
+        self.window.physical_size()
     }
 
     /// Sets the display mode of the window.
@@ -202,4 +176,24 @@ impl Context {
     pub fn wait_periodic(&mut self, duration: Option<Duration>) {
         self.wait_periodic = duration;
     }
+}
+
+/// Returns a simple 1x1 white texture.
+pub fn default_texture() -> Texture {
+    let ctx = OpenGLState::ctx();
+    ctx.default_texture()
+}
+
+/// Gets the max texture size supported on the GPU.
+pub fn max_texture_size() -> usize {
+    OpenGLState::ctx().max_texture_size() as usize
+}
+
+/// Clears the screen buffers according to the clear mode.
+pub fn clear(clear_mode: ClearMode) {
+    let ctx = OpenGLState::ctx();
+    if let Some(clear_color) = clear_mode.color {
+        ctx.gl.clear_color(clear_color);
+    }
+    ctx.gl.clear(clear_mode.mode);
 }

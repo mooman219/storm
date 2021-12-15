@@ -1,9 +1,9 @@
-use crate::graphics::shaders::text::{Text, TextSprite, TextUserData};
-use crate::graphics::{AsStd140, Shader, ShaderDescriptor, ShaderInstance, TextureSection};
+use crate::graphics::{
+    shaders::text::{Text, TextSprite, TextUserData},
+    AsStd140, Buffer, Shader, ShaderDescriptor, Texture, TextureSection, Uniform,
+};
 use crate::image::{Image, Packer};
-use crate::math::Transform;
-use crate::render::OpenGLState;
-use crate::{Context, Texture};
+use crate::*;
 use cgmath::Matrix4;
 use cgmath::*;
 use fontdue::layout::{CoordinateSystem, GlyphRasterConfig, Layout, LayoutSettings};
@@ -15,14 +15,6 @@ impl ShaderDescriptor<1> for TextShader {
     const FRAGMENT_SHADER: &'static str = include_str!("fragment.glsl");
     const TEXTURE_NAMES: [&'static str; 1] = ["tex"];
     const VERTEX_UNIFORM_NAME: &'static str = "vertex";
-    const VERTEX_UNIFORM_DEFAULT: TextUniform = TextUniform {
-        ortho: Matrix4::new(
-            1.0, 0.0, 0.0, 0.0, //
-            0.0, 1.0, 0.0, 0.0, //
-            0.0, 0.0, 1.0, 0.0, //
-            0.0, 0.0, 0.0, 1.0, //
-        ),
-    };
     type VertexUniformType = TextUniform;
     type VertexDescriptor = TextSprite;
 }
@@ -32,33 +24,28 @@ pub struct TextUniform {
     ortho: Matrix4<f32>,
 }
 
+impl TextUniform {
+    pub fn new(ortho: Matrix4<f32>) -> TextUniform {
+        TextUniform {
+            ortho,
+        }
+    }
+}
+
 pub struct TextShader {
     shader: Shader<TextShader, 1>,
-    max: u32,
 }
 
 impl TextShader {
-    pub fn new(ctx: &mut Context) -> TextShader {
+    pub fn new() -> TextShader {
         TextShader {
-            shader: Shader::new(ctx),
-            max: OpenGLState::ctx().max_texture_size().min(4096) as u32,
+            shader: Shader::new(),
         }
     }
 
-    pub fn new_instance(&mut self) -> TextShaderInstance {
-        let mut instance = self.shader.new_instance();
-        let atlas = Texture::from_image(&Image::from_color(0u8, self.max, self.max));
-        instance.set_textures([&atlas]);
-        TextShaderInstance {
-            transform: Transform::new(OpenGLState::ctx().logical_size()),
-            sprites: Vec::new(),
-            instance,
-            layout: Layout::new(CoordinateSystem::PositiveYUp),
-            packer: Packer::new(self.max, self.max),
-            cache: HashMap::new(),
-            atlas,
-            dirty: false,
-        }
+    /// Draws to the screen.
+    pub fn draw(&self, uniform: &Uniform<TextUniform>, atlas: &Texture, buffer: &Buffer<TextSprite>) {
+        self.shader.draw_instanced(uniform, [atlas], buffer, 4);
     }
 }
 
@@ -68,31 +55,42 @@ struct CharCacheValue {
     size: Vector2<f32>,
 }
 
-pub struct TextShaderInstance {
-    transform: Transform,
+pub struct TextShaderPass {
+    pub uniform: Uniform<TextUniform>,
+    atlas: Texture,
+    buffer: Buffer<TextSprite>,
+
     sprites: Vec<TextSprite>,
-    instance: ShaderInstance<TextShader, 1>,
     layout: Layout<TextUserData>,
     packer: Packer,
     cache: HashMap<GlyphRasterConfig, CharCacheValue>,
-    atlas: Texture,
     dirty: bool,
 }
 
-impl TextShaderInstance {
-    /// Draws the instance to the screen.
-    pub fn draw(&mut self) {
+impl TextShaderPass {
+    pub fn new(ortho: Matrix4<f32>) -> TextShaderPass {
+        let max = max_texture_size().min(4096) as u32;
+        let atlas = Texture::from_image(&Image::from_color(0u8, max, max));
+        TextShaderPass {
+            uniform: Uniform::new(TextUniform::new(ortho)),
+            atlas,
+            buffer: Buffer::new(),
+
+            sprites: Vec::new(),
+            layout: Layout::new(CoordinateSystem::PositiveYUp),
+            packer: Packer::new(max, max),
+            cache: HashMap::new(),
+            dirty: false,
+        }
+    }
+
+    pub fn draw(&mut self, shader: &TextShader) {
         if self.sprites.len() > 0 {
             if self.dirty {
                 self.dirty = false;
-                self.instance.set_vertices(&self.sprites);
+                self.buffer.set(&self.sprites);
             }
-            if let Some(transform) = self.transform.matrix() {
-                self.instance.set_vertex_uniform(TextUniform {
-                    ortho: transform,
-                });
-            }
-            self.instance.draw_instanced();
+            shader.draw(&self.uniform, &self.atlas, &self.buffer);
         }
     }
 
@@ -111,6 +109,7 @@ impl TextShaderInstance {
                 None => {
                     let font = &fonts[glyph.font_index];
                     let (metrics, bitmap) = font.rasterize_config(glyph.key);
+                    info!("{:?}", metrics);
                     let rect = self
                         .packer
                         .pack(metrics.width as u32, metrics.height as u32)
@@ -142,10 +141,5 @@ impl TextShaderInstance {
     pub fn clear_text(&mut self) {
         self.sprites.clear();
         self.dirty = true;
-    }
-
-    /// Gets a mutable reference the transform settings for this instance.
-    pub fn transform(&mut self) -> &mut Transform {
-        &mut self.transform
     }
 }

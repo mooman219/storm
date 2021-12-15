@@ -101,4 +101,9 @@ impl Transform {
             None
         }
     }
+
+    pub fn get_matrix(&mut self) -> Matrix4<f32> {
+        self.matrix();
+        self.ortho_transform
+    }
 }

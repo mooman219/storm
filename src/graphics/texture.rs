@@ -28,8 +28,14 @@ impl Clone for Texture {
 }
 
 impl Texture {
+    /// Interpret a slice of bytes as a PNG, decodes it into an RGBA image, then uploads it image to
+    /// the GPU, creating a texture.
+    pub fn from_png(bytes: &[u8]) -> Texture {
+        Self::from_image(&Image::from_png(bytes))
+    }
+
     /// Uploads an image to the GPU, creating a texture.
-    pub(crate) fn from_image<T: ColorDescriptor>(image: &Image<T>) -> Texture {
+    pub fn from_image<T: ColorDescriptor>(image: &Image<T>) -> Texture {
         let gl = &mut OpenGLState::ctx().gl;
         let id = gl.create_texture();
         let texture = Texture {
@@ -38,7 +44,6 @@ impl Texture {
             height: image.height(),
             rc: Rc::new(()),
         };
-        gl.active_texture(0);
         gl.bind_texture(TextureBindingTarget::Texture2D, Some(id));
         gl.tex_image_2d(
             TextureLoadTarget::Texture2D,
@@ -85,7 +90,6 @@ impl Texture {
     pub fn set<Z: ColorDescriptor>(&self, offset_x: u32, offset_y: u32, image: &Image<Z>) {
         assert!(image.width() + offset_x <= self.width && image.height() + offset_y <= self.height);
         let gl = &mut OpenGLState::ctx().gl;
-        gl.active_texture(0);
         gl.bind_texture(TextureBindingTarget::Texture2D, Some(self.id));
         gl.tex_sub_image_2d(
             TextureLoadTarget::Texture2D,
