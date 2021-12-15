@@ -13,6 +13,7 @@ pub trait ShaderDescriptor<const TEXTURES: usize> {
     type VertexDescriptor: VertexDescriptor + Copy;
 }
 
+/// Represents the runtime metadata required to configure and draw with a shader.
 pub struct Shader<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> {
     program: resource::Program,
     vertex_uniform_location: u32,
