@@ -2,7 +2,7 @@ use core::time::Duration;
 use storm::cgmath::prelude::*;
 use storm::cgmath::*;
 use storm::color::RGBA8;
-use storm::graphics::shaders::sprite::{Sprite, SpriteShader, SpriteShaderPass, SpriteUniform};
+use storm::graphics::shaders::sprite::{Sprite, SpriteShader, SpriteShaderPass};
 use storm::graphics::TextureSection;
 use storm::math::Transform;
 use storm::*;
@@ -29,8 +29,8 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
 
     let mut transform = Transform::new(ctx.window_logical_size());
     let sprite_shader = SpriteShader::new();
-    let mut pass = SpriteShaderPass::new(transform.get_matrix());
-    *transform.rotation() = 0.125;
+    let mut pass = SpriteShaderPass::new(transform.matrix());
+    transform.set().scale = 0.125;
 
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
@@ -69,19 +69,19 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             ..
         } => {
             if is_dragging {
-                let scale = *transform.scale();
-                *transform.translation() += delta / scale;
+                let scale = transform.get().scale;
+                transform.set().translation += delta / scale;
             }
         }
         Event::WindowResized {
             logical_size,
             ..
         } => {
-            *transform.logical_size() = logical_size;
+            transform.set_size(logical_size);
         }
         Event::CursorScroll(direction) => match direction {
-            ScrollDirection::Up => *transform.scale() *= 1.1,
-            ScrollDirection::Down => *transform.scale() /= 1.1,
+            ScrollDirection::Up => transform.set().scale *= 1.1,
+            ScrollDirection::Down => transform.set().scale /= 1.1,
             _ => {}
         },
         Event::Update(delta) => {
@@ -90,9 +90,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             }
             pass.buffer.set(&sprites);
             clear(ClearMode::color_depth(RGBA8::BLACK));
-            if let Some(ortho) = transform.matrix() {
-                pass.uniform.set(SpriteUniform::new(ortho));
-            }
+            pass.set_ortho(transform.generate());
             pass.draw(&sprite_shader);
         }
         _ => {}

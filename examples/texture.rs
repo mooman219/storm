@@ -30,7 +30,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
 
     let mut transform = Transform::new(ctx.window_logical_size());
     let sprite_shader = SpriteShader::new();
-    let mut pass = SpriteShaderPass::new(transform.get_matrix());
+    let mut pass = SpriteShaderPass::new(transform.matrix());
     pass.atlas = Texture::from_png(TEXTURE_A);
 
     let source = Sound::from_flac(SOUND).unwrap();
@@ -101,13 +101,11 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             logical_size,
             ..
         } => {
-            *transform.logical_size() = logical_size;
+            transform.set_size(logical_size);
         }
         Event::Update(_delta) => {
-            if let Some(ortho) = transform.matrix() {
-                pass.uniform.set(SpriteUniform::new(ortho));
-            }
             clear(ClearMode::color_depth(RGBA8::BLUE));
+            pass.set_ortho(transform.generate());
             pass.draw(&sprite_shader);
         }
         _ => {}

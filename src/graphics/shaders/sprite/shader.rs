@@ -58,6 +58,14 @@ impl SpriteShaderPass {
         }
     }
 
+    /// Sets the orthographic projection used to draw this pass. If none is passed, this function
+    /// does nothing.
+    pub fn set_ortho(&mut self, ortho: Option<Matrix4<f32>>) {
+        if let Some(ortho) = ortho {
+            self.uniform.set(SpriteUniform::new(ortho));
+        }
+    }
+
     /// Draws the pass to the screen.
     pub fn draw(&mut self, shader: &SpriteShader) {
         shader.draw(&self.uniform, &self.atlas, &self.buffer);

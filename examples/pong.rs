@@ -39,7 +39,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     let sprite_shader = SpriteShader::new();
 
     let fonts = [Font::from_bytes(FONT, Default::default()).unwrap()];
-    let mut text_layer = TextShaderPass::new(transform.get_matrix());
+    let mut text_layer = TextShaderPass::new(transform.matrix());
     let layout_settings = LayoutSettings {
         x: 100.0,
         y: 500.0,
@@ -59,7 +59,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
         }],
     );
 
-    let mut background = SpriteShaderPass::new(transform.get_matrix());
+    let mut background = SpriteShaderPass::new(transform.matrix());
     background.buffer.set(&[Sprite {
         pos: Vector3::new(-500.0, -400.0, -0.1),
         size: Vector2::new(1000, 800),
@@ -69,7 +69,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
 
     let mut up = false;
     let mut down = false;
-    let mut paddles = SpriteShaderPass::new(transform.get_matrix());
+    let mut paddles = SpriteShaderPass::new(transform.matrix());
     let mut paddle_speed = [0.0f32; 2];
     let mut paddle_sprites = [
         Sprite {
@@ -87,7 +87,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ];
     paddles.buffer.set(&paddle_sprites);
 
-    let mut ball = SpriteShaderPass::new(transform.get_matrix());
+    let mut ball = SpriteShaderPass::new(transform.matrix());
     let mut ball_speed = Vector3::new(-300.0, 0.0, 0.0);
     let mut ball_sprites = [Sprite {
         pos: Vector3::new(-12.0, -12.0, 0.0),

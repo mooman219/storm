@@ -2,7 +2,7 @@ use core::time::Duration;
 use storm::color::RGBA8;
 use storm::fontdue::layout::LayoutSettings;
 use storm::fontdue::Font;
-use storm::graphics::shaders::text::{Text, TextShader, TextShaderPass, TextUniform};
+use storm::graphics::shaders::text::{Text, TextShader, TextShaderPass};
 use storm::math::Transform;
 use storm::*;
 
@@ -32,7 +32,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     let text_shader = TextShader::new();
 
     // Create a Layers to draw on.
-    let mut text_layer = TextShaderPass::new(transform.get_matrix());
+    let mut text_layer = TextShaderPass::new(transform.matrix());
 
     // Setup the layout for our text.
     let fonts = [Font::from_bytes(FONT, Default::default()).unwrap()];
@@ -81,7 +81,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
         Event::KeyPressed(key) => match key {
             KeyboardButton::Escape => ctx.stop(),
             KeyboardButton::Tab => {
-                *transform.scale() = 1.0;
+                transform.set().scale = 1.0;
             }
             KeyboardButton::Back => {
                 message.pop();
@@ -119,26 +119,24 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             ..
         } => {
             if is_dragging {
-                let scale = *transform.scale();
-                *transform.translation() += delta / scale;
+                let scale = transform.get().scale;
+                transform.set().translation += delta / scale;
             }
         }
         Event::CursorScroll(direction) => match direction {
-            ScrollDirection::Up => *transform.scale() *= 1.1,
-            ScrollDirection::Down => *transform.scale() /= 1.1,
+            ScrollDirection::Up => transform.set().scale *= 1.1,
+            ScrollDirection::Down => transform.set().scale /= 1.1,
             _ => {}
         },
         Event::WindowResized {
             logical_size,
             ..
         } => {
-            *transform.logical_size() = logical_size;
+            transform.set_size(logical_size);
         }
         Event::Update(_delta) => {
-            if let Some(ortho) = transform.matrix() {
-                text_layer.uniform.set(TextUniform::new(ortho));
-            }
             clear(ClearMode::color_depth(RGBA8::BLACK));
+            text_layer.set_ortho(transform.generate());
             text_layer.draw(&text_shader);
         }
         _ => {}
