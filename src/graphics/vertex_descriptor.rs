@@ -17,6 +17,7 @@ pub struct VertexAttribute {
 }
 
 impl VertexAttribute {
+    /// Helper function to create a new vertex attribute.
     pub const fn new(count: i32, input: VertexInputType, output: VertexOutputType) -> VertexAttribute {
         VertexAttribute {
             count,
@@ -35,14 +36,21 @@ pub struct VertexOutputType {
 
 #[allow(non_upper_case_globals)]
 impl VertexOutputType {
+    /// F32 specifies the input be converted into a f32, normalizing in the process. Signed values
+    /// are normalized into [-1, 1], and unsigned values are normalized into [0, 1]. For example, if
+    /// the input is a u16 with the value of u16::MAX / 2, it will be converted into 0.5.
     pub const NormalizedF32: VertexOutputType = VertexOutputType {
         integer: false,
         normalized: true,
     };
+    /// F32 specifies the input be converted into a f32. For example, if the input is a u32 with the
+    /// value of 10, it will be converted into 10.0.
     pub const F32: VertexOutputType = VertexOutputType {
         integer: false,
         normalized: false,
     };
+    /// I32 specifies the input be converted into a i32. For example, if the input is a f32 with the
+    /// value of 10.1, it will be converted into 10.
     pub const I32: VertexOutputType = VertexOutputType {
         integer: true,
         normalized: false,
@@ -58,38 +66,47 @@ pub struct VertexInputType {
 
 #[allow(non_upper_case_globals)]
 impl VertexInputType {
+    /// I8 specifies the input is an i8.
     pub const I8: VertexInputType = VertexInputType {
         size: 1,
         format: AttributeType::Byte,
     };
+    /// U8 specifies the input is an u8.
     pub const U8: VertexInputType = VertexInputType {
         size: 1,
         format: AttributeType::UnsignedByte,
     };
+    /// I16 specifies the input is an i16.
     pub const I16: VertexInputType = VertexInputType {
         size: 2,
         format: AttributeType::Short,
     };
+    /// U16 specifies the input is an u16.
     pub const U16: VertexInputType = VertexInputType {
         size: 2,
         format: AttributeType::UnsignedShort,
     };
+    /// I32 specifies the input is an i32.
     pub const I32: VertexInputType = VertexInputType {
         size: 4,
         format: AttributeType::Int,
     };
+    /// U32 specifies the input is an u32.
     pub const U32: VertexInputType = VertexInputType {
         size: 4,
         format: AttributeType::UnsignedInt,
     };
+    /// F16 specifies the input is a f16 (A f32 with half percision).
     pub const F16: VertexInputType = VertexInputType {
         size: 2,
         format: AttributeType::HalfFloat,
     };
+    /// F32 specifies the input is an f32.
     pub const F32: VertexInputType = VertexInputType {
         size: 4,
         format: AttributeType::Float,
     };
+    /// F64 specifies the input is an f64.
     pub const F64: VertexInputType = VertexInputType {
         size: 8,
         format: AttributeType::Double,
