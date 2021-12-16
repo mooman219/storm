@@ -36,7 +36,18 @@ impl Texture {
 
     /// Uploads an image to the GPU, creating a texture.
     pub fn from_image<T: ColorDescriptor>(image: &Image<T>) -> Texture {
-        let gl = &mut OpenGLState::ctx().gl;
+        let ctx = OpenGLState::ctx();
+        let max_size = ctx.max_texture_size() as u32;
+        if image.width() > max_size || image.height() > max_size {
+            panic!(
+                "The max width or height texture may have on this device is {}. \
+                 The given image has a (width, height) of ({}, {})",
+                max_size,
+                image.width(),
+                image.height()
+            );
+        }
+        let gl = &mut ctx.gl;
         let id = gl.create_texture();
         let texture = Texture {
             id,

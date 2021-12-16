@@ -30,7 +30,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     let mut transform = Transform::new(ctx.window_logical_size());
     let sprite_shader = SpriteShader::new();
     let mut pass = SpriteShaderPass::new(transform.matrix());
-    transform.set().scale = 0.125;
+    transform.set().rotation = 0.125;
 
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
