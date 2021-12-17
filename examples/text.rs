@@ -6,7 +6,7 @@ use storm::graphics::shaders::text::{Text, TextShader, TextShaderPass};
 use storm::math::Transform;
 use storm::*;
 
-static FONT: &[u8] = include_bytes!("resources/wingding.ttf");
+static FONT: &[u8] = include_bytes!("resources/Roboto-Regular.ttf");
 
 /// Run with: cargo run --example text --release
 fn main() {
@@ -44,14 +44,15 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     };
 
     // Append some text with our layout settings.
-    let mut message = String::from("=");
+    const SIZE: f32 = 100.0;
+    let mut message = String::from("Nice\nPost");
     text_layer.append(
         &fonts,
         &layout_settings,
         &[Text {
             text: &message,
             font_index: 0,
-            px: 209.0,
+            px: SIZE,
             color: RGBA8::WHITE,
             depth: 0.0,
         }],
@@ -71,7 +72,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                 &[Text {
                     text: &message,
                     font_index: 0,
-                    px: 64.0,
+                    px: SIZE,
                     color: RGBA8::WHITE,
                     depth: 0.0,
                 }],
@@ -92,7 +93,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                     &[Text {
                         text: &message,
                         font_index: 0,
-                        px: 64.0,
+                        px: SIZE,
                         color: RGBA8::WHITE,
                         depth: 0.0,
                     }],

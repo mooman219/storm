@@ -367,19 +367,27 @@ pub enum IndiceType {
 
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, PartialEq)]
+/// Specifies what kind of primitives to render.
 pub enum DrawMode {
+    /// Draws verticies as discrete points.
     Points = glow::POINTS,
-    LineStrip = glow::LINE_STRIP,
-    LineLoop = glow::LINE_LOOP,
+    /// Draws pairs of verticies as discrete lines.
     Lines = glow::LINES,
-    LineStripAdjacency = glow::LINE_STRIP_ADJACENCY,
-    LinesAdjacency = glow::LINES_ADJACENCY,
-    TriangleStrip = glow::TRIANGLE_STRIP,
-    TriangleFan = glow::TRIANGLE_FAN,
+    /// Draws a single connected line, with each additional vertex past the first extending the line
+    /// by another segment.
+    LineStrip = glow::LINE_STRIP,
+    /// Draws a single connected line, with each additional vertex past the first extending the line
+    /// by another segment, with the last vertex connecting back to the first.
+    LineLoop = glow::LINE_LOOP,
+    /// Draws sets of 3 verticies as discrete triangles.
     Triangles = glow::TRIANGLES,
-    TriangleStripAdjacency = glow::TRIANGLE_STRIP_ADJACENCY,
-    TrianglesAdjacency = glow::TRIANGLES_ADJACENCY,
-    Patches = glow::PATCHES,
+    /// Draws a single connected polygon of triangles, with each additional vertex past the second
+    /// extends the polygon by another triangle.
+    TriangleStrip = glow::TRIANGLE_STRIP,
+    /// Draws a single connected polygon of triangles, with each additional vertex past the second
+    /// extends the polygon by another triangle. All triangles share a vertex with the first vertex
+    /// provided.
+    TriangleFan = glow::TRIANGLE_FAN,
 }
 
 #[repr(u32)]
@@ -760,6 +768,10 @@ impl OpenGL {
 
     pub fn draw_arrays_instanced(&self, mode: DrawMode, first: i32, count: i32, instance_count: i32) {
         unsafe { self.gl.draw_arrays_instanced(mode as u32, first, count, instance_count) };
+    }
+
+    pub fn draw_arrays(&self, mode: DrawMode, first: i32, count: i32) {
+        unsafe { self.gl.draw_arrays(mode as u32, first, count) };
     }
 
     pub fn create_texture(&self) -> resource::Texture {

@@ -1,6 +1,6 @@
 use crate::graphics::{
     shaders::text::{Text, TextSprite, TextUserData},
-    AsStd140, Buffer, Shader, ShaderDescriptor, Texture, TextureSection, Uniform,
+    AsStd140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture, TextureSection, Uniform,
 };
 use crate::image::{Image, Packer};
 use crate::*;
@@ -45,7 +45,7 @@ impl TextShader {
 
     /// Draws to the screen.
     pub fn draw(&self, uniform: &Uniform<TextUniform>, atlas: &Texture, buffer: &Buffer<TextSprite>) {
-        self.shader.draw_instanced(uniform, [atlas], buffer, 4);
+        self.shader.draw_instanced(DrawMode::TriangleStrip, uniform, [atlas], buffer, 4);
     }
 }
 
@@ -118,7 +118,7 @@ impl TextShaderPass {
                 None => {
                     let font = &fonts[glyph.font_index];
                     let (metrics, bitmap) = font.rasterize_config(glyph.key);
-                    info!("{:?}", metrics);
+                    // info!("{:?}", metrics); // Debug
                     let rect = self
                         .packer
                         .pack(metrics.width as u32, metrics.height as u32)

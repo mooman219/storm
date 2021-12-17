@@ -1,6 +1,6 @@
 use crate::default_texture;
 use crate::graphics::{
-    shaders::sprite::Sprite, AsStd140, Buffer, Shader, ShaderDescriptor, Texture, Uniform,
+    shaders::sprite::Sprite, AsStd140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture, Uniform,
 };
 use cgmath::Matrix4;
 
@@ -39,7 +39,7 @@ impl SpriteShader {
 
     /// Draws to the screen.
     pub fn draw(&self, uniform: &Uniform<SpriteUniform>, atlas: &Texture, buffer: &Buffer<Sprite>) {
-        self.shader.draw_instanced(uniform, [atlas], buffer, 4);
+        self.shader.draw_instanced(DrawMode::TriangleStrip, uniform, [atlas], buffer, 4);
     }
 }
 

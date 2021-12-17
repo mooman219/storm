@@ -11,7 +11,7 @@ pub mod shaders;
 pub(crate) use self::vertex_descriptor::configure_vertex;
 
 pub use self::buffer::Buffer;
-pub use self::shader::{Shader, ShaderDescriptor};
+pub use self::shader::{DrawMode, Shader, ShaderDescriptor};
 pub use self::texture::Texture;
 pub use self::texture_section::TextureSection;
 pub use self::uniform::Uniform;
