@@ -8,6 +8,7 @@ use crate::math::Interpolation;
 pub struct SoundControl {
     volume: AtomicU64,
     paused: AtomicBool,
+    stop: AtomicBool,
 }
 
 impl SoundControl {
@@ -22,22 +23,31 @@ impl SoundControl {
         self.volume.store(pack(volume, smooth), Ordering::Relaxed)
     }
 
-    /// Pauses the sound.
+    /// Pauses the sound. The sound can later be resumed.
     pub fn pause(&self) {
         self.paused.store(true, Ordering::Relaxed);
     }
 
-    /// Resumes the sound.
+    /// Resumes the sound. Only a paused sound can be resumed.
     pub fn resume(&self) {
         self.paused.store(false, Ordering::Relaxed);
     }
 
-    fn load_volume(&self) -> (f32, f32) {
+    /// Stops the sound. This action is irreversible.
+    pub fn stop(&self) {
+        self.stop.store(true, Ordering::Relaxed);
+    }
+
+    pub(crate) fn load_volume(&self) -> (f32, f32) {
         unpack(self.volume.load(Ordering::Relaxed))
     }
 
-    fn load_paused(&self) -> bool {
+    pub(crate) fn load_paused(&self) -> bool {
         self.paused.load(Ordering::Relaxed)
+    }
+
+    pub(crate) fn load_stop(&self) -> bool {
+        self.stop.load(Ordering::Relaxed)
     }
 }
 
@@ -52,6 +62,11 @@ pub struct SoundInstance {
 
 impl SoundInstance {
     pub fn mix(&mut self, interval: f32, out: &mut [[f32; 2]]) -> bool {
+        // Stopping the sound.
+        if self.control.load_stop() {
+            return true;
+        }
+
         // Sync volume.
         let (volume, smooth) = self.control.load_volume();
         if volume != self.volume.end() || smooth != self.smooth {
@@ -111,6 +126,7 @@ pub fn make(sound: &Sound, volume: f32, smooth: f32, paused: bool) -> (Arc<Sound
     let control = Arc::new(SoundControl {
         volume: AtomicU64::new(pack(volume, smooth)),
         paused: AtomicBool::new(paused),
+        stop: AtomicBool::new(false),
     });
     let instance = SoundInstance {
         control: control.clone(),
