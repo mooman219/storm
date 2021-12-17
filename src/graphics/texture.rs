@@ -1,10 +1,9 @@
 use crate::color::ColorDescriptor;
 use crate::graphics::TextureSection;
-use crate::render::raw::{
-    resource, TextureBindingTarget, TextureLoadTarget, TextureMagFilterValue, TextureMinFilterValue,
-    TextureParameterTarget, TextureWrapValue,
+use crate::render::{
+    resource, OpenGLState, TextureBindingTarget, TextureLoadTarget, TextureMagFilterValue,
+    TextureMinFilterValue, TextureParameterTarget, TextureWrapValue,
 };
-use crate::render::OpenGLState;
 use crate::Image;
 use alloc::rc::Rc;
 

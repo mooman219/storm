@@ -1,6 +1,5 @@
 use crate::graphics::AsStd140;
-use crate::render::raw::{resource, BufferBindingTarget, BufferBlockBindingTarget, BufferUsage};
-use crate::render::OpenGLState;
+use crate::render::{resource, BufferBindingTarget, BufferBlockBindingTarget, BufferUsage, OpenGLState};
 use core::marker::PhantomData;
 use crevice::std140::Std140;
 

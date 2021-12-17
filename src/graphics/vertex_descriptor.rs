@@ -1,4 +1,4 @@
-use crate::render::raw::{AttributeType, OpenGL};
+use crate::render::{AttributeType, OpenGL};
 
 /// A trait to describe vertices that will be consumed by a shader.
 pub trait VertexDescriptor {

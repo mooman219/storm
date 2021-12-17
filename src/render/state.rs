@@ -87,7 +87,7 @@ impl OpenGLState {
     }
 
     pub fn resize(&mut self, physical: Vector2<f32>, logical: Vector2<f32>) {
-        if self.logical_size != logical {
+        if self.logical_size != logical || self.physical_size != physical {
             trace!("Window resized: Physical({:?}) Logical({:?})", physical, logical);
             self.logical_size = logical;
             self.physical_size = physical;

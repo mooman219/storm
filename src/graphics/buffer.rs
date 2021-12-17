@@ -1,6 +1,5 @@
 use crate::graphics::{configure_vertex, VertexDescriptor};
-use crate::render::raw::{resource, BufferBindingTarget, BufferUsage};
-use crate::render::OpenGLState;
+use crate::render::{resource, BufferBindingTarget, BufferUsage, OpenGLState};
 use core::marker::PhantomData;
 
 /// Buffers a set of elements on the device.

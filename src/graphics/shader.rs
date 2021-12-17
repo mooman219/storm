@@ -1,9 +1,8 @@
 use crate::graphics::{AsStd140, Buffer, Texture, Uniform, VertexDescriptor};
-use crate::render::raw::resource;
-use crate::render::OpenGLState;
+use crate::render::{resource, OpenGLState};
 use core::marker::PhantomData;
 
-pub use crate::render::raw::DrawMode;
+pub use crate::render::DrawMode;
 
 /// A trait to describe a shader's inputs and outputs so they can be represented without using the
 /// heap.
