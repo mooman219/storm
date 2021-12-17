@@ -1,6 +1,6 @@
 [package]
 name = "storm"
-version = "0.6.0"
+version = "0.7.0"
 authors = ["Joe Cumbo <mooman219@gmail.com>"]
 description = "A personal 2D game engine designed for performance"
 license = "MIT"
@@ -11,7 +11,7 @@ repository = "https://github.com/mooman219/storm"
 keywords = ["game", "engine", "2D", "graphics"]
 categories = ["game-engines"]
 edition = "2018"
-exclude = ["examples_older/**", "examples_old/**", "examples/**"]
+exclude = ["examples/**"]
 
 [badges]
 maintenance = { status = "experimental" }
@@ -44,12 +44,10 @@ cgmath = "0.18.0"
 log = "0.4"
 hashbrown = "0.11.2"
 fontdue = "0.6.2"
-unicode-normalization = "0.1"
 crevice = {version = "0.8.0", features = ["cgmath"]}
 
+# Image format support
 png = "0.14"
 
+# Audio format support
 claxon = "0.4.3"
-
-[profile.release]
-lto = "thin"
