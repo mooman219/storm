@@ -1,12 +1,10 @@
+use crate::audio::{
+    spsc::{self, Producer},
+    Mixer, SoundInstance,
+};
 use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
     Stream,
-};
-
-use super::{
-    control::SoundInstance,
-    mixer::Mixer,
-    spsc::{self, Producer},
 };
 
 #[no_mangle]

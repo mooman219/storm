@@ -1,4 +1,4 @@
-use crate::audio::{control::SoundInstance, spsc::Consumer};
+use crate::audio::{spsc::Consumer, SoundInstance};
 
 pub struct Mixer {
     receiver: Consumer<SoundInstance>,

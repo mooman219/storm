@@ -1,6 +1,6 @@
 use alloc::sync::Arc;
 
-use crate::audio::{control, control::SoundControl, AudioState};
+use crate::audio::{AudioState, SoundControl, SoundInstance};
 use crate::math::lerp;
 
 #[derive(Copy, Clone, Debug)]
@@ -63,8 +63,9 @@ impl Sound {
     /// # Returns
     ///
     /// * `SoundControl` - A handle to control sound properties during play.
-    pub fn play(&self, volume: f32, smooth: f32) -> Arc<SoundControl> {
-        let (control, instance) = control::make(self, volume, smooth, false);
+    pub fn play(&self, volume: f32, smooth: f32) -> SoundControl {
+        let control = SoundControl::new(volume, smooth, false);
+        let instance = SoundInstance::new(self, &control);
         AudioState::ctx().send(instance);
         control
     }
