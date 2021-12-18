@@ -31,7 +31,7 @@ pub struct Sound {
 impl Sound {
     /// Interpret a slice of bytes as a FLAC file and decodes it into a sound.
     pub fn from_flac(bytes: &[u8]) -> Result<Sound, SoundError> {
-        crate::audio::flac::read_flac(bytes)
+        crate::audio::read_flac(bytes)
     }
 
     /// Creates a new sound from a slice of stereo samples.

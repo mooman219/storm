@@ -51,3 +51,6 @@ png = "0.14"
 
 # Audio format support
 claxon = "0.4.3"
+
+[profile.release]
+lto = true

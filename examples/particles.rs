@@ -44,10 +44,22 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     }
     pass.buffer.set(&sprites);
 
-    move |event, ctx| match event {
+    move |event, ctx: &mut Context| match event {
         Event::CloseRequested => ctx.stop(),
         Event::KeyPressed(key) => match key {
             KeyboardButton::Escape => ctx.stop(),
+            KeyboardButton::U => ctx.window_display_mode(DisplayMode::Windowed {
+                width: 1500,
+                height: 1000,
+                resizable: true,
+            }),
+            KeyboardButton::I => ctx.window_display_mode(DisplayMode::Windowed {
+                width: 1280,
+                height: 1024,
+                resizable: true,
+            }),
+            KeyboardButton::O => ctx.window_display_mode(DisplayMode::WindowedFullscreen),
+            KeyboardButton::P => ctx.window_display_mode(DisplayMode::Fullscreen),
             _ => {}
         },
         Event::CursorPressed {
