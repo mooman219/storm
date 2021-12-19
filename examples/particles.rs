@@ -96,9 +96,9 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
             ScrollDirection::Down => transform.set().scale /= 1.1,
             _ => {}
         },
-        Event::Update(delta) => {
+        Event::Update(_delta) => {
             for index in 0..sprites.len() {
-                Particle::tick(&mut sprites[index], &mut particles[index], delta);
+                Particle::tick(&mut sprites[index], &mut particles[index], 1.0 / 144.0);
             }
             pass.buffer.set(&sprites);
             clear(ClearMode::color_depth(RGBA8::BLACK));

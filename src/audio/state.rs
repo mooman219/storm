@@ -7,20 +7,13 @@ use cpal::{
     Stream,
 };
 
-#[no_mangle]
-static mut AUDIO: Option<AudioState> = None;
-
 pub struct AudioState {
     sender: Producer<SoundInstance>,
     stream: Stream,
 }
 
 impl AudioState {
-    pub fn init() {
-        if unsafe { AUDIO.is_some() } {
-            panic!("State already initialized");
-        }
-
+    pub fn init() -> AudioState {
         let host = cpal::default_host();
         let device = host.default_output_device().expect("no output device available");
         let sample_rate = device.default_output_config().unwrap().sample_rate();
@@ -45,24 +38,14 @@ impl AudioState {
             .unwrap();
         stream.play().unwrap();
 
-        let state = AudioState {
+        AudioState {
             sender,
             stream,
-        };
-        unsafe { AUDIO = Some(state) };
+        }
     }
 
     pub fn send(&mut self, instance: SoundInstance) {
         self.sender.push(instance);
-    }
-
-    pub fn ctx() -> &'static mut AudioState {
-        unsafe {
-            if let Some(ctx) = AUDIO.as_mut() {
-                return ctx;
-            }
-            panic!("State not initialized")
-        }
     }
 }
 

@@ -1,5 +1,6 @@
+use crate::ctx;
 use crate::graphics::AsStd140;
-use crate::render::{resource, BufferBindingTarget, BufferBlockBindingTarget, BufferUsage, OpenGLState};
+use crate::render::{resource, BufferBindingTarget, BufferBlockBindingTarget, BufferUsage};
 use core::marker::PhantomData;
 use crevice::std140::Std140;
 
@@ -12,7 +13,7 @@ pub struct Uniform<T: AsStd140> {
 impl<T: AsStd140> Uniform<T> {
     /// Creates a new uniform.
     pub fn new(uniform: T) -> Uniform<T> {
-        let gl = &mut OpenGLState::ctx().gl;
+        let gl = ctx().graphics().gl();
 
         let vbo = gl.create_buffer();
         gl.bind_buffer(BufferBindingTarget::UniformBuffer, Some(vbo));
@@ -29,7 +30,7 @@ impl<T: AsStd140> Uniform<T> {
     }
 
     pub(crate) fn new_internal() -> Uniform<T> {
-        let gl = &mut OpenGLState::ctx().gl;
+        let gl = ctx().graphics().gl();
 
         let vbo = gl.create_buffer();
         gl.bind_buffer(BufferBindingTarget::UniformBuffer, Some(vbo));
@@ -47,7 +48,7 @@ impl<T: AsStd140> Uniform<T> {
 
     /// Sets the value of the uniform.
     pub fn set(&mut self, uniform: T) {
-        let gl = &OpenGLState::ctx().gl;
+        let gl = ctx().graphics().gl();
         gl.bind_buffer(BufferBindingTarget::UniformBuffer, Some(self.vbo));
         gl.buffer_data_u8_slice(
             BufferBindingTarget::UniformBuffer,
@@ -57,14 +58,14 @@ impl<T: AsStd140> Uniform<T> {
     }
 
     pub(crate) fn bind(&self, block: u32) {
-        let gl = &mut OpenGLState::ctx().gl;
+        let gl = ctx().graphics().gl();
         gl.bind_buffer_base(BufferBlockBindingTarget::UniformBuffer, block, Some(self.vbo));
     }
 }
 
 impl<T: AsStd140> Drop for Uniform<T> {
     fn drop(&mut self) {
-        let gl = &mut OpenGLState::ctx().gl;
+        let gl = ctx().graphics().gl();
         gl.delete_buffer(self.vbo);
     }
 }

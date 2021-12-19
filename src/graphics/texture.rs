@@ -1,8 +1,9 @@
 use crate::color::ColorDescriptor;
+use crate::ctx;
 use crate::graphics::TextureSection;
 use crate::render::{
-    resource, OpenGLState, TextureBindingTarget, TextureLoadTarget, TextureMagFilterValue,
-    TextureMinFilterValue, TextureParameterTarget, TextureWrapValue,
+    resource, TextureBindingTarget, TextureLoadTarget, TextureMagFilterValue, TextureMinFilterValue,
+    TextureParameterTarget, TextureWrapValue,
 };
 use crate::Image;
 use alloc::rc::Rc;
@@ -35,8 +36,8 @@ impl Texture {
 
     /// Uploads an image to the GPU, creating a texture.
     pub fn from_image<T: ColorDescriptor>(image: &Image<T>) -> Texture {
-        let ctx = OpenGLState::ctx();
-        let max_size = ctx.max_texture_size() as u32;
+        let gpu = ctx().graphics();
+        let max_size = gpu.max_texture_size() as u32;
         if image.width() > max_size || image.height() > max_size {
             panic!(
                 "The max width or height texture may have on this device is {}. \
@@ -46,7 +47,7 @@ impl Texture {
                 image.height()
             );
         }
-        let gl = &mut ctx.gl;
+        let gl = gpu.gl();
         let id = gl.create_texture();
         let texture = Texture {
             id,
@@ -99,7 +100,7 @@ impl Texture {
     /// * `image` - The image to overwrite the texture with.
     pub fn set<Z: ColorDescriptor>(&self, offset_x: u32, offset_y: u32, image: &Image<Z>) {
         assert!(image.width() + offset_x <= self.width && image.height() + offset_y <= self.height);
-        let gl = &mut OpenGLState::ctx().gl;
+        let gl = ctx().graphics().gl();
         gl.bind_texture(TextureBindingTarget::Texture2D, Some(self.id));
         gl.tex_sub_image_2d(
             TextureLoadTarget::Texture2D,
@@ -116,7 +117,7 @@ impl Texture {
     }
 
     pub(crate) fn bind(&self, unit: u32) {
-        let gl = &mut OpenGLState::ctx().gl;
+        let gl = ctx().graphics().gl();
         gl.active_texture(unit);
         gl.bind_texture(TextureBindingTarget::Texture2D, Some(self.id));
     }
@@ -125,7 +126,7 @@ impl Texture {
 impl Drop for Texture {
     fn drop(&mut self) {
         if Rc::<()>::strong_count(&self.rc) == 1 {
-            OpenGLState::ctx().gl.delete_texture(self.id);
+            ctx().graphics().gl().delete_texture(self.id);
         }
     }
 }

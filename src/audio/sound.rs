@@ -1,7 +1,7 @@
-use alloc::sync::Arc;
-
-use crate::audio::{AudioState, SoundControl, SoundInstance};
+use crate::audio::{SoundControl, SoundInstance};
+use crate::ctx;
 use crate::math::lerp;
+use alloc::sync::Arc;
 
 #[derive(Copy, Clone, Debug)]
 /// An error that prevents successful decoding of an audio stream.
@@ -66,7 +66,7 @@ impl Sound {
     pub fn play(&self, volume: f32, smooth: f32) -> SoundControl {
         let control = SoundControl::new(volume, smooth, false);
         let instance = SoundInstance::new(self, &control);
-        AudioState::ctx().send(instance);
+        ctx().audio().send(instance);
         control
     }
 

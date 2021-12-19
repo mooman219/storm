@@ -23,12 +23,16 @@ pub use cgmath;
 pub use crevice;
 pub use fontdue;
 
+pub(crate) use crate::global::ctx;
+
 mod event;
+mod global;
 mod prelude;
 mod render;
 
 use crate::audio::AudioState;
 use crate::event::EventConverter;
+use crate::global::Ctx;
 use crate::graphics::Texture;
 use crate::image::Image;
 use crate::render::{OpenGLState, OpenGLWindow};
@@ -73,9 +77,12 @@ impl Context {
         event_handler_creator: fn(&mut Context) -> T,
     ) -> ! {
         init_logger();
-        AudioState::init();
+
+        let audio = AudioState::init();
         let event_loop = winit::event_loop::EventLoop::new();
-        let window = OpenGLState::init(&desc, &event_loop);
+        let (graphics, window) = OpenGLState::init(&desc, &event_loop);
+        Ctx::init(graphics, audio);
+
         let mut input = EventConverter::new(window.logical_size());
         let mut context = Context {
             window,
@@ -100,14 +107,18 @@ impl Context {
                     if now >= context.wait_next {
                         if let Some(duration) = context.wait_periodic {
                             context.wait_next += duration;
+                            if context.wait_next < now {
+                                context.wait_next = now;
+                            }
                             context.control_flow = Some(ControlFlow::WaitUntil(context.wait_next));
                         }
-                        let delta = (now - context.last_update).as_secs_f32();
+                        let delta = now - context.last_update;
+                        context.last_update = now;
+
                         update_timer.start();
-                        event_handler(Event::Update(delta), &mut context);
+                        event_handler(Event::Update(delta.as_secs_f32()), &mut context);
                         context.window.swap_buffers();
                         update_timer.stop();
-                        context.last_update = now;
                     }
                 }
                 WinitEvent::LoopDestroyed => {
@@ -125,8 +136,8 @@ impl Context {
     }
 
     pub(crate) fn window_check_resize(&mut self) {
-        let ctx = OpenGLState::ctx();
-        ctx.resize(self.window.physical_size(), self.window.logical_size());
+        let gpu = ctx().graphics();
+        gpu.resize(self.window.physical_size(), self.window.logical_size());
     }
 
     /// Sets the title of the window.
@@ -180,20 +191,20 @@ impl Context {
 
 /// Returns a simple 1x1 white texture.
 pub fn default_texture() -> Texture {
-    let ctx = OpenGLState::ctx();
-    ctx.default_texture()
+    let gpu = ctx().graphics();
+    gpu.default_texture()
 }
 
 /// Gets the max texture size supported on the GPU.
 pub fn max_texture_size() -> usize {
-    OpenGLState::ctx().max_texture_size() as usize
+    ctx().graphics().max_texture_size() as usize
 }
 
 /// Clears the screen buffers according to the clear mode.
 pub fn clear(clear_mode: ClearMode) {
-    let ctx = OpenGLState::ctx();
+    let gl = ctx().graphics().gl();
     if let Some(clear_color) = clear_mode.color {
-        ctx.gl.clear_color(clear_color);
+        gl.clear_color(clear_color);
     }
-    ctx.gl.clear(clear_mode.mode);
+    gl.clear(clear_mode.mode);
 }

@@ -1,5 +1,6 @@
+use crate::ctx;
 use crate::graphics::{configure_vertex, VertexDescriptor};
-use crate::render::{resource, BufferBindingTarget, BufferUsage, OpenGLState};
+use crate::render::{resource, BufferBindingTarget, BufferUsage};
 use core::marker::PhantomData;
 
 /// Buffers a set of elements on the device.
@@ -13,7 +14,7 @@ pub struct Buffer<T: VertexDescriptor + Copy> {
 impl<T: VertexDescriptor + Copy> Buffer<T> {
     /// Creates a new buffer.
     pub fn new() -> Buffer<T> {
-        let gl = &mut OpenGLState::ctx().gl;
+        let gl = ctx().graphics().gl();
 
         let vao = gl.create_vertex_array();
         gl.bind_vertex_array(Some(vao));
@@ -44,21 +45,21 @@ impl<T: VertexDescriptor + Copy> Buffer<T> {
     pub fn set(&mut self, items: &[T]) {
         self.vertices = items.len();
         if self.vertices > 0 {
-            let gl = &OpenGLState::ctx().gl;
+            let gl = ctx().graphics().gl();
             gl.bind_buffer(BufferBindingTarget::ArrayBuffer, Some(self.vbo));
             gl.buffer_data(BufferBindingTarget::ArrayBuffer, items, BufferUsage::StaticDraw);
         }
     }
 
     pub(crate) fn bind(&self) {
-        let gl = &mut OpenGLState::ctx().gl;
+        let gl = ctx().graphics().gl();
         gl.bind_vertex_array(Some(self.vao));
     }
 }
 
 impl<T: VertexDescriptor + Copy> Drop for Buffer<T> {
     fn drop(&mut self) {
-        let gl = &mut OpenGLState::ctx().gl;
+        let gl = ctx().graphics().gl();
         gl.delete_buffer(self.vbo);
         gl.delete_vertex_array(self.vao);
     }

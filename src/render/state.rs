@@ -6,11 +6,8 @@ use crate::render::window::OpenGLWindow;
 use crate::Image;
 use cgmath::*;
 
-#[no_mangle]
-static mut GRAPHICS: Option<OpenGLState> = None;
-
 pub struct OpenGLState {
-    pub gl: OpenGL,
+    gl: OpenGL,
     logical_size: Vector2<f32>,
     physical_size: Vector2<f32>,
     default_texture: Option<Texture>,
@@ -18,11 +15,10 @@ pub struct OpenGLState {
 }
 
 impl OpenGLState {
-    pub fn init(desc: &WindowSettings, event_loop: &winit::event_loop::EventLoop<()>) -> OpenGLWindow {
-        if unsafe { GRAPHICS.is_some() } {
-            panic!("State already initialized");
-        }
-
+    pub fn init(
+        desc: &WindowSettings,
+        event_loop: &winit::event_loop::EventLoop<()>,
+    ) -> (OpenGLState, OpenGLWindow) {
         let (window, gl) = OpenGLWindow::new(desc, event_loop);
         let mut gl = OpenGL::new(gl);
         let max_texture_size = gl.get_max_texture_size();
@@ -50,17 +46,12 @@ impl OpenGLState {
             default_texture: None,
             max_texture_size,
         };
-        unsafe { GRAPHICS = Some(state) };
-        window
+        (state, window)
     }
 
-    pub fn ctx() -> &'static mut OpenGLState {
-        unsafe {
-            if let Some(ctx) = GRAPHICS.as_mut() {
-                return ctx;
-            }
-            panic!("State not initialized")
-        }
+    #[inline(always)]
+    pub fn gl(&mut self) -> &mut OpenGL {
+        &mut self.gl
     }
 
     pub fn logical_size(&self) -> Vector2<f32> {
