@@ -1,5 +1,6 @@
 use cgmath::*;
 
+/// Provides tools for interacting with and creating axis aligned bounding boxes in 2D.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AABB2D {
     pub min: Vector2<f32>,

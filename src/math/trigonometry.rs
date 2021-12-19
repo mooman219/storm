@@ -3,10 +3,11 @@ const PI_2: f32 = 1.570_796_326_794_896_619f32;
 const PI_NEG_2: f32 = -1.570_796_326_794_896_619f32;
 const CONST: f32 = 0.28087f32; // Trial and error
 
-/// Average error of 0.00231 radians.
-/// Largest error of 0.00488 radians.
-/// Speedup of 20.67x over f32.atan2(y);
-#[inline]
+/// Computes the four quadrant arctangent of self (y) and other (x) in radians.
+///
+/// * Average error of 0.00231 radians.
+/// * Largest error of 0.00488 radians.
+/// * Speedup of 20.67x over f32.atan2(y);
 pub fn atan2(y: f32, x: f32) -> f32 {
     if x == 0f32 {
         if y > 0f32 {
@@ -45,38 +46,38 @@ const RAD_INDEX: f32 = (SIN_COUNT as f32) / RAD_FULL;
 const DEG_INDEX: f32 = (SIN_COUNT as f32) / DEG_FULL;
 const SIZE: usize = SIN_COUNT as usize;
 
-/// Average error of 0.00060 radians.
-/// Largest error of 0.00229 radians.
-/// Speedup of 30x over f32.sin();
-/// Input in radians, output in radians.
-#[inline]
+/// Computes the sine of a number. Input in radians, output in radians.
+///
+/// * Average error of 0.00060 radians.
+/// * Largest error of 0.00229 radians.
+/// * Speedup of 30x over f32.sin();
 pub fn sin_rad(rad: f32) -> f32 {
     unsafe { *SIN.get_unchecked((((rad * RAD_INDEX) as i32) & SIN_MASK) as usize) }
 }
 
-/// Average error of 0.00060 radians.
-/// Largest error of 0.00229 radians.
-/// Speedup of 30x over f32.cos();
-/// Input in radians, output in radians.
-#[inline]
+/// Computes the cosine of a number. Input in radians, output in radians.
+///
+/// * Average error of 0.00060 radians.
+/// * Largest error of 0.00229 radians.
+/// * Speedup of 30x over f32.cos();
 pub fn cos_rad(rad: f32) -> f32 {
     unsafe { *COS.get_unchecked((((rad * RAD_INDEX) as i32) & SIN_MASK) as usize) }
 }
 
-/// Average error of 0.00060 radians.
-/// Largest error of 0.00229 radians.
-/// Speedup of 30x over f32.sin();
-/// Input in degrees, output in radians.
-#[inline]
+/// Computes the sine of a number. Input in degrees, output in radians.
+///
+/// * Average error of 0.00060 radians.
+/// * Largest error of 0.00229 radians.
+/// * Speedup of 30x over f32.sin();
 pub fn sin_deg(deg: f32) -> f32 {
     unsafe { *SIN.get_unchecked((((deg * DEG_INDEX) as i32) & SIN_MASK) as usize) }
 }
 
-/// Average error of 0.00060 radians.
-/// Largest error of 0.00229 radians.
-/// Speedup of 30x over f32.cos();
-/// Input in degrees, output in radians.
-#[inline]
+/// Computes the cosine of a number. Input in degrees, output in radians.
+///
+/// * Average error of 0.00060 radians.
+/// * Largest error of 0.00229 radians.
+/// * Speedup of 30x over f32.cos();
 pub fn cos_deg(deg: f32) -> f32 {
     unsafe { *COS.get_unchecked((((deg * DEG_INDEX) as i32) & SIN_MASK) as usize) }
 }

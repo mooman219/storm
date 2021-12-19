@@ -1,5 +1,6 @@
 use crate::math::lerp;
 
+/// Provides functions for interpolating between two f32s.
 pub struct Interpolation {
     /// Initial value.
     start: f32,
@@ -10,6 +11,7 @@ pub struct Interpolation {
 }
 
 impl Interpolation {
+    /// Creates a new interpolation between start and end, starting with a progress of 0.0.
     pub fn new(start: f32, end: f32) -> Interpolation {
         Interpolation {
             start,
