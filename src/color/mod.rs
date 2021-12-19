@@ -10,17 +10,29 @@ pub use rgba8::RGBA8;
 
 use crate::render::{PixelFormat, PixelInternalFormat, PixelType};
 
-/// A trait to describe size and layout of color components.
+/// A trait to describe size and layout of color components. Below is an example for how to
+/// implement ColorDescriptor for a simple type:
 ///
 /// # Examples
 /// ```
+/// use storm::color::*;
+///
+/// #[repr(C)]
+/// #[derive(Copy, Clone)]
+/// pub struct BGRA8 {
+///     pub b: u8,
+///     pub r: u8,
+///     pub g: u8,
+///     pub a: u8,
+/// }
+///
 /// // This allows for bytes to represent single channel resources.
-/// impl ColorDescriptor for u8 {
+/// impl ColorDescriptor for BGRA8 {
 ///     fn component_type() -> ColorComponentType {
 ///         ColorComponentType::U8
 ///     }
 ///     fn layout() -> ColorLayoutFormat {
-///         ColorLayoutFormat::R
+///         ColorLayoutFormat::BGRA
 ///     }
 /// }
 /// ```
@@ -54,6 +66,7 @@ pub enum ColorLayoutFormat {
     RG = PixelFormat::RG as u32,
     RGB = PixelFormat::RGB as u32,
     RGBA = PixelFormat::RGBA as u32,
+    BGRA = PixelFormat::BGRA as u32,
 }
 
 impl ColorLayoutFormat {
@@ -63,6 +76,7 @@ impl ColorLayoutFormat {
             ColorLayoutFormat::RG => PixelInternalFormat::RG8,
             ColorLayoutFormat::RGB => PixelInternalFormat::RGB8,
             ColorLayoutFormat::RGBA => PixelInternalFormat::RGBA8,
+            ColorLayoutFormat::BGRA => PixelInternalFormat::RGBA8,
         }
     }
 

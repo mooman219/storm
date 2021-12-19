@@ -5,7 +5,31 @@ pub trait VertexDescriptor {
     const ATTRIBUTES: &'static [VertexAttribute];
 }
 
-/// Describes a vertex attribute.
+/// Describes a vertex attribute. Below is an example for how to implement VertexDescriptor for a
+/// simple type:
+///
+/// ```
+/// use storm::cgmath::*;
+/// use storm::graphics::*;
+///
+/// #[repr(C)]
+/// #[derive(Copy, Clone)]
+/// struct Demo {
+///     pos: Vector3<f32>,
+///     size: Vector2<u16>,
+/// }
+///
+/// impl VertexDescriptor for Demo {
+///     const ATTRIBUTES: &'static [VertexAttribute] = &[
+///         // This value represents the three f32s in pos's Vector3<f32>. When invoked in the
+///         // shader, the values will be read as f32s.
+///         VertexAttribute::new(3, VertexInputType::F32, VertexOutputType::F32),
+///         // This value represents the two u16s in size's Vector3<u16>. When invoked in the
+///         // shader, the values will be read as f32s.
+///         VertexAttribute::new(2, VertexInputType::U16, VertexOutputType::F32),
+///     ];
+/// }
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct VertexAttribute {
     /// Specifies the number of components per generic vertex attribute
