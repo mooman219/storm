@@ -1,6 +1,6 @@
 [package]
 name = "storm"
-version = "0.7.0"
+version = "0.7.1"
 authors = ["Joe Cumbo <mooman219@gmail.com>"]
 description = "A personal 2D game engine designed for performance"
 license = "MIT"
@@ -11,7 +11,7 @@ repository = "https://github.com/mooman219/storm"
 keywords = ["game", "engine", "2D", "graphics"]
 categories = ["game-engines"]
 edition = "2018"
-exclude = ["examples/**"]
+exclude = ["examples/**", "docs/**"]
 
 [badges]
 maintenance = { status = "experimental" }
