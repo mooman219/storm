@@ -4,13 +4,14 @@
 pub extern crate log;
 extern crate alloc;
 
-/// Audio primitives.
+/// Audio primitives. Creating and controlling sounds are included in here.
 pub mod audio;
-/// Color primitives.
+/// Color primitives. These are used in the graphics and image modules for managing images and
+/// textures.
 pub mod color;
 /// Graphics primitives.
 pub mod graphics;
-/// Image utilities.
+/// Image utilities. Images are used for creating textures.
 pub mod image;
 /// Math utilities.
 pub mod math;

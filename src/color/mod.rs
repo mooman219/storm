@@ -10,11 +10,11 @@ pub use rgba8::RGBA8;
 
 use crate::render::{PixelFormat, PixelInternalFormat, PixelType};
 
-/// A trait to describe size and layout of color components. Below is an example for how to
-/// implement ColorDescriptor for a simple type:
+/// A trait to describe size and layout of color components.
 ///
-/// # Examples
+/// # Example
 /// ```
+/// // This is an example for how to implement ColorDescriptor for a simple type.
 /// use storm::color::*;
 ///
 /// #[repr(C)]

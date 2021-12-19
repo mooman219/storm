@@ -1,14 +1,10 @@
 use crate::render::{AttributeType, OpenGL};
 
 /// A trait to describe vertices that will be consumed by a shader.
-pub trait VertexDescriptor {
-    const ATTRIBUTES: &'static [VertexAttribute];
-}
-
-/// Describes a vertex attribute. Below is an example for how to implement VertexDescriptor for a
-/// simple type:
 ///
+/// # Example
 /// ```
+/// // This is an example for how to implement VertexDescriptor for a simple type.
 /// use storm::cgmath::*;
 /// use storm::graphics::*;
 ///
@@ -30,6 +26,11 @@ pub trait VertexDescriptor {
 ///     ];
 /// }
 /// ```
+pub trait VertexDescriptor {
+    const ATTRIBUTES: &'static [VertexAttribute];
+}
+
+/// Describes an individual vertex attribute. These usually correspond to fields in a struct.
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct VertexAttribute {
     /// Specifies the number of components per generic vertex attribute
