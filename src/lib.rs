@@ -190,7 +190,7 @@ impl Context {
     }
 }
 
-/// Returns a simple 1x1 white texture.
+/// Returns a simple 1x1 white texture. This texture is reused globally.
 pub fn default_texture() -> Texture {
     let gpu = ctx().graphics();
     gpu.default_texture()
