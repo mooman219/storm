@@ -471,19 +471,35 @@ impl OpenGL {
             _ => {}
         }
         if error > 0 {
-            panic!("Rest in peace");
+            panic!("Panic because of the previous error.");
         }
     }
 
+    #[cfg(target_arch = "wasm32")]
+    fn attach_version(shader: &str) -> String {
+        let mut version = "#version 300 es\n".to_string();
+        version.push_str(shader);
+        version
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    fn attach_version(shader: &str) -> String {
+        let mut version = "#version 330\n".to_string();
+        version.push_str(shader);
+        version
+    }
+
     pub fn shader_program(&self, vertex_shader: &str, fragment_shader: &str) -> resource::Program {
+        let vertex_shader = Self::attach_version(vertex_shader);
+        let fragment_shader = Self::attach_version(fragment_shader);
         unsafe {
             let vertex = self.gl.create_shader(ShaderType::Vertex as u32).unwrap();
-            self.gl.shader_source(vertex, vertex_shader);
+            self.gl.shader_source(vertex, &vertex_shader);
             self.gl.compile_shader(vertex);
             self.check_shader(vertex).unwrap();
 
             let fragment = self.gl.create_shader(ShaderType::Fragment as u32).unwrap();
-            self.gl.shader_source(fragment, fragment_shader);
+            self.gl.shader_source(fragment, &fragment_shader);
             self.gl.compile_shader(fragment);
             self.check_shader(fragment).unwrap();
 

@@ -1,4 +1,3 @@
-#version 300 es
 precision highp float;
 
 const float TWO_PI = 6.283185307179586476925286766559;
