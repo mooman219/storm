@@ -45,8 +45,10 @@ use winit::event_loop::ControlFlow;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn init_logger() {
-    match simple_logger::init_with_level(log::Level::Trace) {
-        Ok(_) => info!("Using the default logger: simple_logger."),
+    use simplelog::*;
+
+    match TermLogger::init(LevelFilter::Trace, Config::default(), TerminalMode::Stdout, ColorChoice::Auto) {
+        Ok(_) => info!("Using the default logger: simplelog::loggers::termlog."),
         Err(_) => info!("Using the provided logger."),
     }
 }

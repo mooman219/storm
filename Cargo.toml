@@ -37,7 +37,7 @@ winit = "0.25"
 cpal = "0.13.4"
 
 [dependencies]
-simple_logger = "1.13"
+simplelog = "0.11.1"
 instant = "0.1.11"
 glow = "0.11"
 cgmath = "0.18.0"
