@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use cgmath::*;
 use glutin::ContextBuilder;
+use log::info;
 use winit::dpi::LogicalSize;
 use winit::event_loop::EventLoop;
 use winit::window::{Fullscreen, Window, WindowBuilder};

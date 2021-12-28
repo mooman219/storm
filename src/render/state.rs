@@ -5,6 +5,7 @@ use crate::render::raw::{BlendFactor, Capability, CullFace, DepthTest, OpenGL, P
 use crate::render::window::OpenGLWindow;
 use crate::Image;
 use cgmath::*;
+use log::trace;
 
 pub struct OpenGLState {
     gl: OpenGL,

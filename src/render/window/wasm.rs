@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use cgmath::*;
+use log::info;
 use wasm_bindgen::JsCast;
 use winit::dpi::LogicalSize;
 use winit::event_loop::EventLoop;
@@ -44,6 +45,7 @@ impl OpenGLWindow {
         };
         window.set_title(&desc.title);
         window.set_display_mode(desc.display_mode);
+        info!("Created canvas.");
 
         (window, gl)
     }

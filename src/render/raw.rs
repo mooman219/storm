@@ -1,6 +1,7 @@
 use crate::color::RGBA8;
 use alloc::string::{String, ToString};
 use glow::{HasContext, PixelUnpackData};
+use log::error;
 
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, PartialEq)]

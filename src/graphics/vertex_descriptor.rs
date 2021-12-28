@@ -1,4 +1,5 @@
 use crate::render::{AttributeType, OpenGL};
+use log::trace;
 
 /// A trait to describe vertices that will be consumed by a shader.
 ///

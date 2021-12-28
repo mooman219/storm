@@ -1,13 +1,11 @@
 #![no_std]
 #![allow(dead_code, non_camel_case_types, non_snake_case)]
 
-#[cfg(test)]
-#[macro_use]
-extern crate std;
-
-#[macro_use]
 pub extern crate log;
+
 extern crate alloc;
+#[cfg(test)]
+extern crate std;
 
 /// Audio primitives. Creating and controlling sounds are included in here.
 pub mod audio;
@@ -45,6 +43,7 @@ use crate::render::{OpenGLState, OpenGLWindow};
 use crate::time::{Instant, Timer};
 use cgmath::Vector2;
 use core::time::Duration;
+use log::info;
 use winit::event::Event as WinitEvent;
 use winit::event_loop::ControlFlow;
 

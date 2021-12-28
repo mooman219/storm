@@ -1,5 +1,6 @@
 use crate::time::convert::*;
 use crate::time::Instant;
+use log::trace;
 
 pub struct Timer {
     label: &'static str,
