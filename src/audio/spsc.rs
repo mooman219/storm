@@ -14,7 +14,7 @@ use core::{
 };
 
 const CACHELINE_LEN: usize = 64;
-const CACHELINE: usize = CACHELINE_LEN / std::mem::size_of::<usize>();
+const CACHELINE: usize = CACHELINE_LEN / core::mem::size_of::<usize>();
 
 /// The internal memory buffer used by the queue.
 ///
@@ -370,11 +370,10 @@ impl<T> Consumer<T> {
 mod tests {
     #![allow(unused_imports)]
     use super::{Buffer, CACHELINE_LEN};
-    use std::thread;
 
     #[test]
     fn buffer_size() {
-        assert_eq!(::std::mem::size_of::<Buffer<()>>(), 3 * CACHELINE_LEN);
+        assert_eq!(::core::mem::size_of::<Buffer<()>>(), 3 * CACHELINE_LEN);
     }
 
     #[test]
@@ -486,14 +485,13 @@ mod tests {
 
     #[test]
     fn threaded() {
+        use std::thread;
         let (p, c) = super::make(500);
-
         thread::spawn(move || {
             for i in 0..100000 {
                 p.push(i);
             }
         });
-
         for i in 0..100000 {
             let t = c.pop();
             assert!(t == i);

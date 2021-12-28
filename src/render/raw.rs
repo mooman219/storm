@@ -1,4 +1,5 @@
 use crate::color::RGBA8;
+use alloc::string::{String, ToString};
 use glow::{HasContext, PixelUnpackData};
 
 #[repr(u32)]

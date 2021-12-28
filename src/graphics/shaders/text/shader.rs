@@ -4,10 +4,12 @@ use crate::graphics::{
 };
 use crate::image::{Image, Packer};
 use crate::*;
-use cgmath::Matrix4;
+use alloc::vec::Vec;
 use cgmath::*;
-use fontdue::layout::{CoordinateSystem, GlyphRasterConfig, Layout, LayoutSettings};
-use fontdue::Font;
+use fontdue::{
+    layout::{CoordinateSystem, GlyphRasterConfig, Layout, LayoutSettings},
+    Font,
+};
 use hashbrown::HashMap;
 
 impl ShaderDescriptor<1> for TextShader {

@@ -1,4 +1,5 @@
 use crate::audio::{spsc::Consumer, SoundInstance};
+use alloc::vec::Vec;
 
 pub struct Mixer {
     receiver: Consumer<SoundInstance>,

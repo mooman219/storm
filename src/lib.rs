@@ -1,4 +1,9 @@
+#![no_std]
 #![allow(dead_code, non_camel_case_types, non_snake_case)]
+
+#[cfg(test)]
+#[macro_use]
+extern crate std;
 
 #[macro_use]
 pub extern crate log;
@@ -55,7 +60,7 @@ fn init_logger() {
 
 #[cfg(target_arch = "wasm32")]
 fn init_logger() {
-    std::panic::set_hook(Box::new(console_error_panic_hook::hook));
+    console_error_panic_hook::set_once();
     match console_log::init_with_level(log::Level::Trace) {
         Ok(_) => info!("Using the default logger: console_log."),
         Err(_) => info!("Using the provided logger."),

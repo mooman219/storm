@@ -1,3 +1,5 @@
+use alloc::string::String;
+
 /// Configuration settings for the window.
 #[derive(Debug, Clone, PartialEq)]
 pub struct WindowSettings {

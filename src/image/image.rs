@@ -1,4 +1,5 @@
 use crate::color::{ColorDescriptor, RGBA8};
+use alloc::{vec, vec::Vec};
 
 /// Basic image type.
 #[derive(Clone)]

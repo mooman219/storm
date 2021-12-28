@@ -50,5 +50,5 @@ impl AudioState {
 }
 
 fn as_stereo(xs: &mut [f32]) -> &mut [[f32; 2]] {
-    unsafe { std::slice::from_raw_parts_mut(xs.as_mut_ptr() as _, xs.len() / 2) }
+    unsafe { core::slice::from_raw_parts_mut(xs.as_mut_ptr() as _, xs.len() / 2) }
 }

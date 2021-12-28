@@ -1,5 +1,6 @@
 use super::Image;
 use crate::color::RGBA8;
+use alloc::{vec, vec::Vec};
 use png::{ColorType, Decoder};
 
 /// Interpret a slice of bytes as a PNG and decodes it into an RGBA image.

@@ -131,6 +131,7 @@ impl AABB2D {
 mod tests {
     #![allow(unused_imports)]
     use super::*;
+    use alloc::vec;
 
     #[test]
     fn slide() {

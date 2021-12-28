@@ -1,3 +1,5 @@
+use alloc::vec::Vec;
+
 /// A basic rectangle type used in the packer.
 #[derive(Copy, Clone, Debug)]
 pub struct Rect {
