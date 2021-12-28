@@ -86,7 +86,7 @@ impl Context {
         let (graphics, window) = OpenGLState::init(&desc, &event_loop);
         Ctx::init(graphics, audio);
 
-        let mut input = EventConverter::new(window.logical_size());
+        let mut input = EventConverter::new(window.scale_factor(), window.logical_size());
         let mut context = Context {
             window,
             stop: false,
@@ -138,9 +138,9 @@ impl Context {
         });
     }
 
-    pub(crate) fn window_check_resize(&mut self) {
+    pub(crate) fn window_resize(&mut self, physical: Vector2<f32>, logical: Vector2<f32>) {
         let gpu = ctx().graphics();
-        gpu.resize(self.window.physical_size(), self.window.logical_size());
+        gpu.resize(physical, logical);
     }
 
     /// Sets the title of the window.

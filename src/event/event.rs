@@ -35,9 +35,10 @@ pub enum Event {
     /// Cursor moved event. Contains the position of the cursor and the delta from its last
     /// position.
     CursorMoved {
-        /// Current cursor position.
+        /// Current cursor position. This is based on the physical size of the window, with (0,0)
+        /// being the bottom left.
         pos: Vector2<f32>,
-        /// Change from last position.
+        /// Change from last position. This is based on the logical size of the window.
         delta: Vector2<f32>,
     },
     /// Cursor left the bounds of the window event.

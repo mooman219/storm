@@ -5,14 +5,18 @@ use cgmath::*;
 use winit::event::WindowEvent;
 
 pub struct EventConverter {
-    window_size: Vector2<f32>,
+    scale_factor: f32,
+    physical_size: Vector2<f32>,
+    logical_size: Vector2<f32>,
     cursor_pos: Vector2<f32>,
 }
 
 impl EventConverter {
-    pub fn new(window_size: Vector2<f32>) -> EventConverter {
+    pub fn new(scale_factor: f32, physical_size: Vector2<f32>) -> EventConverter {
         EventConverter {
-            window_size,
+            scale_factor,
+            physical_size,
+            logical_size: physical_size / scale_factor,
             cursor_pos: Vector2::zero(),
         }
     }
@@ -26,26 +30,32 @@ impl EventConverter {
         match event {
             // Window
             WindowEvent::CloseRequested => event_handler(Event::CloseRequested, context),
-            WindowEvent::Resized(_) => {
-                context.window_check_resize();
-                self.window_size = context.window_physical_size();
+            WindowEvent::Resized(physical_size) => {
+                self.physical_size = Vector2::new(physical_size.width as f32, physical_size.height as f32);
+                self.logical_size = self.physical_size / self.scale_factor;
+
+                context.window_resize(self.physical_size, self.logical_size);
                 event_handler(
                     Event::WindowResized {
-                        physical_size: context.window_physical_size(),
-                        logical_size: context.window_logical_size(),
+                        physical_size: self.physical_size,
+                        logical_size: self.logical_size,
                     },
                     context,
                 );
             }
             WindowEvent::ScaleFactorChanged {
-                ..
+                scale_factor,
+                new_inner_size,
             } => {
-                context.window_check_resize();
-                self.window_size = context.window_physical_size();
+                self.scale_factor = scale_factor as f32;
+                self.physical_size = Vector2::new(new_inner_size.width as f32, new_inner_size.height as f32);
+                self.logical_size = self.physical_size / self.scale_factor;
+
+                context.window_resize(self.physical_size, self.logical_size);
                 event_handler(
                     Event::WindowResized {
-                        physical_size: context.window_physical_size(),
-                        logical_size: context.window_logical_size(),
+                        physical_size: self.physical_size,
+                        logical_size: self.logical_size,
                     },
                     context,
                 );
@@ -76,11 +86,8 @@ impl EventConverter {
                 position,
                 ..
             } => {
-                let cursor_pos = Vector2::new(
-                    position.x as f32 - (self.window_size.x / 2.0),
-                    -position.y as f32 + (self.window_size.y / 2.0),
-                );
-                let delta = cursor_pos - self.cursor_pos;
+                let cursor_pos = Vector2::new(position.x as f32, self.physical_size.y - position.y as f32);
+                let delta = (cursor_pos - self.cursor_pos) / self.scale_factor;
                 self.cursor_pos = cursor_pos;
                 event_handler(
                     Event::CursorMoved {

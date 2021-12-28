@@ -50,12 +50,16 @@ impl OpenGLWindow {
     }
 
     #[inline]
+    pub fn scale_factor(&self) -> f32 {
+        self.inner.window().scale_factor() as f32
+    }
+
+    #[inline]
     pub fn logical_size(&self) -> Vector2<f32> {
         let size = self.inner.window().inner_size();
         let scale_factor = self.inner.window().scale_factor() as f32;
-        let width = size.width as f32 / scale_factor;
-        let height = size.height as f32 / scale_factor;
-        Vector2::new(width, height)
+        let size = Vector2::new(size.width as f32, size.height as f32);
+        size / scale_factor
     }
 
     #[inline]
