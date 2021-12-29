@@ -2,6 +2,7 @@ use core::time::Duration;
 use storm::cgmath::prelude::*;
 use storm::cgmath::*;
 use storm::color::RGBA8;
+use storm::event::*;
 use storm::graphics::shaders::sprite::{Sprite, SpriteShader, SpriteShaderPass};
 use storm::graphics::TextureSection;
 use storm::math::Transform;

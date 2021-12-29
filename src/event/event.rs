@@ -6,7 +6,7 @@ pub use winit::event::VirtualKeyCode as KeyboardButton;
 
 /// An input event. These are represented as an enumeration to preserve
 /// ordering when stored in a vector and read sequentially.
-#[derive(Copy, Clone, Debug)]
+#[derive(Debug)]
 pub enum Event {
     /// The window has requested it close.
     CloseRequested,

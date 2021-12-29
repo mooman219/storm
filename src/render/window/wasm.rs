@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{DisplayMode, WindowSettings};
 use cgmath::*;
 use log::info;
 use wasm_bindgen::JsCast;

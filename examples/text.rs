@@ -1,5 +1,6 @@
 use core::time::Duration;
 use storm::color::RGBA8;
+use storm::event::*;
 use storm::fontdue::layout::LayoutSettings;
 use storm::fontdue::Font;
 use storm::graphics::shaders::text::{Text, TextShader, TextShaderPass};

@@ -2,6 +2,7 @@ use cgmath::{Vector2, Vector3};
 use core::time::Duration;
 use storm::audio::*;
 use storm::color::RGBA8;
+use storm::event::*;
 use storm::graphics::{shaders::sprite::*, Texture};
 use storm::math::Transform;
 use storm::*;

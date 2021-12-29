@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{DisplayMode, Vsync, WindowSettings};
 use cgmath::*;
 use glutin::ContextBuilder;
 use log::info;

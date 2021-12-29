@@ -3,7 +3,6 @@ mod instance;
 mod loaders;
 mod mixer;
 mod sound;
-mod spsc;
 mod state;
 
 pub use self::control::SoundControl;

@@ -1,4 +1,5 @@
-use crate::audio::{spsc::Consumer, SoundInstance};
+use crate::audio::SoundInstance;
+use crate::sync::Consumer;
 use alloc::vec::Vec;
 
 pub struct Mixer {

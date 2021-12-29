@@ -1,11 +1,11 @@
 use crate::color::ColorDescriptor;
 use crate::ctx;
 use crate::graphics::TextureSection;
+use crate::image::Image;
 use crate::render::{
     resource, TextureBindingTarget, TextureLoadTarget, TextureMagFilterValue, TextureMinFilterValue,
     TextureParameterTarget, TextureWrapValue,
 };
-use crate::Image;
 use alloc::rc::Rc;
 
 /// Represents a GPU resource for a texture.

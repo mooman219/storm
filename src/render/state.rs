@@ -1,9 +1,9 @@
 use crate::color::RGBA8;
 use crate::graphics::Texture;
-use crate::prelude::WindowSettings;
+use crate::image::Image;
 use crate::render::raw::{BlendFactor, Capability, CullFace, DepthTest, OpenGL, PixelStoreAlignment};
 use crate::render::window::OpenGLWindow;
-use crate::Image;
+use crate::WindowSettings;
 use cgmath::*;
 use log::trace;
 

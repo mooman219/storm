@@ -1,8 +1,9 @@
 mod convert;
 mod timer;
 
+pub(crate) use self::timer::*;
+
 pub use self::convert::*;
-pub use self::timer::*;
 /// A measurement of a monotonically nondecreasing clock.
 /// Opaque and useful only with `Duration`.
 ///
@@ -24,3 +25,8 @@ pub use self::timer::*;
 /// The size of an `Instant` struct may vary depending on the target operating
 /// system.
 pub use instant::Instant;
+
+/// Returns an instant corresponding to “now”.
+pub fn now() -> Instant {
+    Instant::now()
+}

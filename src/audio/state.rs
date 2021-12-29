@@ -1,7 +1,5 @@
-use crate::audio::{
-    spsc::{self, Producer},
-    Mixer, SoundInstance,
-};
+use crate::audio::{Mixer, SoundInstance};
+use crate::sync::{make as spsc_make, Producer};
 use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
     Stream,
@@ -22,7 +20,7 @@ impl AudioState {
             sample_rate,
             buffer_size: cpal::BufferSize::Default,
         };
-        let (sender, receiver) = spsc::make(256);
+        let (sender, receiver) = spsc_make(256);
         let mut mixer = Mixer::new(sample_rate.0, receiver);
 
         let stream = device
