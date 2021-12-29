@@ -16,38 +16,43 @@ pub const SECS_PER_MINUTE: u64 = 60;
 pub const SECS_PER_HOUR: u64 = 3_600;
 /// The number of (non-leap) seconds in days.
 pub const SECS_PER_DAY: u64 = 86_400;
-// A const duration representing a second.
+/// A const duration representing a second.
 pub const SECOND: Duration = Duration::from_secs(1);
-// A const duration representing a millisecond.
+/// A const duration representing a millisecond.
 pub const MILLISECOND: Duration = Duration::from_millis(1);
-// A const duration representing a microsecond.
+/// A const duration representing a microsecond.
 pub const MICROSECOND: Duration = Duration::from_micros(1);
-// A const duration representing a nanosecond.
+/// A const duration representing a nanosecond.
 pub const NANOSECOND: Duration = Duration::from_nanos(1);
 
+/// Converts a duration into a number of days, rounding down.
 #[inline]
 pub fn as_days(duration: &Duration) -> u64 {
     let secs = duration.as_secs();
     secs / SECS_PER_DAY
 }
 
+/// Converts a duration into a number of hours, rounding down.
 #[inline]
 pub fn as_hours(duration: &Duration) -> u64 {
     let secs = duration.as_secs();
     secs / SECS_PER_HOUR
 }
 
+/// Converts a duration into a number of minutes, rounding down.
 #[inline]
 pub fn as_minutes(duration: &Duration) -> u64 {
     let secs = duration.as_secs();
     secs / SECS_PER_MINUTE
 }
 
+/// Converts a duration into a number of seconds, rounding down.
 #[inline]
 pub fn as_seconds(duration: &Duration) -> u64 {
     duration.as_secs()
 }
 
+/// Converts a duration into a number of milliseconds, rounding down.
 #[inline]
 pub fn as_milliseconds(duration: &Duration) -> u64 {
     let mut secs = duration.as_secs();
@@ -57,6 +62,7 @@ pub fn as_milliseconds(duration: &Duration) -> u64 {
     secs + nanos
 }
 
+/// Converts a duration into a number of microseconds, rounding down.
 #[inline]
 pub fn as_microseconds(duration: &Duration) -> u64 {
     let mut secs = duration.as_secs();
@@ -66,6 +72,7 @@ pub fn as_microseconds(duration: &Duration) -> u64 {
     secs + nanos
 }
 
+/// Converts a duration into a number of nanoseconds, rounding down.
 #[inline]
 pub fn as_nanoseconds(duration: &Duration) -> u64 {
     let mut secs = duration.as_secs();
