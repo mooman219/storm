@@ -1,7 +1,6 @@
 #![no_std]
 #![allow(dead_code, non_camel_case_types, non_snake_case)]
 
-pub extern crate crevice;
 pub extern crate log;
 
 extern crate alloc;
@@ -29,6 +28,7 @@ pub mod time;
 pub use crate::prelude::*;
 pub use cgmath;
 pub use context::Context;
+pub use crevice_derive::AsStd140;
 pub use fontdue;
 
 pub(crate) use global::ctx;

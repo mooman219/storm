@@ -44,7 +44,9 @@ cgmath = "0.18.0"
 log = "0.4"
 hashbrown = "0.11.2"
 fontdue = "0.6.2"
+
 crevice = {version = "0.8.0", features = ["cgmath"]}
+crevice-derive = "0.8.0"
 
 # Image format support
 png = "0.14"
