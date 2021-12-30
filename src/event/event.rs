@@ -1,3 +1,4 @@
+use crate::asset::{Asset, LoaderError};
 use cgmath::*;
 
 // Re-exports.
@@ -6,7 +7,8 @@ pub use winit::event::VirtualKeyCode as KeyboardButton;
 
 /// An input event. These are represented as an enumeration to preserve
 /// ordering when stored in a vector and read sequentially.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
+#[non_exhaustive]
 pub enum Event {
     /// The window has requested it close.
     CloseRequested,
@@ -55,6 +57,8 @@ pub enum Event {
     /// etc) that happens as the "main body" of your event loop. The value is the time passed since
     /// the last update in seconds.
     Update(f32),
+    /// Event for when as asset has finished reading and is now available for consumption.
+    AssetRead(Result<Asset, LoaderError>),
 }
 
 /// A cursor wheel movement. Some mice have left and right scroll options.

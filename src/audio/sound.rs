@@ -66,7 +66,7 @@ impl Sound {
     pub fn play(&self, volume: f32, smooth: f32) -> SoundControl {
         let control = SoundControl::new(volume, smooth, false);
         let instance = SoundInstance::new(self, &control);
-        ctx().audio().send(instance);
+        ctx().audio().push_sound(instance);
         control
     }
 

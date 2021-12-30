@@ -31,9 +31,9 @@ pub use fontdue;
 
 pub(crate) use global::ctx;
 
+mod asset;
 mod context;
 mod global;
-mod loader;
 mod prelude;
 mod render;
 mod sync;

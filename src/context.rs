@@ -1,3 +1,4 @@
+use crate::asset::AssetState;
 use crate::audio::AudioState;
 use crate::event::{Event, EventConverter};
 use crate::global::{ctx, Ctx};
@@ -47,10 +48,11 @@ impl Context {
     ) -> ! {
         init_logger();
 
+        let assets = AssetState::init();
         let audio = AudioState::init();
         let event_loop = winit::event_loop::EventLoop::new();
         let (graphics, window) = OpenGLState::init(&desc, &event_loop);
-        Ctx::init(graphics, audio);
+        Ctx::init(graphics, audio, assets);
 
         let mut input = EventConverter::new(window.scale_factor(), window.logical_size());
         let mut context = Context {
@@ -72,6 +74,10 @@ impl Context {
                     input.push(event, &mut event_handler, &mut context);
                 }
                 WinitEvent::MainEventsCleared => {
+                    while let Some(read) = ctx().assets().try_pop_read() {
+                        event_handler(Event::AssetRead(read), &mut context);
+                    }
+
                     let now = Instant::now();
                     if now >= context.wait_next {
                         if let Some(duration) = context.wait_periodic {

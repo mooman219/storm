@@ -1,3 +1,4 @@
+use crate::asset::AssetState;
 use crate::audio::AudioState;
 use crate::render::OpenGLState;
 
@@ -8,10 +9,11 @@ static mut CTX: Option<Ctx> = None;
 pub(crate) struct Ctx {
     graphics: OpenGLState,
     audio: AudioState,
+    assets: AssetState,
 }
 
 impl Ctx {
-    pub fn init(graphics: OpenGLState, audio: AudioState) {
+    pub fn init(graphics: OpenGLState, audio: AudioState, assets: AssetState) {
         if unsafe { CTX.is_some() } {
             panic!("State already initialized");
         }
@@ -20,6 +22,7 @@ impl Ctx {
             CTX = Some(Ctx {
                 graphics,
                 audio,
+                assets,
             })
         };
     }
@@ -32,6 +35,11 @@ impl Ctx {
     #[inline(always)]
     pub(crate) fn audio(&mut self) -> &mut AudioState {
         &mut self.audio
+    }
+
+    #[inline(always)]
+    pub(crate) fn assets(&mut self) -> &mut AssetState {
+        &mut self.assets
     }
 }
 

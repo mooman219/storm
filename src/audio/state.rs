@@ -42,7 +42,7 @@ impl AudioState {
         }
     }
 
-    pub fn send(&mut self, instance: SoundInstance) {
+    pub fn push_sound(&mut self, instance: SoundInstance) {
         self.sender.push(instance);
     }
 }
