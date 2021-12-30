@@ -1,8 +1,8 @@
-use crate::asset::AssetState;
+use crate::asset::{AssetState, AssetStateContract};
 use crate::audio::AudioState;
 use crate::event::{Event, EventConverter};
 use crate::global::{ctx, Ctx};
-use crate::render::{OpenGLState, OpenGLWindow};
+use crate::render::{OpenGLState, OpenGLWindow, OpenGLWindowContract};
 use crate::time::{Instant, Timer};
 use crate::{DisplayMode, WindowSettings};
 use cgmath::Vector2;

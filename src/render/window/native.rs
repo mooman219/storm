@@ -1,3 +1,4 @@
+use crate::render::OpenGLWindowContract;
 use crate::{DisplayMode, Vsync, WindowSettings};
 use cgmath::*;
 use glutin::ContextBuilder;
@@ -10,8 +11,8 @@ pub struct OpenGLWindow {
     inner: glutin::ContextWrapper<glutin::PossiblyCurrent, Window>,
 }
 
-impl OpenGLWindow {
-    pub fn new(desc: &WindowSettings, event_loop: &EventLoop<()>) -> (OpenGLWindow, glow::Context) {
+impl OpenGLWindowContract for OpenGLWindow {
+    fn new(desc: &WindowSettings, event_loop: &EventLoop<()>) -> (OpenGLWindow, glow::Context) {
         let mut window_builder = WindowBuilder::new().with_title(&desc.title);
         match desc.display_mode {
             DisplayMode::Windowed {
@@ -50,21 +51,18 @@ impl OpenGLWindow {
         )
     }
 
-    #[inline]
-    pub fn scale_factor(&self) -> f32 {
+    fn scale_factor(&self) -> f32 {
         self.inner.window().scale_factor() as f32
     }
 
-    #[inline]
-    pub fn logical_size(&self) -> Vector2<f32> {
+    fn logical_size(&self) -> Vector2<f32> {
         let size = self.inner.window().inner_size();
         let scale_factor = self.inner.window().scale_factor() as f32;
         let size = Vector2::new(size.width as f32, size.height as f32);
         size / scale_factor
     }
 
-    #[inline]
-    pub fn physical_size(&self) -> Vector2<f32> {
+    fn physical_size(&self) -> Vector2<f32> {
         let size = self.inner.window().inner_size();
         Vector2::new(size.width as f32, size.height as f32)
     }
@@ -72,16 +70,15 @@ impl OpenGLWindow {
     /// Swaps the buffers in case of double or triple buffering. You should
     /// call this function every time you have finished rendering, or the
     /// image may not be displayed on the screen.
-    #[inline]
-    pub fn swap_buffers(&self) {
+    fn swap_buffers(&self) {
         self.inner.swap_buffers().unwrap();
     }
 
-    pub fn set_title(&self, title: &str) {
+    fn set_title(&self, title: &str) {
         self.inner.window().set_title(title);
     }
 
-    pub fn set_display_mode(&self, display_mode: DisplayMode) {
+    fn set_display_mode(&self, display_mode: DisplayMode) {
         match display_mode {
             DisplayMode::Windowed {
                 width,

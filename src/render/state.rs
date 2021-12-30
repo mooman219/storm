@@ -2,7 +2,7 @@ use crate::color::RGBA8;
 use crate::graphics::Texture;
 use crate::image::Image;
 use crate::render::raw::{BlendFactor, Capability, CullFace, DepthTest, OpenGL, PixelStoreAlignment};
-use crate::render::window::OpenGLWindow;
+use crate::render::{OpenGLWindow, OpenGLWindowContract};
 use crate::WindowSettings;
 use cgmath::*;
 use log::trace;

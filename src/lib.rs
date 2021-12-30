@@ -7,6 +7,8 @@ extern crate alloc;
 #[cfg(any(test, not(target_arch = "wasm32")))]
 extern crate std;
 
+/// Asset utilities.
+pub mod asset;
 /// Audio primitives. Creating and controlling sounds are included in here.
 pub mod audio;
 /// Color primitives. These are used in the graphics and image modules for managing images and
@@ -31,7 +33,6 @@ pub use fontdue;
 
 pub(crate) use global::ctx;
 
-mod asset;
 mod context;
 mod global;
 mod prelude;

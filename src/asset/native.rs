@@ -1,4 +1,4 @@
-use crate::asset::{Asset, LoaderError};
+use crate::asset::{Asset, AssetStateContract, LoaderError};
 use crate::sync::{make as spsc_make, Consumer, Producer};
 use alloc::{
     string::{String, ToString},
@@ -14,8 +14,8 @@ pub struct AssetState {
     read_result_receiver: Consumer<Result<Asset, LoaderError>>,
 }
 
-impl AssetState {
-    pub fn init() -> AssetState {
+impl AssetStateContract for AssetState {
+    fn init() -> Self {
         let (read_request_sender, read_request_receiver) = spsc_make(256);
         let (read_result_sender, read_result_receiver) = spsc_make(256);
 
@@ -32,14 +32,11 @@ impl AssetState {
         }
     }
 
-    /// Pushes a read request to the queue. Relative to the current working directory.
-    pub fn push_read(&mut self, relative_path: &str) {
+    fn push_read(&mut self, relative_path: &str) {
         self.read_request_sender.push(relative_path.to_string())
     }
 
-    /// Pops the next available read off the queue, returning None if there are no finished reads
-    /// available.
-    pub fn try_pop_read(&mut self) -> Option<Result<Asset, LoaderError>> {
+    fn try_pop_read(&mut self) -> Option<Result<Asset, LoaderError>> {
         self.read_result_receiver.try_pop()
     }
 }

@@ -5,8 +5,22 @@ pub(crate) use native::AssetState;
 
 #[cfg(target_arch = "wasm32")]
 mod wasm;
+#[cfg(target_arch = "wasm32")]
+pub(crate) use wasm::AssetState;
 
 use alloc::{string::String, vec::Vec};
+
+pub(crate) trait AssetStateContract {
+    /// Creates a new asset state.
+    fn init() -> Self;
+
+    /// Pushes a read request to the queue. Relative to the current working directory.
+    fn push_read(&mut self, relative_path: &str);
+
+    /// Pops the next available read off the queue, returning None if there are no finished reads
+    /// available.
+    fn try_pop_read(&mut self) -> Option<Result<Asset, LoaderError>>;
+}
 
 /// Represents a binary blob loaded from an external source.
 #[derive(Clone, Debug)]

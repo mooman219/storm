@@ -1,3 +1,4 @@
+use crate::render::OpenGLWindowContract;
 use crate::{DisplayMode, WindowSettings};
 use cgmath::*;
 use log::info;
@@ -11,8 +12,8 @@ pub struct OpenGLWindow {
     inner: Window,
 }
 
-impl OpenGLWindow {
-    pub fn new(desc: &WindowSettings, event_loop: &EventLoop<()>) -> (OpenGLWindow, glow::Context) {
+impl OpenGLWindowContract for OpenGLWindow {
+    fn new(desc: &WindowSettings, event_loop: &EventLoop<()>) -> (OpenGLWindow, glow::Context) {
         let mut builder = WindowBuilder::new().with_title(&desc.title);
         builder = match desc.display_mode {
             DisplayMode::Windowed {
@@ -50,31 +51,27 @@ impl OpenGLWindow {
         (window, gl)
     }
 
-    #[inline]
-    pub fn scale_factor(&self) -> f32 {
+    fn scale_factor(&self) -> f32 {
         self.inner.scale_factor() as f32
     }
 
-    #[inline]
-    pub fn logical_size(&self) -> Vector2<f32> {
+    fn logical_size(&self) -> Vector2<f32> {
         let size = self.inner.inner_size();
         let scale_factor = self.inner.scale_factor() as f32;
         let size = Vector2::new(size.width as f32, size.height as f32);
         size / scale_factor
     }
 
-    #[inline]
-    pub fn physical_size(&self) -> Vector2<f32> {
+    fn physical_size(&self) -> Vector2<f32> {
         let size = self.inner.inner_size();
         Vector2::new(size.width as f32, size.height as f32)
     }
 
-    #[inline]
-    pub fn swap_buffers(&self) {
+    fn swap_buffers(&self) {
         // This is implicit on web.
     }
 
-    pub fn set_title(&self, title: &str) {
+    fn set_title(&self, title: &str) {
         web_sys::window() // Option<Window>
             .unwrap() // Window
             .document() // Option<Document>
@@ -82,7 +79,7 @@ impl OpenGLWindow {
             .set_title(title);
     }
 
-    pub fn set_display_mode(&self, display_mode: DisplayMode) {
+    fn set_display_mode(&self, display_mode: DisplayMode) {
         match display_mode {
             DisplayMode::Windowed {
                 width,
