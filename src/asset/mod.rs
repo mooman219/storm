@@ -84,19 +84,16 @@ pub enum LoaderError {
     /// For example, a function that reads a file into a string will error with
     /// `InvalidData` if the file's contents are not valid UTF-8.
     ///
-    /// [`InvalidInput`]: ErrorKind::InvalidInput
+    /// [`InvalidInput`]: LoaderError::InvalidInput
     InvalidData,
     /// The I/O operation's timeout expired, causing it to be canceled.
     TimedOut,
     /// An error returned when an operation could not be completed because a
-    /// call to [`write`] returned [`Ok(0)`].
+    /// call to `write` returned [`Ok(0)`].
     ///
     /// This typically means that an operation could only succeed if it wrote a
     /// particular number of bytes but only a smaller number of bytes could be
     /// written.
-    ///
-    /// [`write`]: crate::io::Write::write
-    /// [`Ok(0)`]: Ok
     WriteZero,
     /// This operation was interrupted.
     ///
@@ -125,13 +122,13 @@ pub enum LoaderError {
     //
     /// A custom error that does not fall under any other I/O error kind.
     ///
-    /// This can be used to construct your own [`Error`]s that do not match any
-    /// [`ErrorKind`].
+    /// This can be used to construct your own `Error`s that do not match any
+    /// `ErrorKind`.
     ///
-    /// This [`ErrorKind`] is not used by the standard library.
+    /// This `ErrorKind` is not used by the standard library.
     ///
     /// Errors from the standard library that do not fall under any of the I/O
     /// error kinds cannot be `match`ed on, and will only match a wildcard (`_`) pattern.
-    /// New [`ErrorKind`]s might be added in the future for some of those.
+    /// New `ErrorKind`s might be added in the future for some of those.
     Other,
 }
