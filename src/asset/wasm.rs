@@ -1,6 +1,6 @@
 use crate::asset::{Asset, AssetStateContract, LoaderError};
 
-pub struct AssetState {}
+pub(crate) struct AssetState {}
 
 impl AssetStateContract for AssetState {
     fn init() -> Self {

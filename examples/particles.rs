@@ -10,7 +10,7 @@ use storm::*;
 
 /// Run with: cargo run --example particles --release
 fn main() {
-    Context::start(
+    start(
         WindowSettings {
             title: String::from("Storm: Particles"),
             display_mode: DisplayMode::Windowed {
@@ -24,11 +24,11 @@ fn main() {
     );
 }
 
-fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
-    ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
+fn run() -> impl FnMut(Event) {
+    wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
 
-    let mut transform = Transform::new(ctx.window_logical_size());
+    let mut transform = Transform::new(window_logical_size());
     let sprite_shader = SpriteShader::new();
     let mut pass = SpriteShaderPass::new(transform.matrix());
     transform.set().rotation = 0.125;
@@ -45,22 +45,22 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     }
     pass.buffer.set(&sprites);
 
-    move |event, ctx: &mut Context| match event {
-        Event::CloseRequested => ctx.stop(),
+    move |event| match event {
+        Event::CloseRequested => request_stop(),
         Event::KeyPressed(key) => match key {
-            KeyboardButton::Escape => ctx.stop(),
-            KeyboardButton::U => ctx.window_display_mode(DisplayMode::Windowed {
+            KeyboardButton::Escape => request_stop(),
+            KeyboardButton::U => set_window_display_mode(DisplayMode::Windowed {
                 width: 1500,
                 height: 1000,
                 resizable: true,
             }),
-            KeyboardButton::I => ctx.window_display_mode(DisplayMode::Windowed {
+            KeyboardButton::I => set_window_display_mode(DisplayMode::Windowed {
                 width: 1280,
                 height: 1024,
                 resizable: true,
             }),
-            KeyboardButton::O => ctx.window_display_mode(DisplayMode::WindowedFullscreen),
-            KeyboardButton::P => ctx.window_display_mode(DisplayMode::Fullscreen),
+            KeyboardButton::O => set_window_display_mode(DisplayMode::WindowedFullscreen),
+            KeyboardButton::P => set_window_display_mode(DisplayMode::Fullscreen),
             _ => {}
         },
         Event::CursorPressed {

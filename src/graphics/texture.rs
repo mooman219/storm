@@ -1,11 +1,11 @@
 use crate::color::ColorDescriptor;
-use crate::ctx;
 use crate::graphics::TextureSection;
 use crate::image::Image;
 use crate::render::{
     resource, TextureBindingTarget, TextureLoadTarget, TextureMagFilterValue, TextureMinFilterValue,
     TextureParameterTarget, TextureWrapValue,
 };
+use crate::{ctx, max_texture_size};
 use alloc::rc::Rc;
 
 /// Represents a GPU resource for a texture.
@@ -36,8 +36,7 @@ impl Texture {
 
     /// Uploads an image to the GPU, creating a texture.
     pub fn from_image<T: ColorDescriptor>(image: &Image<T>) -> Texture {
-        let gpu = ctx().graphics();
-        let max_size = gpu.max_texture_size() as u32;
+        let max_size = max_texture_size() as u32;
         if image.width() > max_size || image.height() > max_size {
             panic!(
                 "The max width or height texture may have on this device is {}. \
@@ -47,7 +46,7 @@ impl Texture {
                 image.height()
             );
         }
-        let gl = gpu.gl();
+        let gl = ctx().graphics().gl();
         let id = gl.create_texture();
         let texture = Texture {
             id,

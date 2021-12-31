@@ -67,9 +67,6 @@ impl OpenGLWindowContract for OpenGLWindow {
         Vector2::new(size.width as f32, size.height as f32)
     }
 
-    /// Swaps the buffers in case of double or triple buffering. You should
-    /// call this function every time you have finished rendering, or the
-    /// image may not be displayed on the screen.
     fn swap_buffers(&self) {
         self.inner.swap_buffers().unwrap();
     }

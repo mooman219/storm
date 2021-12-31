@@ -5,13 +5,13 @@ use cpal::{
     Stream,
 };
 
-pub struct AudioState {
+pub(crate) struct AudioState {
     sender: Producer<SoundInstance>,
     stream: Stream,
 }
 
 impl AudioState {
-    pub fn init() -> AudioState {
+    pub(crate) fn init() -> AudioState {
         let host = cpal::default_host();
         let device = host.default_output_device().expect("no output device available");
         let sample_rate = device.default_output_config().unwrap().sample_rate();
@@ -42,7 +42,7 @@ impl AudioState {
         }
     }
 
-    pub fn push_sound(&mut self, instance: SoundInstance) {
+    pub(crate) fn push_sound(&mut self, instance: SoundInstance) {
         self.sender.push(instance);
     }
 }

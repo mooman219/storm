@@ -17,7 +17,7 @@ static FONT: &[u8] = include_bytes!("resources/Roboto-Regular.ttf");
 /// Run with: cargo run --example pong --release
 fn main() {
     // Create the engine context and describe the window.
-    Context::start(
+    start(
         WindowSettings {
             title: String::from("Video Game"),
             display_mode: DisplayMode::Windowed {
@@ -31,11 +31,11 @@ fn main() {
     );
 }
 
-fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
-    ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
+fn run() -> impl FnMut(Event) {
+    wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
     let boop = Sound::from_flac(SOUND).unwrap();
-    let mut transform = Transform::new(ctx.window_logical_size());
+    let mut transform = Transform::new(window_logical_size());
     let text_shader = TextShader::new();
     let sprite_shader = SpriteShader::new();
 
@@ -99,8 +99,8 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
     ball.buffer.set(&ball_sprites);
 
     const SPEED: f32 = 250.0;
-    move |event, ctx| match event {
-        Event::CloseRequested => ctx.stop(),
+    move |event| match event {
+        Event::CloseRequested => request_stop(),
         Event::KeyPressed(key) => match key {
             KeyboardButton::Up => {
                 if !up {
@@ -114,7 +114,7 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                     down = true;
                 }
             }
-            KeyboardButton::Escape => ctx.stop(),
+            KeyboardButton::Escape => request_stop(),
             _ => {}
         },
         Event::KeyReleased(key) => match key {
@@ -130,7 +130,6 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
                     down = false;
                 }
             }
-            KeyboardButton::Escape => ctx.stop(),
             _ => {}
         },
         Event::Update(delta) => {

@@ -1,14 +1,16 @@
 use crate::color::RGBA8;
+use crate::ctx;
 use crate::graphics::Texture;
 use crate::image::Image;
 use crate::render::raw::{BlendFactor, Capability, CullFace, DepthTest, OpenGL, PixelStoreAlignment};
 use crate::render::{OpenGLWindow, OpenGLWindowContract};
-use crate::WindowSettings;
+use crate::{ClearMode, DisplayMode, WindowSettings};
 use cgmath::*;
 use log::trace;
 
-pub struct OpenGLState {
+pub(crate) struct OpenGLState {
     gl: OpenGL,
+    window: OpenGLWindow,
     logical_size: Vector2<f32>,
     physical_size: Vector2<f32>,
     default_texture: Option<Texture>,
@@ -16,10 +18,7 @@ pub struct OpenGLState {
 }
 
 impl OpenGLState {
-    pub fn init(
-        desc: &WindowSettings,
-        event_loop: &winit::event_loop::EventLoop<()>,
-    ) -> (OpenGLState, OpenGLWindow) {
+    pub(crate) fn init(desc: &WindowSettings, event_loop: &winit::event_loop::EventLoop<()>) -> OpenGLState {
         let (window, gl) = OpenGLWindow::new(desc, event_loop);
         let mut gl = OpenGL::new(gl);
         let max_texture_size = gl.get_max_texture_size();
@@ -44,41 +43,25 @@ impl OpenGLState {
             gl,
             logical_size: window.logical_size(),
             physical_size: window.physical_size(),
+            window,
             default_texture: None,
             max_texture_size,
         };
-        (state, window)
+        state
     }
 
     #[inline(always)]
-    pub fn gl(&mut self) -> &mut OpenGL {
+    pub(crate) fn gl(&mut self) -> &mut OpenGL {
         &mut self.gl
     }
 
-    pub fn logical_size(&self) -> Vector2<f32> {
-        self.logical_size
+    /// Gets the window.
+    pub(crate) fn window(&mut self) -> &mut impl OpenGLWindowContract {
+        &mut self.window
     }
 
-    pub fn physical_size(&self) -> Vector2<f32> {
-        self.physical_size
-    }
-
-    pub fn max_texture_size(&self) -> i32 {
-        self.max_texture_size
-    }
-
-    pub fn default_texture(&mut self) -> Texture {
-        match &self.default_texture {
-            Some(texture) => texture.clone(),
-            None => {
-                let texture = Texture::from_image(&Image::from_color(RGBA8::WHITE, 1, 1));
-                self.default_texture = Some(texture.clone());
-                texture
-            }
-        }
-    }
-
-    pub fn resize(&mut self, physical: Vector2<f32>, logical: Vector2<f32>) {
+    /// Resizes the viewport.
+    pub(crate) fn resize_viewport(&mut self, physical: Vector2<f32>, logical: Vector2<f32>) {
         if self.logical_size != logical || self.physical_size != physical {
             trace!("Window resized: Physical({:?}) Logical({:?})", physical, logical);
             self.logical_size = logical;
@@ -86,4 +69,65 @@ impl OpenGLState {
             self.gl.viewport(0, 0, physical.x as i32, physical.y as i32);
         }
     }
+}
+
+/// Returns a simple 1x1 white texture. This texture is reused globally.
+pub fn default_texture() -> Texture {
+    let graphics = ctx().graphics();
+    match &graphics.default_texture {
+        Some(texture) => texture.clone(),
+        None => {
+            let texture = Texture::from_image(&Image::from_color(RGBA8::WHITE, 1, 1));
+            graphics.default_texture = Some(texture.clone());
+            texture
+        }
+    }
+}
+
+/// Gets the max texture size supported on the GPU.
+pub fn max_texture_size() -> i32 {
+    ctx().graphics().max_texture_size
+}
+
+/// Sets the title of the window.
+///
+/// ## Platform-specific
+///
+/// - **Web:** This sets the page title.
+pub fn set_window_title(title: &str) {
+    ctx().graphics().window.set_title(title);
+}
+
+/// Sets the display mode of the window.
+pub fn set_window_display_mode(display_mode: DisplayMode) {
+    ctx().graphics().window.set_display_mode(display_mode);
+}
+
+/// Gets the logical size of the window. This may differ from the viewport's logical size.
+pub fn window_logical_size() -> Vector2<f32> {
+    ctx().graphics().window.logical_size()
+}
+
+/// Gets the physical size of the window. This may differ from the viewport's physical size.
+pub fn window_physical_size() -> Vector2<f32> {
+    ctx().graphics().window.physical_size()
+}
+
+/// Gets the logical size of the viewport. This may differ from the window's logical size.
+pub fn viewport_logical_size() -> Vector2<f32> {
+    ctx().graphics().logical_size
+}
+
+/// Gets the physical size of the viewport. This may differ from the window's physical size.
+pub fn viewport_physical_size() -> Vector2<f32> {
+    ctx().graphics().physical_size
+}
+
+/// Clears the screen buffers according to the clear mode.
+pub fn clear(clear_mode: ClearMode) {
+    let gl = ctx().graphics().gl();
+    if let Some(clear_color) = clear_mode.color {
+        gl.clear_color(clear_color);
+    }
+    gl.clear(clear_mode.mode);
 }

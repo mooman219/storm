@@ -27,34 +27,33 @@ pub mod time;
 
 pub use crate::prelude::*;
 pub use cgmath;
-pub use context::Context;
-pub use crevice_derive::AsStd140;
+pub use context::{request_stop, start, wait_for, wait_periodic, wait_until};
+pub use crevice;
 pub use fontdue;
+pub use render::{
+    clear, default_texture, max_texture_size, set_window_display_mode, set_window_title,
+    viewport_logical_size, viewport_physical_size, window_logical_size, window_physical_size,
+};
 
-pub(crate) use global::ctx;
+pub(crate) use context::ctx;
 
 mod context;
-mod global;
 mod prelude;
 mod render;
 mod sync;
 
-/// Returns a simple 1x1 white texture. This texture is reused globally.
-pub fn default_texture() -> crate::graphics::Texture {
-    let gpu = ctx().graphics();
-    gpu.default_texture()
-}
+// ====================================
+// Assets
+// ====================================
 
-/// Gets the max texture size supported on the GPU.
-pub fn max_texture_size() -> usize {
-    ctx().graphics().max_texture_size() as usize
-}
-
-/// Clears the screen buffers according to the clear mode.
-pub fn clear(clear_mode: ClearMode) {
-    let gl = ctx().graphics().gl();
-    if let Some(clear_color) = clear_mode.color {
-        gl.clear_color(clear_color);
-    }
-    gl.clear(clear_mode.mode);
+/// Requests a read of an asset. This produces an AssetRead event with the result of the read once
+/// it has completed.
+///
+/// ## Platform-specific
+///
+/// - **Non-web:** The path is relative to the current working directory.
+/// - **Web:** The path is relative to the current url's root.
+pub fn request_read(relative_path: &str) {
+    use asset::AssetStateContract;
+    ctx().assets().push_read(relative_path);
 }

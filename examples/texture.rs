@@ -12,7 +12,7 @@ static SOUND: &[u8] = include_bytes!("resources/boop.flac");
 
 /// Run with: cargo run --example texture --release
 fn main() {
-    Context::start(
+    start(
         WindowSettings {
             title: String::from("Storm: Texture"),
             display_mode: DisplayMode::Windowed {
@@ -26,10 +26,10 @@ fn main() {
     );
 }
 
-fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
-    ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
+fn run() -> impl FnMut(Event) {
+    wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
-    let mut transform = Transform::new(ctx.window_logical_size());
+    let mut transform = Transform::new(window_logical_size());
     let sprite_shader = SpriteShader::new();
     let mut pass = SpriteShaderPass::new(transform.matrix());
     pass.atlas = Texture::from_png(TEXTURE_A);
@@ -56,10 +56,10 @@ fn run(ctx: &mut Context) -> impl FnMut(Event, &mut Context) {
 
     let mut clicking = false;
 
-    move |event, ctx| match event {
-        Event::CloseRequested => ctx.stop(),
+    move |event| match event {
+        Event::CloseRequested => request_stop(),
         Event::KeyPressed(key) => match key {
-            KeyboardButton::Escape => ctx.stop(),
+            KeyboardButton::Escape => request_stop(),
             KeyboardButton::P => sound.pause(),
             KeyboardButton::R => sound.resume(),
             _ => {}

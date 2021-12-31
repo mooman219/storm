@@ -1,5 +1,6 @@
+use crate::ctx;
 use crate::event::{Event, ScrollDirection};
-use crate::Context;
+use crate::render::OpenGLWindowContract;
 use cgmath::prelude::*;
 use cgmath::*;
 use winit::event::WindowEvent;
@@ -12,36 +13,29 @@ pub struct EventConverter {
 }
 
 impl EventConverter {
-    pub fn new(scale_factor: f32, physical_size: Vector2<f32>) -> EventConverter {
+    pub fn new() -> EventConverter {
+        let window = ctx().graphics().window();
         EventConverter {
-            scale_factor,
-            physical_size,
-            logical_size: physical_size / scale_factor,
+            scale_factor: window.scale_factor(),
+            physical_size: window.physical_size(),
+            logical_size: window.logical_size(),
             cursor_pos: Vector2::zero(),
         }
     }
 
-    pub fn push<T: 'static + FnMut(Event, &mut Context)>(
-        &mut self,
-        event: WindowEvent,
-        event_handler: &mut T,
-        context: &mut Context,
-    ) {
+    pub fn push<T: 'static + FnMut(Event)>(&mut self, event: WindowEvent, event_handler: &mut T) {
         match event {
             // Window
-            WindowEvent::CloseRequested => event_handler(Event::CloseRequested, context),
+            WindowEvent::CloseRequested => event_handler(Event::CloseRequested),
             WindowEvent::Resized(physical_size) => {
                 self.physical_size = Vector2::new(physical_size.width as f32, physical_size.height as f32);
                 self.logical_size = self.physical_size / self.scale_factor;
 
-                context.window_resize(self.physical_size, self.logical_size);
-                event_handler(
-                    Event::WindowResized {
-                        physical_size: self.physical_size,
-                        logical_size: self.logical_size,
-                    },
-                    context,
-                );
+                ctx().graphics().resize_viewport(self.physical_size, self.logical_size);
+                event_handler(Event::WindowResized {
+                    physical_size: self.physical_size,
+                    logical_size: self.logical_size,
+                });
             }
             WindowEvent::ScaleFactorChanged {
                 scale_factor,
@@ -51,19 +45,16 @@ impl EventConverter {
                 self.physical_size = Vector2::new(new_inner_size.width as f32, new_inner_size.height as f32);
                 self.logical_size = self.physical_size / self.scale_factor;
 
-                context.window_resize(self.physical_size, self.logical_size);
-                event_handler(
-                    Event::WindowResized {
-                        physical_size: self.physical_size,
-                        logical_size: self.logical_size,
-                    },
-                    context,
-                );
+                ctx().graphics().resize_viewport(self.physical_size, self.logical_size);
+                event_handler(Event::WindowResized {
+                    physical_size: self.physical_size,
+                    logical_size: self.logical_size,
+                });
             }
 
             // Keyboard
             WindowEvent::ReceivedCharacter(char) => {
-                event_handler(Event::ReceivedCharacter(char), context);
+                event_handler(Event::ReceivedCharacter(char));
             }
             WindowEvent::KeyboardInput {
                 input,
@@ -72,10 +63,10 @@ impl EventConverter {
                 if let Some(keycode) = input.virtual_keycode {
                     match input.state {
                         winit::event::ElementState::Pressed => {
-                            event_handler(Event::KeyPressed(keycode), context);
+                            event_handler(Event::KeyPressed(keycode));
                         }
                         winit::event::ElementState::Released => {
-                            event_handler(Event::KeyReleased(keycode), context);
+                            event_handler(Event::KeyReleased(keycode));
                         }
                     }
                 }
@@ -89,13 +80,10 @@ impl EventConverter {
                 let cursor_pos = Vector2::new(position.x as f32, self.physical_size.y - position.y as f32);
                 let delta = (cursor_pos - self.cursor_pos) / self.scale_factor;
                 self.cursor_pos = cursor_pos;
-                event_handler(
-                    Event::CursorMoved {
-                        pos: self.cursor_pos,
-                        delta,
-                    },
-                    context,
-                );
+                event_handler(Event::CursorMoved {
+                    pos: self.cursor_pos,
+                    delta,
+                });
             }
             WindowEvent::MouseWheel {
                 delta,
@@ -106,14 +94,14 @@ impl EventConverter {
                     winit::event::MouseScrollDelta::PixelDelta(pos) => (pos.x as f32, pos.y as f32),
                 };
                 if x < 0.0 {
-                    event_handler(Event::CursorScroll(ScrollDirection::Left), context);
+                    event_handler(Event::CursorScroll(ScrollDirection::Left));
                 } else if x > 0.0 {
-                    event_handler(Event::CursorScroll(ScrollDirection::Right), context);
+                    event_handler(Event::CursorScroll(ScrollDirection::Right));
                 }
                 if y < 0.0 {
-                    event_handler(Event::CursorScroll(ScrollDirection::Down), context);
+                    event_handler(Event::CursorScroll(ScrollDirection::Down));
                 } else if y > 0.0 {
-                    event_handler(Event::CursorScroll(ScrollDirection::Up), context);
+                    event_handler(Event::CursorScroll(ScrollDirection::Up));
                 }
             }
             WindowEvent::MouseInput {
@@ -122,33 +110,27 @@ impl EventConverter {
                 ..
             } => match state {
                 winit::event::ElementState::Pressed => {
-                    event_handler(
-                        Event::CursorPressed {
-                            button,
-                            pos: self.cursor_pos,
-                        },
-                        context,
-                    );
+                    event_handler(Event::CursorPressed {
+                        button,
+                        pos: self.cursor_pos,
+                    });
                 }
                 winit::event::ElementState::Released => {
-                    event_handler(
-                        Event::CursorReleased {
-                            button,
-                            pos: self.cursor_pos,
-                        },
-                        context,
-                    );
+                    event_handler(Event::CursorReleased {
+                        button,
+                        pos: self.cursor_pos,
+                    });
                 }
             },
             WindowEvent::CursorEntered {
                 ..
             } => {
-                event_handler(Event::CursorEntered, context);
+                event_handler(Event::CursorEntered);
             }
             WindowEvent::CursorLeft {
                 ..
             } => {
-                event_handler(Event::CursorLeft, context);
+                event_handler(Event::CursorLeft);
             }
             _ => {}
         }

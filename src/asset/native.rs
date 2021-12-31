@@ -8,7 +8,7 @@ use std::fs::File;
 use std::{io, io::Read};
 use std::{thread, thread::JoinHandle};
 
-pub struct AssetState {
+pub(crate) struct AssetState {
     handle: JoinHandle<()>,
     read_request_sender: Producer<String>,
     read_result_receiver: Consumer<Result<Asset, LoaderError>>,
