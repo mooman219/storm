@@ -8,7 +8,12 @@ mod wasm;
 #[cfg(target_arch = "wasm32")]
 pub use self::wasm::OpenGLWindow;
 
-use crate::{DisplayMode, WindowSettings};
+mod display_mode;
+mod window_settings;
+
+pub use display_mode::{DisplayMode, Vsync};
+pub use window_settings::WindowSettings;
+
 use cgmath::Vector2;
 use winit::event_loop::EventLoop;
 

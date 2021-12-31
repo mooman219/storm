@@ -1,6 +1,5 @@
 use crate::ctx;
-use crate::graphics::AsStd140;
-use crate::render::{resource, BufferBindingTarget, BufferBlockBindingTarget, BufferUsage};
+use crate::graphics::{resource, AsStd140, BufferBindingTarget, BufferBlockBindingTarget, BufferUsage};
 use core::marker::PhantomData;
 use crevice::std140::Std140;
 

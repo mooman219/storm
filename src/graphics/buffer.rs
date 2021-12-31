@@ -1,6 +1,5 @@
 use crate::ctx;
-use crate::graphics::{configure_vertex, VertexDescriptor};
-use crate::render::{resource, BufferBindingTarget, BufferUsage};
+use crate::graphics::{configure_vertex, resource, BufferBindingTarget, BufferUsage, VertexDescriptor};
 use core::marker::PhantomData;
 
 /// Buffers a set of elements on the device.

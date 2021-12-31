@@ -1,10 +1,11 @@
 use crate::color::RGBA8;
 use crate::ctx;
 use crate::graphics::Texture;
+use crate::graphics::{
+    BlendFactor, Capability, ClearMode, CullFace, DepthTest, DisplayMode, OpenGL, OpenGLWindow,
+    OpenGLWindowContract, PixelStoreAlignment, WindowSettings,
+};
 use crate::image::Image;
-use crate::render::raw::{BlendFactor, Capability, CullFace, DepthTest, OpenGL, PixelStoreAlignment};
-use crate::render::{OpenGLWindow, OpenGLWindowContract};
-use crate::{ClearMode, DisplayMode, WindowSettings};
 use cgmath::*;
 use log::trace;
 

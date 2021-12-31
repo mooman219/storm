@@ -8,7 +8,7 @@ pub use rg8::RG8;
 pub use rgb8::RGB8;
 pub use rgba8::RGBA8;
 
-use crate::render::{PixelFormat, PixelInternalFormat, PixelType};
+use crate::graphics::{PixelFormat, PixelInternalFormat, PixelType};
 
 /// A trait to describe size and layout of color components.
 ///

@@ -1,9 +1,8 @@
 use crate::asset::{AssetState, AssetStateContract};
 use crate::audio::AudioState;
 use crate::event::{Event, EventConverter};
-use crate::render::{OpenGLState, OpenGLWindowContract};
+use crate::graphics::{OpenGLState, OpenGLWindowContract, WindowSettings};
 use crate::time::{Instant, Timer};
-use crate::WindowSettings;
 use core::time::Duration;
 use log::info;
 use winit::event::Event as WinitEvent;

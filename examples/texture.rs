@@ -3,7 +3,9 @@ use core::time::Duration;
 use storm::audio::*;
 use storm::color::RGBA8;
 use storm::event::*;
-use storm::graphics::{shaders::sprite::*, Texture};
+use storm::graphics::{
+    clear, shaders::sprite::*, window_logical_size, ClearMode, DisplayMode, Texture, Vsync, WindowSettings,
+};
 use storm::math::Transform;
 use storm::*;
 

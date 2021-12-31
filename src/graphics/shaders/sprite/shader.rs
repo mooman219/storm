@@ -1,6 +1,6 @@
-use crate::default_texture;
 use crate::graphics::{
-    shaders::sprite::Sprite, AsStd140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture, Uniform,
+    default_texture, shaders::sprite::Sprite, AsStd140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture,
+    Uniform,
 };
 use cgmath::Matrix4;
 

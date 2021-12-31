@@ -1,6 +1,6 @@
 use crate::ctx;
 use crate::event::{Event, ScrollDirection};
-use crate::render::OpenGLWindowContract;
+use crate::graphics::OpenGLWindowContract;
 use cgmath::prelude::*;
 use cgmath::*;
 use winit::event::WindowEvent;

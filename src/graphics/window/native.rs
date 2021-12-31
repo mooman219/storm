@@ -1,5 +1,4 @@
-use crate::render::OpenGLWindowContract;
-use crate::{DisplayMode, Vsync, WindowSettings};
+use crate::graphics::{DisplayMode, OpenGLWindowContract, Vsync, WindowSettings};
 use cgmath::*;
 use glutin::ContextBuilder;
 use log::info;

@@ -25,35 +25,12 @@ pub mod math;
 /// Time utilities.
 pub mod time;
 
-pub use crate::prelude::*;
+mod context;
+mod sync;
+
 pub use cgmath;
 pub use context::{request_stop, start, wait_for, wait_periodic, wait_until};
 pub use crevice;
 pub use fontdue;
-pub use render::{
-    clear, default_texture, max_texture_size, set_window_display_mode, set_window_title,
-    viewport_logical_size, viewport_physical_size, window_logical_size, window_physical_size,
-};
 
 pub(crate) use context::ctx;
-
-mod context;
-mod prelude;
-mod render;
-mod sync;
-
-// ====================================
-// Assets
-// ====================================
-
-/// Requests a read of an asset. This produces an AssetRead event with the result of the read once
-/// it has completed.
-///
-/// ## Platform-specific
-///
-/// - **Non-web:** The path is relative to the current working directory.
-/// - **Web:** The path is relative to the current url's root.
-pub fn request_read(relative_path: &str) {
-    use asset::AssetStateContract;
-    ctx().assets().push_read(relative_path);
-}

@@ -8,7 +8,19 @@ mod wasm;
 #[cfg(target_arch = "wasm32")]
 pub(crate) use wasm::AssetState;
 
+use crate::ctx;
 use alloc::{string::String, vec::Vec};
+
+/// Requests a read of an asset. This produces an AssetRead event with the result of the read once
+/// it has completed.
+///
+/// ## Platform-specific
+///
+/// - **Non-web:** The path is relative to the current working directory.
+/// - **Web:** The path is relative to the current url's root.
+pub fn request_read(relative_path: &str) {
+    ctx().assets().push_read(relative_path);
+}
 
 pub(crate) trait AssetStateContract {
     /// Creates a new asset state.

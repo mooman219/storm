@@ -1,10 +1,7 @@
 use crate::ctx;
-use crate::graphics::{AsStd140, Buffer, Texture, Uniform, VertexDescriptor};
-use crate::render::resource;
+use crate::graphics::{resource, AsStd140, Buffer, DrawMode, Texture, Uniform, VertexDescriptor};
 use alloc::format;
 use core::marker::PhantomData;
-
-pub use crate::render::DrawMode;
 
 /// A trait to describe a shader's inputs and outputs so they can be represented without using the
 /// heap.

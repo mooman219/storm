@@ -1,5 +1,4 @@
-use crate::render::OpenGLWindowContract;
-use crate::{DisplayMode, WindowSettings};
+use crate::graphics::{DisplayMode, OpenGLWindowContract, WindowSettings};
 use cgmath::*;
 use log::info;
 use wasm_bindgen::JsCast;

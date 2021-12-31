@@ -4,11 +4,13 @@ use storm::audio::*;
 use storm::cgmath::{Vector2, Vector3};
 use storm::color::RGBA8;
 use storm::event::*;
-use storm::fontdue::layout::LayoutSettings;
-use storm::fontdue::Font;
-use storm::graphics::shaders::{sprite::*, text::*};
-use storm::math::Transform;
-use storm::math::AABB2D;
+use storm::fontdue::{layout::LayoutSettings, Font};
+use storm::graphics::{
+    clear,
+    shaders::{sprite::*, text::*},
+    window_logical_size, ClearMode, DisplayMode, Vsync, WindowSettings,
+};
+use storm::math::{Transform, AABB2D};
 use storm::*;
 
 static SOUND: &[u8] = include_bytes!("resources/boop.flac");

@@ -88,10 +88,36 @@ pub enum DepthTest {
     GreaterEqual = glow::GEQUAL,
 }
 
-pub mod ClearMode {
-    pub const COLOR: u32 = glow::COLOR_BUFFER_BIT;
-    pub const DEPTH: u32 = glow::DEPTH_BUFFER_BIT;
-    pub const STENCIL: u32 = glow::STENCIL_BUFFER_BIT;
+/// Parameters for how the screen should be cleared.
+pub struct ClearMode {
+    pub(crate) color: Option<RGBA8>,
+    pub(crate) mode: u32,
+}
+
+impl ClearMode {
+    /// Clears both color and depth.
+    pub fn color_depth(color: RGBA8) -> ClearMode {
+        ClearMode {
+            color: Some(color),
+            mode: glow::COLOR_BUFFER_BIT | glow::DEPTH_BUFFER_BIT,
+        }
+    }
+
+    /// Clears only color.
+    pub fn color(color: RGBA8) -> ClearMode {
+        ClearMode {
+            color: Some(color),
+            mode: glow::COLOR_BUFFER_BIT,
+        }
+    }
+
+    /// Clears only depth.
+    pub fn depth() -> ClearMode {
+        ClearMode {
+            color: None,
+            mode: glow::DEPTH_BUFFER_BIT,
+        }
+    }
 }
 
 #[repr(u32)]

@@ -3,8 +3,10 @@ use storm::cgmath::prelude::*;
 use storm::cgmath::*;
 use storm::color::RGBA8;
 use storm::event::*;
-use storm::graphics::shaders::sprite::{Sprite, SpriteShader, SpriteShaderPass};
-use storm::graphics::TextureSection;
+use storm::graphics::{
+    clear, set_window_display_mode, shaders::sprite::*, window_logical_size, ClearMode, DisplayMode,
+    TextureSection, Vsync, WindowSettings,
+};
 use storm::math::Transform;
 use storm::*;
 

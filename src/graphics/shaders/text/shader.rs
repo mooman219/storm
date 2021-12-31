@@ -1,4 +1,5 @@
 use crate::graphics::{
+    max_texture_size,
     shaders::text::{Text, TextSprite, TextUserData},
     AsStd140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture, TextureSection, Uniform,
 };
