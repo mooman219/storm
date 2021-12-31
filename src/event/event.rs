@@ -1,4 +1,4 @@
-use crate::asset::{Asset, LoaderError};
+use crate::asset::Asset;
 use cgmath::*;
 
 // Re-exports.
@@ -58,7 +58,7 @@ pub enum Event {
     /// the last update in seconds.
     Update(f32),
     /// Event for when as asset has finished reading and is now available for consumption.
-    AssetRead(Result<Asset, LoaderError>),
+    AssetRead(Asset),
 }
 
 /// A cursor wheel movement. Some mice have left and right scroll options.

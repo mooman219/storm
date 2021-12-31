@@ -4,6 +4,7 @@ use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
+use core::time::Duration;
 use std::fs::File;
 use std::{io, io::Read};
 use std::{thread, thread::JoinHandle};
@@ -11,7 +12,7 @@ use std::{thread, thread::JoinHandle};
 pub(crate) struct AssetState {
     handle: JoinHandle<()>,
     read_request_sender: Producer<String>,
-    read_result_receiver: Consumer<Result<Asset, LoaderError>>,
+    read_result_receiver: Consumer<Asset>,
 }
 
 impl AssetStateContract for AssetState {
@@ -19,10 +20,11 @@ impl AssetStateContract for AssetState {
         let (read_request_sender, read_request_receiver) = spsc_make(256);
         let (read_result_sender, read_result_receiver) = spsc_make(256);
 
-        let handle = thread::spawn(move || {
+        let handle = thread::spawn(move || loop {
             while let Some(relative_path) = read_request_receiver.try_pop() {
                 read_result_sender.push(read(relative_path));
             }
+            thread::sleep(Duration::from_millis(1));
         });
 
         AssetState {
@@ -36,22 +38,22 @@ impl AssetStateContract for AssetState {
         self.read_request_sender.push(relative_path.to_string())
     }
 
-    fn try_pop_read(&mut self) -> Option<Result<Asset, LoaderError>> {
+    fn try_pop_read(&mut self) -> Option<Asset> {
         self.read_result_receiver.try_pop()
     }
 }
 
 /// Relative to the current working directory.
-fn read(relative_path: String) -> Result<Asset, LoaderError> {
+fn read(relative_path: String) -> Asset {
     let mut file = match File::open(&relative_path) {
         Ok(file) => file,
-        Err(error) => return Err(error.kind().into()),
+        Err(error) => return Asset::new_err(relative_path, error.kind().into()),
     };
     let mut contents = Vec::new();
     if let Err(error) = file.read_to_end(&mut contents) {
-        return Err(error.kind().into());
+        return Asset::new_err(relative_path, error.kind().into());
     }
-    Ok(Asset::new(relative_path, contents))
+    Asset::new_ok(relative_path, contents)
 }
 
 impl From<io::ErrorKind> for LoaderError {

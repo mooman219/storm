@@ -36,5 +36,5 @@ pub(crate) trait AssetStateContract {
 
     /// Pops the next available read off the queue, returning None if there are no finished reads
     /// available.
-    fn try_pop_read(&mut self) -> Option<Result<Asset, LoaderError>>;
+    fn try_pop_read(&mut self) -> Option<Asset>;
 }

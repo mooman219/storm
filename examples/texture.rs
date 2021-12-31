@@ -1,5 +1,6 @@
 use cgmath::{Vector2, Vector3};
 use core::time::Duration;
+use log::{info, warn};
 use storm::audio::*;
 use storm::color::RGBA8;
 use storm::event::*;
@@ -64,6 +65,7 @@ fn run() -> impl FnMut(Event) {
             KeyboardButton::Escape => request_stop(),
             KeyboardButton::P => sound.pause(),
             KeyboardButton::R => sound.resume(),
+            KeyboardButton::Q => storm::asset::request_read("Cargso.toml"),
             _ => {}
         },
         Event::CursorPressed {
@@ -111,6 +113,12 @@ fn run() -> impl FnMut(Event) {
             pass.set_ortho(transform.generate());
             pass.draw(&sprite_shader);
         }
+        Event::AssetRead(asset) => match asset.result {
+            Ok(contents) => {
+                info!("Loaded {}: {}", asset.relative_path, contents[0]);
+            }
+            Err(error) => warn!("Error {}: {:?}", asset.relative_path, error),
+        },
         _ => {}
     }
 }
