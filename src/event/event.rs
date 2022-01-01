@@ -39,7 +39,11 @@ pub enum Event {
     CursorMoved {
         /// Current cursor position. This is based on the physical size of the window, with (0,0)
         /// being the bottom left.
-        pos: Vector2<f32>,
+        physical_pos: Vector2<f32>,
+        /// Current cursor position. This is normalized where the x and y values are between -1 and
+        /// 1, with the bottom left of the screen being (-1, -1), and the top right being (1, 1).
+        /// This may be useful for converting screen space coordinates into world space.
+        normalized_pos: Vector2<f32>,
         /// Change from last position. This is based on the logical size of the window.
         delta: Vector2<f32>,
     },

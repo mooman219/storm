@@ -78,10 +78,13 @@ impl EventConverter {
                 ..
             } => {
                 let cursor_pos = Vector2::new(position.x as f32, self.physical_size.y - position.y as f32);
+                let normalized_pos =
+                    (cursor_pos.div_element_wise(self.physical_size) * 2.0) - Vector2::new(1.0, 1.0);
                 let delta = (cursor_pos - self.cursor_pos) / self.scale_factor;
                 self.cursor_pos = cursor_pos;
                 event_handler(Event::CursorMoved {
-                    pos: self.cursor_pos,
+                    physical_pos: self.cursor_pos,
+                    normalized_pos,
                     delta,
                 });
             }
