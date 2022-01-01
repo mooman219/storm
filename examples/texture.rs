@@ -65,7 +65,8 @@ fn run() -> impl FnMut(Event) {
             KeyboardButton::Escape => request_stop(),
             KeyboardButton::P => sound.pause(),
             KeyboardButton::R => sound.resume(),
-            KeyboardButton::Q => storm::asset::request_read("Cargso.toml"),
+            KeyboardButton::Q => storm::asset::request_read("./docs/load.png"),
+            KeyboardButton::A => storm::asset::request_read("./load.png"),
             _ => {}
         },
         Event::CursorPressed {
@@ -86,10 +87,10 @@ fn run() -> impl FnMut(Event) {
             clicking = false;
         }
         Event::CursorMoved {
-            pos,
+            normalized_pos,
             ..
         } => {
-            let mut x = pos.x - 12.0;
+            let mut x = normalized_pos.x - 12.0;
             if clicking {
                 if x < -200.0 {
                     x = -200.0;
@@ -115,7 +116,7 @@ fn run() -> impl FnMut(Event) {
         }
         Event::AssetRead(asset) => match asset.result {
             Ok(contents) => {
-                info!("Loaded {}: {}", asset.relative_path, contents[0]);
+                info!("Loaded {}: {}", asset.relative_path, contents[1]);
             }
             Err(error) => warn!("Error {}: {:?}", asset.relative_path, error),
         },

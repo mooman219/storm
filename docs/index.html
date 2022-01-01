@@ -15,15 +15,15 @@
             margin-right: auto;
         }
     </style>
-    <script src='./web.js'></script>
-    <script>
+    <script type='module'>
+        import init from './web.js';
         window.onload = (event) => {
             document.getElementById("load").remove();
             let start = document.getElementById("start");
             start.style.visibility = "visible"
             start.onclick = (event) => {
                 start.remove();
-                wasm_bindgen('./web_bg.wasm').catch(console.error);
+                init();
             }
         }
     </script>
