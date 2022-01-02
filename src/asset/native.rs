@@ -11,14 +11,15 @@ use std::{thread, thread::JoinHandle};
 
 pub(crate) struct AssetState {
     handle: JoinHandle<()>,
+    pending: Vec<String>,
     read_request_sender: Producer<String>,
     read_result_receiver: Consumer<Asset>,
 }
 
 impl AssetStateContract for AssetState {
     fn init() -> Self {
-        let (read_request_sender, read_request_receiver) = spsc_make(256);
-        let (read_result_sender, read_result_receiver) = spsc_make(256);
+        let (read_request_sender, read_request_receiver) = spsc_make(128);
+        let (read_result_sender, read_result_receiver) = spsc_make(128);
 
         let handle = thread::spawn(move || loop {
             while let Some(relative_path) = read_request_receiver.try_pop() {
@@ -29,16 +30,25 @@ impl AssetStateContract for AssetState {
 
         AssetState {
             handle,
+            pending: Vec::new(),
             read_request_sender,
             read_result_receiver,
         }
     }
 
     fn push_read(&mut self, relative_path: &str) {
-        self.read_request_sender.push(relative_path.to_string())
+        if let Some(path) = self.read_request_sender.try_push(relative_path.to_string()) {
+            self.pending.push(path);
+        }
     }
 
     fn try_pop_read(&mut self) -> Option<Asset> {
+        while let Some(path) = self.pending.pop() {
+            if let Some(path) = self.read_request_sender.try_push(path) {
+                self.pending.push(path);
+                break;
+            }
+        }
         self.read_result_receiver.try_pop()
     }
 }
