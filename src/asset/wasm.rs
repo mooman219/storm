@@ -1,8 +1,8 @@
 use crate::asset::{Asset, AssetStateContract, LoaderError};
-use alloc::{vec::Vec};
+use alloc::vec::Vec;
 use js_sys::{Array, Uint8Array};
-use wasm_bindgen::{JsCast};
 use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsCast;
 
 // Literally exploiting an injection vulnerability to append arbitrary js into the bundle
 #[wasm_bindgen(raw_module = r#"./web.js';
