@@ -1,62 +1,68 @@
 use crate::asset::{Asset, AssetStateContract, LoaderError};
-use alloc::{string::ToString, vec::Vec};
-use js_sys::{Array, Function, Uint8Array};
-use wasm_bindgen::{JsCast, JsValue};
+use alloc::{vec::Vec};
+use js_sys::{Array, Uint8Array};
+use wasm_bindgen::{JsCast};
+use wasm_bindgen::prelude::wasm_bindgen;
 
-const PUSH_ARGS: &str = "path";
-const PUSH_BODY: &str = r#"
-if (!window.storm_asset_payloads) {
-    window.storm_asset_payloads = [];
-}
-fetch(path)
-    .then(function (response) {
-        if (response.status < 200 || response.status >= 300) {
-            window.storm_asset_payloads.push([path, response.status]);
-        } else {
-            response.arrayBuffer().then(function (buffer) {
-                window.storm_asset_payloads.push([path, new Uint8Array(buffer)]);
-            }).catch(function (reason) {
-                window.storm_asset_payloads.push([path, 500]);
-            });;
-        }
-    }).catch(function (reason) {
-        window.storm_asset_payloads.push([path, 500]);
-    });
-"#;
+// Literally exploiting an injection vulnerability to append arbitrary js into the bundle
+#[wasm_bindgen(raw_module = r#"./web.js';
 
-const PULL_BODY: &str = r#"
-if (!window.storm_asset_payloads || window.storm_asset_payloads.length === 0) {
-    return [];
+// uses `var` instead of `let` so there's no TDZ in case functions using it are called before this module body executes
+var asset_payloads;
+
+function _push_asset(path) {
+    fetch(path)
+        .then(function (response) {
+            if (response.status < 200 || response.status >= 300) {
+                (asset_payloads ||= []).push([path, response.status]);
+            } else {
+                response.arrayBuffer().then(function (buffer) {
+                    (asset_payloads ||= []).push([path, new Uint8Array(buffer)]);
+                }).catch(function (reason) {
+                    (asset_payloads ||= []).push([path, 500]);
+                });;
+            }
+        }).catch(function (reason) {
+            (asset_payloads ||= []).push([path, 500]);
+        });
 }
-let temp = window.storm_asset_payloads;
-window.storm_asset_payloads = [];
-return temp;
-"#;
+
+function _pull_assets() {
+    let temp = asset_payloads;
+    asset_payloads = [];
+    return temp || [];
+}
+
+export {
+    _push_asset as push_asset,
+    _pull_assets as pull_assets
+};
+
+//"# // comment out the unclosed string for valid syntax
+)]
+extern "C" {
+    fn push_asset(path: &str);
+    fn pull_assets() -> Array;
+}
 
 pub(crate) struct AssetState {
-    push: Function,
-    pull: Function,
     results: Vec<Asset>,
 }
 
 impl AssetStateContract for AssetState {
     fn init() -> Self {
         AssetState {
-            push: Function::new_with_args(PUSH_ARGS, PUSH_BODY),
-            pull: Function::new_no_args(PULL_BODY),
             results: Vec::with_capacity(16),
         }
     }
 
     fn push_read(&mut self, relative_path: &str) {
-        if let Err(_) = self.push.call1(&JsValue::UNDEFINED, &JsValue::from_str(relative_path)) {
-            self.results.push(Asset::new_err(relative_path.to_string(), LoaderError::Unsupported));
-        }
+        push_asset(relative_path);
     }
 
     fn try_pop_read(&mut self) -> Option<Asset> {
         if self.results.len() == 0 {
-            let array: Array = self.pull.call0(&JsValue::UNDEFINED).unwrap().dyn_into().unwrap();
+            let array: Array = pull_assets();
             for value in array.iter() {
                 let tuple: Array = value.dyn_into().unwrap();
                 let path = tuple.get(0).as_string().unwrap();
