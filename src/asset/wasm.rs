@@ -6,7 +6,6 @@ use wasm_bindgen::JsCast;
 
 // Literally exploiting an injection vulnerability to append arbitrary js into the bundle
 #[wasm_bindgen(raw_module = r#"./web.js';
-
 // uses `var` instead of `let` so there's no TDZ in case functions using it are called before this module body executes
 var asset_payloads;
 
@@ -37,9 +36,7 @@ export {
     _push_asset as push_asset,
     _pull_assets as pull_assets
 };
-
-//"# // comment out the unclosed string for valid syntax
-)]
+//"#)] // comment out the unclosed string for valid syntax
 extern "C" {
     fn push_asset(path: &str);
     fn pull_assets() -> Array;
