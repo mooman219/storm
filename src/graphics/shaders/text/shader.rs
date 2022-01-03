@@ -48,7 +48,7 @@ impl TextShader {
 
     /// Draws to the screen.
     pub fn draw(&self, uniform: &Uniform<TextUniform>, atlas: &Texture, buffer: &Buffer<TextSprite>) {
-        self.shader.draw_instanced(DrawMode::TriangleStrip, uniform, [atlas], buffer, 4);
+        self.shader.draw_instanced(DrawMode::TriangleStrip, uniform, [atlas], &[buffer], 4);
     }
 }
 
@@ -58,6 +58,7 @@ struct CharCacheValue {
     size: Vector2<f32>,
 }
 
+/// Holds the state required to cache and draw text to the screen.
 pub struct TextShaderPass {
     uniform: Uniform<TextUniform>,
     atlas: Texture,
@@ -89,10 +90,8 @@ impl TextShaderPass {
 
     /// Sets the orthographic projection used to draw this pass. If none is passed, this function
     /// does nothing.
-    pub fn set_ortho(&mut self, ortho: Option<Matrix4<f32>>) {
-        if let Some(ortho) = ortho {
-            self.uniform.set(TextUniform::new(ortho));
-        }
+    pub fn set_ortho(&mut self, ortho: Matrix4<f32>) {
+        self.uniform.set(TextUniform::new(ortho));
     }
 
     /// Draws the pass to the screen.

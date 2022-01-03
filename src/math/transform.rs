@@ -75,9 +75,8 @@ impl Transform {
     }
 
     /// Creates a new transform matix based on the parameters of the LayerTransform. The transform
-    /// matrix is built in this order: Scale * Translation * Rotation. A new matrix is only created
-    /// if it has changed.
-    pub fn generate(&mut self) -> Option<Matrix4<f32>> {
+    /// matrix is built in this order: Scale * Translation * Rotation.
+    pub fn matrix(&mut self) -> Matrix4<f32> {
         if self.transform_dirty {
             let mut translation = self.params.translation;
             translation.x = (translation.x * self.params.scale).floor() / self.params.scale;
@@ -96,16 +95,17 @@ impl Transform {
         if self.ortho_transform_dirty {
             self.ortho_transform = self.ortho * self.transform;
             self.ortho_transform_dirty = false;
-            Some(self.ortho_transform)
-        } else {
-            None
         }
+
+        self.ortho_transform
     }
 
-    /// Creates a new transform matix based on the parameters of the LayerTransform. The transform
-    /// matrix is built in this order: Scale * Translation * Rotation.
-    pub fn matrix(&mut self) -> Matrix4<f32> {
-        self.generate();
-        self.ortho_transform
+    /// Transforms the normalized position into a position in the transform. Typically you'll use
+    /// the mouse's normalized position and convert that into world space.
+    pub fn screen_to_world(&mut self, normalized_pos: Vector2<f32>) -> Vector2<f32> {
+        let matrix = self.matrix().invert().unwrap();
+        let value = Vector4::new(normalized_pos.x, normalized_pos.y, 0.0, 1.0);
+        let value = matrix * value;
+        Vector2::new(value.x, value.y)
     }
 }

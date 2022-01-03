@@ -124,22 +124,26 @@ fn run() -> impl FnMut(Event) {
             if is_dragging {
                 let scale = transform.get().scale;
                 transform.set().translation += delta / scale;
+                text_layer.set_ortho(transform.matrix());
             }
         }
-        Event::CursorScroll(direction) => match direction {
-            ScrollDirection::Up => transform.set().scale *= 1.1,
-            ScrollDirection::Down => transform.set().scale /= 1.1,
-            _ => {}
-        },
+        Event::CursorScroll(direction) => {
+            match direction {
+                ScrollDirection::Up => transform.set().scale *= 1.1,
+                ScrollDirection::Down => transform.set().scale /= 1.1,
+                _ => {}
+            }
+            text_layer.set_ortho(transform.matrix());
+        }
         Event::WindowResized {
             logical_size,
             ..
         } => {
             transform.set_size(logical_size);
+            text_layer.set_ortho(transform.matrix());
         }
         Event::Update(_delta) => {
             clear(ClearMode::color_depth(RGBA8::BLACK));
-            text_layer.set_ortho(transform.generate());
             text_layer.draw(&text_shader);
         }
         _ => {}

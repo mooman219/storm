@@ -1,6 +1,8 @@
-use crate::graphics::{
-    default_texture, shaders::sprite::Sprite, AsStd140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture,
-    Uniform,
+use crate::{
+    graphics::{
+        shaders::sprite::Sprite, AsStd140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture, Uniform,
+    },
+    math::Transform,
 };
 use cgmath::Matrix4;
 
@@ -13,12 +15,15 @@ impl ShaderDescriptor<1> for SpriteShader {
     type VertexDescriptor = Sprite;
 }
 
+/// The uniform for sprites is a simple transformation matrix.
 #[derive(AsStd140)]
 pub struct SpriteUniform {
+    /// The matrix.
     pub ortho: Matrix4<f32>,
 }
 
 impl SpriteUniform {
+    /// Helper function to create a new SpriteUniform.
     pub fn new(ortho: Matrix4<f32>) -> SpriteUniform {
         SpriteUniform {
             ortho,
@@ -26,48 +31,28 @@ impl SpriteUniform {
     }
 }
 
+impl From<&mut Transform> for SpriteUniform {
+    fn from(item: &mut Transform) -> Self {
+        SpriteUniform::new(item.matrix())
+    }
+}
+
+/// Shader object for sprites. This holds no mutable state, so it's recommended to reuse this as
+/// much as possible.
 pub struct SpriteShader {
     shader: Shader<SpriteShader, 1>,
 }
 
 impl SpriteShader {
+    /// Creates a new sprite shader.
     pub fn new() -> SpriteShader {
         SpriteShader {
             shader: Shader::new(),
         }
     }
 
-    /// Draws to the screen.
-    pub fn draw(&self, uniform: &Uniform<SpriteUniform>, atlas: &Texture, buffer: &Buffer<Sprite>) {
-        self.shader.draw_instanced(DrawMode::TriangleStrip, uniform, [atlas], buffer, 4);
-    }
-}
-
-pub struct SpriteShaderPass {
-    pub uniform: Uniform<SpriteUniform>,
-    pub atlas: Texture,
-    pub buffer: Buffer<Sprite>,
-}
-
-impl SpriteShaderPass {
-    pub fn new(ortho: Matrix4<f32>) -> SpriteShaderPass {
-        SpriteShaderPass {
-            uniform: Uniform::new(SpriteUniform::new(ortho)),
-            atlas: default_texture(),
-            buffer: Buffer::new(),
-        }
-    }
-
-    /// Sets the orthographic projection used to draw this pass. If none is passed, this function
-    /// does nothing.
-    pub fn set_ortho(&mut self, ortho: Option<Matrix4<f32>>) {
-        if let Some(ortho) = ortho {
-            self.uniform.set(SpriteUniform::new(ortho));
-        }
-    }
-
-    /// Draws the pass to the screen.
-    pub fn draw(&mut self, shader: &SpriteShader) {
-        shader.draw(&self.uniform, &self.atlas, &self.buffer);
+    /// Helper function to draw sprites to the screen.
+    pub fn draw(&self, uniform: &Uniform<SpriteUniform>, atlas: &Texture, buffers: &[&Buffer<Sprite>]) {
+        self.shader.draw_instanced(DrawMode::TriangleStrip, uniform, [atlas], buffers, 4);
     }
 }

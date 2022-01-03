@@ -7,6 +7,7 @@ use storm::graphics::{
     clear, set_window_display_mode, shaders::sprite::*, window_logical_size, ClearMode, DisplayMode,
     TextureSection, Vsync, WindowSettings,
 };
+use storm::graphics::{default_texture, Buffer, Uniform};
 use storm::math::Transform;
 use storm::*;
 
@@ -30,10 +31,13 @@ fn run() -> impl FnMut(Event) {
     wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
 
-    let mut transform = Transform::new(window_logical_size());
     let sprite_shader = SpriteShader::new();
-    let mut pass = SpriteShaderPass::new(transform.matrix());
+    let mut particle_buffer = Buffer::new();
+    let default_texture = default_texture();
+
+    let mut transform = Transform::new(window_logical_size());
     transform.set().rotation = 0.125;
+    let mut transform_uniform: Uniform<SpriteUniform> = Uniform::new(&mut transform);
 
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
@@ -45,12 +49,20 @@ fn run() -> impl FnMut(Event) {
             particles.push(particle);
         }
     }
-    pass.buffer.set(&sprites);
+    particle_buffer.set(&sprites);
 
     move |event| match event {
         Event::CloseRequested => request_stop(),
         Event::KeyPressed(key) => match key {
             KeyboardButton::Escape => request_stop(),
+            KeyboardButton::Left => {
+                transform.set().rotation += 0.005;
+                transform_uniform.set(&mut transform);
+            }
+            KeyboardButton::Right => {
+                transform.set().rotation -= 0.005;
+                transform_uniform.set(&mut transform);
+            }
             KeyboardButton::U => set_window_display_mode(DisplayMode::Windowed {
                 width: 1500,
                 height: 1000,
@@ -86,6 +98,7 @@ fn run() -> impl FnMut(Event) {
             if is_dragging {
                 let scale = transform.get().scale;
                 transform.set().translation += delta / scale;
+                transform_uniform.set(&mut transform);
             }
         }
         Event::WindowResized {
@@ -93,20 +106,23 @@ fn run() -> impl FnMut(Event) {
             ..
         } => {
             transform.set_size(logical_size);
+            transform_uniform.set(&mut transform);
         }
-        Event::CursorScroll(direction) => match direction {
-            ScrollDirection::Up => transform.set().scale *= 1.1,
-            ScrollDirection::Down => transform.set().scale /= 1.1,
-            _ => {}
-        },
+        Event::CursorScroll(direction) => {
+            match direction {
+                ScrollDirection::Up => transform.set().scale *= 1.1,
+                ScrollDirection::Down => transform.set().scale /= 1.1,
+                _ => {}
+            }
+            transform_uniform.set(&mut transform);
+        }
         Event::Update(_delta) => {
             for index in 0..sprites.len() {
                 Particle::tick(&mut sprites[index], &mut particles[index], 1.0 / 144.0);
             }
-            pass.buffer.set(&sprites);
+            particle_buffer.set(&sprites);
             clear(ClearMode::color_depth(RGBA8::BLACK));
-            pass.set_ortho(transform.generate());
-            pass.draw(&sprite_shader);
+            sprite_shader.draw(&transform_uniform, &default_texture, &[&particle_buffer]);
         }
         _ => {}
     }

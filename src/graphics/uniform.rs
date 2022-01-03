@@ -11,14 +11,14 @@ pub struct Uniform<T: AsStd140> {
 
 impl<T: AsStd140> Uniform<T> {
     /// Creates a new uniform.
-    pub fn new(uniform: T) -> Uniform<T> {
+    pub fn new<Z: Into<T>>(uniform: Z) -> Uniform<T> {
         let gl = ctx().graphics().gl();
 
         let vbo = gl.create_buffer();
         gl.bind_buffer(BufferBindingTarget::UniformBuffer, Some(vbo));
         gl.buffer_data_u8_slice(
             BufferBindingTarget::UniformBuffer,
-            uniform.as_std140().as_bytes(),
+            uniform.into().as_std140().as_bytes(),
             BufferUsage::StaticDraw,
         );
 
@@ -46,12 +46,12 @@ impl<T: AsStd140> Uniform<T> {
     }
 
     /// Sets the value of the uniform.
-    pub fn set(&mut self, uniform: T) {
+    pub fn set<Z: Into<T>>(&mut self, uniform: Z) {
         let gl = ctx().graphics().gl();
         gl.bind_buffer(BufferBindingTarget::UniformBuffer, Some(self.vbo));
         gl.buffer_data_u8_slice(
             BufferBindingTarget::UniformBuffer,
-            uniform.as_std140().as_bytes(),
+            uniform.into().as_std140().as_bytes(),
             BufferUsage::StaticDraw,
         );
     }

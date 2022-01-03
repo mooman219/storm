@@ -5,10 +5,11 @@ use storm::cgmath::{Vector2, Vector3};
 use storm::color::RGBA8;
 use storm::event::*;
 use storm::fontdue::{layout::LayoutSettings, Font};
+use storm::graphics::Buffer;
 use storm::graphics::{
-    clear,
+    clear, default_texture,
     shaders::{sprite::*, text::*},
-    window_logical_size, ClearMode, DisplayMode, Vsync, WindowSettings,
+    window_logical_size, ClearMode, DisplayMode, Uniform, Vsync, WindowSettings,
 };
 use storm::math::{Transform, AABB2D};
 use storm::*;
@@ -36,10 +37,18 @@ fn main() {
 fn run() -> impl FnMut(Event) {
     wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
-    let boop = Sound::from_flac(SOUND).unwrap();
-    let mut transform = Transform::new(window_logical_size());
     let text_shader = TextShader::new();
     let sprite_shader = SpriteShader::new();
+    let default_texture = default_texture();
+
+    let mut background = Buffer::new();
+    let mut paddles = Buffer::new();
+    let mut ball = Buffer::new();
+
+    let mut transform = Transform::new(window_logical_size());
+    let transform_uniform = Uniform::new(&mut transform);
+
+    let boop = Sound::from_flac(SOUND).unwrap();
 
     let fonts = [Font::from_bytes(FONT, Default::default()).unwrap()];
     let mut text_layer = TextShaderPass::new(transform.matrix());
@@ -62,8 +71,7 @@ fn run() -> impl FnMut(Event) {
         }],
     );
 
-    let mut background = SpriteShaderPass::new(transform.matrix());
-    background.buffer.set(&[Sprite {
+    background.set(&[Sprite {
         pos: Vector3::new(-500.0, -400.0, -0.1),
         size: Vector2::new(1000, 800),
         color: RGBA8::new(15, 15, 15, 255),
@@ -72,7 +80,6 @@ fn run() -> impl FnMut(Event) {
 
     let mut up = false;
     let mut down = false;
-    let mut paddles = SpriteShaderPass::new(transform.matrix());
     let mut paddle_speed = [0.0f32; 2];
     let mut paddle_sprites = [
         Sprite {
@@ -88,9 +95,8 @@ fn run() -> impl FnMut(Event) {
             ..Default::default()
         },
     ];
-    paddles.buffer.set(&paddle_sprites);
+    paddles.set(&paddle_sprites);
 
-    let mut ball = SpriteShaderPass::new(transform.matrix());
     let mut ball_speed = Vector3::new(-300.0, 0.0, 0.0);
     let mut ball_sprites = [Sprite {
         pos: Vector3::new(-12.0, -12.0, 0.0),
@@ -98,7 +104,7 @@ fn run() -> impl FnMut(Event) {
         color: RGBA8::WHITE,
         ..Default::default()
     }];
-    ball.buffer.set(&ball_sprites);
+    ball.set(&ball_sprites);
 
     const SPEED: f32 = 250.0;
     move |event| match event {
@@ -152,12 +158,10 @@ fn run() -> impl FnMut(Event) {
                 ball_speed = Vector3::new(-700.0, 0.0, 0.0);
             }
 
-            ball.buffer.set(&ball_sprites);
-            paddles.buffer.set(&paddle_sprites);
+            ball.set(&ball_sprites);
+            paddles.set(&paddle_sprites);
 
-            paddles.draw(&sprite_shader);
-            background.draw(&sprite_shader);
-            ball.draw(&sprite_shader);
+            sprite_shader.draw(&transform_uniform, &default_texture, &[&paddles, &background, &ball]);
             clear(ClearMode::depth());
             text_layer.draw(&text_shader);
         }

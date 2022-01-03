@@ -4,8 +4,10 @@ use log::{info, warn};
 use storm::audio::*;
 use storm::color::RGBA8;
 use storm::event::*;
+use storm::graphics::Buffer;
 use storm::graphics::{
-    clear, shaders::sprite::*, window_logical_size, ClearMode, DisplayMode, Texture, Vsync, WindowSettings,
+    clear, shaders::sprite::*, window_logical_size, ClearMode, DisplayMode, Texture, Uniform, Vsync,
+    WindowSettings,
 };
 use storm::math::Transform;
 use storm::*;
@@ -32,15 +34,19 @@ fn main() {
 fn run() -> impl FnMut(Event) {
     wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
-    let mut transform = Transform::new(window_logical_size());
     let sprite_shader = SpriteShader::new();
-    let mut pass = SpriteShaderPass::new(transform.matrix());
-    pass.atlas = Texture::from_png(TEXTURE_A);
+    let texture_atlas = Texture::from_png(TEXTURE_A);
+    let mut sprite_buffer = Buffer::new();
+
+    let mut transform = Transform::new(window_logical_size());
+    transform.set().rotation = 0.12;
+
+    let mut transform_uniform = Uniform::new(&mut transform);
 
     let source = Sound::from_flac(SOUND).unwrap();
     let sound = source.play(0.3, 0.1);
 
-    let mut back_sprites = [
+    let mut sprites = [
         Sprite::default(),
         Sprite {
             pos: Vector3::new(-200.0, -62.0, 0.0),
@@ -55,7 +61,7 @@ fn run() -> impl FnMut(Event) {
             ..Sprite::default()
         },
     ];
-    pass.buffer.set(&back_sprites);
+    sprite_buffer.set(&sprites);
 
     let mut clicking = false;
 
@@ -70,13 +76,14 @@ fn run() -> impl FnMut(Event) {
             _ => {}
         },
         Event::CursorPressed {
-            pos,
+            normalized_pos,
             ..
         } => {
-            if pos.x >= back_sprites[1].pos.x
-                && pos.x <= back_sprites[1].pos.x + back_sprites[1].size.x as f32
-                && pos.y >= back_sprites[1].pos.y
-                && pos.y <= back_sprites[1].pos.y + back_sprites[1].size.y as f32
+            let pos = transform.screen_to_world(normalized_pos);
+            if pos.x >= sprites[1].pos.x
+                && pos.x <= sprites[1].pos.x + sprites[1].size.x as f32
+                && pos.y >= sprites[1].pos.y
+                && pos.y <= sprites[1].pos.y + sprites[1].size.y as f32
             {
                 clicking = true;
             }
@@ -90,7 +97,8 @@ fn run() -> impl FnMut(Event) {
             normalized_pos,
             ..
         } => {
-            let mut x = normalized_pos.x - 12.0;
+            let pos = transform.screen_to_world(normalized_pos);
+            let mut x = pos.x - 12.0;
             if clicking {
                 if x < -200.0 {
                     x = -200.0;
@@ -99,8 +107,8 @@ fn run() -> impl FnMut(Event) {
                 }
                 let volume = (x + 200.0) / 375.0;
                 sound.set_volume(volume, 0.01);
-                back_sprites[1].pos.x = x;
-                pass.buffer.set(&back_sprites);
+                sprites[1].pos.x = x;
+                sprite_buffer.set(&sprites);
             }
         }
         Event::WindowResized {
@@ -108,11 +116,11 @@ fn run() -> impl FnMut(Event) {
             ..
         } => {
             transform.set_size(logical_size);
+            transform_uniform.set(&mut transform);
         }
         Event::Update(_delta) => {
             clear(ClearMode::color_depth(RGBA8::BLUE));
-            pass.set_ortho(transform.generate());
-            pass.draw(&sprite_shader);
+            sprite_shader.draw(&transform_uniform, &texture_atlas, &[&sprite_buffer]);
         }
         Event::AssetRead(asset) => match asset.result {
             Ok(contents) => {
