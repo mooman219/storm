@@ -22,15 +22,27 @@ pub enum Event {
     CursorPressed {
         /// Button pressed.
         button: CursorButton,
-        /// Cursor position at time of press.
-        pos: Vector2<f32>,
+        /// Cursor position at time of press. This is based on the physical size of the window, with
+        /// (0,0) being the bottom left.
+        physical_pos: Vector2<f32>,
+        /// Cursor position at time of press. This is normalized where the x and y values are
+        /// between -1 and 1, with the bottom left of the screen being (-1, -1), and the top right
+        /// being (1, 1). This may be useful for converting screen space coordinates into world\
+        /// space.
+        normalized_pos: Vector2<f32>,
     },
     /// Cursor release event. Contains the button released and the position it was released at.
     CursorReleased {
         /// Button released.
         button: CursorButton,
-        /// Cursor position at time of release.
-        pos: Vector2<f32>,
+        /// Cursor position at time of release. This is based on the physical size of the window,
+        /// with (0,0) being the bottom left.
+        physical_pos: Vector2<f32>,
+        /// Cursor position at time of release. This is normalized where the x and y values are
+        /// between -1 and 1, with the bottom left of the screen being (-1, -1), and the top right
+        /// being (1, 1). This may be useful for converting screen space coordinates into world\
+        /// space.
+        normalized_pos: Vector2<f32>,
     },
     /// Cursor wheel scroll event.
     CursorScroll(ScrollDirection),
@@ -55,6 +67,7 @@ pub enum Event {
     WindowResized {
         physical_size: Vector2<f32>,
         logical_size: Vector2<f32>,
+        scale_factor: f32,
     },
     /// This event is useful as a place to put your code that should be run after all state-changing
     /// events have been handled and you want to do stuff (updating state, performing calculations,

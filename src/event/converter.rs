@@ -9,7 +9,8 @@ pub struct EventConverter {
     scale_factor: f32,
     physical_size: Vector2<f32>,
     logical_size: Vector2<f32>,
-    cursor_pos: Vector2<f32>,
+    physical_cursor_pos: Vector2<f32>,
+    normalized_cursor_pos: Vector2<f32>,
 }
 
 impl EventConverter {
@@ -19,7 +20,8 @@ impl EventConverter {
             scale_factor: window.scale_factor(),
             physical_size: window.physical_size(),
             logical_size: window.logical_size(),
-            cursor_pos: Vector2::zero(),
+            physical_cursor_pos: Vector2::zero(),
+            normalized_cursor_pos: Vector2::zero(),
         }
     }
 
@@ -35,6 +37,7 @@ impl EventConverter {
                 event_handler(Event::WindowResized {
                     physical_size: self.physical_size,
                     logical_size: self.logical_size,
+                    scale_factor: self.scale_factor,
                 });
             }
             WindowEvent::ScaleFactorChanged {
@@ -49,6 +52,7 @@ impl EventConverter {
                 event_handler(Event::WindowResized {
                     physical_size: self.physical_size,
                     logical_size: self.logical_size,
+                    scale_factor: self.scale_factor,
                 });
             }
 
@@ -80,11 +84,13 @@ impl EventConverter {
                 let cursor_pos = Vector2::new(position.x as f32, self.physical_size.y - position.y as f32);
                 let normalized_pos =
                     (cursor_pos.div_element_wise(self.physical_size) * 2.0) - Vector2::new(1.0, 1.0);
-                let delta = (cursor_pos - self.cursor_pos) / self.scale_factor;
-                self.cursor_pos = cursor_pos;
+                let delta = (cursor_pos - self.physical_cursor_pos) / self.scale_factor;
+
+                self.physical_cursor_pos = cursor_pos;
+                self.normalized_cursor_pos = normalized_pos;
                 event_handler(Event::CursorMoved {
-                    physical_pos: self.cursor_pos,
-                    normalized_pos,
+                    physical_pos: self.physical_cursor_pos,
+                    normalized_pos: self.normalized_cursor_pos,
                     delta,
                 });
             }
@@ -115,13 +121,15 @@ impl EventConverter {
                 winit::event::ElementState::Pressed => {
                     event_handler(Event::CursorPressed {
                         button,
-                        pos: self.cursor_pos,
+                        physical_pos: self.physical_cursor_pos,
+                        normalized_pos: self.normalized_cursor_pos,
                     });
                 }
                 winit::event::ElementState::Released => {
                     event_handler(Event::CursorReleased {
                         button,
-                        pos: self.cursor_pos,
+                        physical_pos: self.physical_cursor_pos,
+                        normalized_pos: self.normalized_cursor_pos,
                     });
                 }
             },
