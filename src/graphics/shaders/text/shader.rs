@@ -1,7 +1,7 @@
 use crate::graphics::{
     max_texture_size,
     shaders::text::{Text, TextSprite, TextUserData},
-    AsStd140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture, TextureSection, Uniform,
+    std140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture, TextureSection, Uniform,
 };
 use crate::image::{Image, Packer};
 use crate::*;
@@ -22,15 +22,16 @@ impl ShaderDescriptor<1> for TextShader {
     type VertexDescriptor = TextSprite;
 }
 
-#[derive(AsStd140)]
+#[std140::uniform]
+#[derive(Clone, Copy)]
 pub struct TextUniform {
-    ortho: Matrix4<f32>,
+    pub ortho: std140::mat4,
 }
 
 impl TextUniform {
     pub fn new(ortho: Matrix4<f32>) -> TextUniform {
         TextUniform {
-            ortho,
+            ortho: ortho.into(),
         }
     }
 }

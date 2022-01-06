@@ -30,7 +30,6 @@ mod sync;
 
 pub use cgmath;
 pub use context::{request_stop, start, wait_for, wait_periodic, wait_until};
-pub use crevice;
 pub use fontdue;
 
 pub(crate) use context::ctx;

@@ -1,5 +1,7 @@
 /// Bundled sample shaders for basic sprite and text rendering.
 pub mod shaders;
+/// Rust struct types that are compatible with the GLSL std140 memory layout.
+pub mod std140;
 
 mod buffer;
 mod opengl;
@@ -23,8 +25,6 @@ pub use self::texture_section::TextureSection;
 pub use self::uniform::Uniform;
 pub use self::vertex_descriptor::{VertexAttribute, VertexDescriptor, VertexInputType, VertexOutputType};
 pub use self::window::{DisplayMode, Vsync, WindowSettings};
-/// Macro for working with data adhering to GLSL’s std140 layout specification.
-pub use crevice::std140::AsStd140;
 
 pub(crate) use self::opengl::*;
 pub(crate) use self::state::OpenGLState;

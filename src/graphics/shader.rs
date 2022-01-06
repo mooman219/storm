@@ -1,5 +1,5 @@
 use crate::ctx;
-use crate::graphics::{resource, AsStd140, Buffer, DrawMode, Texture, Uniform, VertexDescriptor};
+use crate::graphics::{resource, std140::Std140Struct, Buffer, DrawMode, Texture, Uniform, VertexDescriptor};
 use alloc::format;
 use core::marker::PhantomData;
 
@@ -10,7 +10,7 @@ pub trait ShaderDescriptor<const TEXTURES: usize> {
     const FRAGMENT_SHADER: &'static str;
     const TEXTURE_NAMES: [&'static str; TEXTURES];
     const VERTEX_UNIFORM_NAME: &'static str;
-    type VertexUniformType: AsStd140;
+    type VertexUniformType: Std140Struct;
     type VertexDescriptor: VertexDescriptor + Copy;
 }
 

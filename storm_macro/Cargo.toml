@@ -1,0 +1,23 @@
+[package]
+name = "storm_macro"
+version = "0.1.0"
+authors = ["Joe Cumbo <mooman219@gmail.com>"]
+description = "Proc macro crate for storm"
+license = "MIT"
+readme = "README.md"
+edition = "2021"
+documentation = "https://docs.rs/storm"
+homepage = "https://github.com/mooman219/storm"
+repository = "https://github.com/mooman219/storm"
+include = ["Cargo.toml", "src/", "README.md", "LICENSE"]
+
+[badges]
+maintenance = { status = "experimental" }
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "1.0"
+quote = "1.0"
+proc-macro2 = "1.0"

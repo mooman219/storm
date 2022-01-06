@@ -1,6 +1,6 @@
 use crate::{
     graphics::{
-        shaders::sprite::Sprite, AsStd140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture, Uniform,
+        shaders::sprite::Sprite, std140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture, Uniform,
     },
     math::Transform,
 };
@@ -16,17 +16,18 @@ impl ShaderDescriptor<1> for SpriteShader {
 }
 
 /// The uniform for sprites is a simple transformation matrix.
-#[derive(AsStd140)]
+#[std140::uniform]
+#[derive(Copy, Clone)]
 pub struct SpriteUniform {
     /// The matrix.
-    pub ortho: Matrix4<f32>,
+    pub ortho: std140::mat4,
 }
 
 impl SpriteUniform {
     /// Helper function to create a new SpriteUniform.
     pub fn new(ortho: Matrix4<f32>) -> SpriteUniform {
         SpriteUniform {
-            ortho,
+            ortho: ortho.into(),
         }
     }
 }
