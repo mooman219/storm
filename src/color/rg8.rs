@@ -4,7 +4,9 @@ use super::{ColorComponentType, ColorDescriptor, ColorLayoutFormat};
 #[repr(C)]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct RG8 {
+    /// Represents the red color channel.
     pub r: u8,
+    /// Represents the green color channel.
     pub g: u8,
 }
 
@@ -16,6 +18,7 @@ impl RG8 {
         }
     }
 
+    /// Helper function to create this color from f32s.
     pub fn from_f32(red: f32, green: f32) -> RG8 {
         RG8 {
             r: (red * 255.0) as u8,

@@ -36,11 +36,14 @@ impl TextUniform {
     }
 }
 
+/// Shader object for sprites. This holds no mutable state, so it's recommended to reuse this as
+/// much as possible.
 pub struct TextShader {
     shader: Shader<TextShader, 1>,
 }
 
 impl TextShader {
+    /// Creates a new text shader.
     pub fn new() -> TextShader {
         TextShader {
             shader: Shader::new(),

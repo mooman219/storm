@@ -36,13 +36,18 @@ pub(crate) struct TextUserData {
     pub color: RGBA8,
     pub depth: f32,
 }
-
+/// Holds configuration settings for a glyph of text.
 #[repr(C)]
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct TextSprite {
+    /// Position of the sprite. The X and Y coordinates represent the bottom left corner of the
+    /// sprite. The Z coordinate represents sprite depth. Units are measured in pixels.
     pub pos: Vector3<f32>,
+    /// Units are measured in pixels.
     pub size: Vector2<u16>,
+    /// Texture to apply to the sprite. The default is a plain white texture.
     pub texture: TextureSection,
+    /// Color multiplier to apply to the sprite. The default is white.
     pub color: RGBA8,
 }
 
@@ -57,6 +62,7 @@ impl VertexDescriptor for TextSprite {
 }
 
 impl TextSprite {
+    /// Helper function to create a new text sprite.
     pub fn new(pos: Vector3<f32>, size: Vector2<f32>, texture: TextureSection, color: RGBA8) -> TextSprite {
         TextSprite {
             pos,

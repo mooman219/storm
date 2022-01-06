@@ -30,6 +30,7 @@ pub unsafe trait Std140Struct: Copy {}
 #[repr(C, align(4))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct float {
+    /// The first value.
     pub x: f32,
 }
 
@@ -52,7 +53,9 @@ impl float {
 #[repr(C, align(8))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct vec2 {
+    /// The first value.
     pub x: f32,
+    /// The second value.
     pub y: f32,
 }
 
@@ -76,8 +79,11 @@ impl vec2 {
 #[repr(C, align(16))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct vec3 {
+    /// The first value.
     pub x: f32,
+    /// The second value.
     pub y: f32,
+    /// The third value.
     pub z: f32,
 }
 
@@ -102,9 +108,13 @@ impl vec3 {
 #[repr(C, align(16))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct vec4 {
+    /// The first value.
     pub x: f32,
+    /// The second value.
     pub y: f32,
+    /// The third value.
     pub z: f32,
+    /// The fourth value.
     pub w: f32,
 }
 
@@ -132,6 +142,7 @@ impl vec4 {
 #[repr(C, align(4))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct int {
+    /// The first value.
     pub x: i32,
 }
 
@@ -154,7 +165,9 @@ impl int {
 #[repr(C, align(8))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct ivec2 {
+    /// The first value.
     pub x: i32,
+    /// The second value.
     pub y: i32,
 }
 
@@ -178,8 +191,11 @@ impl ivec2 {
 #[repr(C, align(16))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct ivec3 {
+    /// The first value.
     pub x: i32,
+    /// The second value.
     pub y: i32,
+    /// The third value.
     pub z: i32,
 }
 
@@ -204,9 +220,13 @@ impl ivec3 {
 #[repr(C, align(16))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct ivec4 {
+    /// The first value.
     pub x: i32,
+    /// The second value.
     pub y: i32,
+    /// The third value.
     pub z: i32,
+    /// The fourth value.
     pub w: i32,
 }
 
@@ -234,6 +254,7 @@ impl ivec4 {
 #[repr(C, align(4))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct uint {
+    /// The first value.
     pub x: u32,
 }
 
@@ -258,7 +279,9 @@ impl uint {
 #[repr(C, align(8))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct uvec2 {
+    /// The first value.
     pub x: u32,
+    /// The second value.
     pub y: u32,
 }
 
@@ -282,8 +305,11 @@ impl uvec2 {
 #[repr(C, align(16))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct uvec3 {
+    /// The first value.
     pub x: u32,
+    /// The second value.
     pub y: u32,
+    /// The third value.
     pub z: u32,
 }
 
@@ -308,9 +334,13 @@ impl uvec3 {
 #[repr(C, align(16))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct uvec4 {
+    /// The first value.
     pub x: u32,
+    /// The second value.
     pub y: u32,
+    /// The third value.
     pub z: u32,
+    /// The fourth value.
     pub w: u32,
 }
 
@@ -338,7 +368,9 @@ impl uvec4 {
 #[repr(u32)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum boolean {
+    /// Represents true.
     True,
+    /// Represents false.
     False,
 }
 
@@ -346,7 +378,9 @@ pub enum boolean {
 #[repr(C, align(8))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct bvec2 {
+    /// The first value.
     pub x: boolean,
+    /// The second value.
     pub y: boolean,
 }
 
@@ -375,8 +409,11 @@ impl bvec2 {
 #[repr(C, align(16))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct bvec3 {
+    /// The first value.
     pub x: boolean,
+    /// The second value.
     pub y: boolean,
+    /// The third value.
     pub z: boolean,
 }
 
@@ -406,9 +443,13 @@ impl bvec3 {
 #[repr(C, align(16))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct bvec4 {
+    /// The first value.
     pub x: boolean,
+    /// The second value.
     pub y: boolean,
+    /// The third value.
     pub z: boolean,
+    /// The fourth value.
     pub w: boolean,
 }
 
@@ -440,7 +481,9 @@ impl bvec4 {
 /// A matrix with 2 columns and up to 2 rows, represented by 2 vec4 vectors.
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct mat2 {
+    /// The first value.
     pub x: vec4,
+    /// The second value.
     pub y: vec4,
 }
 
@@ -463,8 +506,11 @@ impl mat2 {
 /// A matrix with 3 columns and up to 3 rows, represented by 3 vec4 vectors.
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct mat3 {
+    /// The first value.
     pub x: vec4,
+    /// The second value.
     pub y: vec4,
+    /// The third value.
     pub z: vec4,
 }
 
@@ -488,9 +534,13 @@ impl mat3 {
 /// A matrix with 4 columns and up to 4 rows, represented by 4 vec4 vectors.
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct mat4 {
+    /// The first value.
     pub x: vec4,
+    /// The second value.
     pub y: vec4,
+    /// The third value.
     pub z: vec4,
+    /// The fourth value.
     pub w: vec4,
 }
 
