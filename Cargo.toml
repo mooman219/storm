@@ -1,6 +1,6 @@
 [package]
 name = "storm"
-version = "0.9.0"
+version = "0.9.1"
 authors = ["Joe Cumbo <mooman219@gmail.com>"]
 description = "A personal 2D game engine designed for performance"
 license = "MIT"
@@ -25,19 +25,16 @@ web-sys = { version = "0.3.55", features = [
     "Window",
 ]}
 wasm-bindgen = { version = "0.2" } 
-winit = { version = "0.25", features = [
-    "web-sys"
-]}
 console_error_panic_hook = "0.1.6"
 cpal = { version = "0.13.4", features = ["wasm-bindgen"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-glutin = "0.27"
-winit = "0.25"
+glutin = "0.28"
 cpal = "0.13.4"
 
 [dependencies]
 storm_macro = { version = "0.1.0", path = "storm_macro" }
+winit = "0.26"
 simplelog = "0.11.1"
 instant = "0.1.11"
 glow = "0.11"
