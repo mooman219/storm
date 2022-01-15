@@ -30,7 +30,8 @@ impl Mixer {
         while index < self.active.len() {
             let instance = &mut self.active[index];
             if instance.mix(self.sample_interval, out) {
-                self.active.swap_remove(index);
+                let mut instance = self.active.swap_remove(index);
+                instance.control().stop();
             } else {
                 index += 1;
             }

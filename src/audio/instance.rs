@@ -24,9 +24,13 @@ impl SoundInstance {
         }
     }
 
+    pub fn control(&mut self) -> &mut SoundControl {
+        &mut self.control
+    }
+
     pub fn mix(&mut self, interval: f32, out: &mut [[f32; 2]]) -> bool {
         // Stopping the sound.
-        if self.control.load_stop() {
+        if self.control.is_stopped() {
             return true;
         }
 

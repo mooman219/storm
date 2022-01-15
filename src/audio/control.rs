@@ -56,7 +56,9 @@ impl SoundControl {
         self.0.paused.load(Ordering::Relaxed)
     }
 
-    pub(crate) fn load_stop(&self) -> bool {
+    /// Returns if the sound is stopped. If the sound was manually stopped or finished playing, it
+    /// will be marked as stopped.
+    pub fn is_stopped(&self) -> bool {
         self.0.stop.load(Ordering::Relaxed)
     }
 }
