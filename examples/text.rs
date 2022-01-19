@@ -5,7 +5,7 @@ use storm::fontdue::{layout::LayoutSettings, Font};
 use storm::graphics::{
     clear, shaders::text::*, window_logical_size, ClearMode, DisplayMode, Vsync, WindowSettings,
 };
-use storm::math::Transform;
+use storm::math::OrthographicCamera;
 use storm::*;
 
 static FONT: &[u8] = include_bytes!("resources/Roboto-Regular.ttf");
@@ -30,7 +30,7 @@ fn main() {
 fn run() -> impl FnMut(Event) {
     wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
     let mut is_dragging = false;
-    let mut transform = Transform::new(window_logical_size());
+    let mut transform = OrthographicCamera::new(window_logical_size());
     let text_shader = TextShader::new();
 
     // Create a Layers to draw on.
@@ -81,7 +81,10 @@ fn run() -> impl FnMut(Event) {
             );
         }
         Event::CloseRequested => request_stop(),
-        Event::KeyPressed(key) => match key {
+        Event::KeyPressed {
+            keycode,
+            ..
+        } => match keycode {
             KeyboardButton::Escape => request_stop(),
             KeyboardButton::Tab => {
                 transform.set().scale = 1.0;
@@ -123,7 +126,7 @@ fn run() -> impl FnMut(Event) {
         } => {
             if is_dragging {
                 let scale = transform.get().scale;
-                transform.set().translation += delta / scale;
+                transform.set().translation += delta.extend(0.0) / scale;
                 text_layer.set_ortho(transform.matrix());
             }
         }

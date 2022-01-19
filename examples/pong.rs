@@ -11,7 +11,7 @@ use storm::graphics::{
     shaders::{sprite::*, text::*},
     window_logical_size, ClearMode, DisplayMode, Uniform, Vsync, WindowSettings,
 };
-use storm::math::{Transform, AABB2D};
+use storm::math::{OrthographicCamera, AABB2D};
 use storm::*;
 
 static SOUND: &[u8] = include_bytes!("resources/boop.flac");
@@ -45,7 +45,7 @@ fn run() -> impl FnMut(Event) {
     let mut paddles = Buffer::new();
     let mut ball = Buffer::new();
 
-    let mut transform = Transform::new(window_logical_size());
+    let mut transform = OrthographicCamera::new(window_logical_size());
     let transform_uniform = Uniform::new(&mut transform);
 
     let boop = Sound::from_flac(SOUND).unwrap();
@@ -109,7 +109,10 @@ fn run() -> impl FnMut(Event) {
     const SPEED: f32 = 250.0;
     move |event| match event {
         Event::CloseRequested => request_stop(),
-        Event::KeyPressed(key) => match key {
+        Event::KeyPressed {
+            keycode,
+            ..
+        } => match keycode {
             KeyboardButton::Up => {
                 if !up {
                     paddle_speed[0] += SPEED;

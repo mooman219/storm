@@ -8,7 +8,7 @@ use storm::graphics::{
     TextureSection, Vsync, WindowSettings,
 };
 use storm::graphics::{default_texture, Buffer, Uniform};
-use storm::math::Transform;
+use storm::math::OrthographicCamera;
 use storm::*;
 
 /// Run with: cargo run --example particles --release
@@ -35,7 +35,7 @@ fn run() -> impl FnMut(Event) {
     let mut particle_buffer = Buffer::new();
     let default_texture = default_texture();
 
-    let mut transform = Transform::new(window_logical_size());
+    let mut transform = OrthographicCamera::new(window_logical_size());
     transform.set().rotation = 0.125;
     let mut transform_uniform: Uniform<SpriteUniform> = Uniform::new(&mut transform);
 
@@ -53,7 +53,10 @@ fn run() -> impl FnMut(Event) {
 
     move |event| match event {
         Event::CloseRequested => request_stop(),
-        Event::KeyPressed(key) => match key {
+        Event::KeyPressed {
+            keycode,
+            ..
+        } => match keycode {
             KeyboardButton::Escape => request_stop(),
             KeyboardButton::Left => {
                 transform.set().rotation += 0.005;
@@ -97,7 +100,7 @@ fn run() -> impl FnMut(Event) {
         } => {
             if is_dragging {
                 let scale = transform.get().scale;
-                transform.set().translation += delta / scale;
+                transform.set().translation += delta.extend(0.0) / scale;
                 transform_uniform.set(&mut transform);
             }
         }

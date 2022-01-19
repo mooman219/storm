@@ -2,7 +2,7 @@ use crate::{
     graphics::{
         shaders::sprite::Sprite, std140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture, Uniform,
     },
-    math::Transform,
+    math::OrthographicCamera,
 };
 use cgmath::Matrix4;
 
@@ -32,8 +32,8 @@ impl SpriteUniform {
     }
 }
 
-impl From<&mut Transform> for SpriteUniform {
-    fn from(item: &mut Transform) -> Self {
+impl From<&mut OrthographicCamera> for SpriteUniform {
+    fn from(item: &mut OrthographicCamera) -> Self {
         SpriteUniform::new(item.matrix())
     }
 }

@@ -9,7 +9,7 @@ use storm::graphics::{
     clear, shaders::sprite::*, window_logical_size, ClearMode, DisplayMode, Texture, Uniform, Vsync,
     WindowSettings,
 };
-use storm::math::Transform;
+use storm::math::OrthographicCamera;
 use storm::*;
 
 static TEXTURE_A: &[u8] = include_bytes!("resources/3.png");
@@ -38,7 +38,7 @@ fn run() -> impl FnMut(Event) {
     let texture_atlas = Texture::from_png(TEXTURE_A);
     let mut sprite_buffer = Buffer::new();
 
-    let mut transform = Transform::new(window_logical_size());
+    let mut transform = OrthographicCamera::new(window_logical_size());
     transform.set().rotation = 0.12;
 
     let mut transform_uniform = Uniform::new(&mut transform);
@@ -67,7 +67,10 @@ fn run() -> impl FnMut(Event) {
 
     move |event| match event {
         Event::CloseRequested => request_stop(),
-        Event::KeyPressed(key) => match key {
+        Event::KeyPressed {
+            keycode,
+            ..
+        } => match keycode {
             KeyboardButton::Escape => request_stop(),
             KeyboardButton::P => sound.pause(),
             KeyboardButton::R => sound.resume(),

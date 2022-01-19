@@ -1,11 +1,15 @@
 mod aabb;
 mod interpolation;
+mod orthographic;
+mod perspective;
 mod transform;
 mod trigonometry;
 
 pub use self::aabb::*;
 pub use self::interpolation::*;
-pub use self::transform::*;
+pub use self::orthographic::{ortho_from_bounds, OrthographicCamera};
+pub use self::perspective::PerspectiveCamera;
+pub use self::transform::{TransformParameters, IDENTITY_MATRIX};
 pub use self::trigonometry::*;
 
 /// Converts perceptual (db) into linear ([0, 1]).

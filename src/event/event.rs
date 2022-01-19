@@ -14,8 +14,14 @@ pub enum Event {
     CloseRequested,
     /// Received a character. This includes control characters.
     ReceivedCharacter(char),
-    /// Keyboard press event.
-    KeyPressed(KeyboardButton),
+    /// Keyboard press event. Includes a flag for if this is a repeat event.
+    KeyPressed {
+        /// The button pressed.
+        keycode: KeyboardButton,
+        /// Flag for if this key was already pressed. Some environments may fire repeat key pressed
+        /// events when the key is held.
+        is_repeat: bool,
+    },
     /// Keyboard release event.
     KeyReleased(KeyboardButton),
     /// Cursor press event. Contains the button pressed and the position it was pressed at.

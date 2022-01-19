@@ -11,6 +11,7 @@ pub struct EventConverter {
     logical_size: Vector2<f32>,
     physical_cursor_pos: Vector2<f32>,
     normalized_cursor_pos: Vector2<f32>,
+    pressed_keys: [bool; 256],
 }
 
 impl EventConverter {
@@ -22,6 +23,7 @@ impl EventConverter {
             logical_size: window.logical_size(),
             physical_cursor_pos: Vector2::zero(),
             normalized_cursor_pos: Vector2::zero(),
+            pressed_keys: [false; 256],
         }
     }
 
@@ -65,11 +67,27 @@ impl EventConverter {
                 ..
             } => {
                 if let Some(keycode) = input.virtual_keycode {
+                    let val = keycode as u32;
                     match input.state {
                         winit::event::ElementState::Pressed => {
-                            event_handler(Event::KeyPressed(keycode));
+                            if val < 256 {
+                                let is_pressed = &mut self.pressed_keys[val as usize];
+                                event_handler(Event::KeyPressed {
+                                    keycode,
+                                    is_repeat: *is_pressed,
+                                });
+                                *is_pressed = true;
+                            } else {
+                                event_handler(Event::KeyPressed {
+                                    keycode,
+                                    is_repeat: false,
+                                });
+                            }
                         }
                         winit::event::ElementState::Released => {
+                            if val < 256 {
+                                self.pressed_keys[val as usize] = false;
+                            }
                             event_handler(Event::KeyReleased(keycode));
                         }
                     }

@@ -22,11 +22,12 @@ pub mod graphics;
 pub mod image;
 /// Math utilities.
 pub mod math;
+/// Synchronization utilities.
+pub mod sync;
 /// Time utilities.
 pub mod time;
 
 mod context;
-mod sync;
 
 pub use cgmath;
 pub use context::{request_stop, start, wait_for, wait_periodic, wait_until};
