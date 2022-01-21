@@ -29,6 +29,24 @@ pub(crate) trait OpenGLWindowContract: Sized {
     /// Gets the physical size of the window. This may differ from the viewport's physical size.
     fn physical_size(&self) -> Vector2<f32>;
 
+    /// Grabs the cursor, preventing it from leaving the window.
+    ///
+    /// ## Platform-specific
+    ///
+    /// - **macOS:** This locks the cursor in a fixed location, which looks visually awkward.
+    fn set_cursor_grab(&self, grab: bool);
+
+    /// Sets the visibility of the cursor.
+    ///
+    /// ## Platform-specific
+    ///
+    /// - **Windows:** The cursor is only hidden within the confines of the window.
+    /// - **X11:** The cursor is only hidden within the confines of the window.
+    /// - **Wayland:** The cursor is only hidden within the confines of the window.
+    /// - **macOS:** The cursor is hidden as long as the window has input focus, even if the cursor is
+    ///   outside of the window.
+    fn set_cursor_visible(&self, grab: bool);
+
     /// Sets the title of the window.
     ///
     /// ## Platform-specific

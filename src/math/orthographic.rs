@@ -1,4 +1,4 @@
-use crate::math::{TransformParameters, IDENTITY_MATRIX};
+use crate::math::IDENTITY_MATRIX;
 use cgmath::*;
 
 /// Creates an orthographic matrix from screen bounds with a fixed aspect ratio and with 0,0 in the
@@ -9,8 +9,21 @@ pub fn ortho_from_bounds(bounds: &Vector2<f32>) -> Matrix4<f32> {
     ortho(-w.floor(), w.ceil(), -h.floor(), h.ceil(), -1.0, 1.0)
 }
 
+pub struct OrthographicParams {
+    /// The translation of the layer.
+    pub translation: Vector3<f32>,
+    /// The zoom level of the layer. This is 1.0 by default, meaning 1 pixel takes up 1x1 pixels on
+    /// screen.
+    pub scale: f32,
+    /// Rotation is measured in turns from [0, 1). Values outside of the range are wrapped into the
+    /// range. For example, 1.75 is wrapped into 0.75, -0.4 is wrapped into 0.6.
+    pub rotation: f32,
+    /// Flags pixel perfect alignment.
+    pub pixel_perfect: bool,
+}
+
 pub struct OrthographicCamera {
-    params: TransformParameters,
+    params: OrthographicParams,
     logical_size: Vector2<f32>,
 
     transform: Matrix4<f32>,
@@ -24,10 +37,11 @@ pub struct OrthographicCamera {
 impl OrthographicCamera {
     pub fn new(logical_size: Vector2<f32>) -> OrthographicCamera {
         OrthographicCamera {
-            params: TransformParameters {
+            params: OrthographicParams {
                 translation: Vector3::zero(),
                 scale: 1.0,
                 rotation: 0.0,
+                pixel_perfect: true,
             },
             logical_size,
 
@@ -40,11 +54,13 @@ impl OrthographicCamera {
         }
     }
 
-    pub fn get(&mut self) -> &TransformParameters {
+    /// Gets an immutable reference to the transform parameters.
+    pub fn get(&self) -> &OrthographicParams {
         &self.params
     }
 
-    pub fn set(&mut self) -> &mut TransformParameters {
+    /// Gets an mutable reference to the transform parameters.
+    pub fn set(&mut self) -> &mut OrthographicParams {
         self.transform_dirty = true;
         self.ortho_transform_dirty = true;
         &mut self.params
@@ -62,8 +78,10 @@ impl OrthographicCamera {
     pub fn matrix(&mut self) -> Matrix4<f32> {
         if self.transform_dirty {
             let mut translation = self.params.translation;
-            translation.x = (translation.x * self.params.scale).floor() / self.params.scale;
-            translation.y = (translation.y * self.params.scale).floor() / self.params.scale;
+            if self.params.pixel_perfect {
+                translation.x = (translation.x * self.params.scale).floor() / self.params.scale;
+                translation.y = (translation.y * self.params.scale).floor() / self.params.scale;
+            }
             self.transform = Matrix4::from_scale(self.params.scale)
                 * Matrix4::from_translation(translation)
                 * Matrix4::from_angle_z(Rad(core::f32::consts::PI * 2.0 * self.params.rotation));

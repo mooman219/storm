@@ -52,8 +52,7 @@ pub enum Event {
     },
     /// Cursor wheel scroll event.
     CursorScroll(ScrollDirection),
-    /// Cursor moved event. Contains the position of the cursor and the delta from its last
-    /// position.
+    /// Cursor moved event. Contains the new position of the cursor.
     CursorMoved {
         /// Current cursor position. This is based on the physical size of the window, with (0,0)
         /// being the bottom left.
@@ -62,7 +61,11 @@ pub enum Event {
         /// 1, with the bottom left of the screen being (-1, -1), and the top right being (1, 1).
         /// This may be useful for converting screen space coordinates into world space.
         normalized_pos: Vector2<f32>,
-        /// Change from last position. This is based on the logical size of the window.
+    },
+    /// Cursor delta event. Contains the represents raw, unfiltered physical motion. Represents the
+    /// change in physical position of the pointing device.
+    CursorDelta {
+        /// Change from last position.
         delta: Vector2<f32>,
     },
     /// Cursor left the bounds of the window event.

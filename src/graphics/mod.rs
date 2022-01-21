@@ -18,7 +18,8 @@ pub use self::opengl::{ClearMode, DrawMode};
 pub use self::shader::{Shader, ShaderDescriptor};
 pub use self::state::{
     clear, default_texture, max_texture_size, set_window_display_mode, set_window_title,
-    viewport_logical_size, viewport_physical_size, window_logical_size, window_physical_size,
+    viewport_logical_size, viewport_physical_size, window_cursor_grab, window_cursor_visibility,
+    window_logical_size, window_physical_size,
 };
 pub use self::texture::Texture;
 pub use self::texture_section::TextureSection;

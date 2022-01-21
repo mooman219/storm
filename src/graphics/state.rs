@@ -114,6 +114,28 @@ pub fn window_physical_size() -> Vector2<f32> {
     ctx().graphics().window.physical_size()
 }
 
+/// Grabs the cursor, preventing it from leaving the window.
+///
+/// ## Platform-specific
+///
+/// - **macOS:** This locks the cursor in a fixed location, which looks visually awkward.
+pub fn window_cursor_grab(grab: bool) {
+    ctx().graphics().window.set_cursor_grab(grab)
+}
+
+/// Sets the visibility of the cursor.
+///
+/// ## Platform-specific
+///
+/// - **Windows:** The cursor is only hidden within the confines of the window.
+/// - **X11:** The cursor is only hidden within the confines of the window.
+/// - **Wayland:** The cursor is only hidden within the confines of the window.
+/// - **macOS:** The cursor is hidden as long as the window has input focus, even if the cursor is
+///   outside of the window.
+pub fn window_cursor_visibility(grab: bool) {
+    ctx().graphics().window.set_cursor_visible(grab)
+}
+
 /// Gets the logical size of the viewport. This may differ from the window's logical size.
 pub fn viewport_logical_size() -> Vector2<f32> {
     ctx().graphics().logical_size

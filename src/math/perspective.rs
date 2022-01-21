@@ -8,20 +8,17 @@ pub const IDENTITY_MATRIX: Matrix4<f32> = Matrix4::new(
 );
 
 /// Parameters
-pub struct TransformParameters {
-    /// The translation of the layer.
-    pub translation: Vector3<f32>,
-    /// The zoom level of the layer. This is 1.0 by default, meaning 1 pixel takes up 1x1 pixels on
-    /// screen.
-    pub scale: f32,
-    /// Rotation is measured in turns from [0, 1). Values outside of the range are wrapped into the
-    /// range. For example, 1.75 is wrapped into 0.75, -0.4 is wrapped into 0.6.
-    pub rotation: f32,
+pub struct PerspectiveParams {
+    /// The position of the camera..
+    pub eye: Vector3<f32>,
+    /// The direction the camera is looking
+    pub direction: Vector3<f32>,
 }
 
 pub struct PerspectiveCamera {
-    params: TransformParameters,
+    params: PerspectiveParams,
     logical_size: Vector2<f32>,
+    fov: Rad<f32>,
 
     transform: Matrix4<f32>,
     transform_dirty: bool,
@@ -34,12 +31,12 @@ pub struct PerspectiveCamera {
 impl PerspectiveCamera {
     pub fn new(logical_size: Vector2<f32>) -> PerspectiveCamera {
         PerspectiveCamera {
-            params: TransformParameters {
-                translation: Vector3::new(0.0, 0.0, 0.0),
-                scale: 1.0,
-                rotation: 0.0,
+            params: PerspectiveParams {
+                eye: Vector3::new(0.0, 0.0, 0.0),
+                direction: Vector3::new(1.0, 0.0, 0.0),
             },
             logical_size,
+            fov: Deg(90.0).into(),
 
             transform: IDENTITY_MATRIX,
             transform_dirty: false,
@@ -50,11 +47,13 @@ impl PerspectiveCamera {
         }
     }
 
-    pub fn get(&mut self) -> &TransformParameters {
+    /// Gets an immutable reference to the transform parameters.
+    pub fn get(&self) -> &PerspectiveParams {
         &self.params
     }
 
-    pub fn set(&mut self) -> &mut TransformParameters {
+    /// Gets an mutable reference to the transform parameters.
+    pub fn set(&mut self) -> &mut PerspectiveParams {
         self.transform_dirty = true;
         self.proj_transform_dirty = true;
         &mut self.params
@@ -67,19 +66,25 @@ impl PerspectiveCamera {
         self.logical_size = logical_size;
     }
 
+    /// Sets the FOV in degrees.
+    pub fn set_fov(&mut self, fov: f32) {
+        self.fov = Deg(fov).into();
+        self.proj_dirty = true;
+        self.proj_transform_dirty = true;
+    }
+
     /// Creates a new transform matix based on the parameters of the LayerTransform. The transform
     /// matrix is built in this order: Scale * Translation * Rotation.
     pub fn matrix(&mut self) -> Matrix4<f32> {
         if self.proj_transform_dirty {
             if self.transform_dirty {
-                self.transform = Matrix4::from_scale(self.params.scale)
-                    * Matrix4::from_translation(self.params.translation)
-                    * Matrix4::from_angle_z(Rad(core::f32::consts::PI * 2.0 * self.params.rotation));
+                let eye = unsafe { core::mem::transmute(self.params.eye) };
+                self.transform = Matrix4::look_to_rh(eye, self.params.direction, Vector3::new(0.0, 1.0, 0.0));
                 self.transform_dirty = false;
             }
             if self.proj_dirty {
                 let a = self.logical_size.x / self.logical_size.y;
-                self.proj = perspective(Deg::<f32>(100.0), a, 0.001, 100.0);
+                self.proj = perspective(self.fov, a, 0.001, 100.0);
                 self.proj_dirty = false;
             }
             self.proj_transform = self.proj * self.transform;

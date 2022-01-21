@@ -94,9 +94,8 @@ fn run() -> impl FnMut(Event) {
             CursorButton::Left => is_dragging = false,
             _ => {}
         },
-        Event::CursorMoved {
+        Event::CursorDelta {
             delta,
-            ..
         } => {
             if is_dragging {
                 let scale = transform.get().scale;

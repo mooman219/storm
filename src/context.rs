@@ -84,8 +84,12 @@ pub fn start<T: 'static + FnMut(Event)>(desc: WindowSettings, event_handler_crea
     event_loop.run(move |event, _, control_flow| {
         let ctx = ctx();
         match event {
+            WinitEvent::DeviceEvent {
+                ..
+            } => {
+                input.push(event, &mut event_handler);
+            }
             WinitEvent::WindowEvent {
-                event,
                 ..
             } => {
                 input.push(event, &mut event_handler);

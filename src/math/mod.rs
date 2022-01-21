@@ -2,15 +2,36 @@ mod aabb;
 mod interpolation;
 mod orthographic;
 mod perspective;
-mod transform;
 mod trigonometry;
+
+use cgmath::Vector2;
 
 pub use self::aabb::*;
 pub use self::interpolation::*;
 pub use self::orthographic::{ortho_from_bounds, OrthographicCamera};
 pub use self::perspective::PerspectiveCamera;
-pub use self::transform::{TransformParameters, IDENTITY_MATRIX};
 pub use self::trigonometry::*;
+
+/// Simple const identity matrix.
+pub const IDENTITY_MATRIX: cgmath::Matrix4<f32> = cgmath::Matrix4::new(
+    1.0, 0.0, 0.0, 0.0, //
+    0.0, 1.0, 0.0, 0.0, //
+    0.0, 0.0, 1.0, 0.0, //
+    0.0, 0.0, 0.0, 1.0, //
+);
+
+/// Quake fast inverse square root.
+pub fn inv_sqrt(x: f32) -> f32 {
+    let i = x.to_bits();
+    let i = 0x5f3759df - (i >> 1);
+    let y = f32::from_bits(i);
+    y * (1.5 - 0.5 * x * y * y)
+}
+
+/// Fast Vector2<f32> normalization.
+pub fn fast_normalize2(vector: Vector2<f32>) -> Vector2<f32> {
+    vector * inv_sqrt(vector.x * vector.x + vector.y * vector.y)
+}
 
 /// Converts perceptual (db) into linear ([0, 1]).
 pub fn perceptual(db: f32) -> f32 {

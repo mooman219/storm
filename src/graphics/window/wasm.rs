@@ -66,6 +66,14 @@ impl OpenGLWindowContract for OpenGLWindow {
         Vector2::new(size.width as f32, size.height as f32)
     }
 
+    fn set_cursor_grab(&self, grab: bool) {
+        let _ = self.inner.set_cursor_grab(grab);
+    }
+
+    fn set_cursor_visible(&self, visible: bool) {
+        let _ = self.inner.set_cursor_visible(visible);
+    }
+
     fn swap_buffers(&self) {
         // This is implicit on web.
     }
