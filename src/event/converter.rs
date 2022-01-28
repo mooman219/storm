@@ -12,6 +12,7 @@ pub struct EventConverter {
     physical_cursor_pos: Vector2<f32>,
     normalized_cursor_pos: Vector2<f32>,
     pressed_keys: [bool; 256],
+    focused: bool,
 }
 
 impl EventConverter {
@@ -24,6 +25,7 @@ impl EventConverter {
             physical_cursor_pos: Vector2::zero(),
             normalized_cursor_pos: Vector2::zero(),
             pressed_keys: [false; 256],
+            focused: false,
         }
     }
 
@@ -39,6 +41,7 @@ impl EventConverter {
                     let delta = Vector2::new(delta.0 as f32, -delta.1 as f32);
                     event_handler(Event::CursorDelta {
                         delta,
+                        focused: self.focused,
                     });
                 }
                 _ => {}
@@ -48,7 +51,12 @@ impl EventConverter {
                 ..
             } => {
                 match event {
-                    // Window
+                    WindowEvent::Focused(focused) => {
+                        self.focused = focused;
+                        event_handler(Event::WindowFocused {
+                            focused: self.focused,
+                        });
+                    }
                     WindowEvent::CloseRequested => event_handler(Event::CloseRequested),
                     WindowEvent::Resized(physical_size) => {
                         self.physical_size =

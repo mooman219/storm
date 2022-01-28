@@ -1,7 +1,7 @@
 use crate::graphics::{
     max_texture_size,
     shaders::text::{Text, TextSprite, TextUserData},
-    std140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture, TextureSection, Uniform,
+    std140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture, TextureFiltering, TextureSection, Uniform,
 };
 use crate::image::{Image, Packer};
 use crate::*;
@@ -78,7 +78,7 @@ pub struct TextShaderPass {
 impl TextShaderPass {
     pub fn new(ortho: Matrix4<f32>) -> TextShaderPass {
         let max = max_texture_size().min(4096) as u32;
-        let atlas = Texture::from_image(&Image::from_color(0u8, max, max));
+        let atlas = Texture::from_image(&Image::from_color(0u8, max, max), TextureFiltering::NONE);
         TextShaderPass {
             uniform: Uniform::new(TextUniform::new(ortho)),
             atlas,

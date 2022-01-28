@@ -96,6 +96,7 @@ fn run() -> impl FnMut(Event) {
         },
         Event::CursorDelta {
             delta,
+            ..
         } => {
             if is_dragging {
                 let scale = transform.get().scale;

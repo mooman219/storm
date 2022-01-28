@@ -7,6 +7,63 @@ use crate::graphics::{
 use crate::image::Image;
 use alloc::rc::Rc;
 
+use super::state::max_texture_anisotropy;
+
+/// Describes how a texture will be filtered. Different settings can improve texture rendering when
+/// viewing textures far away, or at steep angles.
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct TextureFiltering {
+    min_filter: TextureMinFilterValue,
+    anisotropy: Option<f32>,
+}
+
+impl TextureFiltering {
+    /// Applies no filtering to the texture.
+    pub const NONE: TextureFiltering = TextureFiltering {
+        min_filter: TextureMinFilterValue::Nearest,
+        anisotropy: None,
+    };
+    /// Generates mipmaps, using the nearest mipmap to select the texture.
+    pub const BILINEAR: TextureFiltering = TextureFiltering {
+        min_filter: TextureMinFilterValue::LinearMipmapNearest,
+        anisotropy: None,
+    };
+    /// Generates mipmaps, linearly interpolating between the mipmap to select the texture.
+    pub const TRILINEAR: TextureFiltering = TextureFiltering {
+        min_filter: TextureMinFilterValue::LinearMipmapLinear,
+        anisotropy: None,
+    };
+    /// Generates mipmaps and 2 anisotropic mipmap levels, linearly interpolating between the mipmap
+    /// to select the texture. If anisotropic mipmaps aren't available, this silently falls back to
+    /// trilinear filtering. Use max_texture_anisotropy() to check if this feature is supported.
+    pub const ANISOTROPIC2X: TextureFiltering = TextureFiltering {
+        min_filter: TextureMinFilterValue::LinearMipmapLinear,
+        anisotropy: Some(2.0),
+    };
+    /// Generates mipmaps and 4 anisotropic mipmap levels, linearly interpolating between the mipmap
+    /// to select the texture. If anisotropic mipmaps aren't available, this silently falls back to
+    /// trilinear filtering. Use max_texture_anisotropy() to check if this feature is supported.
+    pub const ANISOTROPIC4X: TextureFiltering = TextureFiltering {
+        min_filter: TextureMinFilterValue::LinearMipmapLinear,
+        anisotropy: Some(4.0),
+    };
+    /// Generates mipmaps and 8 anisotropic mipmap levels, linearly interpolating between the mipmap
+    /// to select the texture. If anisotropic mipmaps aren't available, this silently falls back to
+    /// trilinear filtering. Use max_texture_anisotropy() to check if this feature is supported.
+    pub const ANISOTROPIC8X: TextureFiltering = TextureFiltering {
+        min_filter: TextureMinFilterValue::LinearMipmapLinear,
+        anisotropy: Some(8.0),
+    };
+    /// Generates mipmaps and 16 anisotropic mipmap levels, linearly interpolating between the
+    /// mipmap to select the texture. If anisotropic mipmaps aren't available, this silently falls
+    /// back to trilinear filtering. Use max_texture_anisotropy() to check if this feature is
+    /// supported.
+    pub const ANISOTROPIC16X: TextureFiltering = TextureFiltering {
+        min_filter: TextureMinFilterValue::LinearMipmapLinear,
+        anisotropy: Some(16.0),
+    };
+}
+
 /// Represents a GPU resource for a texture.
 pub struct Texture {
     id: resource::Texture,
@@ -29,12 +86,12 @@ impl Clone for Texture {
 impl Texture {
     /// Interpret a slice of bytes as a PNG, decodes it into an RGBA image, then uploads it image to
     /// the GPU, creating a texture.
-    pub fn from_png(bytes: &[u8]) -> Texture {
-        Self::from_image(&Image::from_png(bytes))
+    pub fn from_png(bytes: &[u8], filtering: TextureFiltering) -> Texture {
+        Self::from_image(&Image::from_png(bytes), filtering)
     }
 
     /// Uploads an image to the GPU, creating a texture.
-    pub fn from_image<T: ColorDescriptor>(image: &Image<T>) -> Texture {
+    pub fn from_image<T: ColorDescriptor>(image: &Image<T>, filtering: TextureFiltering) -> Texture {
         let max_size = max_texture_size() as u32;
         if image.width() > max_size || image.height() > max_size {
             panic!(
@@ -65,9 +122,23 @@ impl Texture {
             T::component_type().pixel_type(),
             image.as_slice(),
         );
+
+        if filtering != TextureFiltering::NONE {
+            gl.generate_mipmap(TextureParameterTarget::Texture2D);
+        }
+
+        if let Some(requested_anisotropy) = filtering.anisotropy {
+            if let Some(supported_anisotropy) = max_texture_anisotropy() {
+                gl.tex_parameter_anisotropy(
+                    TextureParameterTarget::Texture2D,
+                    supported_anisotropy.min(requested_anisotropy),
+                );
+            }
+        }
+
         gl.tex_parameter_wrap_s(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
         gl.tex_parameter_wrap_t(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
-        gl.tex_parameter_min_filter(TextureParameterTarget::Texture2D, TextureMinFilterValue::Nearest);
+        gl.tex_parameter_min_filter(TextureParameterTarget::Texture2D, filtering.min_filter);
         gl.tex_parameter_mag_filter(TextureParameterTarget::Texture2D, TextureMagFilterValue::Nearest);
         gl.bind_texture(TextureBindingTarget::Texture2D, None);
         texture

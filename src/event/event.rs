@@ -67,6 +67,9 @@ pub enum Event {
     CursorDelta {
         /// Change from last position.
         delta: Vector2<f32>,
+        /// Flag for if the window is focused. This event may return deltas even when the window is
+        /// not focused.
+        focused: bool,
     },
     /// Cursor left the bounds of the window event.
     CursorLeft,
@@ -77,6 +80,11 @@ pub enum Event {
         physical_size: Vector2<f32>,
         logical_size: Vector2<f32>,
         scale_factor: f32,
+    },
+    /// The window gained or lost focus.
+    WindowFocused {
+        /// The parameter is true if the window has gained focus, and false if it has lost focus.
+        focused: bool,
     },
     /// This event is useful as a place to put your code that should be run after all state-changing
     /// events have been handled and you want to do stuff (updating state, performing calculations,

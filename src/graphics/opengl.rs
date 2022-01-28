@@ -2,6 +2,8 @@ use crate::color::RGBA8;
 use alloc::string::{String, ToString};
 use glow::{HasContext, PixelUnpackData};
 use log::error;
+// TODO: Replace with hashbrown when glow is fixed.
+use std::collections::HashSet;
 
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -337,6 +339,7 @@ pub enum TextureParameterName {
     TextureWrapS = glow::TEXTURE_WRAP_S,
     TextureWrapT = glow::TEXTURE_WRAP_T,
     TextureWrapR = glow::TEXTURE_WRAP_R,
+    TextureMaxAnisotropy = glow::TEXTURE_MAX_ANISOTROPY_EXT,
 }
 
 #[repr(u32)]
@@ -901,6 +904,12 @@ impl OpenGL {
         };
     }
 
+    pub fn generate_mipmap(&self, target: TextureParameterTarget) {
+        unsafe {
+            self.gl.generate_mipmap(target as u32);
+        };
+    }
+
     pub fn tex_parameter_wrap_s(&self, target: TextureParameterTarget, value: TextureWrapValue) {
         unsafe {
             self.gl.tex_parameter_i32(target as u32, TextureParameterName::TextureWrapS as u32, value as i32)
@@ -935,6 +944,16 @@ impl OpenGL {
                 target as u32,
                 TextureParameterName::TextureMagFilter as u32,
                 value as i32,
+            )
+        };
+    }
+
+    pub fn tex_parameter_anisotropy(&self, target: TextureParameterTarget, anisotropy: f32) {
+        unsafe {
+            self.gl.tex_parameter_f32(
+                target as u32,
+                TextureParameterName::TextureMaxAnisotropy as u32,
+                anisotropy,
             )
         };
     }
@@ -977,6 +996,14 @@ impl OpenGL {
 
     pub fn get_max_texture_size(&self) -> i32 {
         unsafe { self.gl.get_parameter_i32(glow::MAX_TEXTURE_SIZE) }
+    }
+
+    pub fn get_max_texture_anisotropy(&self) -> f32 {
+        unsafe { self.gl.get_parameter_f32(glow::MAX_TEXTURE_MAX_ANISOTROPY_EXT) }
+    }
+
+    pub fn get_supported_extensions(&self) -> &HashSet<String> {
+        self.gl.supported_extensions()
     }
 
     pub fn debug_message_callback<F>(&self, callback: F)

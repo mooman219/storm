@@ -3,7 +3,7 @@ use crate::ctx;
 use crate::graphics::Texture;
 use crate::graphics::{
     BlendFactor, Capability, ClearMode, CullFace, DepthTest, DisplayMode, OpenGL, OpenGLWindow,
-    OpenGLWindowContract, PixelStoreAlignment, WindowSettings,
+    OpenGLWindowContract, PixelStoreAlignment, TextureFiltering, WindowSettings,
 };
 use crate::image::Image;
 use cgmath::*;
@@ -16,22 +16,33 @@ pub(crate) struct OpenGLState {
     physical_size: Vector2<f32>,
     default_texture: Option<Texture>,
     max_texture_size: i32,
+    max_texture_anisotropy: Option<f32>,
 }
 
 impl OpenGLState {
     pub(crate) fn init(desc: &WindowSettings, event_loop: &winit::event_loop::EventLoop<()>) -> OpenGLState {
         let (window, gl) = OpenGLWindow::new(desc, event_loop);
         let mut gl = OpenGL::new(gl);
+        let extensions = gl.get_supported_extensions();
         let max_texture_size = gl.get_max_texture_size();
+        let max_texture_anisotropy = if extensions.contains("GL_EXT_texture_filter_anisotropic") {
+            Some(gl.get_max_texture_anisotropy())
+        } else {
+            None
+        };
         gl.pixel_store(PixelStoreAlignment::UnpackAlignment, 1);
         gl.enable(Capability::CullFace);
         gl.enable(Capability::Blend);
         gl.enable(Capability::DepthTest);
         // gl.enable(Capability::DebugOutput); // DEBUG
         // gl.debug_message_callback(|source: u32, error_type: u32, id: u32, severity: u32, message: &str| {
-        //     warn!(
+        //     log::warn!(
         //         "source: {}, error_type: {}, id: {}, severity: {}, message: {}",
-        //         source, error_type, id, severity, message
+        //         source,
+        //         error_type,
+        //         id,
+        //         severity,
+        //         message
         //     );
         // }); // DEBUG
         gl.clear_color(RGBA8::BLACK);
@@ -47,6 +58,7 @@ impl OpenGLState {
             window,
             default_texture: None,
             max_texture_size,
+            max_texture_anisotropy,
         };
         state
     }
@@ -78,7 +90,7 @@ pub fn default_texture() -> Texture {
     match &graphics.default_texture {
         Some(texture) => texture.clone(),
         None => {
-            let texture = Texture::from_image(&Image::from_color(RGBA8::WHITE, 1, 1));
+            let texture = Texture::from_image(&Image::from_color(RGBA8::WHITE, 1, 1), TextureFiltering::NONE);
             graphics.default_texture = Some(texture.clone());
             texture
         }
@@ -88,6 +100,11 @@ pub fn default_texture() -> Texture {
 /// Gets the max texture size supported on the GPU.
 pub fn max_texture_size() -> i32 {
     ctx().graphics().max_texture_size
+}
+
+/// Gets the max anisotropic texture filtering supported by the GPU. Returns None if unsupported.
+pub fn max_texture_anisotropy() -> Option<f32> {
+    ctx().graphics().max_texture_anisotropy
 }
 
 /// Sets the title of the window.

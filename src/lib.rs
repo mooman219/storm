@@ -4,7 +4,8 @@
 pub extern crate log;
 
 extern crate alloc;
-#[cfg(any(test, not(target_arch = "wasm32")))]
+// TODO: Resolve when glow is fixed.
+// #[cfg(any(test, not(target_arch = "wasm32")))]
 extern crate std;
 
 /// Asset utilities.

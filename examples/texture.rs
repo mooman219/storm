@@ -6,8 +6,8 @@ use storm::color::RGBA8;
 use storm::event::*;
 use storm::graphics::Buffer;
 use storm::graphics::{
-    clear, shaders::sprite::*, window_logical_size, ClearMode, DisplayMode, Texture, Uniform, Vsync,
-    WindowSettings,
+    clear, shaders::sprite::*, window_logical_size, ClearMode, DisplayMode, Texture, TextureFiltering,
+    Uniform, Vsync, WindowSettings,
 };
 use storm::math::OrthographicCamera;
 use storm::*;
@@ -35,7 +35,7 @@ fn run() -> impl FnMut(Event) {
     wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
     let sprite_shader = SpriteShader::new();
-    let texture_atlas = Texture::from_png(TEXTURE_A);
+    let texture_atlas = Texture::from_png(TEXTURE_A, TextureFiltering::NONE);
     let mut sprite_buffer = Buffer::new();
 
     let mut transform = OrthographicCamera::new(window_logical_size());
