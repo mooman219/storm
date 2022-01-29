@@ -5,11 +5,10 @@ use storm::cgmath::{Vector2, Vector3};
 use storm::color::RGBA8;
 use storm::event::*;
 use storm::fontdue::{layout::LayoutSettings, Font};
-use storm::graphics::Buffer;
 use storm::graphics::{
     clear, default_texture,
     shaders::{sprite::*, text::*},
-    window_logical_size, ClearMode, DisplayMode, Uniform, Vsync, WindowSettings,
+    window_logical_size, Buffer, ClearMode, DisplayMode, Texture, Uniform, Vsync, WindowSettings,
 };
 use storm::math::{OrthographicCamera, AABB2D};
 use storm::*;
@@ -30,11 +29,31 @@ fn main() {
             },
             vsync: Vsync::Disabled,
         },
-        run,
+        new,
     );
 }
 
-fn run() -> impl FnMut(Event) {
+const SPEED: f32 = 250.0;
+
+struct PongApp {
+    text_shader: TextShader,
+    sprite_shader: SpriteShader,
+    default_texture: Texture,
+    background: Buffer<Sprite>,
+    paddles: Buffer<Sprite>,
+    ball: Buffer<Sprite>,
+    transform_uniform: Uniform<SpriteUniform>,
+    boop: Sound,
+    text_layer: TextShaderPass,
+    up: bool,
+    down: bool,
+    paddle_speed: [f32; 2],
+    paddle_sprites: [Sprite; 2],
+    ball_speed: Vector3<f32>,
+    ball_sprites: [Sprite; 1],
+}
+
+fn new() -> impl App {
     wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
     let text_shader = TextShader::new();
@@ -78,10 +97,10 @@ fn run() -> impl FnMut(Event) {
         ..Default::default()
     }]);
 
-    let mut up = false;
-    let mut down = false;
-    let mut paddle_speed = [0.0f32; 2];
-    let mut paddle_sprites = [
+    let up = false;
+    let down = false;
+    let paddle_speed = [0.0f32; 2];
+    let paddle_sprites = [
         Sprite {
             pos: Vector3::new(-500.0, -60.0, 0.0),
             size: Vector2::new(30, 120),
@@ -97,8 +116,8 @@ fn run() -> impl FnMut(Event) {
     ];
     paddles.set(&paddle_sprites);
 
-    let mut ball_speed = Vector3::new(-300.0, 0.0, 0.0);
-    let mut ball_sprites = [Sprite {
+    let ball_speed = Vector3::new(-300.0, 0.0, 0.0);
+    let ball_sprites = [Sprite {
         pos: Vector3::new(-12.0, -12.0, 0.0),
         size: Vector2::new(25, 25),
         color: RGBA8::WHITE,
@@ -106,68 +125,94 @@ fn run() -> impl FnMut(Event) {
     }];
     ball.set(&ball_sprites);
 
-    const SPEED: f32 = 250.0;
-    move |event| match event {
-        Event::CloseRequested => request_stop(),
-        Event::KeyPressed {
-            keycode,
-            ..
-        } => match keycode {
+    PongApp {
+        text_shader,
+        sprite_shader,
+        default_texture,
+        background,
+        paddles,
+        ball,
+        transform_uniform,
+        boop,
+        text_layer,
+        up,
+        down,
+        paddle_speed,
+        paddle_sprites,
+        ball_speed,
+        ball_sprites,
+    }
+}
+
+impl App for PongApp {
+    fn on_update(&mut self, delta: f32) {
+        clear(ClearMode::color_depth(RGBA8::BLACK));
+        self.paddle_sprites[0].pos.y += self.paddle_speed[0] * delta;
+
+        let mut ball_aabb: AABB2D = self.ball_sprites[0].into();
+        if ball_aabb.slide(
+            &(self.ball_speed * delta).truncate(),
+            &[self.paddle_sprites[0].into(), self.paddle_sprites[1].into()],
+        ) {
+            self.ball_speed *= -1.0;
+            let _ = self.boop.play(0.4, 0.0);
+        }
+        self.ball_sprites[0].pos = Vector3::new(ball_aabb.min.x, ball_aabb.min.y, 0.0);
+        if self.ball_sprites[0].pos.x < -500.0 || self.ball_sprites[0].pos.x > 500.0 - 30.0 {
+            self.ball_sprites[0].pos = Vector3::new(-15.0, -15.0, 0.0);
+            self.ball_speed = Vector3::new(-700.0, 0.0, 0.0);
+        }
+
+        self.ball.set(&self.ball_sprites);
+        self.paddles.set(&self.paddle_sprites);
+
+        self.sprite_shader.draw(
+            &self.transform_uniform,
+            &self.default_texture,
+            &[&self.paddles, &self.background, &self.ball],
+        );
+        clear(ClearMode::depth());
+        self.text_layer.draw(&self.text_shader);
+    }
+
+    fn on_close_requested(&mut self) {
+        request_stop();
+    }
+
+    fn on_key_pressed(&mut self, key: event::KeyboardButton, _is_repeat: bool) {
+        match key {
             KeyboardButton::Up => {
-                if !up {
-                    paddle_speed[0] += SPEED;
-                    up = true;
+                if !self.up {
+                    self.paddle_speed[0] += SPEED;
+                    self.up = true;
                 }
             }
             KeyboardButton::Down => {
-                if !down {
-                    paddle_speed[0] -= SPEED;
-                    down = true;
+                if !self.down {
+                    self.paddle_speed[0] -= SPEED;
+                    self.down = true;
                 }
             }
             KeyboardButton::Escape => request_stop(),
             _ => {}
-        },
-        Event::KeyReleased(key) => match key {
+        }
+    }
+
+    fn on_key_released(&mut self, key: event::KeyboardButton) {
+        match key {
             KeyboardButton::Up => {
-                if up {
-                    paddle_speed[0] -= SPEED;
-                    up = false;
+                if self.up {
+                    self.paddle_speed[0] -= SPEED;
+                    self.up = false;
                 }
             }
             KeyboardButton::Down => {
-                if down {
-                    paddle_speed[0] += SPEED;
-                    down = false;
+                if self.down {
+                    self.paddle_speed[0] += SPEED;
+                    self.down = false;
                 }
             }
             _ => {}
-        },
-        Event::Update(delta) => {
-            clear(ClearMode::color_depth(RGBA8::BLACK));
-            paddle_sprites[0].pos.y += paddle_speed[0] * delta;
-
-            let mut ball_aabb: AABB2D = ball_sprites[0].into();
-            if ball_aabb.slide(
-                &(ball_speed * delta).truncate(),
-                &[paddle_sprites[0].into(), paddle_sprites[1].into()],
-            ) {
-                ball_speed *= -1.0;
-                let _ = boop.play(0.4, 0.0);
-            }
-            ball_sprites[0].pos = Vector3::new(ball_aabb.min.x, ball_aabb.min.y, 0.0);
-            if ball_sprites[0].pos.x < -500.0 || ball_sprites[0].pos.x > 500.0 - 30.0 {
-                ball_sprites[0].pos = Vector3::new(-15.0, -15.0, 0.0);
-                ball_speed = Vector3::new(-700.0, 0.0, 0.0);
-            }
-
-            ball.set(&ball_sprites);
-            paddles.set(&paddle_sprites);
-
-            sprite_shader.draw(&transform_uniform, &default_texture, &[&paddles, &background, &ball]);
-            clear(ClearMode::depth());
-            text_layer.draw(&text_shader);
         }
-        _ => {}
     }
 }

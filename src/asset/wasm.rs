@@ -37,6 +37,7 @@ export {
     _pull_assets as pull_assets
 };
 //"#)] // comment out the unclosed string for valid syntax
+
 extern "C" {
     fn push_asset(path: &str);
     fn pull_assets() -> Array;

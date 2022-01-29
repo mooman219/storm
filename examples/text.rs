@@ -23,13 +23,25 @@ fn main() {
             },
             vsync: Vsync::Disabled,
         },
-        run,
+        new,
     );
 }
 
-fn run() -> impl FnMut(Event) {
+const SIZE: f32 = 100.0;
+
+struct TextApp {
+    is_dragging: bool,
+    transform: OrthographicCamera,
+    text_shader: TextShader,
+    text_layer: TextShaderPass,
+    fonts: [Font; 1],
+    layout_settings: LayoutSettings,
+    message: String,
+}
+
+fn new() -> impl App {
     wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
-    let mut is_dragging = false;
+    let is_dragging = false;
     let mut transform = OrthographicCamera::new(window_logical_size());
     let text_shader = TextShader::new();
 
@@ -47,7 +59,7 @@ fn run() -> impl FnMut(Event) {
 
     // Append some text with our layout settings.
     const SIZE: f32 = 100.0;
-    let mut message = String::from("Nice\nPost");
+    let message = String::from("Nice\nPost");
     text_layer.append(
         &fonts,
         &layout_settings,
@@ -60,43 +72,61 @@ fn run() -> impl FnMut(Event) {
         }],
     );
 
-    move |event| match event {
-        Event::ReceivedCharacter(char) => {
-            // Backspace
-            if char == '\u{08}' {
-                return;
-            }
-            message.push(char);
-            text_layer.clear_text();
-            text_layer.append(
-                &fonts,
-                &layout_settings,
-                &[Text {
-                    text: &message,
-                    font_index: 0,
-                    px: SIZE,
-                    color: RGBA8::WHITE,
-                    depth: 0.0,
-                }],
-            );
+    TextApp {
+        is_dragging,
+        transform,
+        text_shader,
+        text_layer,
+        fonts,
+        layout_settings,
+        message,
+    }
+}
+
+impl App for TextApp {
+    fn on_update(&mut self, _delta: f32) {
+        clear(ClearMode::color_depth(RGBA8::BLACK));
+        self.text_layer.draw(&self.text_shader);
+    }
+
+    fn on_close_requested(&mut self) {
+        request_stop();
+    }
+
+    fn on_received_character(&mut self, character: char) {
+        // Backspace
+        if character == '\u{08}' {
+            return;
         }
-        Event::CloseRequested => request_stop(),
-        Event::KeyPressed {
-            keycode,
-            ..
-        } => match keycode {
+        self.message.push(character);
+        self.text_layer.clear_text();
+        self.text_layer.append(
+            &self.fonts,
+            &self.layout_settings,
+            &[Text {
+                text: &self.message,
+                font_index: 0,
+                px: SIZE,
+                color: RGBA8::WHITE,
+                depth: 0.0,
+            }],
+        );
+    }
+
+    fn on_key_pressed(&mut self, key: event::KeyboardButton, _is_repeat: bool) {
+        match key {
             KeyboardButton::Escape => request_stop(),
             KeyboardButton::Tab => {
-                transform.set().scale = 1.0;
+                self.transform.set().scale = 1.0;
             }
             KeyboardButton::Back => {
-                message.pop();
-                text_layer.clear_text();
-                text_layer.append(
-                    &fonts,
-                    &layout_settings,
+                self.message.pop();
+                self.text_layer.clear_text();
+                self.text_layer.append(
+                    &self.fonts,
+                    &self.layout_settings,
                     &[Text {
-                        text: &message,
+                        text: &self.message,
                         font_index: 0,
                         px: SIZE,
                         color: RGBA8::WHITE,
@@ -105,50 +135,57 @@ fn run() -> impl FnMut(Event) {
                 );
             }
             _ => {}
-        },
-        Event::CursorPressed {
-            button,
-            ..
-        } => match button {
-            CursorButton::Left => is_dragging = true,
+        }
+    }
+
+    fn on_cursor_pressed(
+        &mut self,
+        button: event::CursorButton,
+        _physical_pos: cgmath::Vector2<f32>,
+        _normalized_pos: cgmath::Vector2<f32>,
+    ) {
+        match button {
+            CursorButton::Left => self.is_dragging = true,
             _ => {}
-        },
-        Event::CursorReleased {
-            button,
-            ..
-        } => match button {
-            CursorButton::Left => is_dragging = false,
+        }
+    }
+
+    fn on_cursor_released(
+        &mut self,
+        button: event::CursorButton,
+        _physical_pos: cgmath::Vector2<f32>,
+        _normalized_pos: cgmath::Vector2<f32>,
+    ) {
+        match button {
+            CursorButton::Left => self.is_dragging = false,
             _ => {}
-        },
-        Event::CursorDelta {
-            delta,
-            ..
-        } => {
-            if is_dragging {
-                let scale = transform.get().scale;
-                transform.set().translation += delta.extend(0.0) / scale;
-                text_layer.set_ortho(transform.matrix());
-            }
         }
-        Event::CursorScroll(direction) => {
-            match direction {
-                ScrollDirection::Up => transform.set().scale *= 1.1,
-                ScrollDirection::Down => transform.set().scale /= 1.1,
-                _ => {}
-            }
-            text_layer.set_ortho(transform.matrix());
+    }
+
+    fn on_cursor_delta(&mut self, delta: cgmath::Vector2<f32>, _focused: bool) {
+        if self.is_dragging {
+            let scale = self.transform.get().scale;
+            self.transform.set().translation += delta.extend(0.0) / scale;
+            self.text_layer.set_ortho(self.transform.matrix());
         }
-        Event::WindowResized {
-            logical_size,
-            ..
-        } => {
-            transform.set_size(logical_size);
-            text_layer.set_ortho(transform.matrix());
+    }
+
+    fn on_cursor_scroll(&mut self, direction: event::ScrollDirection) {
+        match direction {
+            ScrollDirection::Up => self.transform.set().scale *= 1.1,
+            ScrollDirection::Down => self.transform.set().scale /= 1.1,
+            _ => {}
         }
-        Event::Update(_delta) => {
-            clear(ClearMode::color_depth(RGBA8::BLACK));
-            text_layer.draw(&text_shader);
-        }
-        _ => {}
+        self.text_layer.set_ortho(self.transform.matrix());
+    }
+
+    fn on_window_resized(
+        &mut self,
+        _physical_size: cgmath::Vector2<f32>,
+        logical_size: cgmath::Vector2<f32>,
+        _scale_factor: f32,
+    ) {
+        self.transform.set_size(logical_size);
+        self.text_layer.set_ortho(self.transform.matrix());
     }
 }

@@ -1,8 +1,9 @@
 use crate::asset::{AssetState, AssetStateContract};
 use crate::audio::AudioState;
-use crate::event::{Event, EventConverter};
+use crate::event::EventConverter;
 use crate::graphics::{OpenGLState, OpenGLWindowContract, WindowSettings};
 use crate::time::{Instant, Timer};
+use crate::App;
 use core::time::Duration;
 use log::info;
 use winit::event::Event as WinitEvent;
@@ -53,8 +54,8 @@ impl Context {
     }
 }
 
-/// Initializes the context. Graphics, audio, assets, are initialized by this function.
-pub fn start<T: 'static + FnMut(Event)>(desc: WindowSettings, event_handler_creator: fn() -> T) -> ! {
+/// Initializes the context. Graphics, audio, assets, and you app, are initialized by this function.
+pub fn start<T: 'static + App>(desc: WindowSettings, new_app: fn() -> T) -> ! {
     if unsafe { CTX.is_some() } {
         panic!("Start has already been called.");
     }
@@ -79,7 +80,7 @@ pub fn start<T: 'static + FnMut(Event)>(desc: WindowSettings, event_handler_crea
     };
 
     let mut input = EventConverter::new();
-    let mut event_handler = event_handler_creator();
+    let mut app = new_app();
     let mut update_timer = Timer::new("Event::Update");
     event_loop.run(move |event, _, control_flow| {
         let ctx = ctx();
@@ -87,16 +88,16 @@ pub fn start<T: 'static + FnMut(Event)>(desc: WindowSettings, event_handler_crea
             WinitEvent::DeviceEvent {
                 ..
             } => {
-                input.push(event, &mut event_handler);
+                input.push(event, &mut app);
             }
             WinitEvent::WindowEvent {
                 ..
             } => {
-                input.push(event, &mut event_handler);
+                input.push(event, &mut app);
             }
             WinitEvent::MainEventsCleared => {
-                while let Some(read) = ctx.assets().try_pop_read() {
-                    event_handler(Event::AssetRead(read));
+                while let Some(_read) = ctx.assets().try_pop_read() {
+                    // app.update(Event::AssetRead(read));
                 }
 
                 let now = Instant::now();
@@ -112,7 +113,7 @@ pub fn start<T: 'static + FnMut(Event)>(desc: WindowSettings, event_handler_crea
                     ctx.last_update = now;
 
                     update_timer.start();
-                    event_handler(Event::Update(delta.as_secs_f32()));
+                    app.on_update(delta.as_secs_f32());
                     ctx.graphics().window().swap_buffers();
                     update_timer.stop();
                 }

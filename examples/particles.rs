@@ -4,7 +4,7 @@ use storm::cgmath::*;
 use storm::color::RGBA8;
 use storm::event::*;
 use storm::graphics::{
-    clear, set_window_display_mode, shaders::sprite::*, window_logical_size, ClearMode, DisplayMode,
+    clear, set_window_display_mode, shaders::sprite::*, window_logical_size, ClearMode, DisplayMode, Texture,
     TextureSection, Vsync, WindowSettings,
 };
 use storm::graphics::{default_texture, Buffer, Uniform};
@@ -23,13 +23,24 @@ fn main() {
             },
             vsync: Vsync::Disabled,
         },
-        run,
+        new,
     );
 }
 
-fn run() -> impl FnMut(Event) {
+struct ParticlesApp {
+    is_dragging: bool,
+    sprite_shader: SpriteShader,
+    particle_buffer: Buffer<Sprite>,
+    default_texture: Texture,
+    transform: OrthographicCamera,
+    transform_uniform: Uniform<SpriteUniform>,
+    sprites: Vec<Sprite>,
+    particles: Vec<Particle>,
+}
+
+fn new() -> impl App {
     wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
-    let mut is_dragging = false;
+    let is_dragging = false;
 
     let sprite_shader = SpriteShader::new();
     let mut particle_buffer = Buffer::new();
@@ -37,7 +48,7 @@ fn run() -> impl FnMut(Event) {
 
     let mut transform = OrthographicCamera::new(window_logical_size());
     transform.set().rotation = 0.125;
-    let mut transform_uniform: Uniform<SpriteUniform> = Uniform::new(&mut transform);
+    let transform_uniform: Uniform<SpriteUniform> = Uniform::new(&mut transform);
 
     let mut sprites = Vec::new();
     let mut particles = Vec::new();
@@ -51,20 +62,42 @@ fn run() -> impl FnMut(Event) {
     }
     particle_buffer.set(&sprites);
 
-    move |event| match event {
-        Event::CloseRequested => request_stop(),
-        Event::KeyPressed {
-            keycode,
-            ..
-        } => match keycode {
+    ParticlesApp {
+        is_dragging,
+        sprite_shader,
+        particle_buffer,
+        default_texture,
+        transform,
+        transform_uniform,
+        sprites,
+        particles,
+    }
+}
+
+impl App for ParticlesApp {
+    fn on_update(&mut self, _delta: f32) {
+        for index in 0..self.sprites.len() {
+            Particle::tick(&mut self.sprites[index], &mut self.particles[index], 1.0 / 144.0);
+        }
+        self.particle_buffer.set(&self.sprites);
+        clear(ClearMode::color_depth(RGBA8::BLACK));
+        self.sprite_shader.draw(&self.transform_uniform, &self.default_texture, &[&self.particle_buffer]);
+    }
+
+    fn on_close_requested(&mut self) {
+        request_stop();
+    }
+
+    fn on_key_pressed(&mut self, key: event::KeyboardButton, _is_repeat: bool) {
+        match key {
             KeyboardButton::Escape => request_stop(),
             KeyboardButton::Left => {
-                transform.set().rotation += 0.005;
-                transform_uniform.set(&mut transform);
+                self.transform.set().rotation += 0.005;
+                self.transform_uniform.set(&mut self.transform);
             }
             KeyboardButton::Right => {
-                transform.set().rotation -= 0.005;
-                transform_uniform.set(&mut transform);
+                self.transform.set().rotation -= 0.005;
+                self.transform_uniform.set(&mut self.transform);
             }
             KeyboardButton::U => set_window_display_mode(DisplayMode::Windowed {
                 width: 1500,
@@ -79,55 +112,58 @@ fn run() -> impl FnMut(Event) {
             KeyboardButton::O => set_window_display_mode(DisplayMode::WindowedFullscreen),
             KeyboardButton::P => set_window_display_mode(DisplayMode::Fullscreen),
             _ => {}
-        },
-        Event::CursorPressed {
-            button,
-            ..
-        } => match button {
-            CursorButton::Left => is_dragging = true,
+        }
+    }
+
+    fn on_cursor_pressed(
+        &mut self,
+        button: event::CursorButton,
+        _physical_pos: cgmath::Vector2<f32>,
+        _normalized_pos: cgmath::Vector2<f32>,
+    ) {
+        match button {
+            CursorButton::Left => self.is_dragging = true,
             _ => {}
-        },
-        Event::CursorReleased {
-            button,
-            ..
-        } => match button {
-            CursorButton::Left => is_dragging = false,
+        }
+    }
+
+    fn on_cursor_released(
+        &mut self,
+        button: event::CursorButton,
+        _physical_pos: cgmath::Vector2<f32>,
+        _normalized_pos: cgmath::Vector2<f32>,
+    ) {
+        match button {
+            CursorButton::Left => self.is_dragging = false,
             _ => {}
-        },
-        Event::CursorDelta {
-            delta,
-            ..
-        } => {
-            if is_dragging {
-                let scale = transform.get().scale;
-                transform.set().translation += delta.extend(0.0) / scale;
-                transform_uniform.set(&mut transform);
-            }
         }
-        Event::WindowResized {
-            logical_size,
-            ..
-        } => {
-            transform.set_size(logical_size);
-            transform_uniform.set(&mut transform);
+    }
+
+    fn on_cursor_delta(&mut self, delta: cgmath::Vector2<f32>, _focused: bool) {
+        if self.is_dragging {
+            let scale = self.transform.get().scale;
+            self.transform.set().translation += delta.extend(0.0) / scale;
+            self.transform_uniform.set(&mut self.transform);
         }
-        Event::CursorScroll(direction) => {
-            match direction {
-                ScrollDirection::Up => transform.set().scale *= 1.1,
-                ScrollDirection::Down => transform.set().scale /= 1.1,
-                _ => {}
-            }
-            transform_uniform.set(&mut transform);
+    }
+
+    fn on_cursor_scroll(&mut self, direction: event::ScrollDirection) {
+        match direction {
+            ScrollDirection::Up => self.transform.set().scale *= 1.1,
+            ScrollDirection::Down => self.transform.set().scale /= 1.1,
+            _ => {}
         }
-        Event::Update(_delta) => {
-            for index in 0..sprites.len() {
-                Particle::tick(&mut sprites[index], &mut particles[index], 1.0 / 144.0);
-            }
-            particle_buffer.set(&sprites);
-            clear(ClearMode::color_depth(RGBA8::BLACK));
-            sprite_shader.draw(&transform_uniform, &default_texture, &[&particle_buffer]);
-        }
-        _ => {}
+        self.transform_uniform.set(&mut self.transform);
+    }
+
+    fn on_window_resized(
+        &mut self,
+        _physical_size: cgmath::Vector2<f32>,
+        logical_size: cgmath::Vector2<f32>,
+        _scale_factor: f32,
+    ) {
+        self.transform.set_size(logical_size);
+        self.transform_uniform.set(&mut self.transform);
     }
 }
 
