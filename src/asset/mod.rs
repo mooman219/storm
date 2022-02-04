@@ -1,9 +1,11 @@
 #[cfg(not(target_arch = "wasm32"))]
+#[path = "platform/native.rs"]
 mod native;
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) use native::AssetState;
 
 #[cfg(target_arch = "wasm32")]
+#[path = "platform/wasm.rs"]
 mod wasm;
 #[cfg(target_arch = "wasm32")]
 pub(crate) use wasm::AssetState;
