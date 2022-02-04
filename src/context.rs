@@ -96,10 +96,7 @@ pub fn start<T: 'static + App>(desc: WindowSettings, new_app: fn() -> T) -> ! {
                 input.push(event, &mut app);
             }
             WinitEvent::MainEventsCleared => {
-                while let Some(_read) = ctx.assets().try_pop_read() {
-                    // app.update(Event::AssetRead(read));
-                }
-
+                ctx.assets().process();
                 let now = Instant::now();
                 if now >= ctx.wait_next {
                     if let Some(duration) = ctx.wait_periodic {

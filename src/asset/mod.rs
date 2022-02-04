@@ -14,7 +14,7 @@ mod error;
 pub use self::asset::Asset;
 pub use self::error::LoaderError;
 
-use crate::ctx;
+pub(crate) use self::asset::AssetRequest;
 
 /// Requests a read of an asset. This produces an AssetRead event with the result of the read once
 /// it has completed.
@@ -23,8 +23,9 @@ use crate::ctx;
 ///
 /// - **Non-web:** The path is relative to the current working directory.
 /// - **Web:** The path is relative to the current url's root.
-pub fn request_read(relative_path: &str) {
-    ctx().assets().push_read(relative_path);
+pub fn request_read<T: FnMut(alloc::vec::Vec<Asset>) + Send + 'static>(relative_paths: &[&str], callback: T) {
+    let request = AssetRequest::new(relative_paths, alloc::boxed::Box::new(callback));
+    crate::ctx().assets().read(request);
 }
 
 pub(crate) trait AssetStateContract {
@@ -32,9 +33,8 @@ pub(crate) trait AssetStateContract {
     fn init() -> Self;
 
     /// Pushes a read request to the queue. Relative to the current working directory.
-    fn push_read(&mut self, relative_path: &str);
+    fn read(&mut self, request: AssetRequest);
 
-    /// Pops the next available read off the queue, returning None if there are no finished reads
-    /// available.
-    fn try_pop_read(&mut self) -> Option<Asset>;
+    /// Processes all available completed read requests.
+    fn process(&mut self);
 }

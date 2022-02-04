@@ -1,6 +1,9 @@
-use alloc::{string::String, vec::Vec};
-
 use super::LoaderError;
+use alloc::{
+    boxed::Box,
+    string::{String, ToString},
+    vec::Vec,
+};
 
 /// Represents a binary blob loaded from an external source.
 #[derive(Clone, Debug)]
@@ -25,6 +28,25 @@ impl Asset {
         Asset {
             relative_path,
             result: Err(error),
+        }
+    }
+}
+
+pub(crate) type AssetCallbackBox = Box<dyn FnMut(alloc::vec::Vec<Asset>) + Send + 'static>;
+
+pub(crate) struct AssetRequest {
+    pub assets: Vec<Asset>,
+    pub callback: AssetCallbackBox,
+}
+
+impl AssetRequest {
+    pub(crate) fn new(relative_paths: &[&str], callback: AssetCallbackBox) -> AssetRequest {
+        AssetRequest {
+            assets: relative_paths
+                .iter()
+                .map(|path| Asset::new_err(path.to_string(), LoaderError::Pending))
+                .collect::<Vec<Asset>>(),
+            callback,
         }
     }
 }

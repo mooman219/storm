@@ -102,8 +102,28 @@ impl App for TextureApp {
             KeyboardButton::Escape => request_stop(),
             KeyboardButton::P => self.sound.pause(),
             KeyboardButton::R => self.sound.resume(),
-            KeyboardButton::Q => storm::asset::request_read("./docs/load.png"),
-            KeyboardButton::A => storm::asset::request_read("./load.png"),
+            KeyboardButton::Q => {
+                storm::asset::request_read(&["./docs/load.png", "./docs/start.png"], |assets| {
+                    for asset in assets {
+                        match &asset.result {
+                            Ok(contents) => {
+                                log::info!("Loaded {}: {}", asset.relative_path, contents[1]);
+                            }
+                            Err(error) => log::warn!("Error {}: {:?}", asset.relative_path, error),
+                        }
+                    }
+                })
+            }
+            KeyboardButton::A => storm::asset::request_read(&["./load.png", "./start.png"], |assets| {
+                for asset in assets {
+                    match &asset.result {
+                        Ok(contents) => {
+                            log::info!("Loaded {}: {}", asset.relative_path, contents[1]);
+                        }
+                        Err(error) => log::warn!("Error {}: {:?}", asset.relative_path, error),
+                    }
+                }
+            }),
             _ => {}
         }
     }
@@ -158,11 +178,4 @@ impl App for TextureApp {
         self.transform.set_size(logical_size);
         self.transform_uniform.set(&mut self.transform);
     }
-
-    // Event::AssetRead(asset) => match asset.result {
-    //     Ok(contents) => {
-    //         info!("Loaded {}: {}", asset.relative_path, contents[1]);
-    //     }
-    //     Err(error) => warn!("Error {}: {:?}", asset.relative_path, error),
-    // },
 }

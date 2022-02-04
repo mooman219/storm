@@ -5,6 +5,8 @@
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[non_exhaustive]
 pub enum LoaderError {
+    /// This file is queued to be read.
+    Pending,
     /// An entity was not found, often a file.
     NotFound,
     /// The operation lacked the necessary privileges to complete.
