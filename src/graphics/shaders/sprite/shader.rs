@@ -3,6 +3,7 @@ use crate::{
         shaders::sprite::Sprite, std140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture, Uniform,
     },
     math::OrthographicCamera,
+    App, Context,
 };
 use cgmath::Matrix4;
 
@@ -46,9 +47,9 @@ pub struct SpriteShader {
 
 impl SpriteShader {
     /// Creates a new sprite shader.
-    pub fn new() -> SpriteShader {
+    pub fn new(ctx: &Context<impl App>) -> SpriteShader {
         SpriteShader {
-            shader: Shader::new(),
+            shader: Shader::new(ctx),
         }
     }
 

@@ -1,24 +1,29 @@
 use crate::asset::{Asset, AssetRequest, AssetStateContract, LoaderError};
 use crate::sync::{make as spsc_make, Consumer, Producer};
+use crate::App;
 use alloc::vec::Vec;
 use core::time::Duration;
 use std::fs::File;
 use std::{io, io::Read};
 use std::{thread, thread::JoinHandle};
 
-pub(crate) struct AssetState {
+pub(crate) struct AssetState<A: App> {
     handle: JoinHandle<()>,
-    pending: Vec<AssetRequest>,
-    read_request_sender: Producer<AssetRequest>,
-    read_result_receiver: Consumer<AssetRequest>,
+    pending: Vec<AssetRequest<A>>,
+    read_request_sender: Producer<AssetRequest<A>>,
+    read_result_receiver: Consumer<AssetRequest<A>>,
 }
 
-impl AssetStateContract for AssetState {
+impl<A: App> AssetStateContract<A> for AssetState<A> {
     fn init() -> Self {
-        let (read_request_sender, read_request_receiver): (Producer<AssetRequest>, Consumer<AssetRequest>) =
-            spsc_make(128);
-        let (read_result_sender, read_result_receiver): (Producer<AssetRequest>, Consumer<AssetRequest>) =
-            spsc_make(128);
+        let (read_request_sender, read_request_receiver): (
+            Producer<AssetRequest<A>>,
+            Consumer<AssetRequest<A>>,
+        ) = spsc_make(128);
+        let (read_result_sender, read_result_receiver): (
+            Producer<AssetRequest<A>>,
+            Consumer<AssetRequest<A>>,
+        ) = spsc_make(128);
 
         let handle = thread::spawn(move || loop {
             while let Some(mut request) = read_request_receiver.try_pop() {
@@ -38,13 +43,13 @@ impl AssetStateContract for AssetState {
         }
     }
 
-    fn read(&mut self, request: AssetRequest) {
+    fn read(&mut self, request: AssetRequest<A>) {
         if let Some(path) = self.read_request_sender.try_push(request) {
             self.pending.push(path);
         }
     }
 
-    fn process(&mut self) {
+    fn next(&mut self) -> Option<AssetRequest<A>> {
         // Send the backlog to be read.
         while let Some(path) = self.pending.pop() {
             if let Some(path) = self.read_request_sender.try_push(path) {
@@ -53,9 +58,7 @@ impl AssetStateContract for AssetState {
             }
         }
         // Process the finished requests.
-        while let Some(mut request) = self.read_result_receiver.try_pop() {
-            (request.callback)(request.assets);
-        }
+        self.read_result_receiver.try_pop()
     }
 }
 

@@ -1,9 +1,13 @@
-use crate::ctx;
-use crate::graphics::{configure_vertex, resource, BufferBindingTarget, BufferUsage, VertexDescriptor};
+use crate::graphics::{
+    configure_vertex, graphics, resource, BufferBindingTarget, BufferUsage, VertexDescriptor,
+};
+use crate::{App, Context};
 use core::marker::PhantomData;
 
 /// Buffers a set of elements on the device.
 pub struct Buffer<T: VertexDescriptor + Copy> {
+    // This type is !Send + !Sync.
+    _unsend: core::marker::PhantomData<*const ()>,
     vbo: resource::Buffer,
     vao: resource::VertexArray,
     vertices: usize,
@@ -12,8 +16,8 @@ pub struct Buffer<T: VertexDescriptor + Copy> {
 
 impl<T: VertexDescriptor + Copy> Buffer<T> {
     /// Creates a new buffer.
-    pub fn new() -> Buffer<T> {
-        let gl = ctx().graphics().gl();
+    pub fn new(_ctx: &Context<impl App>) -> Buffer<T> {
+        let gl = graphics().gl();
 
         let vao = gl.create_vertex_array();
         gl.bind_vertex_array(Some(vao));
@@ -23,6 +27,7 @@ impl<T: VertexDescriptor + Copy> Buffer<T> {
         gl.bind_vertex_array(None);
 
         Buffer {
+            _unsend: core::marker::PhantomData,
             vbo,
             vao,
             vertices: 0,
@@ -44,21 +49,21 @@ impl<T: VertexDescriptor + Copy> Buffer<T> {
     pub fn set(&mut self, items: &[T]) {
         self.vertices = items.len();
         if self.vertices > 0 {
-            let gl = ctx().graphics().gl();
+            let gl = graphics().gl();
             gl.bind_buffer(BufferBindingTarget::ArrayBuffer, Some(self.vbo));
             gl.buffer_data(BufferBindingTarget::ArrayBuffer, items, BufferUsage::StaticDraw);
         }
     }
 
     pub(crate) fn bind(&self) {
-        let gl = ctx().graphics().gl();
+        let gl = graphics().gl();
         gl.bind_vertex_array(Some(self.vao));
     }
 }
 
 impl<T: VertexDescriptor + Copy> Drop for Buffer<T> {
     fn drop(&mut self) {
-        let gl = ctx().graphics().gl();
+        let gl = graphics().gl();
         gl.delete_buffer(self.vbo);
         gl.delete_vertex_array(self.vao);
     }

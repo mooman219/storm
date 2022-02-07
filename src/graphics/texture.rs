@@ -1,13 +1,11 @@
 use crate::color::ColorDescriptor;
-use crate::ctx;
 use crate::graphics::{
-    max_texture_size, resource, TextureBindingTarget, TextureLoadTarget, TextureMagFilterValue,
+    graphics, resource, TextureBindingTarget, TextureLoadTarget, TextureMagFilterValue,
     TextureMinFilterValue, TextureParameterTarget, TextureSection, TextureWrapValue,
 };
 use crate::image::Image;
+use crate::{App, Context};
 use alloc::rc::Rc;
-
-use super::state::max_texture_anisotropy;
 
 /// Describes how a texture will be filtered. Different settings can improve texture rendering when
 /// viewing textures far away, or at steep angles.
@@ -86,13 +84,17 @@ impl Clone for Texture {
 impl Texture {
     /// Interpret a slice of bytes as a PNG, decodes it into an RGBA image, then uploads it image to
     /// the GPU, creating a texture.
-    pub fn from_png(bytes: &[u8], filtering: TextureFiltering) -> Texture {
-        Self::from_image(&Image::from_png(bytes), filtering)
+    pub fn from_png(ctx: &Context<impl App>, bytes: &[u8], filtering: TextureFiltering) -> Texture {
+        Self::from_image(ctx, &Image::from_png(bytes), filtering)
     }
 
     /// Uploads an image to the GPU, creating a texture.
-    pub fn from_image<T: ColorDescriptor>(image: &Image<T>, filtering: TextureFiltering) -> Texture {
-        let max_size = max_texture_size() as u32;
+    pub fn from_image<T: ColorDescriptor>(
+        ctx: &Context<impl App>,
+        image: &Image<T>,
+        filtering: TextureFiltering,
+    ) -> Texture {
+        let max_size = ctx.max_texture_size() as u32;
         if image.width() > max_size || image.height() > max_size {
             panic!(
                 "The max width or height texture may have on this device is {}. \
@@ -102,7 +104,7 @@ impl Texture {
                 image.height()
             );
         }
-        let gl = ctx().graphics().gl();
+        let gl = graphics().gl();
         let id = gl.create_texture();
         let texture = Texture {
             id,
@@ -128,7 +130,7 @@ impl Texture {
         }
 
         if let Some(requested_anisotropy) = filtering.anisotropy {
-            if let Some(supported_anisotropy) = max_texture_anisotropy() {
+            if let Some(supported_anisotropy) = ctx.max_texture_anisotropy() {
                 gl.tex_parameter_anisotropy(
                     TextureParameterTarget::Texture2D,
                     supported_anisotropy.min(requested_anisotropy),
@@ -169,7 +171,7 @@ impl Texture {
     /// * `image` - The image to overwrite the texture with.
     pub fn set<Z: ColorDescriptor>(&self, offset_x: u32, offset_y: u32, image: &Image<Z>) {
         assert!(image.width() + offset_x <= self.width && image.height() + offset_y <= self.height);
-        let gl = ctx().graphics().gl();
+        let gl = graphics().gl();
         gl.bind_texture(TextureBindingTarget::Texture2D, Some(self.id));
         gl.tex_sub_image_2d(
             TextureLoadTarget::Texture2D,
@@ -186,7 +188,7 @@ impl Texture {
     }
 
     pub(crate) fn bind(&self, unit: u32) {
-        let gl = ctx().graphics().gl();
+        let gl = graphics().gl();
         gl.active_texture(unit);
         gl.bind_texture(TextureBindingTarget::Texture2D, Some(self.id));
     }
@@ -195,7 +197,7 @@ impl Texture {
 impl Drop for Texture {
     fn drop(&mut self) {
         if Rc::<()>::strong_count(&self.rc) == 1 {
-            ctx().graphics().gl().delete_texture(self.id);
+            graphics().gl().delete_texture(self.id);
         }
     }
 }

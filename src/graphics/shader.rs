@@ -1,5 +1,7 @@
-use crate::ctx;
-use crate::graphics::{resource, std140::Std140Struct, Buffer, DrawMode, Texture, Uniform, VertexDescriptor};
+use crate::graphics::{
+    graphics, resource, std140::Std140Struct, Buffer, DrawMode, Texture, Uniform, VertexDescriptor,
+};
+use crate::{App, Context};
 use alloc::format;
 use core::marker::PhantomData;
 
@@ -16,6 +18,8 @@ pub trait ShaderDescriptor<const TEXTURES: usize> {
 
 /// Represents the runtime metadata required to configure and draw with a shader.
 pub struct Shader<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> {
+    // This type is !Send + !Sync.
+    _unsend: core::marker::PhantomData<*const ()>,
     program: resource::Program,
     vertex_uniform_location: u32,
     texture_locations: [resource::UniformLocation; TEXTURES],
@@ -25,8 +29,8 @@ pub struct Shader<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> {
 impl<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> Shader<T, TEXTURES> {
     /// Creates a new shader. Shaders hold no mutable state and should be reused as often as
     /// possible.
-    pub fn new() -> Shader<T, TEXTURES> {
-        let gl = ctx().graphics().gl();
+    pub fn new(_ctx: &Context<impl App>) -> Shader<T, TEXTURES> {
+        let gl = graphics().gl();
 
         let program = gl.shader_program(T::VERTEX_SHADER, T::FRAGMENT_SHADER);
         let vertex_uniform_location = gl.get_uniform_block_index(program, T::VERTEX_UNIFORM_NAME).expect(
@@ -40,6 +44,7 @@ impl<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> Shader<T, TEXTURES> {
         });
 
         Shader {
+            _unsend: core::marker::PhantomData,
             program,
             vertex_uniform_location,
             texture_locations,
@@ -48,7 +53,7 @@ impl<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> Shader<T, TEXTURES> {
     }
 
     fn bind(&self, uniform: &Uniform<T::VertexUniformType>, textures: [&Texture; TEXTURES]) {
-        let gl = ctx().graphics().gl();
+        let gl = graphics().gl();
         gl.use_program(Some(self.program));
         uniform.bind(0);
         for i in 0..TEXTURES {
@@ -78,7 +83,7 @@ impl<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> Shader<T, TEXTURES> {
         for buffer in buffers {
             if buffer.len() > 0 {
                 buffer.bind();
-                ctx().graphics().gl().draw_arrays_instanced(mode, 0, count, buffer.len() as i32);
+                graphics().gl().draw_arrays_instanced(mode, 0, count, buffer.len() as i32);
             }
         }
     }
@@ -102,7 +107,7 @@ impl<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> Shader<T, TEXTURES> {
         for buffer in buffers {
             if buffer.len() > 0 {
                 buffer.bind();
-                ctx().graphics().gl().draw_arrays(mode, 0, buffer.len() as i32);
+                graphics().gl().draw_arrays(mode, 0, buffer.len() as i32);
             }
         }
     }
@@ -110,7 +115,7 @@ impl<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> Shader<T, TEXTURES> {
 
 impl<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> Drop for Shader<T, TEXTURES> {
     fn drop(&mut self) {
-        let gl = ctx().graphics().gl();
+        let gl = graphics().gl();
         gl.delete_program(self.program);
     }
 }

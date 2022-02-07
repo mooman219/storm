@@ -1,6 +1,6 @@
-use crate::audio::{SoundControl, SoundInstance};
-use crate::ctx;
+use crate::audio::{audio, SoundControl, SoundInstance};
 use crate::math::lerp;
+use crate::{App, Context};
 use alloc::{sync::Arc, vec::Vec};
 
 #[derive(Copy, Clone, Debug)]
@@ -63,10 +63,10 @@ impl Sound {
     /// # Returns
     ///
     /// * `SoundControl` - A handle to control sound properties during play.
-    pub fn play(&self, volume: f32, smooth: f32) -> SoundControl {
+    pub fn play(&self, _ctx: &Context<impl App>, volume: f32, smooth: f32) -> SoundControl {
         let control = SoundControl::new(volume, smooth, false);
         let instance = SoundInstance::new(self, &control);
-        ctx().audio().push_sound(instance);
+        audio().push_sound(instance);
         control
     }
 

@@ -1,10 +1,9 @@
 use crate::graphics::{
-    max_texture_size,
     shaders::text::{Text, TextSprite, TextUserData},
     std140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture, TextureFiltering, TextureSection, Uniform,
 };
 use crate::image::{Image, Packer};
-use crate::*;
+use crate::{App, Context};
 use alloc::vec::Vec;
 use cgmath::*;
 use fontdue::{
@@ -44,9 +43,9 @@ pub struct TextShader {
 
 impl TextShader {
     /// Creates a new text shader.
-    pub fn new() -> TextShader {
+    pub fn new(ctx: &Context<impl App>) -> TextShader {
         TextShader {
-            shader: Shader::new(),
+            shader: Shader::new(ctx),
         }
     }
 
@@ -76,13 +75,13 @@ pub struct TextShaderPass {
 }
 
 impl TextShaderPass {
-    pub fn new(ortho: Matrix4<f32>) -> TextShaderPass {
-        let max = max_texture_size().min(4096) as u32;
-        let atlas = Texture::from_image(&Image::from_color(0u8, max, max), TextureFiltering::NONE);
+    pub fn new(ctx: &Context<impl App>, ortho: Matrix4<f32>) -> TextShaderPass {
+        let max = ctx.max_texture_size().min(4096) as u32;
+        let atlas = Texture::from_image(ctx, &Image::from_color(0u8, max, max), TextureFiltering::NONE);
         TextShaderPass {
-            uniform: Uniform::new(TextUniform::new(ortho)),
+            uniform: Uniform::new(ctx, TextUniform::new(ortho)),
             atlas,
-            buffer: Buffer::new(),
+            buffer: Buffer::new(ctx),
 
             sprites: Vec::new(),
             layout: Layout::new(CoordinateSystem::PositiveYUp),

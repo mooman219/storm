@@ -1,4 +1,5 @@
 use super::LoaderError;
+use crate::{App, Context};
 use alloc::{
     boxed::Box,
     string::{String, ToString},
@@ -32,21 +33,26 @@ impl Asset {
     }
 }
 
-pub(crate) type AssetCallbackBox = Box<dyn FnMut(alloc::vec::Vec<Asset>) + Send + 'static>;
-
-pub(crate) struct AssetRequest {
+pub(crate) struct AssetRequest<A: App> {
     pub assets: Vec<Asset>,
-    pub callback: AssetCallbackBox,
+    pub callback: Box<dyn FnMut(&mut Context<A>, &mut A, Vec<Asset>) + Send + 'static>,
 }
 
-impl AssetRequest {
-    pub(crate) fn new(relative_paths: &[&str], callback: AssetCallbackBox) -> AssetRequest {
+impl<A: App> AssetRequest<A> {
+    pub(crate) fn new<C: FnMut(&mut Context<A>, &mut A, Vec<Asset>) + Send + 'static>(
+        relative_paths: &[&str],
+        callback: C,
+    ) -> AssetRequest<A> {
         AssetRequest {
             assets: relative_paths
                 .iter()
                 .map(|path| Asset::new_err(path.to_string(), LoaderError::Pending))
                 .collect::<Vec<Asset>>(),
-            callback,
+            callback: Box::new(callback),
         }
+    }
+
+    pub(crate) fn call(mut self, ctx: &mut Context<A>, app: &mut A) {
+        (self.callback)(ctx, app, self.assets)
     }
 }

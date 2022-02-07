@@ -1,13 +1,24 @@
 use crate::color::RGBA8;
-use crate::ctx;
 use crate::graphics::Texture;
 use crate::graphics::{
     BlendFactor, Capability, ClearMode, CullFace, DepthTest, DisplayMode, OpenGL, OpenGLWindow,
     OpenGLWindowContract, PixelStoreAlignment, TextureFiltering, WindowSettings,
 };
 use crate::image::Image;
+use crate::{App, Context};
 use cgmath::*;
+use core::mem::MaybeUninit;
+use core::sync::atomic::{AtomicBool, Ordering};
 use log::trace;
+
+#[no_mangle]
+static mut _STORM_GRAPHICS_INITIALIZED: AtomicBool = AtomicBool::new(false);
+#[no_mangle]
+static mut _STORM_GRAPHICS: MaybeUninit<OpenGLState> = MaybeUninit::<OpenGLState>::uninit();
+
+pub(crate) fn graphics() -> &'static mut OpenGLState {
+    unsafe { _STORM_GRAPHICS.assume_init_mut() }
+}
 
 pub(crate) struct OpenGLState {
     gl: OpenGL,
@@ -20,7 +31,11 @@ pub(crate) struct OpenGLState {
 }
 
 impl OpenGLState {
-    pub(crate) fn init(desc: &WindowSettings, event_loop: &winit::event_loop::EventLoop<()>) -> OpenGLState {
+    pub(crate) fn init(desc: &WindowSettings, event_loop: &winit::event_loop::EventLoop<()>) {
+        if unsafe { _STORM_GRAPHICS_INITIALIZED.swap(true, Ordering::Relaxed) } {
+            panic!("Graphics has already initialized.");
+        }
+
         let (window, gl) = OpenGLWindow::new(desc, event_loop);
         let mut gl = OpenGL::new(gl);
         let extensions = gl.get_supported_extensions();
@@ -51,16 +66,17 @@ impl OpenGLState {
         gl.cull_face(CullFace::Back);
         trace!("MAX_TEXTURE_SIZE: {}", max_texture_size);
 
-        let state = OpenGLState {
-            gl,
-            logical_size: window.logical_size(),
-            physical_size: window.physical_size(),
-            window,
-            default_texture: None,
-            max_texture_size,
-            max_texture_anisotropy,
+        unsafe {
+            _STORM_GRAPHICS.write(OpenGLState {
+                gl,
+                logical_size: window.logical_size(),
+                physical_size: window.physical_size(),
+                window,
+                default_texture: None,
+                max_texture_size,
+                max_texture_anisotropy,
+            })
         };
-        state
     }
 
     #[inline(always)]
@@ -84,90 +100,94 @@ impl OpenGLState {
     }
 }
 
-/// Returns a simple 1x1 white texture. This texture is reused globally.
-pub fn default_texture() -> Texture {
-    let graphics = ctx().graphics();
-    match &graphics.default_texture {
-        Some(texture) => texture.clone(),
-        None => {
-            let texture = Texture::from_image(&Image::from_color(RGBA8::WHITE, 1, 1), TextureFiltering::NONE);
-            graphics.default_texture = Some(texture.clone());
-            texture
+/// Graphics and window related functions.
+impl<A: App> Context<A> {
+    /// Returns a simple 1x1 white texture. This texture is reused globally.
+    pub fn default_texture(&self) -> Texture {
+        let graphics = graphics();
+        match &graphics.default_texture {
+            Some(texture) => texture.clone(),
+            None => {
+                let texture =
+                    Texture::from_image(self, &Image::from_color(RGBA8::WHITE, 1, 1), TextureFiltering::NONE);
+                graphics.default_texture = Some(texture.clone());
+                texture
+            }
         }
     }
-}
 
-/// Gets the max texture size supported on the GPU.
-pub fn max_texture_size() -> i32 {
-    ctx().graphics().max_texture_size
-}
-
-/// Gets the max anisotropic texture filtering supported by the GPU. Returns None if unsupported.
-pub fn max_texture_anisotropy() -> Option<f32> {
-    ctx().graphics().max_texture_anisotropy
-}
-
-/// Sets the title of the window.
-///
-/// ## Platform-specific
-///
-/// - **Web:** This sets the page title.
-pub fn set_window_title(title: &str) {
-    ctx().graphics().window.set_title(title);
-}
-
-/// Sets the display mode of the window.
-pub fn set_window_display_mode(display_mode: DisplayMode) {
-    ctx().graphics().window.set_display_mode(display_mode);
-}
-
-/// Gets the logical size of the window. This may differ from the viewport's logical size.
-pub fn window_logical_size() -> Vector2<f32> {
-    ctx().graphics().window.logical_size()
-}
-
-/// Gets the physical size of the window. This may differ from the viewport's physical size.
-pub fn window_physical_size() -> Vector2<f32> {
-    ctx().graphics().window.physical_size()
-}
-
-/// Grabs the cursor, preventing it from leaving the window.
-///
-/// ## Platform-specific
-///
-/// - **macOS:** This locks the cursor in a fixed location, which looks visually awkward.
-pub fn window_cursor_grab(grab: bool) {
-    ctx().graphics().window.set_cursor_grab(grab)
-}
-
-/// Sets the visibility of the cursor.
-///
-/// ## Platform-specific
-///
-/// - **Windows:** The cursor is only hidden within the confines of the window.
-/// - **X11:** The cursor is only hidden within the confines of the window.
-/// - **Wayland:** The cursor is only hidden within the confines of the window.
-/// - **macOS:** The cursor is hidden as long as the window has input focus, even if the cursor is
-///   outside of the window.
-pub fn window_cursor_visibility(grab: bool) {
-    ctx().graphics().window.set_cursor_visible(grab)
-}
-
-/// Gets the logical size of the viewport. This may differ from the window's logical size.
-pub fn viewport_logical_size() -> Vector2<f32> {
-    ctx().graphics().logical_size
-}
-
-/// Gets the physical size of the viewport. This may differ from the window's physical size.
-pub fn viewport_physical_size() -> Vector2<f32> {
-    ctx().graphics().physical_size
-}
-
-/// Clears the screen buffers according to the clear mode.
-pub fn clear(clear_mode: ClearMode) {
-    let gl = ctx().graphics().gl();
-    if let Some(clear_color) = clear_mode.color {
-        gl.clear_color(clear_color);
+    /// Gets the max texture size supported on the GPU.
+    pub fn max_texture_size(&self) -> i32 {
+        graphics().max_texture_size
     }
-    gl.clear(clear_mode.mode);
+
+    /// Gets the max anisotropic texture filtering supported by the GPU. Returns None if unsupported.
+    pub fn max_texture_anisotropy(&self) -> Option<f32> {
+        graphics().max_texture_anisotropy
+    }
+
+    /// Sets the title of the window.
+    ///
+    /// ## Platform-specific
+    ///
+    /// - **Web:** This sets the page title.
+    pub fn set_window_title(&self, title: &str) {
+        graphics().window.set_title(title);
+    }
+
+    /// Sets the display mode of the window.
+    pub fn set_window_display_mode(&self, display_mode: DisplayMode) {
+        graphics().window.set_display_mode(display_mode);
+    }
+
+    /// Gets the logical size of the window. This may differ from the viewport's logical size.
+    pub fn window_logical_size(&self) -> Vector2<f32> {
+        graphics().window.logical_size()
+    }
+
+    /// Gets the physical size of the window. This may differ from the viewport's physical size.
+    pub fn window_physical_size(&self) -> Vector2<f32> {
+        graphics().window.physical_size()
+    }
+
+    /// Grabs the cursor, preventing it from leaving the window.
+    ///
+    /// ## Platform-specific
+    ///
+    /// - **macOS:** This locks the cursor in a fixed location, which looks visually awkward.
+    pub fn window_cursor_grab(&self, grab: bool) {
+        graphics().window.set_cursor_grab(grab)
+    }
+
+    /// Sets the visibility of the cursor.
+    ///
+    /// ## Platform-specific
+    ///
+    /// - **Windows:** The cursor is only hidden within the confines of the window.
+    /// - **X11:** The cursor is only hidden within the confines of the window.
+    /// - **Wayland:** The cursor is only hidden within the confines of the window.
+    /// - **macOS:** The cursor is hidden as long as the window has input focus, even if the cursor is
+    ///   outside of the window.
+    pub fn window_cursor_visibility(&self, grab: bool) {
+        graphics().window.set_cursor_visible(grab)
+    }
+
+    /// Gets the logical size of the viewport. This may differ from the window's logical size.
+    pub fn viewport_logical_size(&self) -> Vector2<f32> {
+        graphics().logical_size
+    }
+
+    /// Gets the physical size of the viewport. This may differ from the window's physical size.
+    pub fn viewport_physical_size(&self) -> Vector2<f32> {
+        graphics().physical_size
+    }
+
+    /// Clears the screen buffers according to the clear mode.
+    pub fn clear(&self, clear_mode: ClearMode) {
+        let gl = graphics().gl();
+        if let Some(clear_color) = clear_mode.color {
+            gl.clear_color(clear_color);
+        }
+        gl.clear(clear_mode.mode);
+    }
 }

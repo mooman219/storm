@@ -1,9 +1,20 @@
 use crate::audio::{Mixer, SoundInstance};
 use crate::sync::{make as spsc_make, Producer};
+use core::mem::MaybeUninit;
+use core::sync::atomic::{AtomicBool, Ordering};
 use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
     Stream,
 };
+
+#[no_mangle]
+static mut _STORM_AUDIO_INITIALIZED: AtomicBool = AtomicBool::new(false);
+#[no_mangle]
+static mut _STORM_AUDIO: MaybeUninit<AudioState> = MaybeUninit::<AudioState>::uninit();
+
+pub(crate) fn audio() -> &'static mut AudioState {
+    unsafe { _STORM_AUDIO.assume_init_mut() }
+}
 
 pub(crate) struct AudioState {
     sender: Producer<SoundInstance>,
@@ -11,7 +22,11 @@ pub(crate) struct AudioState {
 }
 
 impl AudioState {
-    pub(crate) fn init() -> AudioState {
+    pub(crate) fn init() {
+        if unsafe { _STORM_AUDIO_INITIALIZED.swap(true, Ordering::Relaxed) } {
+            panic!("Audio has already initialized.");
+        }
+
         let host = cpal::default_host();
         let device = host.default_output_device().expect("no output device available");
         let sample_rate = device.default_output_config().unwrap().sample_rate();
@@ -36,10 +51,12 @@ impl AudioState {
             .unwrap();
         stream.play().unwrap();
 
-        AudioState {
-            sender,
-            stream,
-        }
+        unsafe {
+            _STORM_AUDIO.write(AudioState {
+                sender,
+                stream,
+            })
+        };
     }
 
     pub(crate) fn push_sound(&mut self, instance: SoundInstance) {

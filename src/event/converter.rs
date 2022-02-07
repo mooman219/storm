@@ -1,6 +1,6 @@
 use crate::event::ScrollDirection;
-use crate::graphics::OpenGLWindowContract;
-use crate::{ctx, App};
+use crate::graphics::{graphics, OpenGLWindowContract};
+use crate::{App, Context};
 use cgmath::prelude::*;
 use cgmath::*;
 use winit::event::{DeviceEvent, Event as WinitEvent, WindowEvent};
@@ -16,8 +16,8 @@ pub struct EventConverter {
 }
 
 impl EventConverter {
-    pub fn new() -> EventConverter {
-        let window = ctx().graphics().window();
+    pub(crate) fn new() -> EventConverter {
+        let window = graphics().window();
         EventConverter {
             scale_factor: window.scale_factor(),
             physical_size: window.physical_size(),
@@ -29,7 +29,7 @@ impl EventConverter {
         }
     }
 
-    pub fn push<T: App>(&mut self, event: WinitEvent<()>, app: &mut T) {
+    pub(crate) fn push<A: App>(&mut self, event: WinitEvent<()>, ctx: &mut Context<A>, app: &mut A) {
         match event {
             WinitEvent::DeviceEvent {
                 event,
@@ -39,7 +39,7 @@ impl EventConverter {
                     delta,
                 } => {
                     let delta = Vector2::new(delta.0 as f32, -delta.1 as f32);
-                    app.on_cursor_delta(delta, self.focused);
+                    app.on_cursor_delta(ctx, delta, self.focused);
                 }
                 _ => {}
             },
@@ -50,16 +50,16 @@ impl EventConverter {
                 match event {
                     WindowEvent::Focused(focused) => {
                         self.focused = focused;
-                        app.on_window_focused(self.focused);
+                        app.on_window_focused(ctx, self.focused);
                     }
-                    WindowEvent::CloseRequested => app.on_close_requested(),
+                    WindowEvent::CloseRequested => app.on_close_requested(ctx),
                     WindowEvent::Resized(physical_size) => {
                         self.physical_size =
                             Vector2::new(physical_size.width as f32, physical_size.height as f32);
                         self.logical_size = self.physical_size / self.scale_factor;
 
-                        ctx().graphics().resize_viewport(self.physical_size, self.logical_size);
-                        app.on_window_resized(self.physical_size, self.logical_size, self.scale_factor);
+                        graphics().resize_viewport(self.physical_size, self.logical_size);
+                        app.on_window_resized(ctx, self.physical_size, self.logical_size, self.scale_factor);
                     }
                     WindowEvent::ScaleFactorChanged {
                         scale_factor,
@@ -70,13 +70,13 @@ impl EventConverter {
                             Vector2::new(new_inner_size.width as f32, new_inner_size.height as f32);
                         self.logical_size = self.physical_size / self.scale_factor;
 
-                        ctx().graphics().resize_viewport(self.physical_size, self.logical_size);
-                        app.on_window_resized(self.physical_size, self.logical_size, self.scale_factor);
+                        graphics().resize_viewport(self.physical_size, self.logical_size);
+                        app.on_window_resized(ctx, self.physical_size, self.logical_size, self.scale_factor);
                     }
 
                     // Keyboard
                     WindowEvent::ReceivedCharacter(char) => {
-                        app.on_received_character(char);
+                        app.on_received_character(ctx, char);
                     }
                     WindowEvent::KeyboardInput {
                         input,
@@ -88,17 +88,17 @@ impl EventConverter {
                                 winit::event::ElementState::Pressed => {
                                     if val < 256 {
                                         let is_pressed = &mut self.pressed_keys[val as usize];
-                                        app.on_key_pressed(keycode, *is_pressed);
+                                        app.on_key_pressed(ctx, keycode, *is_pressed);
                                         *is_pressed = true;
                                     } else {
-                                        app.on_key_pressed(keycode, false);
+                                        app.on_key_pressed(ctx, keycode, false);
                                     }
                                 }
                                 winit::event::ElementState::Released => {
                                     if val < 256 {
                                         self.pressed_keys[val as usize] = false;
                                     }
-                                    app.on_key_released(keycode);
+                                    app.on_key_released(ctx, keycode);
                                 }
                             }
                         }
@@ -116,7 +116,7 @@ impl EventConverter {
 
                         self.physical_cursor_pos = cursor_pos;
                         self.normalized_cursor_pos = normalized_pos;
-                        app.on_cursor_moved(self.physical_cursor_pos, self.normalized_cursor_pos);
+                        app.on_cursor_moved(ctx, self.physical_cursor_pos, self.normalized_cursor_pos);
                     }
                     WindowEvent::MouseWheel {
                         delta,
@@ -127,14 +127,14 @@ impl EventConverter {
                             winit::event::MouseScrollDelta::PixelDelta(pos) => (pos.x as f32, pos.y as f32),
                         };
                         if x < 0.0 {
-                            app.on_cursor_scroll(ScrollDirection::Left);
+                            app.on_cursor_scroll(ctx, ScrollDirection::Left);
                         } else if x > 0.0 {
-                            app.on_cursor_scroll(ScrollDirection::Right);
+                            app.on_cursor_scroll(ctx, ScrollDirection::Right);
                         }
                         if y < 0.0 {
-                            app.on_cursor_scroll(ScrollDirection::Down);
+                            app.on_cursor_scroll(ctx, ScrollDirection::Down);
                         } else if y > 0.0 {
-                            app.on_cursor_scroll(ScrollDirection::Up);
+                            app.on_cursor_scroll(ctx, ScrollDirection::Up);
                         }
                     }
                     WindowEvent::MouseInput {
@@ -144,6 +144,7 @@ impl EventConverter {
                     } => match state {
                         winit::event::ElementState::Pressed => {
                             app.on_cursor_pressed(
+                                ctx,
                                 button,
                                 self.physical_cursor_pos,
                                 self.normalized_cursor_pos,
@@ -151,6 +152,7 @@ impl EventConverter {
                         }
                         winit::event::ElementState::Released => {
                             app.on_cursor_released(
+                                ctx,
                                 button,
                                 self.physical_cursor_pos,
                                 self.normalized_cursor_pos,
@@ -159,10 +161,10 @@ impl EventConverter {
                     },
                     WindowEvent::CursorEntered {
                         ..
-                    } => app.on_cursor_entered(),
+                    } => app.on_cursor_entered(ctx),
                     WindowEvent::CursorLeft {
                         ..
-                    } => app.on_cursor_left(),
+                    } => app.on_cursor_left(ctx),
                     _ => {}
                 }
             }

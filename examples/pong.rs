@@ -6,9 +6,8 @@ use storm::color::RGBA8;
 use storm::event::*;
 use storm::fontdue::{layout::LayoutSettings, Font};
 use storm::graphics::{
-    clear, default_texture,
     shaders::{sprite::*, text::*},
-    window_logical_size, Buffer, ClearMode, DisplayMode, Texture, Uniform, Vsync, WindowSettings,
+    Buffer, ClearMode, DisplayMode, Texture, Uniform, Vsync, WindowSettings,
 };
 use storm::math::{OrthographicCamera, AABB2D};
 use storm::*;
@@ -19,18 +18,15 @@ static FONT: &[u8] = include_bytes!("resources/Roboto-Regular.ttf");
 /// Run with: cargo run --example pong --release
 fn main() {
     // Create the engine context and describe the window.
-    start(
-        WindowSettings {
-            title: String::from("Video Game"),
-            display_mode: DisplayMode::Windowed {
-                width: 1280,
-                height: 1024,
-                resizable: true,
-            },
-            vsync: Vsync::Disabled,
+    start::<PongApp>(WindowSettings {
+        title: String::from("Video Game"),
+        display_mode: DisplayMode::Windowed {
+            width: 1280,
+            height: 1024,
+            resizable: true,
         },
-        new,
-    );
+        vsync: Vsync::Disabled,
+    });
 }
 
 const SPEED: f32 = 250.0;
@@ -53,100 +49,100 @@ struct PongApp {
     ball_sprites: [Sprite; 1],
 }
 
-fn new() -> impl App {
-    wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
-
-    let text_shader = TextShader::new();
-    let sprite_shader = SpriteShader::new();
-    let default_texture = default_texture();
-
-    let mut background = Buffer::new();
-    let mut paddles = Buffer::new();
-    let mut ball = Buffer::new();
-
-    let mut transform = OrthographicCamera::new(window_logical_size());
-    let transform_uniform = Uniform::new(&mut transform);
-
-    let boop = Sound::from_flac(SOUND).unwrap();
-
-    let fonts = [Font::from_bytes(FONT, Default::default()).unwrap()];
-    let mut text_layer = TextShaderPass::new(transform.matrix());
-    let layout_settings = LayoutSettings {
-        x: 100.0,
-        y: 500.0,
-        max_width: Some(500.0),
-        ..Default::default()
-    };
-    let message = String::from("This is a test.\nNew line.");
-    text_layer.append(
-        &fonts,
-        &layout_settings,
-        &[Text {
-            text: &message,
-            font_index: 0,
-            px: 16.0,
-            color: RGBA8::WHITE,
-            depth: 0.0,
-        }],
-    );
-
-    background.set(&[Sprite {
-        pos: Vector3::new(-500.0, -400.0, -0.1),
-        size: Vector2::new(1000, 800),
-        color: RGBA8::new(15, 15, 15, 255),
-        ..Default::default()
-    }]);
-
-    let up = false;
-    let down = false;
-    let paddle_speed = [0.0f32; 2];
-    let paddle_sprites = [
-        Sprite {
-            pos: Vector3::new(-500.0, -60.0, 0.0),
-            size: Vector2::new(30, 120),
-            color: RGBA8::WHITE,
-            ..Default::default()
-        },
-        Sprite {
-            pos: Vector3::new(500.0 - 30.0, -60.0, 0.0),
-            size: Vector2::new(30, 120),
-            color: RGBA8::WHITE,
-            ..Default::default()
-        },
-    ];
-    paddles.set(&paddle_sprites);
-
-    let ball_speed = Vector3::new(-300.0, 0.0, 0.0);
-    let ball_sprites = [Sprite {
-        pos: Vector3::new(-12.0, -12.0, 0.0),
-        size: Vector2::new(25, 25),
-        color: RGBA8::WHITE,
-        ..Default::default()
-    }];
-    ball.set(&ball_sprites);
-
-    PongApp {
-        text_shader,
-        sprite_shader,
-        default_texture,
-        background,
-        paddles,
-        ball,
-        transform_uniform,
-        boop,
-        text_layer,
-        up,
-        down,
-        paddle_speed,
-        paddle_sprites,
-        ball_speed,
-        ball_sprites,
-    }
-}
-
 impl App for PongApp {
-    fn on_update(&mut self, delta: f32) {
-        clear(ClearMode::color_depth(RGBA8::BLACK));
+    fn new(ctx: &mut Context<Self>) -> Self {
+        ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
+
+        let text_shader = TextShader::new(ctx);
+        let sprite_shader = SpriteShader::new(ctx);
+        let default_texture = ctx.default_texture();
+
+        let mut background = Buffer::new(ctx);
+        let mut paddles = Buffer::new(ctx);
+        let mut ball = Buffer::new(ctx);
+
+        let mut transform = OrthographicCamera::new(ctx.window_logical_size());
+        let transform_uniform = Uniform::new(ctx, &mut transform);
+
+        let boop = Sound::from_flac(SOUND).unwrap();
+
+        let fonts = [Font::from_bytes(FONT, Default::default()).unwrap()];
+        let mut text_layer = TextShaderPass::new(ctx, transform.matrix());
+        let layout_settings = LayoutSettings {
+            x: 100.0,
+            y: 500.0,
+            max_width: Some(500.0),
+            ..Default::default()
+        };
+        let message = String::from("This is a test.\nNew line.");
+        text_layer.append(
+            &fonts,
+            &layout_settings,
+            &[Text {
+                text: &message,
+                font_index: 0,
+                px: 16.0,
+                color: RGBA8::WHITE,
+                depth: 0.0,
+            }],
+        );
+
+        background.set(&[Sprite {
+            pos: Vector3::new(-500.0, -400.0, -0.1),
+            size: Vector2::new(1000, 800),
+            color: RGBA8::new(15, 15, 15, 255),
+            ..Default::default()
+        }]);
+
+        let up = false;
+        let down = false;
+        let paddle_speed = [0.0f32; 2];
+        let paddle_sprites = [
+            Sprite {
+                pos: Vector3::new(-500.0, -60.0, 0.0),
+                size: Vector2::new(30, 120),
+                color: RGBA8::WHITE,
+                ..Default::default()
+            },
+            Sprite {
+                pos: Vector3::new(500.0 - 30.0, -60.0, 0.0),
+                size: Vector2::new(30, 120),
+                color: RGBA8::WHITE,
+                ..Default::default()
+            },
+        ];
+        paddles.set(&paddle_sprites);
+
+        let ball_speed = Vector3::new(-300.0, 0.0, 0.0);
+        let ball_sprites = [Sprite {
+            pos: Vector3::new(-12.0, -12.0, 0.0),
+            size: Vector2::new(25, 25),
+            color: RGBA8::WHITE,
+            ..Default::default()
+        }];
+        ball.set(&ball_sprites);
+
+        PongApp {
+            text_shader,
+            sprite_shader,
+            default_texture,
+            background,
+            paddles,
+            ball,
+            transform_uniform,
+            boop,
+            text_layer,
+            up,
+            down,
+            paddle_speed,
+            paddle_sprites,
+            ball_speed,
+            ball_sprites,
+        }
+    }
+
+    fn on_update(&mut self, ctx: &mut Context<Self>, delta: f32) {
+        ctx.clear(ClearMode::color_depth(RGBA8::BLACK));
         self.paddle_sprites[0].pos.y += self.paddle_speed[0] * delta;
 
         let mut ball_aabb: AABB2D = self.ball_sprites[0].into();
@@ -155,7 +151,7 @@ impl App for PongApp {
             &[self.paddle_sprites[0].into(), self.paddle_sprites[1].into()],
         ) {
             self.ball_speed *= -1.0;
-            let _ = self.boop.play(0.4, 0.0);
+            let _ = self.boop.play(ctx, 0.4, 0.0);
         }
         self.ball_sprites[0].pos = Vector3::new(ball_aabb.min.x, ball_aabb.min.y, 0.0);
         if self.ball_sprites[0].pos.x < -500.0 || self.ball_sprites[0].pos.x > 500.0 - 30.0 {
@@ -171,15 +167,15 @@ impl App for PongApp {
             &self.default_texture,
             &[&self.paddles, &self.background, &self.ball],
         );
-        clear(ClearMode::depth());
+        ctx.clear(ClearMode::depth());
         self.text_layer.draw(&self.text_shader);
     }
 
-    fn on_close_requested(&mut self) {
-        request_stop();
+    fn on_close_requested(&mut self, ctx: &mut Context<Self>) {
+        ctx.request_stop();
     }
 
-    fn on_key_pressed(&mut self, key: event::KeyboardButton, _is_repeat: bool) {
+    fn on_key_pressed(&mut self, ctx: &mut Context<Self>, key: event::KeyboardButton, _is_repeat: bool) {
         match key {
             KeyboardButton::Up => {
                 if !self.up {
@@ -193,12 +189,12 @@ impl App for PongApp {
                     self.down = true;
                 }
             }
-            KeyboardButton::Escape => request_stop(),
+            KeyboardButton::Escape => ctx.request_stop(),
             _ => {}
         }
     }
 
-    fn on_key_released(&mut self, key: event::KeyboardButton) {
+    fn on_key_released(&mut self, _ctx: &mut Context<Self>, key: event::KeyboardButton) {
         match key {
             KeyboardButton::Up => {
                 if self.up {
