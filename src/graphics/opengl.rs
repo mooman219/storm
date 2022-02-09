@@ -910,6 +910,16 @@ impl OpenGL {
         };
     }
 
+    pub fn tex_parameter_max_mipmaps(&self, target: TextureParameterTarget, level: i32) {
+        unsafe {
+            self.gl.tex_parameter_i32(
+                target as u32,
+                TextureParameterName::TextureMaxLevel as u32,
+                level as i32,
+            )
+        };
+    }
+
     pub fn tex_parameter_wrap_s(&self, target: TextureParameterTarget, value: TextureWrapValue) {
         unsafe {
             self.gl.tex_parameter_i32(target as u32, TextureParameterName::TextureWrapS as u32, value as i32)

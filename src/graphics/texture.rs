@@ -138,6 +138,7 @@ impl Texture {
             }
         }
 
+        gl.tex_parameter_max_mipmaps(TextureParameterTarget::Texture2D, 4);
         gl.tex_parameter_wrap_s(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
         gl.tex_parameter_wrap_t(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
         gl.tex_parameter_min_filter(TextureParameterTarget::Texture2D, filtering.min_filter);
