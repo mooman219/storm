@@ -1,10 +1,6 @@
 use super::LoaderError;
 use crate::{App, Context};
-use alloc::{
-    boxed::Box,
-    string::{String, ToString},
-    vec::Vec,
-};
+use alloc::{boxed::Box, string::String, vec::Vec};
 
 /// Represents a binary blob loaded from an external source.
 #[derive(Clone, Debug)]
@@ -40,13 +36,13 @@ pub(crate) struct AssetRequest<A: App> {
 
 impl<A: App> AssetRequest<A> {
     pub(crate) fn new<C: FnMut(&mut Context<A>, &mut A, Vec<Asset>) + Send + 'static>(
-        relative_paths: &[&str],
+        relative_paths: &[String],
         callback: C,
     ) -> AssetRequest<A> {
         AssetRequest {
             assets: relative_paths
-                .iter()
-                .map(|path| Asset::new_err(path.to_string(), LoaderError::Pending))
+                .into_iter()
+                .map(|path| Asset::new_err(path.clone(), LoaderError::Pending))
                 .collect::<Vec<Asset>>(),
             callback: Box::new(callback),
         }

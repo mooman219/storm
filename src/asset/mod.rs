@@ -13,6 +13,8 @@ pub(crate) use wasm::AssetState;
 mod asset;
 mod error;
 
+use alloc::string::String;
+
 pub use self::asset::Asset;
 pub use self::error::LoaderError;
 
@@ -42,7 +44,7 @@ impl<A: App> Context<A> {
     /// - **Web:** The path is relative to the current url's root.
     pub fn request_read<C: FnMut(&mut Context<A>, &mut A, alloc::vec::Vec<Asset>) + Send + 'static>(
         &mut self,
-        relative_paths: &[&str],
+        relative_paths: &[String],
         callback: C,
     ) {
         let request = AssetRequest::new(relative_paths, callback);

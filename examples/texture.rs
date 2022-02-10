@@ -100,7 +100,8 @@ impl App for TextureApp {
             KeyboardButton::R => self.sound.resume(),
             KeyboardButton::Q => {
                 log::info!("Q Read");
-                ctx.request_read(&["./docs/load.png", "./docs/start.png"], |_ctx, _app, assets| {
+                let paths = [String::from("./docs/load.png"), String::from("./docs/start.png")];
+                ctx.request_read(&paths, |_ctx, _app, assets| {
                     for asset in assets {
                         match &asset.result {
                             Ok(contents) => {
@@ -113,7 +114,8 @@ impl App for TextureApp {
             }
             KeyboardButton::A => {
                 log::info!("A Read");
-                ctx.request_read(&["./load.png"], |_ctx, _app, assets| {
+                let paths = [String::from("./load.png")];
+                ctx.request_read(&paths, |_ctx, _app, assets| {
                     for asset in assets {
                         match &asset.result {
                             Ok(contents) => {
