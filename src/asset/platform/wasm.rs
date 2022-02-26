@@ -6,7 +6,7 @@ use js_sys::{Array, Uint8Array};
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsValue};
 
-#[wasm_bindgen(module = "./storm.js")]
+#[wasm_bindgen(raw_module = "./storm.js")]
 extern "C" {
     fn push_asset(index: usize, paths: Array);
     fn pull_assets() -> Array;
