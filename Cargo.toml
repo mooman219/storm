@@ -41,7 +41,7 @@ glow = "0.11"
 cgmath = "0.18.0"
 log = "0.4"
 hashbrown = "0.11.2"
-fontdue = { version = "0.7.1", path = "../fontdue" }
+fontdue = "0.7.1"
 
 # Image format support
 png = "0.14"
