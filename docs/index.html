@@ -16,14 +16,25 @@
         }
     </style>
     <script type='module'>
-        import init from './web.js';
+        import particles_init from './particles.js';
+        import text_init from './text.js';
         window.onload = (event) => {
             document.getElementById("load").remove();
-            let start = document.getElementById("start");
-            start.style.visibility = "visible"
-            start.onclick = (event) => {
-                start.remove();
-                init();
+            let particles_element = document.getElementById("particles");
+            let text_element = document.getElementById("text");
+
+            particles_element.style.visibility = "visible";
+            text_element.style.visibility = "visible";
+
+            particles_element.onclick = (event) => {
+                particles_element.remove();
+                text_element.remove();
+                particles_init();
+            }
+            text_element.onclick = (event) => {
+                particles_element.remove();
+                text_element.remove();
+                text_init();
             }
         }
     </script>
@@ -31,7 +42,8 @@
 
 <body>
     <img id="load" src="load.png">
-    <img id="start" src="start.png" style="visibility: hidden">
+    <img id="particles" src="particles.png" style="visibility: hidden">
+    <img id="text" src="text.png" style="visibility: hidden">
 </body>
 
 </html>

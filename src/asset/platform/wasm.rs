@@ -6,43 +6,7 @@ use js_sys::{Array, Uint8Array};
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsValue};
 
-// Literally exploiting an injection vulnerability to append arbitrary js into the bundle
-#[wasm_bindgen(raw_module = r#"./web.js';
-// uses `var` instead of `let` so there's no TDZ in case functions using it are called before this module body executes
-var asset_payloads;
-
-function _push_asset(index, paths) {
-    let promises = paths.map(function (path) {
-        return fetch(path).then(function (response) {
-            if (response.status < 200 || response.status >= 300) {
-                return response.status;
-            } else {
-                return response.arrayBuffer().then(function (buffer) {
-                    return new Uint8Array(buffer);
-                }).catch(function (reason) {
-                    return 500;
-                });
-            }
-        }).catch(function (reason) {
-            return 500;
-        });
-    });
-    Promise.all(promises).then(function (array) {
-        (asset_payloads ||= []).push([index, array]);
-    });
-}
-
-function _pull_assets() {
-    let temp = asset_payloads;
-    asset_payloads = [];
-    return temp || [];
-}
-
-export {
-    _push_asset as push_asset,
-    _pull_assets as pull_assets
-};
-//"#)] // comment out the unclosed string for valid syntax
+#[wasm_bindgen(module = "./storm.js")]
 extern "C" {
     fn push_asset(index: usize, paths: Array);
     fn pull_assets() -> Array;

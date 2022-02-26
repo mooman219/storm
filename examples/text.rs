@@ -23,6 +23,7 @@ fn main() {
 }
 
 const SIZE: f32 = 100.0;
+const COLOR: RGBA8 = RGBA8::WHITE;
 
 struct TextApp {
     is_dragging: bool,
@@ -54,7 +55,6 @@ impl App for TextApp {
         };
 
         // Append some text with our layout settings.
-        const SIZE: f32 = 100.0;
         let message = String::from("Nice\nPost");
         text_layer.append(
             &fonts,
@@ -63,7 +63,7 @@ impl App for TextApp {
                 text: &message,
                 font_index: 0,
                 px: SIZE,
-                color: RGBA8::WHITE,
+                color: COLOR,
                 depth: 0.0,
             }],
         );
@@ -102,7 +102,7 @@ impl App for TextApp {
                 text: &self.message,
                 font_index: 0,
                 px: SIZE,
-                color: RGBA8::WHITE,
+                color: COLOR,
                 depth: 0.0,
             }],
         );
@@ -113,6 +113,7 @@ impl App for TextApp {
             KeyboardButton::Escape => ctx.request_stop(),
             KeyboardButton::Tab => {
                 self.transform.set().scale = 1.0;
+                self.text_layer.set_ortho(self.transform.matrix());
             }
             KeyboardButton::Back => {
                 self.message.pop();
@@ -124,7 +125,7 @@ impl App for TextApp {
                         text: &self.message,
                         font_index: 0,
                         px: SIZE,
-                        color: RGBA8::WHITE,
+                        color: COLOR,
                         depth: 0.0,
                     }],
                 );

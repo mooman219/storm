@@ -65,6 +65,7 @@ impl TextureFiltering {
 /// Represents a GPU resource for a texture.
 pub struct Texture {
     id: resource::Texture,
+    filter: TextureFiltering,
     width: u32,
     height: u32,
     rc: Rc<()>,
@@ -74,6 +75,7 @@ impl Clone for Texture {
     fn clone(&self) -> Self {
         Texture {
             id: self.id,
+            filter: self.filter,
             width: self.width,
             height: self.height,
             rc: self.rc.clone(),
@@ -108,6 +110,7 @@ impl Texture {
         let id = gl.create_texture();
         let texture = Texture {
             id,
+            filter: filtering,
             width: image.width(),
             height: image.height(),
             rc: Rc::new(()),
@@ -125,26 +128,30 @@ impl Texture {
             image.as_slice(),
         );
 
-        if filtering != TextureFiltering::NONE {
+        gl.tex_parameter_max_mipmaps(TextureParameterTarget::Texture2D, 2);
+        gl.tex_parameter_wrap_s(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
+        gl.tex_parameter_wrap_t(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
+        gl.tex_parameter_min_filter(TextureParameterTarget::Texture2D, filtering.min_filter);
+        gl.tex_parameter_mag_filter(TextureParameterTarget::Texture2D, TextureMagFilterValue::Nearest);
+        texture.generate_mipmap();
+        gl.bind_texture(TextureBindingTarget::Texture2D, None);
+        texture
+    }
+
+    fn generate_mipmap(&self) {
+        let gl = graphics().gl();
+        if self.filter != TextureFiltering::NONE {
             gl.generate_mipmap(TextureParameterTarget::Texture2D);
         }
 
-        if let Some(requested_anisotropy) = filtering.anisotropy {
-            if let Some(supported_anisotropy) = ctx.max_texture_anisotropy() {
+        if let Some(requested_anisotropy) = self.filter.anisotropy {
+            if let Some(supported_anisotropy) = graphics().max_texture_anisotropy() {
                 gl.tex_parameter_anisotropy(
                     TextureParameterTarget::Texture2D,
                     supported_anisotropy.min(requested_anisotropy),
                 );
             }
         }
-
-        gl.tex_parameter_max_mipmaps(TextureParameterTarget::Texture2D, 4);
-        gl.tex_parameter_wrap_s(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
-        gl.tex_parameter_wrap_t(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
-        gl.tex_parameter_min_filter(TextureParameterTarget::Texture2D, filtering.min_filter);
-        gl.tex_parameter_mag_filter(TextureParameterTarget::Texture2D, TextureMagFilterValue::Nearest);
-        gl.bind_texture(TextureBindingTarget::Texture2D, None);
-        texture
     }
 
     /// The width of the texture.
@@ -185,6 +192,7 @@ impl Texture {
             Z::component_type().pixel_type(),
             image.as_slice(),
         );
+        self.generate_mipmap();
         gl.bind_texture(TextureBindingTarget::Texture2D, None);
     }
 

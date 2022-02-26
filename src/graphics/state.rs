@@ -89,6 +89,11 @@ impl OpenGLState {
         &mut self.window
     }
 
+    /// Gets the max anisotropic texture filtering supported by the GPU. Returns None if unsupported.
+    pub(crate) fn max_texture_anisotropy(&self) -> Option<f32> {
+        self.max_texture_anisotropy
+    }
+
     /// Resizes the viewport.
     pub(crate) fn resize_viewport(&mut self, physical: Vector2<f32>, logical: Vector2<f32>) {
         if self.logical_size != logical || self.physical_size != physical {
@@ -123,7 +128,7 @@ impl<A: App> Context<A> {
 
     /// Gets the max anisotropic texture filtering supported by the GPU. Returns None if unsupported.
     pub fn max_texture_anisotropy(&self) -> Option<f32> {
-        graphics().max_texture_anisotropy
+        graphics().max_texture_anisotropy()
     }
 
     /// Sets the title of the window.
