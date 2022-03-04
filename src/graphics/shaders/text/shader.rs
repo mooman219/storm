@@ -114,6 +114,7 @@ impl TextShaderPass {
         for style in styles {
             self.layout.append(fonts, &style.into());
         }
+        // log::info!("{:?}", self.layout.glyphs());
         // log::info!("{:?}", self.layout.lines());
         for glyph in self.layout.glyphs() {
             if glyph.width == 0 {
