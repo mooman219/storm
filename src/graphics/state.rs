@@ -113,8 +113,11 @@ impl<A: App> Context<A> {
         match &graphics.default_texture {
             Some(texture) => texture.clone(),
             None => {
-                let texture =
-                    Texture::from_image(self, &Image::from_color(RGBA8::WHITE, 1, 1), TextureFiltering::NONE);
+                let texture = Texture::from_image(
+                    self,
+                    &Image::from_color(RGBA8::WHITE, 1, 1),
+                    TextureFiltering::none(),
+                );
                 graphics.default_texture = Some(texture.clone());
                 texture
             }
@@ -128,7 +131,7 @@ impl<A: App> Context<A> {
 
     /// Gets the max anisotropic texture filtering supported by the GPU. Returns None if unsupported.
     pub fn max_texture_anisotropy(&self) -> Option<f32> {
-        graphics().max_texture_anisotropy()
+        graphics().max_texture_anisotropy
     }
 
     /// Sets the title of the window.

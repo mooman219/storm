@@ -1,12 +1,4 @@
-/// Represents 2 * pi.
-pub const TAO: f32 = 6.283_185_307_179_586_476f32;
-/// Represents pi.
-pub const PI: f32 = 3.141_592_653_589_793_238f32;
-/// Represents pi / 2.
-pub const PI_2: f32 = 1.570_796_326_794_896_619f32;
-/// Represents -pi / 2.
-pub const PI_NEG_2: f32 = -1.570_796_326_794_896_619f32;
-const CONST: f32 = 0.28087f32; // Trial and error
+use crate::math::{PI, PI_2, PI_NEG_2};
 
 /// Computes the four quadrant arctangent of self (y) and other (x) in radians.
 ///
@@ -14,6 +6,7 @@ const CONST: f32 = 0.28087f32; // Trial and error
 /// * Largest error of 0.00488 radians.
 /// * Speedup of 20.67x over f32.atan2(y);
 pub fn atan2(y: f32, x: f32) -> f32 {
+    const CONST: f32 = 0.28087f32; // Trial and error
     if x == 0f32 {
         if y > 0f32 {
             return PI_2;

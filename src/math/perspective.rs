@@ -1,11 +1,5 @@
+use crate::math::IDENTITY_MATRIX;
 use cgmath::*;
-
-pub const IDENTITY_MATRIX: Matrix4<f32> = Matrix4::new(
-    1.0, 0.0, 0.0, 0.0, //
-    0.0, 1.0, 0.0, 0.0, //
-    0.0, 0.0, 1.0, 0.0, //
-    0.0, 0.0, 0.0, 1.0, //
-);
 
 /// Parameters
 pub struct PerspectiveParams {
@@ -15,6 +9,7 @@ pub struct PerspectiveParams {
     pub direction: Vector3<f32>,
 }
 
+/// Simple camera for perspective projections.
 pub struct PerspectiveCamera {
     params: PerspectiveParams,
     logical_size: Vector2<f32>,

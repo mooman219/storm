@@ -46,9 +46,48 @@ impl RGBA8 {
     }
 }
 
-impl Into<(f32, f32, f32, f32)> for RGBA8 {
-    fn into(self) -> (f32, f32, f32, f32) {
-        ((self.r as f32) / 255.0, (self.g as f32) / 255.0, (self.b as f32) / 255.0, (self.a as f32) / 255.0)
+impl From<RGBA8> for (f32, f32, f32, f32) {
+    fn from(x: RGBA8) -> Self {
+        let r = (x.r as f32) / 255.0;
+        let g = (x.g as f32) / 255.0;
+        let b = (x.b as f32) / 255.0;
+        let a = (x.a as f32) / 255.0;
+        (r, g, b, a)
+    }
+}
+
+impl From<RGBA8> for [f32; 4] {
+    fn from(x: RGBA8) -> Self {
+        let r = (x.r as f32) / 255.0;
+        let g = (x.g as f32) / 255.0;
+        let b = (x.b as f32) / 255.0;
+        let a = (x.a as f32) / 255.0;
+        [r, g, b, a]
+    }
+}
+
+impl From<(f32, f32, f32, f32)> for RGBA8 {
+    fn from(x: (f32, f32, f32, f32)) -> Self {
+        let (r, g, b, a) = x;
+        Self::from_f32(r, g, b, a)
+    }
+}
+
+impl From<[f32; 4]> for RGBA8 {
+    fn from(x: [f32; 4]) -> Self {
+        let [r, g, b, a] = x;
+        Self::from_f32(r, g, b, a)
+    }
+}
+
+impl Default for RGBA8 {
+    fn default() -> Self {
+        Self {
+            r: 255,
+            g: 255,
+            b: 255,
+            a: 255,
+        }
     }
 }
 

@@ -27,9 +27,42 @@ impl RG8 {
     }
 }
 
-impl Into<(f32, f32)> for RG8 {
-    fn into(self) -> (f32, f32) {
-        ((self.r as f32) / 255.0, (self.g as f32) / 255.0)
+impl From<RG8> for (f32, f32) {
+    fn from(x: RG8) -> Self {
+        let r = (x.r as f32) / 255.0;
+        let g = (x.g as f32) / 255.0;
+        (r, g)
+    }
+}
+
+impl From<RG8> for [f32; 2] {
+    fn from(x: RG8) -> Self {
+        let r = (x.r as f32) / 255.0;
+        let g = (x.g as f32) / 255.0;
+        [r, g]
+    }
+}
+
+impl From<(f32, f32)> for RG8 {
+    fn from(x: (f32, f32)) -> Self {
+        let (r, g) = x;
+        Self::from_f32(r, g)
+    }
+}
+
+impl From<[f32; 2]> for RG8 {
+    fn from(x: [f32; 2]) -> Self {
+        let [r, g] = x;
+        Self::from_f32(r, g)
+    }
+}
+
+impl Default for RG8 {
+    fn default() -> Self {
+        Self {
+            r: 255,
+            g: 255,
+        }
     }
 }
 

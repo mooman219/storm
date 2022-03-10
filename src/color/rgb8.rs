@@ -41,9 +41,45 @@ impl RGB8 {
     }
 }
 
-impl Into<(f32, f32, f32)> for RGB8 {
-    fn into(self) -> (f32, f32, f32) {
-        ((self.r as f32) / 255.0, (self.g as f32) / 255.0, (self.b as f32) / 255.0)
+impl From<RGB8> for (f32, f32, f32) {
+    fn from(x: RGB8) -> Self {
+        let r = (x.r as f32) / 255.0;
+        let g = (x.g as f32) / 255.0;
+        let b = (x.b as f32) / 255.0;
+        (r, g, b)
+    }
+}
+
+impl From<RGB8> for [f32; 3] {
+    fn from(x: RGB8) -> Self {
+        let r = (x.r as f32) / 255.0;
+        let g = (x.g as f32) / 255.0;
+        let b = (x.b as f32) / 255.0;
+        [r, g, b]
+    }
+}
+
+impl From<(f32, f32, f32)> for RGB8 {
+    fn from(x: (f32, f32, f32)) -> Self {
+        let (r, g, b) = x;
+        Self::from_f32(r, g, b)
+    }
+}
+
+impl From<[f32; 3]> for RGB8 {
+    fn from(x: [f32; 3]) -> Self {
+        let [r, g, b] = x;
+        Self::from_f32(r, g, b)
+    }
+}
+
+impl Default for RGB8 {
+    fn default() -> Self {
+        Self {
+            r: 255,
+            g: 255,
+            b: 255,
+        }
     }
 }
 

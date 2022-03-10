@@ -12,54 +12,69 @@ use alloc::rc::Rc;
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct TextureFiltering {
     min_filter: TextureMinFilterValue,
+    mip_levels: Option<i32>,
     anisotropy: Option<f32>,
 }
 
 impl TextureFiltering {
     /// Applies no filtering to the texture.
-    pub const NONE: TextureFiltering = TextureFiltering {
-        min_filter: TextureMinFilterValue::Nearest,
-        anisotropy: None,
-    };
+    pub fn none() -> TextureFiltering {
+        TextureFiltering {
+            min_filter: TextureMinFilterValue::Nearest,
+            mip_levels: None,
+            anisotropy: None,
+        }
+    }
+
     /// Generates mipmaps, using the nearest mipmap to select the texture.
-    pub const BILINEAR: TextureFiltering = TextureFiltering {
-        min_filter: TextureMinFilterValue::LinearMipmapNearest,
-        anisotropy: None,
-    };
+    /// # Arguments
+    ///
+    /// * `mip_levels` - The number of mip map levels to generate. If the requested level isn't
+    /// available, this falls back to the max supported level.
+    pub fn bilinear(mip_levels: u32) -> TextureFiltering {
+        TextureFiltering {
+            min_filter: TextureMinFilterValue::LinearMipmapNearest,
+            mip_levels: Some(mip_levels as i32),
+            anisotropy: None,
+        }
+    }
+
     /// Generates mipmaps, linearly interpolating between the mipmap to select the texture.
-    pub const TRILINEAR: TextureFiltering = TextureFiltering {
-        min_filter: TextureMinFilterValue::LinearMipmapLinear,
-        anisotropy: None,
-    };
-    /// Generates mipmaps and 2 anisotropic mipmap levels, linearly interpolating between the mipmap
+    /// # Arguments
+    ///
+    /// * `mip_levels` - The number of mip map levels to generate. If the requested level isn't
+    /// available, this falls back to the max supported level.
+    pub fn trilinear(mip_levels: u32) -> TextureFiltering {
+        TextureFiltering {
+            min_filter: TextureMinFilterValue::LinearMipmapLinear,
+            mip_levels: Some(mip_levels as i32),
+            anisotropy: None,
+        }
+    }
+
+    /// Generates mipmaps and anisotropic mipmap levels, linearly interpolating between the mipmap
     /// to select the texture. If anisotropic mipmaps aren't available, this silently falls back to
-    /// trilinear filtering. Use max_texture_anisotropy() to check if this feature is supported.
-    pub const ANISOTROPIC2X: TextureFiltering = TextureFiltering {
-        min_filter: TextureMinFilterValue::LinearMipmapLinear,
-        anisotropy: Some(2.0),
-    };
-    /// Generates mipmaps and 4 anisotropic mipmap levels, linearly interpolating between the mipmap
-    /// to select the texture. If anisotropic mipmaps aren't available, this silently falls back to
-    /// trilinear filtering. Use max_texture_anisotropy() to check if this feature is supported.
-    pub const ANISOTROPIC4X: TextureFiltering = TextureFiltering {
-        min_filter: TextureMinFilterValue::LinearMipmapLinear,
-        anisotropy: Some(4.0),
-    };
-    /// Generates mipmaps and 8 anisotropic mipmap levels, linearly interpolating between the mipmap
-    /// to select the texture. If anisotropic mipmaps aren't available, this silently falls back to
-    /// trilinear filtering. Use max_texture_anisotropy() to check if this feature is supported.
-    pub const ANISOTROPIC8X: TextureFiltering = TextureFiltering {
-        min_filter: TextureMinFilterValue::LinearMipmapLinear,
-        anisotropy: Some(8.0),
-    };
-    /// Generates mipmaps and 16 anisotropic mipmap levels, linearly interpolating between the
-    /// mipmap to select the texture. If anisotropic mipmaps aren't available, this silently falls
-    /// back to trilinear filtering. Use max_texture_anisotropy() to check if this feature is
-    /// supported.
-    pub const ANISOTROPIC16X: TextureFiltering = TextureFiltering {
-        min_filter: TextureMinFilterValue::LinearMipmapLinear,
-        anisotropy: Some(16.0),
-    };
+    /// trilinear filtering. Use max_texture_anisotropy() to check if this feature is supported, as
+    /// well as to get the max anisotropy.
+    /// # Arguments
+    ///
+    /// * `mip_levels` - The number of mip map levels to generate. If the requested level isn't
+    /// available, this falls back to the max supported level.
+    /// * `anisotropy` - The number of anisotropy samples. This must be a power of two value. If the
+    /// requested level isn't available, this silently falls back to the max supported level.
+    pub fn anisotropic(mip_levels: u32, anisotropy: u32) -> TextureFiltering {
+        assert!(anisotropy.is_power_of_two(), "anisotropy is not a power of two.");
+        TextureFiltering {
+            min_filter: TextureMinFilterValue::LinearMipmapLinear,
+            mip_levels: Some(mip_levels as i32),
+            anisotropy: Some(anisotropy as f32),
+        }
+    }
+
+    /// Gets the requested mip levels. None if no filtering is being requested.
+    pub fn mip_levels(&self) -> Option<i32> {
+        self.mip_levels
+    }
 }
 
 /// Represents a GPU resource for a texture.
@@ -128,7 +143,6 @@ impl Texture {
             image.as_slice(),
         );
 
-        gl.tex_parameter_max_mipmaps(TextureParameterTarget::Texture2D, 2);
         gl.tex_parameter_wrap_s(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
         gl.tex_parameter_wrap_t(TextureParameterTarget::Texture2D, TextureWrapValue::ClampToEdge);
         gl.tex_parameter_min_filter(TextureParameterTarget::Texture2D, filtering.min_filter);
@@ -140,7 +154,8 @@ impl Texture {
 
     fn generate_mipmap(&self) {
         let gl = graphics().gl();
-        if self.filter != TextureFiltering::NONE {
+        if let Some(mip_levels) = self.filter.mip_levels {
+            gl.tex_parameter_max_mipmaps(TextureParameterTarget::Texture2D, mip_levels);
             gl.generate_mipmap(TextureParameterTarget::Texture2D);
         }
 

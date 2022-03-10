@@ -36,7 +36,7 @@ use crate::graphics::{PixelFormat, PixelInternalFormat, PixelType};
 ///     }
 /// }
 /// ```
-pub trait ColorDescriptor: Sized + Copy {
+pub trait ColorDescriptor: Sized + Copy + Default {
     /// Gets the component type of the color.
     fn component_type() -> ColorComponentType;
 

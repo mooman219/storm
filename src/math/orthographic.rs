@@ -22,6 +22,7 @@ pub struct OrthographicParams {
     pub pixel_perfect: bool,
 }
 
+/// Simple camera for orthographic projections.
 pub struct OrthographicCamera {
     params: OrthographicParams,
     logical_size: Vector2<f32>,

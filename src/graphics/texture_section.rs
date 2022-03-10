@@ -19,19 +19,17 @@ impl TextureSection {
     /// Coordinates relative to the top left corner of the texture. (0, 0) is the top left of the
     /// texture, and (width, height) is the bottom right of the texture.
     pub fn from_texture(texture: &Texture, left: u32, right: u32, top: u32, bottom: u32) -> TextureSection {
-        let left = left as f32;
-        let right = right as f32;
-        let top = top as f32;
-        let bottom = bottom as f32;
-        let h_size = MAX_FLOAT / (texture.width() as f32);
-        let v_size = MAX_FLOAT / (texture.height() as f32);
-        let h_nudge = h_size * 0.25;
-        let v_nudge = v_size * 0.25;
+        let inv_width = MAX_FLOAT / (texture.width() as f32);
+        let inv_height = MAX_FLOAT / (texture.height() as f32);
+        let left = (left as f32) * inv_width;
+        let right = (right as f32) * inv_width;
+        let top = (top as f32) * inv_height;
+        let bottom = (bottom as f32) * inv_height;
         TextureSection(Vector4::new(
-            (left * h_size + h_nudge) as u16,   // Left
-            (right * h_size - h_nudge) as u16,  // Right
-            (top * v_size + v_nudge) as u16,    // Top
-            (bottom * v_size - v_nudge) as u16, // Bottom
+            left as u16 + 1,   // Left
+            right as u16 - 1,  // Right
+            top as u16 + 1,    // Top
+            bottom as u16 - 1, // Bottom
         ))
     }
 

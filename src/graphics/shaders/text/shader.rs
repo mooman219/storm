@@ -1,8 +1,11 @@
+use crate::color::R8;
 use crate::graphics::{
     shaders::text::{Text, TextSprite, TextUserData},
-    std140, Buffer, DrawMode, Shader, ShaderDescriptor, Texture, TextureFiltering, TextureSection, Uniform,
+    std140,
+    texture_atlas::TextureAtlas,
+    Buffer, DrawMode, Shader, ShaderDescriptor, Texture, TextureFiltering, TextureSection, Uniform,
 };
-use crate::image::{Image, Packer};
+use crate::image::Image;
 use crate::{App, Context};
 use alloc::vec::Vec;
 use cgmath::*;
@@ -64,12 +67,11 @@ struct CharCacheValue {
 /// Holds the state required to cache and draw text to the screen.
 pub struct TextShaderPass {
     uniform: Uniform<TextUniform>,
-    atlas: Texture,
+    atlas: TextureAtlas,
     buffer: Buffer<TextSprite>,
 
     sprites: Vec<TextSprite>,
     layout: Layout<TextUserData>,
-    packer: Packer,
     cache: HashMap<GlyphRasterConfig, CharCacheValue>,
     dirty: bool,
 }
@@ -77,15 +79,13 @@ pub struct TextShaderPass {
 impl TextShaderPass {
     pub fn new(ctx: &Context<impl App>, ortho: Matrix4<f32>) -> TextShaderPass {
         let max = ctx.max_texture_size().min(4096) as u32;
-        let atlas = Texture::from_image(ctx, &Image::from_color(0u8, max, max), TextureFiltering::NONE);
         TextShaderPass {
             uniform: Uniform::new(ctx, TextUniform::new(ortho)),
-            atlas,
+            atlas: TextureAtlas::new::<R8, _>(ctx, max, TextureFiltering::none()),
             buffer: Buffer::new(ctx),
 
             sprites: Vec::new(),
             layout: Layout::new(CoordinateSystem::PositiveYUp),
-            packer: Packer::new(max, max),
             cache: HashMap::new(),
             dirty: false,
         }
@@ -104,7 +104,7 @@ impl TextShaderPass {
                 self.dirty = false;
                 self.buffer.set(&self.sprites);
             }
-            shader.draw(&self.uniform, &self.atlas, &self.buffer);
+            shader.draw(&self.uniform, self.atlas.get(), &self.buffer);
         }
     }
 
@@ -126,17 +126,10 @@ impl TextShaderPass {
                     let font = &fonts[glyph.font_index];
                     let (metrics, bitmap) = font.rasterize_config(glyph.key);
                     // info!("{:?}", metrics); // Debug
-                    let rect = self
-                        .packer
-                        .pack(metrics.width as u32, metrics.height as u32)
-                        .expect("Text packer is full.");
-                    self.atlas.set(
-                        rect.x,
-                        rect.y,
-                        &Image::from_vec(bitmap, metrics.width as u32, metrics.height as u32),
-                    );
+                    let image = Image::from_vec(bitmap, metrics.width as u32, metrics.height as u32);
+                    let uv = self.atlas.pack(&image).expect("Text packer is full.");
                     let value = CharCacheValue {
-                        uv: self.atlas.subsection(rect.x, rect.x + rect.w, rect.y, rect.y + rect.h),
+                        uv,
                         size: Vector2::new(metrics.width as f32, metrics.height as f32),
                     };
                     self.cache.insert(glyph.key, value);

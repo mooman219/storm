@@ -42,7 +42,7 @@ impl App for TextureApp {
         ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
         let sprite_shader = SpriteShader::new(ctx);
-        let texture_atlas = Texture::from_png(ctx, TEXTURE_A, TextureFiltering::NONE);
+        let texture_atlas = Texture::from_png(ctx, TEXTURE_A, TextureFiltering::none());
         let mut sprite_buffer = Buffer::new(ctx);
 
         let mut transform = OrthographicCamera::new(ctx.window_logical_size());

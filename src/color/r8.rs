@@ -23,9 +23,23 @@ impl R8 {
     }
 }
 
-impl Into<f32> for R8 {
-    fn into(self) -> f32 {
-        (self.r as f32) / 255.0
+impl From<R8> for f32 {
+    fn from(x: R8) -> Self {
+        (x.r as f32) / 255.0
+    }
+}
+
+impl From<f32> for R8 {
+    fn from(r: f32) -> Self {
+        Self::from_f32(r)
+    }
+}
+
+impl Default for R8 {
+    fn default() -> Self {
+        Self {
+            r: 255,
+        }
     }
 }
 

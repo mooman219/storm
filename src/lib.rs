@@ -4,7 +4,7 @@
 pub extern crate log;
 
 extern crate alloc;
-// TODO: Resolve when glow is fixed.
+// TODO: Resolve when glow is fixed. They use standard HashSet >:(
 // #[cfg(any(test, not(target_arch = "wasm32")))]
 extern crate std;
 
