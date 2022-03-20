@@ -68,3 +68,9 @@ impl<T: VertexDescriptor + Copy> Drop for Buffer<T> {
         gl.delete_vertex_array(self.vao);
     }
 }
+
+impl<T: VertexDescriptor + Copy> AsRef<Buffer<T>> for Buffer<T> {
+    fn as_ref(&self) -> &Buffer<T> {
+        self
+    }
+}
