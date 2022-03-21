@@ -91,34 +91,44 @@ pub enum DepthTest {
 }
 
 /// Parameters for how the screen should be cleared.
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct ClearMode {
     pub(crate) color: Option<RGBA8>,
+    pub(crate) depth: Option<f32>,
+    pub(crate) depth_test: Option<DepthTest>,
     pub(crate) mode: u32,
 }
 
 impl ClearMode {
-    /// Clears both color and depth.
-    pub fn color_depth(color: RGBA8) -> ClearMode {
-        ClearMode {
-            color: Some(color),
-            mode: glow::COLOR_BUFFER_BIT | glow::DEPTH_BUFFER_BIT,
-        }
-    }
-
-    /// Clears only color.
-    pub fn color(color: RGBA8) -> ClearMode {
-        ClearMode {
-            color: Some(color),
-            mode: glow::COLOR_BUFFER_BIT,
-        }
-    }
-
-    /// Clears only depth.
-    pub fn depth() -> ClearMode {
+    pub const fn new() -> ClearMode {
         ClearMode {
             color: None,
-            mode: glow::DEPTH_BUFFER_BIT,
+            depth: None,
+            depth_test: None,
+            mode: 0,
         }
+    }
+
+    /// Enables cleaing the color buffer.
+    /// # Arguments
+    ///
+    /// * `color` - The color value to clear to. Typically RGBA8::BLACK.
+    pub const fn with_color(mut self, color: RGBA8) -> ClearMode {
+        self.color = Some(color);
+        self.mode |= glow::COLOR_BUFFER_BIT;
+        self
+    }
+
+    /// Enables cleaing the depth buffer.
+    /// # Arguments
+    ///
+    /// * `depth` - The depth value to clear to. Typically 1.0.
+    /// * `depth_test` - The depth function to use. Typically DepthTest::Less.
+    pub const fn with_depth(mut self, depth: f32, depth_test: DepthTest) -> ClearMode {
+        self.depth = Some(depth);
+        self.depth_test = Some(depth_test);
+        self.mode |= glow::DEPTH_BUFFER_BIT;
+        self
     }
 }
 
@@ -465,6 +475,8 @@ pub mod resource {
 pub struct OpenGL {
     gl: glow::Context,
     clear_color: RGBA8,
+    clear_depth: f32,
+    clear_depth_test: DepthTest,
     shader_program: Option<resource::Program>,
     vertex_array: Option<resource::VertexArray>,
     active_texture_unit: u32,
@@ -475,7 +487,9 @@ impl OpenGL {
     pub fn new(gl: glow::Context) -> OpenGL {
         OpenGL {
             gl,
-            clear_color: RGBA8::new(0, 0, 0, 0),
+            clear_color: RGBA8::BLACK,
+            clear_depth: 1.0,
+            clear_depth_test: DepthTest::Less,
             shader_program: None,
             vertex_array: None,
             active_texture_unit: 0,
@@ -984,8 +998,18 @@ impl OpenGL {
         }
     }
 
-    pub fn depth_func(&self, test: DepthTest) {
-        unsafe { self.gl.depth_func(test as u32) };
+    pub fn clear_depth(&mut self, depth: f32) {
+        if self.clear_depth != depth {
+            self.clear_depth = depth;
+            unsafe { self.gl.clear_depth_f32(depth) };
+        }
+    }
+
+    pub fn depth_func(&mut self, test: DepthTest) {
+        if self.clear_depth_test != test {
+            self.clear_depth_test = test;
+            unsafe { self.gl.depth_func(test as u32) };
+        }
     }
 
     pub fn blend_func(&self, src: BlendFactor, dst: BlendFactor) {

@@ -7,7 +7,7 @@ use storm::event::*;
 use storm::fontdue::{layout::LayoutSettings, Font};
 use storm::graphics::{
     shaders::{sprite::*, text::*},
-    Buffer, ClearMode, DisplayMode, Texture, Uniform, Vsync, WindowSettings,
+    Buffer, ClearMode, DepthTest, DisplayMode, Texture, Uniform, Vsync, WindowSettings,
 };
 use storm::math::{OrthographicCamera, AABB2D};
 use storm::*;
@@ -142,7 +142,7 @@ impl App for PongApp {
     }
 
     fn on_update(&mut self, ctx: &mut Context<Self>, delta: f32) {
-        ctx.clear(ClearMode::color_depth(RGBA8::BLACK));
+        ctx.clear(ClearMode::new().with_color(RGBA8::BLACK).with_depth(1.0, DepthTest::Less));
         self.paddle_sprites[0].pos.y += self.paddle_speed[0] * delta;
 
         let mut ball_aabb: AABB2D = self.ball_sprites[0].into();
@@ -167,7 +167,7 @@ impl App for PongApp {
             &self.default_texture,
             &[&self.paddles, &self.background, &self.ball],
         );
-        ctx.clear(ClearMode::depth());
+        ctx.clear(ClearMode::new().with_depth(1.0, DepthTest::Less));
         self.text_layer.draw(&self.text_shader);
     }
 

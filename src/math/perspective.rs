@@ -9,7 +9,7 @@ pub struct PerspectiveParams {
     pub direction: Vector3<f32>,
 }
 
-/// Simple camera for perspective projections.
+/// Simple camera for perspective projections. +Y is up, right handed system. Depth is inverted.
 pub struct PerspectiveCamera {
     params: PerspectiveParams,
     logical_size: Vector2<f32>,
@@ -79,7 +79,7 @@ impl PerspectiveCamera {
             }
             if self.proj_dirty {
                 let a = self.logical_size.x / self.logical_size.y;
-                self.proj = perspective(self.fov, a, 0.001, 100.0);
+                self.proj = perspective(self.fov, a, 0.01);
                 self.proj_dirty = false;
             }
             self.proj_transform = self.proj * self.transform;
@@ -88,4 +88,14 @@ impl PerspectiveCamera {
 
         self.proj_transform
     }
+}
+
+#[rustfmt::skip]
+fn perspective(fovy: Rad<f32>, aspect: f32, near: f32) -> Matrix4<f32> {
+    let f = Rad::cot(fovy / 2.0);
+    Matrix4::new(
+        f / aspect,  0.0,  0.0,  0.0,
+               0.0,    f,  0.0,  0.0,
+               0.0,  0.0,  0.0, -1.0,
+               0.0,  0.0, near,  0.0)
 }

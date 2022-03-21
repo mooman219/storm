@@ -190,11 +190,17 @@ impl<A: App> Context<A> {
         graphics().physical_size
     }
 
-    /// Clears the screen buffers according to the clear mode.
+    /// Clears the screen buffers according to the given clear mode.
     pub fn clear(&self, clear_mode: ClearMode) {
         let gl = graphics().gl();
         if let Some(clear_color) = clear_mode.color {
             gl.clear_color(clear_color);
+        }
+        if let Some(depth) = clear_mode.depth {
+            gl.clear_depth(depth);
+        }
+        if let Some(depth_test) = clear_mode.depth_test {
+            gl.depth_func(depth_test);
         }
         gl.clear(clear_mode.mode);
     }

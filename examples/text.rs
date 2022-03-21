@@ -2,7 +2,7 @@ use core::time::Duration;
 use storm::color::RGBA8;
 use storm::event::*;
 use storm::fontdue::{layout::LayoutSettings, Font};
-use storm::graphics::{shaders::text::*, ClearMode, DisplayMode, Vsync, WindowSettings};
+use storm::graphics::{shaders::text::*, ClearMode, DepthTest, DisplayMode, Vsync, WindowSettings};
 use storm::math::OrthographicCamera;
 use storm::*;
 
@@ -80,7 +80,7 @@ impl App for TextApp {
     }
 
     fn on_update(&mut self, ctx: &mut Context<Self>, _delta: f32) {
-        ctx.clear(ClearMode::color_depth(RGBA8::BLACK));
+        ctx.clear(ClearMode::new().with_color(RGBA8::BLACK).with_depth(1.0, DepthTest::Less));
         self.text_layer.draw(&self.text_shader);
     }
 

@@ -5,7 +5,8 @@ use storm::color::RGBA8;
 use storm::event::*;
 use storm::graphics::Buffer;
 use storm::graphics::{
-    shaders::sprite::*, ClearMode, DisplayMode, Texture, TextureFiltering, Uniform, Vsync, WindowSettings,
+    shaders::sprite::*, ClearMode, DepthTest, DisplayMode, Texture, TextureFiltering, Uniform, Vsync,
+    WindowSettings,
 };
 use storm::math::OrthographicCamera;
 use storm::*;
@@ -85,7 +86,7 @@ impl App for TextureApp {
     }
 
     fn on_update(&mut self, ctx: &mut Context<Self>, _delta: f32) {
-        ctx.clear(ClearMode::color_depth(RGBA8::BLUE));
+        ctx.clear(ClearMode::new().with_color(RGBA8::BLUE).with_depth(1.0, DepthTest::Less));
         self.sprite_shader.draw(&self.transform_uniform, &self.texture_atlas, &[&self.sprite_buffer]);
     }
 

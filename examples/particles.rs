@@ -4,7 +4,7 @@ use storm::cgmath::*;
 use storm::color::RGBA8;
 use storm::event::*;
 use storm::graphics::{
-    shaders::sprite::*, ClearMode, DisplayMode, Texture, TextureSection, Vsync, WindowSettings,
+    shaders::sprite::*, ClearMode, DepthTest, DisplayMode, Texture, TextureSection, Vsync, WindowSettings,
 };
 use storm::graphics::{Buffer, Uniform};
 use storm::math::OrthographicCamera;
@@ -76,7 +76,7 @@ impl App for ParticlesApp {
             Particle::tick(&mut self.sprites[index], &mut self.particles[index], 1.0 / 144.0);
         }
         self.particle_buffer.set(&self.sprites);
-        ctx.clear(ClearMode::color_depth(RGBA8::BLACK));
+        ctx.clear(ClearMode::new().with_color(RGBA8::BLACK).with_depth(1.0, DepthTest::Less));
         self.sprite_shader.draw(&self.transform_uniform, &self.default_texture, &[&self.particle_buffer]);
     }
 
