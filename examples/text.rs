@@ -6,7 +6,7 @@ use storm::graphics::{shaders::text::*, ClearMode, DepthTest, DisplayMode, Vsync
 use storm::math::OrthographicCamera;
 use storm::*;
 
-static FONT: &[u8] = include_bytes!("resources/Roboto-Regular.ttf");
+static FONT: &[u8] = include_bytes!("resources/arial.ttf");
 
 /// Run with: cargo run --example text --release
 fn main() {
@@ -22,8 +22,8 @@ fn main() {
     });
 }
 
-const SIZE: f32 = 100.0;
-const COLOR: RGBA8 = RGBA8::WHITE;
+const SIZE: f32 = 16.0;
+const COLOR: RGBA8 = RGBA8::BLACK;
 
 struct TextApp {
     is_dragging: bool,
@@ -55,7 +55,7 @@ impl App for TextApp {
         };
 
         // Append some text with our layout settings.
-        let message = String::from("Nice\nPost");
+        let message = String::from("Increment");
         text_layer.append(
             &fonts,
             &layout_settings,
@@ -80,7 +80,7 @@ impl App for TextApp {
     }
 
     fn on_update(&mut self, ctx: &mut Context<Self>, _delta: f32) {
-        ctx.clear(ClearMode::new().with_color(RGBA8::BLACK).with_depth(1.0, DepthTest::Less));
+        ctx.clear(ClearMode::new().with_color(RGBA8::WHITE).with_depth(1.0, DepthTest::Less));
         self.text_layer.draw(&self.text_shader);
     }
 
