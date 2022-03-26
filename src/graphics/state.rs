@@ -124,6 +124,15 @@ impl<A: App> Context<A> {
         }
     }
 
+    /// Sets if backface culling is enabled. This is enabled by default.
+    pub fn set_backface_culling(&self, enabled: bool) {
+        if enabled {
+            graphics().gl().enable(Capability::CullFace)
+        } else {
+            graphics().gl().disable(Capability::CullFace)
+        }
+    }
+
     /// Gets the max texture size supported on the GPU.
     pub fn max_texture_size(&self) -> i32 {
         graphics().max_texture_size

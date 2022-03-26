@@ -990,6 +990,10 @@ impl OpenGL {
         unsafe { self.gl.enable(capability as u32) };
     }
 
+    pub fn disable(&self, capability: Capability) {
+        unsafe { self.gl.disable(capability as u32) };
+    }
+
     pub fn clear_color(&mut self, color: RGBA8) {
         if self.clear_color != color {
             self.clear_color = color;
