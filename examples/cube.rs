@@ -151,9 +151,10 @@ impl App for CubeApp {
         &mut self,
         _ctx: &mut Context<Self>,
         _physical_size: cgmath::Vector2<f32>,
-        _logical_size: cgmath::Vector2<f32>,
+        logical_size: cgmath::Vector2<f32>,
         _scale_factor: f32,
     ) {
+        self.camera.resize(logical_size);
     }
 }
 
