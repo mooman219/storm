@@ -186,7 +186,7 @@ impl Camera {
         Camera {
             transform,
             uniform,
-            pos: Vector3::zero(),
+            pos: Vector3::new(-1.0, 0.0, 0.0),
             dir: Vector3::zero(),
             forward: Vector2::zero(),
             yaw: 0.0,
