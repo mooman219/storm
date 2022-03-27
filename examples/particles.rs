@@ -4,7 +4,8 @@ use storm::cgmath::*;
 use storm::color::RGBA8;
 use storm::event::*;
 use storm::graphics::{
-    shaders::sprite::*, ClearMode, DepthTest, DisplayMode, Texture, TextureSection, Vsync, WindowSettings,
+    shaders::sprite::*, std140, ClearMode, DepthTest, DisplayMode, Texture, TextureSection, Vsync,
+    WindowSettings,
 };
 use storm::graphics::{Buffer, Uniform};
 use storm::math::OrthographicCamera;
@@ -29,7 +30,7 @@ struct ParticlesApp {
     particle_buffer: Buffer<Sprite>,
     default_texture: Texture,
     transform: OrthographicCamera,
-    transform_uniform: Uniform<SpriteUniform>,
+    transform_uniform: Uniform<std140::mat4>,
     sprites: Vec<Sprite>,
     particles: Vec<Particle>,
 }
@@ -45,7 +46,7 @@ impl App for ParticlesApp {
 
         let mut transform = OrthographicCamera::new(ctx.window_logical_size());
         transform.set().rotation = 0.125;
-        let transform_uniform: Uniform<SpriteUniform> = Uniform::new(ctx, &mut transform);
+        let transform_uniform: Uniform<std140::mat4> = Uniform::new(ctx, transform.matrix());
 
         let mut sprites = Vec::new();
         let mut particles = Vec::new();
@@ -89,11 +90,11 @@ impl App for ParticlesApp {
             KeyboardButton::Escape => ctx.request_stop(),
             KeyboardButton::Left => {
                 self.transform.set().rotation += 0.005;
-                self.transform_uniform.set(&mut self.transform);
+                self.transform_uniform.set(self.transform.matrix());
             }
             KeyboardButton::Right => {
                 self.transform.set().rotation -= 0.005;
-                self.transform_uniform.set(&mut self.transform);
+                self.transform_uniform.set(self.transform.matrix());
             }
             KeyboardButton::U => ctx.set_window_display_mode(DisplayMode::Windowed {
                 width: 1500,
@@ -141,7 +142,7 @@ impl App for ParticlesApp {
         if self.is_dragging {
             let scale = self.transform.get().scale;
             self.transform.set().translation += delta.extend(0.0) / scale;
-            self.transform_uniform.set(&mut self.transform);
+            self.transform_uniform.set(self.transform.matrix());
         }
     }
 
@@ -151,7 +152,7 @@ impl App for ParticlesApp {
             ScrollDirection::Down => self.transform.set().scale /= 1.1,
             _ => {}
         }
-        self.transform_uniform.set(&mut self.transform);
+        self.transform_uniform.set(self.transform.matrix());
     }
 
     fn on_window_resized(
@@ -162,7 +163,7 @@ impl App for ParticlesApp {
         _scale_factor: f32,
     ) {
         self.transform.set_size(logical_size);
-        self.transform_uniform.set(&mut self.transform);
+        self.transform_uniform.set(self.transform.matrix());
     }
 }
 

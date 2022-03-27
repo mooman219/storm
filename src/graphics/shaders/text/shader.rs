@@ -20,22 +20,8 @@ impl ShaderDescriptor<1> for TextShader {
     const FRAGMENT_SHADER: &'static str = include_str!("fragment.glsl");
     const TEXTURE_NAMES: [&'static str; 1] = ["tex"];
     const VERTEX_UNIFORM_NAME: &'static str = "vertex";
-    type VertexUniformType = TextUniform;
+    type VertexUniformType = std140::mat4;
     type VertexDescriptor = TextSprite;
-}
-
-#[std140::uniform]
-#[derive(Clone, Copy)]
-pub struct TextUniform {
-    pub ortho: std140::mat4,
-}
-
-impl TextUniform {
-    pub fn new(ortho: Matrix4<f32>) -> TextUniform {
-        TextUniform {
-            ortho: ortho.into(),
-        }
-    }
 }
 
 /// Shader object for sprites. This holds no mutable state, so it's recommended to reuse this as
@@ -53,7 +39,7 @@ impl TextShader {
     }
 
     /// Draws to the screen.
-    pub fn draw(&self, uniform: &Uniform<TextUniform>, atlas: &Texture, buffer: &Buffer<TextSprite>) {
+    pub fn draw(&self, uniform: &Uniform<std140::mat4>, atlas: &Texture, buffer: &Buffer<TextSprite>) {
         self.shader.draw(DrawMode::TriangleStrip, uniform, [atlas], &[buffer]);
     }
 }
@@ -66,7 +52,7 @@ struct CharCacheValue {
 
 /// Holds the state required to cache and draw text to the screen.
 pub struct TextShaderPass {
-    uniform: Uniform<TextUniform>,
+    uniform: Uniform<std140::mat4>,
     atlas: TextureAtlas,
     buffer: Buffer<TextSprite>,
 
@@ -80,7 +66,7 @@ impl TextShaderPass {
     pub fn new(ctx: &Context<impl App>, ortho: Matrix4<f32>) -> TextShaderPass {
         let max = ctx.max_texture_size().min(4096) as u32;
         TextShaderPass {
-            uniform: Uniform::new(ctx, TextUniform::new(ortho)),
+            uniform: Uniform::new(ctx, ortho),
             atlas: TextureAtlas::new::<R8, _>(ctx, max, TextureFiltering::none()),
             buffer: Buffer::new(ctx),
 
@@ -94,7 +80,7 @@ impl TextShaderPass {
     /// Sets the orthographic projection used to draw this pass. If none is passed, this function
     /// does nothing.
     pub fn set_ortho(&mut self, ortho: Matrix4<f32>) {
-        self.uniform.set(TextUniform::new(ortho));
+        self.uniform.set(ortho);
     }
 
     /// Draws the pass to the screen.

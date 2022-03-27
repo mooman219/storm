@@ -5,7 +5,7 @@ use storm::color::RGBA8;
 use storm::event::*;
 use storm::graphics::Buffer;
 use storm::graphics::{
-    shaders::sprite::*, ClearMode, DepthTest, DisplayMode, Texture, TextureFiltering, Uniform, Vsync,
+    shaders::sprite::*, std140, ClearMode, DepthTest, DisplayMode, Texture, TextureFiltering, Uniform, Vsync,
     WindowSettings,
 };
 use storm::math::OrthographicCamera;
@@ -32,7 +32,7 @@ struct TextureApp {
     texture_atlas: Texture,
     sprite_buffer: Buffer<Sprite>,
     transform: OrthographicCamera,
-    transform_uniform: Uniform<SpriteUniform>,
+    transform_uniform: Uniform<std140::mat4>,
     sound: SoundControl,
     sprites: [Sprite; 3],
     clicking: bool,
@@ -49,7 +49,7 @@ impl App for TextureApp {
         let mut transform = OrthographicCamera::new(ctx.window_logical_size());
         transform.set().rotation = 0.12;
 
-        let transform_uniform = Uniform::new(ctx, &mut transform);
+        let transform_uniform = Uniform::new(ctx, transform.matrix());
 
         let source = Sound::from_flac(SOUND).unwrap();
         let sound = source.play(ctx, 0.3, 0.1);
@@ -185,6 +185,6 @@ impl App for TextureApp {
         _scale_factor: f32,
     ) {
         self.transform.set_size(logical_size);
-        self.transform_uniform.set(&mut self.transform);
+        self.transform_uniform.set(self.transform.matrix());
     }
 }

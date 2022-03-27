@@ -16,12 +16,12 @@ mod core;
 /// ```
 pub use storm_macro::uniform;
 
-/// Marker trait for element types supported by the `#[uniform]` macro. These types have specific
-/// safety, padding, and alignment requirements.
+/// Marker trait for element types supported by the `#[std140::uniform]` macro. These types have
+/// specific safety, padding, and alignment requirements.
 pub unsafe trait Std140Element: Copy {}
 
-/// Marker trait for structs supported by the `#[uniform]` macro. These types have specific safety,
-/// padding, and alignment requirements.
+/// Marker trait for structs supported by the `#[std140::uniform]` macro. These types have specific
+/// safety, padding, and alignment requirements.
 pub unsafe trait Std140Struct: Copy {}
 
 // float ========================================
@@ -88,6 +88,7 @@ pub struct vec3 {
 }
 
 unsafe impl Std140Element for vec3 {}
+unsafe impl Std140Struct for vec3 {}
 impl vec3 {
     /// Creates a new [vec3] with zeros in all positions.
     pub const fn zero() -> Self {
@@ -119,6 +120,7 @@ pub struct vec4 {
 }
 
 unsafe impl Std140Element for vec4 {}
+unsafe impl Std140Struct for vec4 {}
 impl vec4 {
     /// Creates a new [vec4] with zeros in all positions.
     pub const fn zero() -> Self {
@@ -200,6 +202,7 @@ pub struct ivec3 {
 }
 
 unsafe impl Std140Element for ivec3 {}
+unsafe impl Std140Struct for ivec3 {}
 impl ivec3 {
     /// Creates a new [ivec3] with zeros in all positions.
     pub const fn zero() -> Self {
@@ -231,6 +234,7 @@ pub struct ivec4 {
 }
 
 unsafe impl Std140Element for ivec4 {}
+unsafe impl Std140Struct for ivec4 {}
 impl ivec4 {
     /// Creates a new [ivec4] with zeros in all positions.
     pub const fn zero() -> Self {
@@ -314,6 +318,7 @@ pub struct uvec3 {
 }
 
 unsafe impl Std140Element for uvec3 {}
+unsafe impl Std140Struct for uvec3 {}
 impl uvec3 {
     /// Creates a new [uvec3] with zeros in all positions.
     pub const fn zero() -> Self {
@@ -345,6 +350,7 @@ pub struct uvec4 {
 }
 
 unsafe impl Std140Element for uvec4 {}
+unsafe impl Std140Struct for uvec4 {}
 impl uvec4 {
     /// Creates a new [uvec4] with zeros in all positions.
     pub const fn zero() -> Self {
@@ -418,6 +424,7 @@ pub struct bvec3 {
 }
 
 unsafe impl Std140Element for bvec3 {}
+unsafe impl Std140Struct for bvec3 {}
 impl bvec3 {
     /// Creates a new [bvec3] with false in all positions.
     pub const fn falsey() -> Self {
@@ -454,6 +461,7 @@ pub struct bvec4 {
 }
 
 unsafe impl Std140Element for bvec4 {}
+unsafe impl Std140Struct for bvec4 {}
 impl bvec4 {
     /// Creates a new [bvec4] with false in all positions.
     pub const fn falsey() -> Self {
@@ -479,6 +487,7 @@ impl bvec4 {
 // matn =========================================
 
 /// A matrix with 2 columns and up to 2 rows, represented by 2 vec4 vectors.
+#[repr(C, align(16))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct mat2 {
     /// The first value.
@@ -488,6 +497,7 @@ pub struct mat2 {
 }
 
 unsafe impl Std140Element for mat2 {}
+unsafe impl Std140Struct for mat2 {}
 impl mat2 {
     /// Creates a new [mat2] with zeros in all positions.
     pub const fn zero() -> Self {
@@ -504,6 +514,7 @@ impl mat2 {
 }
 
 /// A matrix with 3 columns and up to 3 rows, represented by 3 vec4 vectors.
+#[repr(C, align(16))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct mat3 {
     /// The first value.
@@ -515,6 +526,7 @@ pub struct mat3 {
 }
 
 unsafe impl Std140Element for mat3 {}
+unsafe impl Std140Struct for mat3 {}
 impl mat3 {
     /// Creates a new [mat3] with zeros in all positions.
     pub const fn zero() -> Self {
@@ -532,6 +544,7 @@ impl mat3 {
 }
 
 /// A matrix with 4 columns and up to 4 rows, represented by 4 vec4 vectors.
+#[repr(C, align(16))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct mat4 {
     /// The first value.
@@ -545,6 +558,7 @@ pub struct mat4 {
 }
 
 unsafe impl Std140Element for mat4 {}
+unsafe impl Std140Struct for mat4 {}
 impl mat4 {
     /// Creates a new [mat4] with zeros in all positions.
     pub const fn zero() -> Self {

@@ -7,7 +7,7 @@ use storm::event::*;
 use storm::fontdue::{layout::LayoutSettings, Font};
 use storm::graphics::{
     shaders::{sprite::*, text::*},
-    Buffer, ClearMode, DepthTest, DisplayMode, Texture, Uniform, Vsync, WindowSettings,
+    std140, Buffer, ClearMode, DepthTest, DisplayMode, Texture, Uniform, Vsync, WindowSettings,
 };
 use storm::math::{OrthographicCamera, AABB2D};
 use storm::*;
@@ -38,7 +38,7 @@ struct PongApp {
     background: Buffer<Sprite>,
     paddles: Buffer<Sprite>,
     ball: Buffer<Sprite>,
-    transform_uniform: Uniform<SpriteUniform>,
+    transform_uniform: Uniform<std140::mat4>,
     boop: Sound,
     text_layer: TextShaderPass,
     up: bool,
@@ -62,7 +62,7 @@ impl App for PongApp {
         let mut ball = Buffer::new(ctx);
 
         let mut transform = OrthographicCamera::new(ctx.window_logical_size());
-        let transform_uniform = Uniform::new(ctx, &mut transform);
+        let transform_uniform = Uniform::new(ctx, transform.matrix());
 
         let boop = Sound::from_flac(SOUND).unwrap();
 

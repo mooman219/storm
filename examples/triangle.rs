@@ -139,7 +139,7 @@ pub struct Camera {
     /// Transform matix.
     transform: PerspectiveCamera,
     /// Transform uniform.
-    uniform: Uniform<TriangleUniform>,
+    uniform: Uniform<std140::mat4>,
     /// Position vector.
     pos: Vector3<f32>,
     /// Unnormalized direction vector.
@@ -160,7 +160,7 @@ pub struct Camera {
 impl Camera {
     pub fn new(ctx: &mut Context<TriangleApp>) -> Camera {
         let mut transform = PerspectiveCamera::new(ctx.window_logical_size());
-        let uniform = Uniform::new(ctx, &mut transform);
+        let uniform = Uniform::new(ctx, transform.matrix());
         Camera {
             transform,
             uniform,
@@ -178,7 +178,7 @@ impl Camera {
 
     pub fn resize(&mut self, logical_size: Vector2<f32>) {
         self.transform.set_size(logical_size);
-        self.uniform.set(&mut self.transform);
+        self.uniform.set(self.transform.matrix());
     }
 
     pub fn look(&mut self, cursor_delta: Vector2<f32>) {
@@ -205,7 +205,7 @@ impl Camera {
         let z = cos_pitch * self.forward.y;
         self.dir = Vector3::new(x, y, z);
         self.transform.set().direction = self.dir;
-        self.uniform.set(&mut self.transform);
+        self.uniform.set(self.transform.matrix());
     }
 
     pub fn update(&mut self, time_delta: f32) {
@@ -216,10 +216,10 @@ impl Camera {
         self.pos.z += (self.forward.y * forward_speed) + (self.forward.x * strafe_speed);
         self.pos.y += vertical_speed;
         self.transform.set().eye = self.pos;
-        self.uniform.set(&mut self.transform);
+        self.uniform.set(self.transform.matrix());
     }
 
-    pub fn uniform(&self) -> &Uniform<TriangleUniform> {
+    pub fn uniform(&self) -> &Uniform<std140::mat4> {
         &self.uniform
     }
 }

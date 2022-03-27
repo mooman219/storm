@@ -13,7 +13,7 @@ pub struct Uniform<T: Std140Struct> {
 
 impl<T: Std140Struct> Uniform<T> {
     /// Creates a new uniform.
-    pub fn new<Z: Into<T>>(_ctx: &Context<impl App>, uniform: Z) -> Uniform<T> {
+    pub fn new(_ctx: &Context<impl App>, uniform: impl Into<T>) -> Uniform<T> {
         let gl = graphics().gl();
 
         let vbo = gl.create_buffer();
@@ -28,7 +28,7 @@ impl<T: Std140Struct> Uniform<T> {
     }
 
     /// Sets the value of the uniform.
-    pub fn set<Z: Into<T>>(&mut self, uniform: Z) {
+    pub fn set(&mut self, uniform: impl Into<T>) {
         let gl = graphics().gl();
         gl.bind_buffer(BufferBindingTarget::UniformBuffer, Some(self.vbo));
         gl.buffer_data(BufferBindingTarget::UniformBuffer, &[uniform.into()], BufferUsage::StaticDraw);

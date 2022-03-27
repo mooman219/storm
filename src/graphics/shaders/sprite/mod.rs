@@ -2,4 +2,4 @@ mod data;
 mod shader;
 
 pub use self::data::Sprite;
-pub use self::shader::{SpriteShader, SpriteUniform};
+pub use self::shader::SpriteShader;
