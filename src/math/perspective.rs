@@ -12,11 +12,11 @@ pub struct PerspectiveParams {
 /// Simple camera for perspective projections. +Y is up, right handed system. Depth is inverted.
 pub struct PerspectiveCamera {
     params: PerspectiveParams,
-    logical_size: Vector2<f32>,
+    aspect: f32,
     fov: Rad<f32>,
 
-    transform: Matrix4<f32>,
-    transform_dirty: bool,
+    view: Matrix4<f32>,
+    view_dirty: bool,
     proj: Matrix4<f32>,
     proj_dirty: bool,
     proj_transform: Matrix4<f32>,
@@ -30,11 +30,11 @@ impl PerspectiveCamera {
                 eye: Vector3::new(0.0, 0.0, 0.0),
                 direction: Vector3::new(1.0, 0.0, 0.0),
             },
-            logical_size,
+            aspect: logical_size.x / logical_size.y,
             fov: Deg(90.0).into(),
 
-            transform: IDENTITY_MATRIX,
-            transform_dirty: false,
+            view: IDENTITY_MATRIX,
+            view_dirty: false,
             proj: IDENTITY_MATRIX,
             proj_dirty: true,
             proj_transform: IDENTITY_MATRIX,
@@ -49,16 +49,16 @@ impl PerspectiveCamera {
 
     /// Gets an mutable reference to the transform parameters.
     pub fn set(&mut self) -> &mut PerspectiveParams {
-        self.transform_dirty = true;
+        self.view_dirty = true;
         self.proj_transform_dirty = true;
         &mut self.params
     }
 
     /// Logical size of the viewport.
     pub fn set_size(&mut self, logical_size: Vector2<f32>) {
+        self.aspect = logical_size.x / logical_size.y;
         self.proj_dirty = true;
         self.proj_transform_dirty = true;
-        self.logical_size = logical_size;
     }
 
     /// Sets the FOV in degrees.
@@ -72,17 +72,15 @@ impl PerspectiveCamera {
     /// matrix is built in this order: Scale * Translation * Rotation.
     pub fn matrix(&mut self) -> Matrix4<f32> {
         if self.proj_transform_dirty {
-            if self.transform_dirty {
-                let eye = unsafe { core::mem::transmute(self.params.eye) };
-                self.transform = Matrix4::look_to_rh(eye, self.params.direction, Vector3::new(0.0, 1.0, 0.0));
-                self.transform_dirty = false;
+            if self.view_dirty {
+                self.view = view(self.params.eye, self.params.direction);
+                self.view_dirty = false;
             }
             if self.proj_dirty {
-                let a = self.logical_size.x / self.logical_size.y;
-                self.proj = perspective(self.fov, a, 0.01);
+                self.proj = projection(self.fov, self.aspect, 0.01);
                 self.proj_dirty = false;
             }
-            self.proj_transform = self.proj * self.transform;
+            self.proj_transform = self.proj * self.view;
             self.proj_transform_dirty = false;
         }
 
@@ -90,8 +88,33 @@ impl PerspectiveCamera {
     }
 }
 
+// Right handed, +Y is up.
 #[rustfmt::skip]
-fn perspective(fovy: Rad<f32>, aspect: f32, near: f32) -> Matrix4<f32> {
+fn view(eye: Vector3<f32>, dir: Vector3<f32>) -> Matrix4<f32> {
+    let f = dir.normalize();
+
+    // let s = f.cross(up).normalize();
+    let s = Vector3::new(-f.z, 0.0, f.x);
+    let mag = (s.x * s.x + s.z * s.z).sqrt().recip();
+    let s = Vector3::new(s.x * mag, 0.0, s.z * mag);
+    
+    // let u = s.cross(f);
+    let u = Vector3::new(
+        -(s.z * f.y),
+        (s.z * f.x) - (s.x * f.z),
+        s.x * f.y,
+    );
+
+    Matrix4::new(
+        s.x, u.x, -f.x, 0.0,
+        s.y, u.y, -f.y, 0.0,
+        s.z, u.z, -f.z, 0.0,
+        -eye.dot(s), -eye.dot(u), eye.dot(f), 1.0,
+    )
+}
+
+#[rustfmt::skip]
+fn projection(fovy: Rad<f32>, aspect: f32, near: f32) -> Matrix4<f32> {
     let f = Rad::cot(fovy / 2.0);
     Matrix4::new(
         f / aspect,  0.0,  0.0,  0.0,
