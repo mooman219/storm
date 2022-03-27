@@ -71,7 +71,7 @@ impl VertexInstancing {
 
     /// Gets if this is instanced or not.
     pub const fn is_instanced(&self) -> bool {
-        self.divisor == 0
+        self.divisor != 0
     }
 }
 
