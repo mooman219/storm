@@ -1,5 +1,7 @@
 use crate::color::RGBA8;
-use crate::graphics::{TextureSection, VertexAttribute, VertexDescriptor, VertexInputType, VertexOutputType};
+use crate::graphics::{
+    TextureSection, VertexAttribute, VertexDescriptor, VertexInputType, VertexInstancing, VertexOutputType,
+};
 use crate::math::AABB2D;
 use cgmath::*;
 
@@ -21,6 +23,7 @@ pub struct Sprite {
 }
 
 impl VertexDescriptor for Sprite {
+    const INSTANCING: VertexInstancing = VertexInstancing::instanced(4);
     const ATTRIBUTES: &'static [VertexAttribute] = &[
         // Pos, Size, Texture, Color::RGBA8, Rotation
         VertexAttribute::new(3, VertexInputType::F32, VertexOutputType::F32),

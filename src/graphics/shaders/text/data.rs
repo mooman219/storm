@@ -1,5 +1,7 @@
 use crate::color::RGBA8;
-use crate::graphics::{TextureSection, VertexAttribute, VertexDescriptor, VertexInputType, VertexOutputType};
+use crate::graphics::{
+    TextureSection, VertexAttribute, VertexDescriptor, VertexInputType, VertexInstancing, VertexOutputType,
+};
 use cgmath::{Vector2, Vector3};
 use fontdue::layout::TextStyle;
 
@@ -52,6 +54,7 @@ pub struct TextSprite {
 }
 
 impl VertexDescriptor for TextSprite {
+    const INSTANCING: VertexInstancing = VertexInstancing::instanced(4);
     const ATTRIBUTES: &'static [VertexAttribute] = &[
         // Position, Size, UV, Color::RGBA8
         VertexAttribute::new(3, VertexInputType::F32, VertexOutputType::F32),

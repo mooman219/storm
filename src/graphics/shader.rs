@@ -62,6 +62,29 @@ impl<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> Shader<T, TEXTURES> {
         }
     }
 
+    /// Performs a draw to the screen.
+    /// # Arguments
+    ///
+    /// * `mode` - Specifies what kind of primitives to render.
+    /// * `uniform` - The uniform to use for the shader invocation.
+    /// * `textures` - The set of textures to use in the fragment shader.
+    /// * `buffers` - The set of buffers of vertices to draw, reusing the uniform and textures for
+    /// each buffer draw.
+    pub fn draw(
+        &self,
+        mode: DrawMode,
+        uniform: &Uniform<T::VertexUniformType>,
+        textures: [&Texture; TEXTURES],
+        buffers: &[impl AsRef<Buffer<T::VertexDescriptor>>],
+    ) {
+        let instancing = T::VertexDescriptor::INSTANCING;
+        if instancing.is_instanced() {
+            self.draw_instanced(mode, uniform, textures, buffers, instancing.count);
+        } else {
+            self.draw_non_instanced(mode, uniform, textures, buffers);
+        }
+    }
+
     /// Performs an instanced draw to the screen.
     /// # Arguments
     ///
@@ -71,7 +94,7 @@ impl<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> Shader<T, TEXTURES> {
     /// * `buffers` - The set of buffers of vertices to draw, reusing the uniform and textures for
     /// each buffer draw.
     /// * `count` - Specifies the number of instances to be rendered.
-    pub fn draw_instanced(
+    fn draw_instanced(
         &self,
         mode: DrawMode,
         uniform: &Uniform<T::VertexUniformType>,
@@ -97,7 +120,7 @@ impl<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> Shader<T, TEXTURES> {
     /// * `textures` - The set of textures to use in the fragment shader.
     /// * `buffers` - The set of buffers of vertices to draw, reusing the uniform and textures for
     /// each buffer draw.
-    pub fn draw(
+    fn draw_non_instanced(
         &self,
         mode: DrawMode,
         uniform: &Uniform<T::VertexUniformType>,

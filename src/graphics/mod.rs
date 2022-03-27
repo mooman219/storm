@@ -21,7 +21,9 @@ pub use self::texture::{Texture, TextureFiltering};
 pub use self::texture_atlas::TextureAtlas;
 pub use self::texture_section::TextureSection;
 pub use self::uniform::Uniform;
-pub use self::vertex_descriptor::{VertexAttribute, VertexDescriptor, VertexInputType, VertexOutputType};
+pub use self::vertex_descriptor::{
+    VertexAttribute, VertexDescriptor, VertexInputType, VertexInstancing, VertexOutputType,
+};
 pub use self::window::{DisplayMode, Vsync, WindowSettings};
 
 pub(crate) use self::opengl::*;

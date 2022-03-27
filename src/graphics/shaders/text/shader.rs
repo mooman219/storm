@@ -54,7 +54,7 @@ impl TextShader {
 
     /// Draws to the screen.
     pub fn draw(&self, uniform: &Uniform<TextUniform>, atlas: &Texture, buffer: &Buffer<TextSprite>) {
-        self.shader.draw_instanced(DrawMode::TriangleStrip, uniform, [atlas], &[buffer], 4);
+        self.shader.draw(DrawMode::TriangleStrip, uniform, [atlas], &[buffer]);
     }
 }
 

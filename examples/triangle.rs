@@ -1,16 +1,14 @@
 use core::time::Duration;
-use face::*;
 use storm::cgmath::*;
 use storm::{color::*, event::*, graphics::*, math::*, *};
+use triangle_shader::*;
 
-mod face;
+mod triangle_shader;
 
-static TEXTURE: &[u8] = include_bytes!("resources/1.png");
-
-/// Run with: cargo run --example cube --release
+/// Run with: cargo run --example triangle --release
 fn main() {
-    start::<CubeApp>(WindowSettings {
-        title: String::from("Storm: Cube"),
+    start::<TriangleApp>(WindowSettings {
+        title: String::from("Storm: triangle"),
         display_mode: DisplayMode::Windowed {
             width: 1280,
             height: 1024,
@@ -20,56 +18,35 @@ fn main() {
     });
 }
 
-pub struct CubeApp {
+pub struct TriangleApp {
     camera: Camera,
-    texture: Texture,
-    buffer: Buffer<Face>,
-    shader: FaceShader,
+    buffer: Buffer<TrianglePoint>,
+    shader: TriangleShader,
 }
 
-impl App for CubeApp {
+impl App for TriangleApp {
     fn new(ctx: &mut Context<Self>) -> Self {
         ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
-        let texture = Texture::from_png(ctx, TEXTURE, TextureFiltering::none());
-        let pos: Vector3<f32> = Vector3::zero();
-        let mut faces: Vec<Face> = Vec::new();
-        faces.push(Face {
-            pos,
-            kind: FaceKind::BlockPosX,
-            texture: TextureSection::default(),
-        });
-        faces.push(Face {
-            pos,
-            kind: FaceKind::BlockNegX,
-            texture: TextureSection::default(),
-        });
-        faces.push(Face {
-            pos,
-            kind: FaceKind::BlockPosY,
-            texture: TextureSection::default(),
-        });
-        faces.push(Face {
-            pos,
-            kind: FaceKind::BlockNegY,
-            texture: TextureSection::default(),
-        });
-        faces.push(Face {
-            pos,
-            kind: FaceKind::BlockPosZ,
-            texture: TextureSection::default(),
-        });
-        faces.push(Face {
-            pos,
-            kind: FaceKind::BlockNegZ,
-            texture: TextureSection::default(),
-        });
-        let mut buffer: Buffer<Face> = Buffer::new(ctx);
-        buffer.set(&faces);
-        let shader = FaceShader::new(ctx);
+        ctx.set_backface_culling(false);
+        let mut buffer: Buffer<TrianglePoint> = Buffer::new(ctx);
+        buffer.set(&[
+            TrianglePoint {
+                pos: Vector3::new(0.0, 1.0, -1.0),
+                col: Vector3::new(1.0, 0.0, 0.0),
+            },
+            TrianglePoint {
+                pos: Vector3::new(0.0, 1.0, 1.0),
+                col: Vector3::new(0.0, 1.0, 0.0),
+            },
+            TrianglePoint {
+                pos: Vector3::new(0.0, 0.0, 0.0),
+                col: Vector3::new(0.0, 0.0, 1.0),
+            },
+        ]);
+        let shader = TriangleShader::new(ctx);
 
-        CubeApp {
+        TriangleApp {
             camera: Camera::new(ctx),
-            texture,
             buffer,
             shader,
         }
@@ -78,7 +55,7 @@ impl App for CubeApp {
     fn on_update(&mut self, ctx: &mut Context<Self>, delta: f32) {
         ctx.clear(ClearMode::new().with_color(RGBA8::BLUE).with_depth(0.0, DepthTest::Greater));
         self.camera.update(delta);
-        self.shader.draw(self.camera.uniform(), &self.texture, &[&self.buffer])
+        self.shader.draw(self.camera.uniform(), &[&self.buffer])
     }
 
     fn on_close_requested(&mut self, ctx: &mut Context<Self>) {
@@ -162,7 +139,7 @@ pub struct Camera {
     /// Transform matix.
     transform: PerspectiveCamera,
     /// Transform uniform.
-    uniform: Uniform<FaceUniform>,
+    uniform: Uniform<TriangleUniform>,
     /// Position vector.
     pos: Vector3<f32>,
     /// Unnormalized direction vector.
@@ -181,7 +158,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(ctx: &mut Context<CubeApp>) -> Camera {
+    pub fn new(ctx: &mut Context<TriangleApp>) -> Camera {
         let mut transform = PerspectiveCamera::new(ctx.window_logical_size());
         let uniform = Uniform::new(ctx, &mut transform);
         Camera {
@@ -242,7 +219,7 @@ impl Camera {
         self.uniform.set(&mut self.transform);
     }
 
-    pub fn uniform(&self) -> &Uniform<FaceUniform> {
+    pub fn uniform(&self) -> &Uniform<TriangleUniform> {
         &self.uniform
     }
 }

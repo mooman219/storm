@@ -55,6 +55,6 @@ impl SpriteShader {
 
     /// Helper function to draw sprites to the screen.
     pub fn draw(&self, uniform: &Uniform<SpriteUniform>, atlas: &Texture, buffers: &[&Buffer<Sprite>]) {
-        self.shader.draw_instanced(DrawMode::TriangleStrip, uniform, [atlas], buffers, 4);
+        self.shader.draw(DrawMode::TriangleStrip, uniform, [atlas], buffers);
     }
 }

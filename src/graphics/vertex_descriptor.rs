@@ -1,7 +1,9 @@
 use crate::graphics::{AttributeType, OpenGL};
 use log::trace;
 
-/// A trait to describe vertices that will be consumed by a shader.
+/// A trait to describe vertices that will be consumed by a shader. The INSTANCING field describes
+/// if vertices with this VertexDescriptor will be drawn instanced or non instanced. The ATTRIBUTES
+/// field describes the fields contained in your vertex struct.
 ///
 /// # Example
 /// ```
@@ -17,6 +19,9 @@ use log::trace;
 /// }
 ///
 /// impl VertexDescriptor for Demo {
+///     // Don't apply any instancing to this vertex type.
+///     const INSTANCING: VertexInstancing = VertexInstancing::none();
+///     // These are the attributes that describe the fields contained in this vertex.
 ///     const ATTRIBUTES: &'static [VertexAttribute] = &[
 ///         // This value represents the three f32s in pos's Vector3<f32>. When invoked in the
 ///         // shader, the values will be read as f32s.
@@ -28,7 +33,46 @@ use log::trace;
 /// }
 /// ```
 pub trait VertexDescriptor {
+    const INSTANCING: VertexInstancing;
     const ATTRIBUTES: &'static [VertexAttribute];
+}
+
+/// Describes how instancing will apply to verticies of this type.
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct VertexInstancing {
+    /// The rate at which generic vertex attributes advance when rendering multiple instances of
+    /// primitives in a single draw call. If divisor is zero, the attribute at slot index advances
+    /// once per vertex. If divisor is non-zero, the attribute advances once per divisor instances
+    /// of the set(s) of vertices being rendered.
+    pub divisor: u32,
+    /// The number of verticies required to render a single instance.
+    pub count: i32,
+}
+
+impl VertexInstancing {
+    /// No instancing will be applied when this vertex is drawn.
+    pub const fn none() -> VertexInstancing {
+        VertexInstancing {
+            divisor: 0,
+            count: 0,
+        }
+    }
+
+    /// Instancing will be applied when this vertex is drawn.
+    /// # Arguments
+    ///
+    /// * `count` - Specifies the number of instances to be rendered per vertex.
+    pub const fn instanced(count: i32) -> VertexInstancing {
+        VertexInstancing {
+            divisor: 1,
+            count,
+        }
+    }
+
+    /// Gets if this is instanced or not.
+    pub const fn is_instanced(&self) -> bool {
+        self.divisor == 0
+    }
 }
 
 /// Describes an individual vertex attribute. These usually correspond to fields in a struct.
@@ -159,9 +203,10 @@ pub(crate) fn configure_vertex<T: VertexDescriptor + Copy>(attributes: &[VertexA
     let stride = core::mem::size_of::<T>() as i32;
     let mut index = 0;
     let mut size = 0;
+    let divisor = T::INSTANCING.divisor;
     for attribute in attributes {
         gl.enable_vertex_attrib_array(index);
-        gl.vertex_attrib_divisor(index, 1);
+        gl.vertex_attrib_divisor(index, divisor);
         if attribute.output.integer {
             gl.vertex_attrib_pointer_i32(index, attribute.count, attribute.input.format, stride, size);
         } else {
