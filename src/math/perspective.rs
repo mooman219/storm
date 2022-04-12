@@ -86,6 +86,15 @@ impl PerspectiveCamera {
 
         self.proj_transform
     }
+
+    /// Transforms the normalized position into a position in the transform. Typically you'll use
+    /// the mouse's normalized position and convert that into world space.
+    pub fn screen_to_world(&mut self, normalized_pos: Vector2<f32>) -> Vector2<f32> {
+        let matrix = self.matrix().invert().unwrap();
+        let value = Vector4::new(normalized_pos.x, normalized_pos.y, 0.0, 1.0);
+        let value = matrix * value;
+        Vector2::new(value.x, value.y)
+    }
 }
 
 // Right handed, +Y is up.
