@@ -204,7 +204,7 @@ impl Camera {
         let y = self.pitch.sin_deg_fast();
         let z = cos_pitch * self.forward.y;
         self.dir = Vector3::new(x, y, z);
-        self.transform.set().direction = self.dir;
+        self.transform.set_direction(self.dir);
         self.uniform.set(self.transform.matrix());
     }
 
@@ -215,7 +215,7 @@ impl Camera {
         self.pos.x += (self.forward.x * forward_speed) + (-self.forward.y * strafe_speed);
         self.pos.z += (self.forward.y * forward_speed) + (self.forward.x * strafe_speed);
         self.pos.y += vertical_speed;
-        self.transform.set().eye = self.pos;
+        self.transform.set_eye(self.pos);
         self.uniform.set(self.transform.matrix());
     }
 

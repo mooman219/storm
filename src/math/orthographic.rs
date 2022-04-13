@@ -18,13 +18,12 @@ pub struct OrthographicParams {
     /// Rotation is measured in turns from [0, 1). Values outside of the range are wrapped into the
     /// range. For example, 1.75 is wrapped into 0.75, -0.4 is wrapped into 0.6.
     pub rotation: f32,
-    /// Flags pixel perfect alignment.
-    pub pixel_perfect: bool,
 }
 
 /// Simple camera for orthographic projections.
 pub struct OrthographicCamera {
     params: OrthographicParams,
+    pixel_perfect: bool,
     logical_size: Vector2<f32>,
 
     transform: Matrix4<f32>,
@@ -42,8 +41,8 @@ impl OrthographicCamera {
                 translation: Vector3::zero(),
                 scale: 1.0,
                 rotation: 0.0,
-                pixel_perfect: true,
             },
+            pixel_perfect: true,
             logical_size,
 
             transform: IDENTITY_MATRIX,
@@ -67,6 +66,15 @@ impl OrthographicCamera {
         &mut self.params
     }
 
+    /// Flags pixel perfect alignment.
+    pub fn set_pixel_perfect(&mut self, pixel_perfect: bool) {
+        if self.pixel_perfect != pixel_perfect {
+            self.pixel_perfect = pixel_perfect;
+            self.transform_dirty = true;
+            self.ortho_transform_dirty = true;
+        }
+    }
+
     /// Logical size of the viewport.
     pub fn set_size(&mut self, logical_size: Vector2<f32>) {
         self.ortho_dirty = true;
@@ -79,7 +87,7 @@ impl OrthographicCamera {
     pub fn matrix(&mut self) -> Matrix4<f32> {
         if self.transform_dirty {
             let mut translation = self.params.translation;
-            if self.params.pixel_perfect {
+            if self.pixel_perfect {
                 translation.x = (translation.x * self.params.scale).floor() / self.params.scale;
                 translation.y = (translation.y * self.params.scale).floor() / self.params.scale;
             }

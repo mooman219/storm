@@ -3,7 +3,7 @@ use cgmath::*;
 
 /// Parameters
 pub struct PerspectiveParams {
-    /// The position of the camera..
+    /// The position of the camera.
     pub eye: Vector3<f32>,
     /// The direction the camera is looking
     pub direction: Vector3<f32>,
@@ -11,7 +11,8 @@ pub struct PerspectiveParams {
 
 /// Simple camera for perspective projections. +Y is up, right handed system. Depth is inverted.
 pub struct PerspectiveCamera {
-    params: PerspectiveParams,
+    eye: Vector3<f32>,
+    direction: Vector3<f32>,
     aspect: f32,
     fov: Rad<f32>,
 
@@ -26,10 +27,8 @@ pub struct PerspectiveCamera {
 impl PerspectiveCamera {
     pub fn new(logical_size: Vector2<f32>) -> PerspectiveCamera {
         PerspectiveCamera {
-            params: PerspectiveParams {
-                eye: Vector3::new(0.0, 0.0, 0.0),
-                direction: Vector3::new(1.0, 0.0, 0.0),
-            },
+            eye: Vector3::new(0.0, 0.0, 0.0),
+            direction: Vector3::new(1.0, 0.0, 0.0),
             aspect: logical_size.x / logical_size.y,
             fov: Deg(90.0).into(),
 
@@ -42,16 +41,18 @@ impl PerspectiveCamera {
         }
     }
 
-    /// Gets an immutable reference to the transform parameters.
-    pub fn get(&self) -> &PerspectiveParams {
-        &self.params
-    }
-
-    /// Gets an mutable reference to the transform parameters.
-    pub fn set(&mut self) -> &mut PerspectiveParams {
+    /// The direction the camera is looking
+    pub fn set_direction(&mut self, direction: Vector3<f32>) {
+        self.direction = direction;
         self.view_dirty = true;
         self.proj_transform_dirty = true;
-        &mut self.params
+    }
+
+    /// The position of the camera.
+    pub fn set_eye(&mut self, eye: Vector3<f32>) {
+        self.eye = eye;
+        self.view_dirty = true;
+        self.proj_transform_dirty = true;
     }
 
     /// Logical size of the viewport.
@@ -68,12 +69,11 @@ impl PerspectiveCamera {
         self.proj_transform_dirty = true;
     }
 
-    /// Creates a new transform matix based on the parameters of the LayerTransform. The transform
-    /// matrix is built in this order: Scale * Translation * Rotation.
+    /// Creates a new transform matix based on the parameters of the LayerTransform.
     pub fn matrix(&mut self) -> Matrix4<f32> {
         if self.proj_transform_dirty {
             if self.view_dirty {
-                self.view = view(self.params.eye, self.params.direction);
+                self.view = view(self.eye, self.direction);
                 self.view_dirty = false;
             }
             if self.proj_dirty {
@@ -87,13 +87,19 @@ impl PerspectiveCamera {
         self.proj_transform
     }
 
-    /// Transforms the normalized position into a position in the transform. Typically you'll use
-    /// the mouse's normalized position and convert that into world space.
-    pub fn screen_to_world(&mut self, normalized_pos: Vector2<f32>) -> Vector3<f32> {
+    /// Given the mouse's normalized position, this returns a point on the near plane.
+    pub fn screen_to_world_pos(&mut self, normalized_pos: Vector2<f32>) -> Vector3<f32> {
         let matrix = self.matrix().invert().unwrap();
         let value = Vector4::new(normalized_pos.x, normalized_pos.y, 1.0, 1.0);
         let value = matrix * value;
         Vector3::new(value.x, value.y, value.z) * value.w.recip()
+    }
+
+    /// Given the mouse's normalized position, this returns the direction from the camera to the
+    /// position of the mouse transformed onto the near plane.
+    pub fn screen_to_world_dir(&mut self, normalized_pos: Vector2<f32>) -> Vector3<f32> {
+        let world = self.screen_to_world_pos(normalized_pos);
+        (world - self.eye).normalize()
     }
 }
 
