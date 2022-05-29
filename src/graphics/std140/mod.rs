@@ -559,6 +559,8 @@ pub struct mat4 {
 
 unsafe impl Std140Element for mat4 {}
 unsafe impl Std140Struct for mat4 {}
+unsafe impl<const N: usize> Std140Element for [mat4; N] {}
+unsafe impl<const N: usize> Std140Struct for [mat4; N] {}
 impl mat4 {
     /// Creates a new [mat4] with zeros in all positions.
     pub const fn zero() -> Self {
