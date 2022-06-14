@@ -58,7 +58,7 @@ impl App for ParticlesApp {
                 particles.push(particle);
             }
         }
-        particle_buffer.set(&sprites);
+        particle_buffer.set_data(&sprites);
 
         ParticlesApp {
             is_dragging,
@@ -76,7 +76,7 @@ impl App for ParticlesApp {
         for index in 0..self.sprites.len() {
             Particle::tick(&mut self.sprites[index], &mut self.particles[index], 1.0 / 144.0);
         }
-        self.particle_buffer.set(&self.sprites);
+        self.particle_buffer.set_data(&self.sprites);
         ctx.clear(ClearMode::new().with_color(RGBA8::BLACK).with_depth(1.0, DepthTest::Less));
         self.sprite_shader.draw(&self.transform_uniform, &self.default_texture, &[&self.particle_buffer]);
     }

@@ -8,7 +8,7 @@ use cgmath::Vector2;
 
 pub use self::aabb::AABB2D;
 pub use self::interpolation::Interpolation;
-pub use self::num::Float;
+pub use self::num::{Float, UnsignedInteger};
 pub use self::orthographic::{ortho_from_bounds, OrthographicCamera};
 pub use self::perspective::PerspectiveCamera;
 

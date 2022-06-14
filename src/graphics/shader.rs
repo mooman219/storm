@@ -112,10 +112,7 @@ impl<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> Shader<T, TEXTURES> {
         self.bind(uniform, textures);
         for buffer in buffers {
             let buffer = buffer.as_ref();
-            if buffer.len() > 0 {
-                buffer.bind();
-                graphics().gl().draw_arrays_instanced(mode, 0, count, buffer.len() as i32);
-            }
+            buffer.draw_instanced(mode, count);
         }
     }
 
@@ -140,10 +137,7 @@ impl<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> Shader<T, TEXTURES> {
         self.bind(uniform, textures);
         for buffer in buffers {
             let buffer = buffer.as_ref();
-            if buffer.len() > 0 {
-                buffer.bind();
-                graphics().gl().draw_arrays(mode, 0, buffer.len() as i32);
-            }
+            buffer.draw(mode);
         }
     }
 }

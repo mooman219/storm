@@ -87,7 +87,7 @@ impl App for PongApp {
             }],
         );
 
-        background.set(&[Sprite {
+        background.set_data(&[Sprite {
             pos: Vector3::new(-500.0, -400.0, -0.1),
             size: Vector2::new(1000, 800),
             color: RGBA8::new(15, 15, 15, 255),
@@ -111,7 +111,7 @@ impl App for PongApp {
                 ..Default::default()
             },
         ];
-        paddles.set(&paddle_sprites);
+        paddles.set_data(&paddle_sprites);
 
         let ball_speed = Vector3::new(-300.0, 0.0, 0.0);
         let ball_sprites = [Sprite {
@@ -120,7 +120,7 @@ impl App for PongApp {
             color: RGBA8::WHITE,
             ..Default::default()
         }];
-        ball.set(&ball_sprites);
+        ball.set_data(&ball_sprites);
 
         PongApp {
             text_shader,
@@ -159,8 +159,8 @@ impl App for PongApp {
             self.ball_speed = Vector3::new(-700.0, 0.0, 0.0);
         }
 
-        self.ball.set(&self.ball_sprites);
-        self.paddles.set(&self.paddle_sprites);
+        self.ball.set_data(&self.ball_sprites);
+        self.paddles.set_data(&self.paddle_sprites);
 
         self.sprite_shader.draw(
             &self.transform_uniform,

@@ -15,7 +15,7 @@ mod vertex_descriptor;
 mod window;
 
 pub use self::buffer::Buffer;
-pub use self::opengl::{ClearMode, DepthTest, DrawMode};
+pub use self::opengl::{ClearMode, DepthTest, DrawMode, IndiceType};
 pub use self::shader::{Shader, ShaderDescriptor};
 pub use self::texture::{Texture, TextureFiltering};
 pub use self::texture_atlas::TextureAtlas;

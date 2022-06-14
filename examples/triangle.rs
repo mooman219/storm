@@ -29,7 +29,7 @@ impl App for TriangleApp {
         ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
         ctx.set_backface_culling(false);
         let mut buffer: Buffer<TrianglePoint> = Buffer::new(ctx);
-        buffer.set(&[
+        buffer.set_data(&[
             TrianglePoint {
                 pos: Vector3::new(0.0, 1.0, -1.0),
                 col: Vector3::new(1.0, 0.0, 0.0),
@@ -43,6 +43,7 @@ impl App for TriangleApp {
                 col: Vector3::new(0.0, 0.0, 1.0),
             },
         ]);
+        buffer.set_indices(&[0u16, 1u16, 2u16]);
         let shader = TriangleShader::new(ctx);
 
         TriangleApp {

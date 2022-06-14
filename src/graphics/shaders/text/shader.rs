@@ -88,7 +88,7 @@ impl TextShaderPass {
         if self.sprites.len() > 0 {
             if self.dirty {
                 self.dirty = false;
-                self.buffer.set(&self.sprites);
+                self.buffer.set_data(&self.sprites);
             }
             shader.draw(&self.uniform, self.atlas.get(), &self.buffer);
         }

@@ -2,6 +2,7 @@ mod nostd;
 mod trigonometry;
 
 use self::trigonometry::{atan2, cos_deg, cos_rad, sin_deg, sin_rad};
+use crate::graphics::IndiceType;
 
 /// Extra functions on floating point values.
 pub trait Float {
@@ -45,4 +46,21 @@ pub trait Float {
 
     /// Converts perceptual (db) into linear ([0, 1]).
     fn perceptual(self) -> Self;
+}
+
+/// Extra functions on unsigned integers.
+pub trait UnsignedInteger: Copy + Clone {
+    const INDICE_TYPE: IndiceType;
+}
+
+impl UnsignedInteger for u8 {
+    const INDICE_TYPE: IndiceType = IndiceType::UnsignedByte;
+}
+
+impl UnsignedInteger for u16 {
+    const INDICE_TYPE: IndiceType = IndiceType::UnsignedShort;
+}
+
+impl UnsignedInteger for u32 {
+    const INDICE_TYPE: IndiceType = IndiceType::UnsignedInt;
 }

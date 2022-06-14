@@ -398,11 +398,15 @@ pub enum AttributeType {
     UnsignedInt10f_11f_11f_Rev = glow::UNSIGNED_INT_10F_11F_11F_REV,
 }
 
+/// Specifies the type of an indice used in element array buffers.
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum IndiceType {
+    /// Represents a u8.
     UnsignedByte = glow::UNSIGNED_BYTE,
+    /// Represents a u16.
     UnsignedShort = glow::UNSIGNED_SHORT,
+    /// Represents a u32.
     UnsignedInt = glow::UNSIGNED_INT,
 }
 
@@ -833,6 +837,20 @@ impl OpenGL {
 
     pub fn draw_arrays(&self, mode: DrawMode, first: i32, count: i32) {
         unsafe { self.gl.draw_arrays(mode as u32, first, count) };
+    }
+
+    pub fn draw_elements_instanced(
+        &self,
+        mode: DrawMode,
+        indice_type: IndiceType,
+        count: i32,
+        instance_count: i32,
+    ) {
+        unsafe { self.gl.draw_elements_instanced(mode as u32, count, indice_type as u32, 0, instance_count) };
+    }
+
+    pub fn draw_elements(&self, mode: DrawMode, indice_type: IndiceType, count: i32) {
+        unsafe { self.gl.draw_elements(mode as u32, count, indice_type as u32, 0) };
     }
 
     pub fn create_texture(&self) -> resource::Texture {

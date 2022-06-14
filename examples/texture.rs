@@ -69,7 +69,7 @@ impl App for TextureApp {
                 ..Sprite::default()
             },
         ];
-        sprite_buffer.set(&sprites);
+        sprite_buffer.set_data(&sprites);
 
         let clicking = false;
 
@@ -173,7 +173,7 @@ impl App for TextureApp {
             let volume = (x + 200.0) / 375.0;
             self.sound.set_volume(volume, 0.01);
             self.sprites[1].pos.x = x;
-            self.sprite_buffer.set(&self.sprites);
+            self.sprite_buffer.set_data(&self.sprites);
         }
     }
 
