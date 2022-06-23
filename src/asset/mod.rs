@@ -33,14 +33,14 @@ pub(crate) trait AssetStateContract<A: App> {
 
 /// Asset related functions.
 impl<A: App> Context<A> {
-    /// Requests a read of an asset. This produces an AssetRead event with the result of the read once
-    /// it has completed.
+    /// Requests a read of a set of assets. This produces an AssetRead event with the result of the
+    /// read once all assets requested have completed.
     ///
     /// ## Platform-specific
     ///
     /// - **Non-web:** The path is relative to the current working directory.
     /// - **Web:** The path is relative to the current url's root.
-    pub fn request_read<C: FnMut(&mut Context<A>, &mut A, alloc::vec::Vec<Asset>) + Send + 'static>(
+    pub fn read<C: FnMut(&mut Context<A>, &mut A, alloc::vec::Vec<Asset>) + 'static>(
         &mut self,
         relative_paths: &[impl AsRef<str>],
         callback: C,

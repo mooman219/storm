@@ -27,11 +27,7 @@ use crate::{color::RGBA8, math::Float};
 use alloc::vec::Vec;
 
 impl Image<RGBA8> {
-    /// Interpret a slice of bytes as a PNG and decodes it into an RGBA image.
-    pub fn from_png(bytes: &[u8]) -> Image<RGBA8> {
-        crate::image::png::read_png(bytes)
-    }
-
+    /// Performs a lanczos resampling of the image.
     pub fn resize(&self, width: u32, height: u32) -> Image<RGBA8> {
         let image = vertical_sample(self, height);
         horizontal_sample(&image, width)

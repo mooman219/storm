@@ -13,7 +13,27 @@ use core::{
     usize,
 };
 
+#[cfg(target_arch = "s390x")]
+const CACHELINE_LEN: usize = 256;
+
+#[cfg(any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64",))]
+const CACHELINE_LEN: usize = 128;
+
+#[cfg(not(any(
+    target_arch = "x86_64",
+    target_arch = "aarch64",
+    target_arch = "powerpc64",
+    target_arch = "arm",
+    target_arch = "mips",
+    target_arch = "mips64",
+    target_arch = "riscv64",
+    target_arch = "s390x",
+)))]
 const CACHELINE_LEN: usize = 64;
+
+#[cfg(any(target_arch = "arm", target_arch = "mips", target_arch = "mips64", target_arch = "riscv64",))]
+const CACHELINE_LEN: usize = 32;
+
 const CACHELINE: usize = CACHELINE_LEN / core::mem::size_of::<usize>();
 
 /// The internal memory buffer used by the queue.
@@ -26,14 +46,11 @@ pub struct Buffer<T> {
     /// A pointer to the allocated ring buffer
     buffer: *mut T,
 
-    /// The bounded size as specified by the user.  If the queue reaches capacity, it will block
-    /// until values are poppped off.
+    /// The allocated size in terms of values (not physical memory) of the ring buffer. This will be
+    /// the next power of two larger than the minimum specified by the user. If the queue reaches
+    /// capacity, it will block until values are poppped off.
     capacity: usize,
-
-    /// The allocated size of the ring buffer, in terms of number of values (not physical memory).
-    /// This will be the next power of two larger than `capacity`
-    allocated_size: usize,
-    _padding1: [usize; CACHELINE - 3],
+    _padding1: [usize; CACHELINE - 2],
 
     /// Consumer cacheline:
 
@@ -82,30 +99,6 @@ impl<T> Buffer<T> {
         let v = unsafe { ptr::read(self.load(current_head)) };
         self.head.store(current_head.wrapping_add(1), Ordering::Release);
         Some(v)
-    }
-
-    /// Attempts to pop (and discard) at most `n` values off the buffer.
-    ///
-    /// Returns the amount of values successfully skipped.
-    ///
-    /// # Safety
-    ///
-    /// *WARNING:* This will leak at most `n` values from the buffer, i.e. the destructors of the
-    /// objects skipped over will not be called. This function is intended to be used on buffers
-    /// that contain non-`Drop` data, such as a `Buffer<f32>`.
-    pub fn skip_n(&self, n: usize) -> usize {
-        let current_head = self.head.load(Ordering::Relaxed);
-
-        self.shadow_tail.set(self.tail.load(Ordering::Acquire));
-        if current_head == self.shadow_tail.get() {
-            return 0;
-        }
-        let mut diff = self.shadow_tail.get().wrapping_sub(current_head);
-        if diff > n {
-            diff = n
-        }
-        self.head.store(current_head.wrapping_add(diff), Ordering::Release);
-        diff
     }
 
     /// Pop a value off the buffer.
@@ -173,7 +166,7 @@ impl<T> Buffer<T> {
     /// buffer wrapping is handled inside the method.
     #[inline]
     unsafe fn load(&self, pos: usize) -> &T {
-        &*self.buffer.offset((pos & (self.allocated_size - 1)) as isize)
+        &*self.buffer.offset((pos & (self.capacity - 1)) as isize)
     }
 
     /// Store a value in the buffer
@@ -184,7 +177,7 @@ impl<T> Buffer<T> {
     /// - Initialized a valid block of memory
     #[inline]
     unsafe fn store(&self, pos: usize, v: T) {
-        let end = self.buffer.offset((pos & (self.allocated_size - 1)) as isize);
+        let end = self.buffer.offset((pos & (self.capacity - 1)) as isize);
         ptr::write(&mut *end, v);
     }
 }
@@ -199,8 +192,7 @@ impl<T> Drop for Buffer<T> {
 
         unsafe {
             let layout =
-                Layout::from_size_align(self.allocated_size * mem::size_of::<T>(), mem::align_of::<T>())
-                    .unwrap();
+                Layout::from_size_align(self.capacity * mem::size_of::<T>(), mem::align_of::<T>()).unwrap();
             alloc::dealloc(self.buffer as *mut u8, layout);
         }
     }
@@ -222,14 +214,14 @@ impl<T> Drop for Buffer<T> {
 /// If the requested queue size is larger than available memory (e.g.
 /// `capacity.next_power_of_two() * size_of::<T>() > available memory` ), this function will abort
 /// with an OOM panic.
-pub fn make<T>(capacity: usize) -> (Producer<T>, Consumer<T>) {
+pub fn make<T>(min_capacity: usize) -> (Producer<T>, Consumer<T>) {
+    let capacity = min_capacity.next_power_of_two();
     let ptr = unsafe { allocate_buffer(capacity) };
 
     let arc = Arc::new(Buffer {
         buffer: ptr,
         capacity,
-        allocated_size: capacity.next_power_of_two(),
-        _padding1: [0; CACHELINE - 3],
+        _padding1: [0; CACHELINE - 2],
 
         head: AtomicUsize::new(0),
         shadow_tail: Cell::new(0),
@@ -333,18 +325,6 @@ impl<T> Consumer<T> {
         (*self.buffer).try_pop()
     }
 
-    /// Attempts to pop (and discard) at most `n` values off the buffer.
-    ///
-    /// Returns the amount of values successfully skipped.
-    ///
-    /// # Safety
-    ///
-    /// *WARNING:* This will leak at most `n` values from the buffer, i.e. the destructors of the
-    /// objects skipped over will not be called. This function is intended to be used on buffers
-    /// that contain non-`Drop` data, such as a `Buffer<f32>`.
-    pub fn skip_n(&self, n: usize) -> usize {
-        (*self.buffer).skip_n(n)
-    }
     /// Returns the total capacity of this queue
     ///
     /// This value represents the total capacity of the queue when it is full.  It does not
@@ -404,43 +384,6 @@ mod tests {
             assert!(c.size() == 9 - i - 1);
             assert!(t == i);
         }
-    }
-
-    #[test]
-    fn consumer_skip() {
-        let (p, c) = super::make(10);
-
-        for i in 0..9 {
-            p.push(i);
-            assert!(p.capacity() == 10);
-            assert!(p.size() == i + 1);
-        }
-        assert!(c.size() == 9);
-        assert!(c.skip_n(5) == 5);
-        assert!(c.size() == 4);
-        for i in 0..4 {
-            assert!(c.size() == 4 - i);
-            let t = c.pop();
-            assert!(c.capacity() == 10);
-            assert!(c.size() == 4 - i - 1);
-            assert!(t == i + 5);
-        }
-        assert!(c.size() == 0);
-        assert!(c.skip_n(5) == 0);
-    }
-
-    #[test]
-    fn consumer_skip_whole_buf() {
-        let (p, c) = super::make(9);
-
-        for i in 0..9 {
-            p.push(i);
-            assert!(p.capacity() == 9);
-            assert!(p.size() == i + 1);
-        }
-        assert!(c.size() == 9);
-        assert!(c.skip_n(9) == 9);
-        assert!(c.size() == 0);
     }
 
     #[test]

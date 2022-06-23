@@ -81,59 +81,6 @@ impl<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> Shader<T, TEXTURES> {
         Item: AsRef<Buffer<T::VertexDescriptor>> + 'a,
         Iter: IntoIterator<Item = &'a Item>,
     {
-        let instancing = T::VertexDescriptor::INSTANCING;
-        if instancing.is_instanced() {
-            self.draw_instanced(mode, uniform, textures, buffers, instancing.count);
-        } else {
-            self.draw_non_instanced(mode, uniform, textures, buffers);
-        }
-    }
-
-    /// Performs an instanced draw to the screen.
-    /// # Arguments
-    ///
-    /// * `mode` - Specifies what kind of primitives to render.
-    /// * `uniform` - The uniform to use for the shader invocation.
-    /// * `textures` - The set of textures to use in the fragment shader.
-    /// * `buffers` - The set of buffers of vertices to draw, reusing the uniform and textures for
-    /// each buffer draw.
-    /// * `count` - Specifies the number of instances to be rendered.
-    fn draw_instanced<'a, Item, Iter>(
-        &self,
-        mode: DrawMode,
-        uniform: &Uniform<T::VertexUniformType>,
-        textures: [&Texture; TEXTURES],
-        buffers: Iter,
-        count: i32,
-    ) where
-        Item: AsRef<Buffer<T::VertexDescriptor>> + 'a,
-        Iter: IntoIterator<Item = &'a Item>,
-    {
-        self.bind(uniform, textures);
-        for buffer in buffers {
-            let buffer = buffer.as_ref();
-            buffer.draw_instanced(mode, count);
-        }
-    }
-
-    /// Performs a draw to the screen.
-    /// # Arguments
-    ///
-    /// * `mode` - Specifies what kind of primitives to render.
-    /// * `uniform` - The uniform to use for the shader invocation.
-    /// * `textures` - The set of textures to use in the fragment shader.
-    /// * `buffers` - The set of buffers of vertices to draw, reusing the uniform and textures for
-    /// each buffer draw.
-    fn draw_non_instanced<'a, Item, Iter>(
-        &self,
-        mode: DrawMode,
-        uniform: &Uniform<T::VertexUniformType>,
-        textures: [&Texture; TEXTURES],
-        buffers: Iter,
-    ) where
-        Item: AsRef<Buffer<T::VertexDescriptor>> + 'a,
-        Iter: IntoIterator<Item = &'a Item>,
-    {
         self.bind(uniform, textures);
         for buffer in buffers {
             let buffer = buffer.as_ref();

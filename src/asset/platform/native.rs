@@ -1,14 +1,14 @@
 use crate::asset::{Asset, AssetRequest, AssetStateContract, LoaderError};
-use crate::sync::{make as spsc_make, Consumer, Producer};
+use crate::sync::{make as spsc_make, Consumer, Producer, Signal};
 use crate::App;
-use alloc::vec::Vec;
-use core::time::Duration;
+use alloc::{sync::Arc, vec::Vec};
 use std::fs::File;
 use std::{io, io::Read};
 use std::{thread, thread::JoinHandle};
 
 pub(crate) struct AssetState<A: App> {
     handle: JoinHandle<()>,
+    signal: Arc<Signal>,
     pending: Vec<AssetRequest<A>>,
     read_request_sender: Producer<AssetRequest<A>>,
     read_result_receiver: Consumer<AssetRequest<A>>,
@@ -25,6 +25,9 @@ impl<A: App> AssetStateContract<A> for AssetState<A> {
             Consumer<AssetRequest<A>>,
         ) = spsc_make(128);
 
+        let signal = Arc::new(Signal::new());
+        let handle_signal = signal.clone();
+
         let handle = thread::spawn(move || loop {
             while let Some(mut request) = read_request_receiver.try_pop() {
                 for asset in &mut request.assets {
@@ -32,11 +35,12 @@ impl<A: App> AssetStateContract<A> for AssetState<A> {
                 }
                 read_result_sender.push(request);
             }
-            thread::sleep(Duration::from_millis(1));
+            handle_signal.wait();
         });
 
         AssetState {
             handle,
+            signal,
             pending: Vec::new(),
             read_request_sender,
             read_result_receiver,
@@ -46,6 +50,8 @@ impl<A: App> AssetStateContract<A> for AssetState<A> {
     fn read(&mut self, request: AssetRequest<A>) {
         if let Some(path) = self.read_request_sender.try_push(request) {
             self.pending.push(path);
+        } else {
+            self.signal.notify();
         }
     }
 
@@ -55,6 +61,8 @@ impl<A: App> AssetStateContract<A> for AssetState<A> {
             if let Some(path) = self.read_request_sender.try_push(path) {
                 self.pending.push(path);
                 break;
+            } else {
+                self.signal.notify();
             }
         }
         // Process the finished requests.

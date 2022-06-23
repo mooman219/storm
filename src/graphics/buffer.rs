@@ -50,6 +50,7 @@ impl<T: VertexDescriptor + Copy> Buffer<T> {
         gl.buffer_data(BufferBindingTarget::ArrayBuffer, items, BufferUsage::StaticDraw);
     }
 
+    /// Attaches indices to the buffer.
     pub fn set_indices<U: UnsignedInteger>(&mut self, indices: &[U]) {
         self.indices = indices.len();
         let gl = graphics().gl();
@@ -66,20 +67,18 @@ impl<T: VertexDescriptor + Copy> Buffer<T> {
     pub(crate) fn draw(&self, mode: DrawMode) {
         let gl = graphics().gl();
         gl.bind_vertex_array(Some(self.vao));
-        if self.ebo.is_some() {
-            gl.draw_elements(mode, self.indice_type, self.indices as i32)
+        if T::INSTANCING.is_instanced() {
+            if self.ebo.is_some() {
+                gl.draw_elements_instanced(mode, self.indice_type, self.indices as i32, T::INSTANCING.count)
+            } else {
+                gl.draw_arrays_instanced(mode, 0, T::INSTANCING.count, self.vertices as i32);
+            }
         } else {
-            gl.draw_arrays(mode, 0, self.vertices as i32);
-        }
-    }
-
-    pub(crate) fn draw_instanced(&self, mode: DrawMode, count: i32) {
-        let gl = graphics().gl();
-        gl.bind_vertex_array(Some(self.vao));
-        if self.ebo.is_some() {
-            gl.draw_elements_instanced(mode, self.indice_type, self.indices as i32, count)
-        } else {
-            gl.draw_arrays_instanced(mode, 0, count, self.vertices as i32);
+            if self.ebo.is_some() {
+                gl.draw_elements(mode, self.indice_type, self.indices as i32)
+            } else {
+                gl.draw_arrays(mode, 0, self.vertices as i32);
+            }
         }
     }
 }

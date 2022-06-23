@@ -35,11 +35,13 @@ impl Asset {
 
 pub(crate) struct AssetRequest<A: App> {
     pub assets: Vec<Asset>,
-    pub callback: Box<dyn FnMut(&mut Context<A>, &mut A, Vec<Asset>) + Send + 'static>,
+    pub callback: Box<dyn FnMut(&mut Context<A>, &mut A, Vec<Asset>) + 'static>,
 }
 
+unsafe impl<A: App> Send for AssetRequest<A> {}
+
 impl<A: App> AssetRequest<A> {
-    pub(crate) fn new<C: FnMut(&mut Context<A>, &mut A, Vec<Asset>) + Send + 'static>(
+    pub(crate) fn new<C: FnMut(&mut Context<A>, &mut A, Vec<Asset>) + 'static>(
         relative_paths: &[impl AsRef<str>],
         callback: C,
     ) -> AssetRequest<A> {

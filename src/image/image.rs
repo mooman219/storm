@@ -1,4 +1,4 @@
-use crate::color::ColorDescriptor;
+use crate::color::{ColorDescriptor, RGBA8};
 use alloc::{vec, vec::Vec};
 
 /// Basic image type.
@@ -7,6 +7,13 @@ pub struct Image<T: ColorDescriptor> {
     pixels: Vec<T>,
     width: u32,
     height: u32,
+}
+
+impl Image<RGBA8> {
+    /// Interpret a slice of bytes as a PNG and decodes it into an RGBA image.
+    pub fn from_png(bytes: &[u8]) -> Image<RGBA8> {
+        crate::image::png::read_png(bytes)
+    }
 }
 
 impl<T: ColorDescriptor> Image<T> {
