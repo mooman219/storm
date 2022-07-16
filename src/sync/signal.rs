@@ -2,7 +2,7 @@ use parking_lot::{Condvar, Mutex};
 
 /// Simple Mutex + Condvar wait notify primitive. Can be used for waiting without spinning. This
 /// should be wrapped as an Arc<Signal> and cloned.
-#[repr(align(16))]
+#[repr(align(8))]
 pub struct Signal {
     mutex: Mutex<bool>,
     cvar: Condvar,

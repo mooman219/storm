@@ -868,12 +868,19 @@ impl OpenGL {
         }
     }
 
-    pub fn bind_texture(&mut self, target: TextureBindingTarget, texture: Option<resource::Texture>) {
+    /// Returns the texture being bound over.
+    pub fn bind_texture(
+        &mut self,
+        target: TextureBindingTarget,
+        texture: Option<resource::Texture>,
+    ) -> Option<resource::Texture> {
         let index = self.active_texture_unit as usize;
+        let ret = self.bound_textures[index];
         if self.bound_textures[index] != texture {
             self.bound_textures[index] = texture;
             unsafe { self.gl.bind_texture(target as u32, texture) };
         }
+        ret
     }
 
     pub fn tex_image_2d<T: Sized>(

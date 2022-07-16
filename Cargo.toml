@@ -43,12 +43,10 @@ log = "0.4"
 hashbrown = "0.11.2"
 fontdue = "0.7.2"
 parking_lot = "0.12.1"
+profiling = "1.0.5"
 
 # Image format support
 png = "0.14"
 
 # Audio format support
 claxon = "0.4.3"
-
-[profile.release]
-lto = true

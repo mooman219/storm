@@ -3,7 +3,7 @@ use crate::graphics::{
     shaders::text::{Text, TextSprite, TextUserData},
     std140,
     texture_atlas::TextureAtlas,
-    Buffer, DrawMode, Shader, ShaderDescriptor, Texture, TextureFiltering, TextureSection, Uniform,
+    Buffer, Shader, ShaderDescriptor, TextureFiltering, TextureSection, Uniform,
 };
 use crate::image::Image;
 use crate::{App, Context};
@@ -15,7 +15,7 @@ use fontdue::{
 };
 use hashbrown::HashMap;
 
-impl ShaderDescriptor<1> for TextShader {
+impl ShaderDescriptor<1> for TextShaderDescriptor {
     const VERTEX_SHADER: &'static str = include_str!("vertex.glsl");
     const FRAGMENT_SHADER: &'static str = include_str!("fragment.glsl");
     const TEXTURE_NAMES: [&'static str; 1] = ["tex"];
@@ -24,25 +24,12 @@ impl ShaderDescriptor<1> for TextShader {
     type VertexDescriptor = TextSprite;
 }
 
-/// Shader object for sprites. This holds no mutable state, so it's recommended to reuse this as
+/// Describes the TextShader.
+pub struct TextShaderDescriptor();
+
+/// Shader object for text. This holds no mutable state, so it's recommended to reuse this as
 /// much as possible.
-pub struct TextShader {
-    shader: Shader<TextShader, 1>,
-}
-
-impl TextShader {
-    /// Creates a new text shader.
-    pub fn new(ctx: &Context<impl App>) -> TextShader {
-        TextShader {
-            shader: Shader::new(ctx),
-        }
-    }
-
-    /// Draws to the screen.
-    pub fn draw(&self, uniform: &Uniform<std140::mat4>, atlas: &Texture, buffer: &Buffer<TextSprite>) {
-        self.shader.draw(DrawMode::TriangleStrip, uniform, [atlas], &[buffer]);
-    }
-}
+pub type TextShader = Shader<TextShaderDescriptor, 1>;
 
 #[derive(Debug, Copy, Clone)]
 struct CharCacheValue {
@@ -90,7 +77,8 @@ impl TextShaderPass {
                 self.dirty = false;
                 self.buffer.set_data(&self.sprites);
             }
-            shader.draw(&self.uniform, self.atlas.get(), &self.buffer);
+            shader.bind(&self.uniform, [self.atlas.get()]);
+            self.buffer.draw();
         }
     }
 

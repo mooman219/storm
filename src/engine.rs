@@ -2,7 +2,7 @@ use crate::asset::{AssetState, AssetStateContract};
 use crate::audio::AudioState;
 use crate::event::EventConverter;
 use crate::graphics::{graphics, OpenGLState, OpenGLWindowContract, WindowSettings};
-use crate::time::{Instant, Timer};
+use crate::time::Instant;
 use crate::App;
 use core::sync::atomic::{AtomicBool, Ordering};
 use core::time::Duration;
@@ -47,7 +47,6 @@ pub fn start<A: App>(desc: WindowSettings) -> ! {
     };
     let mut input = EventConverter::new();
     let mut app = A::new(&mut ctx);
-    let mut update_timer = Timer::new("Event::Update");
     event_loop.run(move |event, _, control_flow| {
         match event {
             WinitEvent::DeviceEvent {
@@ -66,20 +65,20 @@ pub fn start<A: App>(desc: WindowSettings) -> ! {
                 }
                 let now = Instant::now();
                 if now >= ctx.wait_next {
-                    if let Some(duration) = ctx.wait_periodic {
-                        ctx.wait_next += duration;
-                        if ctx.wait_next < now {
-                            ctx.wait_next = now;
+                    {
+                        profiling::scope!("storm_update");
+                        if let Some(duration) = ctx.wait_periodic {
+                            ctx.wait_next += duration;
+                            if ctx.wait_next < now {
+                                ctx.wait_next = now;
+                            }
+                            ctx.control_flow = Some(ControlFlow::WaitUntil(ctx.wait_next));
                         }
-                        ctx.control_flow = Some(ControlFlow::WaitUntil(ctx.wait_next));
+                        let delta = now - ctx.last_update;
+                        ctx.last_update = now;
+                        app.on_update(&mut ctx, delta.as_secs_f32());
                     }
-                    let delta = now - ctx.last_update;
-                    ctx.last_update = now;
-
-                    update_timer.start();
-                    app.on_update(&mut ctx, delta.as_secs_f32());
                     graphics().window().swap_buffers();
-                    update_timer.stop();
                 }
             }
             WinitEvent::LoopDestroyed => {

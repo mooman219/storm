@@ -4,6 +4,7 @@ pub mod shaders;
 pub mod std140;
 
 mod buffer;
+mod index_buffer;
 mod opengl;
 mod shader;
 mod state;
@@ -15,6 +16,7 @@ mod vertex_descriptor;
 mod window;
 
 pub use self::buffer::Buffer;
+pub use self::index_buffer::IndexBuffer;
 pub use self::opengl::{ClearMode, DepthTest, DrawMode, IndiceType};
 pub use self::shader::{Shader, ShaderDescriptor};
 pub use self::texture::{Texture, TextureFiltering};

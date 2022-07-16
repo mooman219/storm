@@ -20,7 +20,7 @@ fn main() {
 
 pub struct TriangleApp {
     camera: Camera,
-    buffer: Buffer<TrianglePoint>,
+    buffer: IndexBuffer<TrianglePoint, u16>,
     shader: TriangleShader,
 }
 
@@ -28,7 +28,7 @@ impl App for TriangleApp {
     fn new(ctx: &mut Context<Self>) -> Self {
         ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
         ctx.set_backface_culling(false);
-        let mut buffer: Buffer<TrianglePoint> = Buffer::new(ctx);
+        let mut buffer: IndexBuffer<TrianglePoint, u16> = IndexBuffer::new(ctx);
         buffer.set_data(&[
             TrianglePoint {
                 pos: Vector3::new(0.0, 1.0, -1.0),
@@ -56,7 +56,8 @@ impl App for TriangleApp {
     fn on_update(&mut self, ctx: &mut Context<Self>, delta: f32) {
         ctx.clear(ClearMode::new().with_color(RGBA8::BLUE).with_depth(0.0, DepthTest::Greater));
         self.camera.update(delta);
-        self.shader.draw(self.camera.uniform(), &[&self.buffer])
+        self.shader.bind(self.camera.uniform(), []);
+        self.buffer.draw();
     }
 
     fn on_close_requested(&mut self, ctx: &mut Context<Self>) {

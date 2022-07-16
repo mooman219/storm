@@ -1,4 +1,4 @@
-use crate::graphics::{AttributeType, OpenGL};
+use crate::graphics::{AttributeType, DrawMode, OpenGL};
 use log::trace;
 
 /// A trait to describe vertices that will be consumed by a shader. The INSTANCING field describes
@@ -32,9 +32,10 @@ use log::trace;
 ///     ];
 /// }
 /// ```
-pub trait VertexDescriptor {
+pub trait VertexDescriptor: Copy {
     const INSTANCING: VertexInstancing;
     const ATTRIBUTES: &'static [VertexAttribute];
+    const DRAW_MODE: DrawMode;
 }
 
 /// Describes how instancing will apply to verticies of this type.
@@ -199,7 +200,7 @@ impl VertexInputType {
     };
 }
 
-pub(crate) fn configure_vertex<T: VertexDescriptor + Copy>(attributes: &[VertexAttribute], gl: &OpenGL) {
+pub(crate) fn configure_vertex<T: VertexDescriptor>(attributes: &[VertexAttribute], gl: &OpenGL) {
     let stride = core::mem::size_of::<T>() as i32;
     let mut index = 0;
     let mut size = 0;

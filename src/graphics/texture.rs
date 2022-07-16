@@ -130,7 +130,7 @@ impl Texture {
             height: image.height(),
             rc: Rc::new(()),
         };
-        gl.bind_texture(TextureBindingTarget::Texture2D, Some(id));
+        let prev = gl.bind_texture(TextureBindingTarget::Texture2D, Some(id));
         gl.tex_image_2d(
             TextureLoadTarget::Texture2D,
             0,
@@ -148,7 +148,7 @@ impl Texture {
         gl.tex_parameter_min_filter(TextureParameterTarget::Texture2D, filtering.min_filter);
         gl.tex_parameter_mag_filter(TextureParameterTarget::Texture2D, TextureMagFilterValue::Nearest);
         texture.generate_mipmap();
-        gl.bind_texture(TextureBindingTarget::Texture2D, None);
+        gl.bind_texture(TextureBindingTarget::Texture2D, prev);
         texture
     }
 
@@ -195,7 +195,7 @@ impl Texture {
     pub fn set<Z: ColorDescriptor>(&self, offset_x: u32, offset_y: u32, image: &Image<Z>) {
         assert!(image.width() + offset_x <= self.width && image.height() + offset_y <= self.height);
         let gl = graphics().gl();
-        gl.bind_texture(TextureBindingTarget::Texture2D, Some(self.id));
+        let prev = gl.bind_texture(TextureBindingTarget::Texture2D, Some(self.id));
         gl.tex_sub_image_2d(
             TextureLoadTarget::Texture2D,
             0,
@@ -208,7 +208,7 @@ impl Texture {
             image.as_slice(),
         );
         self.generate_mipmap();
-        gl.bind_texture(TextureBindingTarget::Texture2D, None);
+        gl.bind_texture(TextureBindingTarget::Texture2D, prev);
     }
 
     pub(crate) fn bind(&self, unit: u32) {

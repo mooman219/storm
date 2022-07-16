@@ -1,6 +1,7 @@
 use crate::color::RGBA8;
 use crate::graphics::{
-    TextureSection, VertexAttribute, VertexDescriptor, VertexInputType, VertexInstancing, VertexOutputType,
+    DrawMode, TextureSection, VertexAttribute, VertexDescriptor, VertexInputType, VertexInstancing,
+    VertexOutputType,
 };
 use crate::math::AABB2D;
 use cgmath::*;
@@ -32,6 +33,7 @@ impl VertexDescriptor for Sprite {
         VertexAttribute::new(4, VertexInputType::U8, VertexOutputType::NormalizedF32),
         VertexAttribute::new(1, VertexInputType::U16, VertexOutputType::NormalizedF32),
     ];
+    const DRAW_MODE: DrawMode = DrawMode::TriangleStrip;
 }
 
 impl Default for Sprite {

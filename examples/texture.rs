@@ -87,7 +87,8 @@ impl App for TextureApp {
 
     fn on_update(&mut self, ctx: &mut Context<Self>, _delta: f32) {
         ctx.clear(ClearMode::new().with_color(RGBA8::BLUE).with_depth(1.0, DepthTest::Less));
-        self.sprite_shader.draw(&self.transform_uniform, &self.texture_atlas, &[&self.sprite_buffer]);
+        self.sprite_shader.bind(&self.transform_uniform, [&self.texture_atlas]);
+        self.sprite_buffer.draw();
     }
 
     fn on_close_requested(&mut self, ctx: &mut Context<Self>) {

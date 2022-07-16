@@ -1,6 +1,6 @@
 use storm::cgmath::*;
 use storm::graphics::{
-    VertexAttribute, VertexDescriptor, VertexInputType, VertexInstancing, VertexOutputType,
+    DrawMode, VertexAttribute, VertexDescriptor, VertexInputType, VertexInstancing, VertexOutputType,
 };
 
 #[repr(C)]
@@ -16,6 +16,7 @@ impl VertexDescriptor for TrianglePoint {
         VertexAttribute::new(3, VertexInputType::F32, VertexOutputType::F32),
         VertexAttribute::new(3, VertexInputType::F32, VertexOutputType::F32),
     ];
+    const DRAW_MODE: DrawMode = DrawMode::TriangleStrip;
 }
 
 impl Default for TrianglePoint {

@@ -1,6 +1,7 @@
 use crate::color::RGBA8;
 use crate::graphics::{
-    TextureSection, VertexAttribute, VertexDescriptor, VertexInputType, VertexInstancing, VertexOutputType,
+    DrawMode, TextureSection, VertexAttribute, VertexDescriptor, VertexInputType, VertexInstancing,
+    VertexOutputType,
 };
 use cgmath::{Vector2, Vector3};
 use fontdue::layout::TextStyle;
@@ -62,6 +63,7 @@ impl VertexDescriptor for TextSprite {
         VertexAttribute::new(4, VertexInputType::U16, VertexOutputType::NormalizedF32),
         VertexAttribute::new(4, VertexInputType::U8, VertexOutputType::NormalizedF32),
     ];
+    const DRAW_MODE: DrawMode = DrawMode::TriangleStrip;
 }
 
 impl TextSprite {

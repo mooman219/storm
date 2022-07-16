@@ -162,11 +162,10 @@ impl App for PongApp {
         self.ball.set_data(&self.ball_sprites);
         self.paddles.set_data(&self.paddle_sprites);
 
-        self.sprite_shader.draw(
-            &self.transform_uniform,
-            &self.default_texture,
-            &[&self.paddles, &self.background, &self.ball],
-        );
+        self.sprite_shader.bind(&self.transform_uniform, [&self.default_texture]);
+        self.paddles.draw();
+        self.background.draw();
+        self.ball.draw();
         ctx.clear(ClearMode::new().with_depth(1.0, DepthTest::Less));
         self.text_layer.draw(&self.text_shader);
     }

@@ -1,10 +1,7 @@
 use super::TrianglePoint;
-use crate::TriangleApp;
+use storm::graphics::{std140, Shader, ShaderDescriptor};
 
-use storm::graphics::{std140, Buffer, DrawMode, Shader, ShaderDescriptor, Uniform};
-use storm::Context;
-
-impl ShaderDescriptor<0> for TriangleShader {
+impl ShaderDescriptor<0> for TriangleShaderDescriptor {
     const VERTEX_SHADER: &'static str = include_str!("vertex.glsl");
     const FRAGMENT_SHADER: &'static str = include_str!("fragment.glsl");
     const TEXTURE_NAMES: [&'static str; 0] = [];
@@ -13,18 +10,6 @@ impl ShaderDescriptor<0> for TriangleShader {
     type VertexDescriptor = TrianglePoint;
 }
 
-pub struct TriangleShader {
-    shader: Shader<TriangleShader, 0>,
-}
+pub struct TriangleShaderDescriptor();
 
-impl TriangleShader {
-    pub fn new(ctx: &mut Context<TriangleApp>) -> TriangleShader {
-        TriangleShader {
-            shader: Shader::new(ctx),
-        }
-    }
-
-    pub fn draw(&self, uniform: &Uniform<std140::mat4>, buffers: &[impl AsRef<Buffer<TrianglePoint>>]) {
-        self.shader.draw(DrawMode::Triangles, uniform, [], buffers);
-    }
-}
+pub type TriangleShader = Shader<TriangleShaderDescriptor, 0>;

@@ -78,7 +78,8 @@ impl App for ParticlesApp {
         }
         self.particle_buffer.set_data(&self.sprites);
         ctx.clear(ClearMode::new().with_color(RGBA8::BLACK).with_depth(1.0, DepthTest::Less));
-        self.sprite_shader.draw(&self.transform_uniform, &self.default_texture, &[&self.particle_buffer]);
+        self.sprite_shader.bind(&self.transform_uniform, [&self.default_texture]);
+        self.particle_buffer.draw();
     }
 
     fn on_close_requested(&mut self, ctx: &mut Context<Self>) {
