@@ -16,7 +16,7 @@ impl VertexDescriptor for TrianglePoint {
         VertexAttribute::new(3, VertexInputType::F32, VertexOutputType::F32),
         VertexAttribute::new(3, VertexInputType::F32, VertexOutputType::F32),
     ];
-    const DRAW_MODE: DrawMode = DrawMode::TriangleStrip;
+    const DRAW_MODE: DrawMode = DrawMode::Triangles;
 }
 
 impl Default for TrianglePoint {
