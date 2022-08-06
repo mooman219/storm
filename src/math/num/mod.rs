@@ -43,9 +43,6 @@ pub trait Float {
 
     /// Quake fast inverse square root.
     fn inv_sqrt(self) -> Self;
-
-    /// Converts perceptual (db) into linear ([0, 1]).
-    fn perceptual(self) -> Self;
 }
 
 /// Extra functions on unsigned integers.
