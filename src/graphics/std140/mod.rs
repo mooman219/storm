@@ -87,6 +87,7 @@ pub struct vec3 {
     pub z: f32,
 }
 
+unsafe impl<const N: usize> Std140Element for [vec3; N] {}
 unsafe impl Std140Element for vec3 {}
 unsafe impl Std140Struct for vec3 {}
 impl vec3 {
@@ -119,6 +120,7 @@ pub struct vec4 {
     pub w: f32,
 }
 
+unsafe impl<const N: usize> Std140Element for [vec4; N] {}
 unsafe impl Std140Element for vec4 {}
 unsafe impl Std140Struct for vec4 {}
 impl vec4 {
