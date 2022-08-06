@@ -50,7 +50,7 @@ impl<T: ShaderDescriptor<TEXTURES>, const TEXTURES: usize> Shader<T, TEXTURES> {
         }
     }
 
-    /// Executes the given closure in the context of the shader.
+    /// Binds this shader for future draw calls.
     /// # Arguments
     ///
     /// * `uniform` - The uniform to use for the shader invocation.
