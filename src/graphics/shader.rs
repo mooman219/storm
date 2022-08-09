@@ -11,7 +11,7 @@ pub trait ShaderDescriptor<const TEXTURES: usize> {
     const TEXTURE_NAMES: [&'static str; TEXTURES];
     const VERTEX_UNIFORM_NAME: &'static str;
     type VertexUniformType: Std140Struct;
-    type VertexDescriptor: VertexDescriptor + Copy;
+    type VertexDescriptor: VertexDescriptor;
 }
 
 /// Represents the runtime metadata required to configure and draw with a shader.
