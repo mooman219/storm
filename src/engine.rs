@@ -31,7 +31,7 @@ pub fn start<A: App>(desc: WindowSettings) -> ! {
         panic!("Start has already been called.");
     }
 
-    init_logger();
+    init_logger(A::LOG_LEVEL);
 
     let event_loop = winit::event_loop::EventLoop::new();
     OpenGLState::init(&desc, &event_loop);
@@ -96,19 +96,24 @@ pub fn start<A: App>(desc: WindowSettings) -> ! {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn init_logger() {
+fn init_logger(level: log::Level) {
     use simplelog::*;
 
-    match TermLogger::init(LevelFilter::Trace, Config::default(), TerminalMode::Stdout, ColorChoice::Auto) {
+    match TermLogger::init(
+        level.to_level_filter(),
+        Config::default(),
+        TerminalMode::Stdout,
+        ColorChoice::Auto,
+    ) {
         Ok(_) => info!("Using the default logger: simplelog::loggers::termlog."),
         Err(_) => info!("Using the provided logger."),
     }
 }
 
 #[cfg(target_arch = "wasm32")]
-fn init_logger() {
+fn init_logger(level: log::Level) {
     console_error_panic_hook::set_once();
-    match console_log::init_with_level(log::Level::Trace) {
+    match console_log::init_with_level(level) {
         Ok(_) => info!("Using the default logger: console_log."),
         Err(_) => info!("Using the provided logger."),
     }

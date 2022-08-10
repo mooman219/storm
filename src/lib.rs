@@ -36,6 +36,8 @@ pub use fontdue;
 
 /// Type that holds all of your application state and handles events.
 pub trait App: 'static + Sized {
+    const LOG_LEVEL: log::Level = log::Level::Trace;
+
     /// Function to create the app from a context.
     /// # Arguments
     ///
