@@ -43,6 +43,8 @@ impl<T: VertexDescriptor> Buffer<T> {
         gl.buffer_data(BufferBindingTarget::ArrayBuffer, items, BufferUsage::StaticDraw);
     }
 
+    /// Perfroms a draw call for the buffer. The most recently bound shader will dictate how this
+    /// data is processed.
     pub fn draw(&self) {
         let gl = graphics().gl();
         gl.bind_vertex_array(Some(self.vao));

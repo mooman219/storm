@@ -60,6 +60,8 @@ impl<T: VertexDescriptor, U: UnsignedInteger> IndexBuffer<T, U> {
         gl.buffer_data(BufferBindingTarget::ElementArrayBuffer, indices, BufferUsage::StaticDraw);
     }
 
+    /// Perfroms a draw call for the buffer. The most recently bound shader will dictate how this
+    /// data is processed.
     pub fn draw(&self) {
         let gl = graphics().gl();
         gl.bind_vertex_array(Some(self.vao));
