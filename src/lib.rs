@@ -1,10 +1,12 @@
+#![feature(portable_simd)]
 #![no_std]
 #![allow(dead_code, non_camel_case_types, non_snake_case)]
 
 pub extern crate log;
 
 extern crate alloc;
-// TODO: Resolve when glow is fixed. They use standard HashSet >:(
+// TODO: Resolve when glow is fixed.
+// https://github.com/grovesNL/glow/issues/205
 // #[cfg(any(test, not(target_arch = "wasm32")))]
 extern crate std;
 
@@ -23,6 +25,8 @@ pub mod graphics;
 pub mod image;
 /// Math utilities.
 pub mod math;
+/// Noise functions.
+pub mod noise;
 /// Synchronization utilities.
 pub mod sync;
 /// Time utilities.

@@ -3,6 +3,7 @@ use alloc::string::{String, ToString};
 use glow::{HasContext, PixelUnpackData};
 use log::error;
 // TODO: Replace with hashbrown when glow is fixed.
+// https://github.com/grovesNL/glow/issues/205
 use std::collections::HashSet;
 
 #[repr(u32)]
