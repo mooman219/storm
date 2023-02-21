@@ -64,7 +64,7 @@ impl App for PongApp {
         let mut transform = OrthographicCamera::new(ctx.window_logical_size());
         let transform_uniform = Uniform::new(ctx, transform.matrix());
 
-        let boop = Sound::from_flac(SOUND).unwrap();
+        let boop = Sound::from_bytes(SOUND).unwrap();
 
         let fonts = [Font::from_bytes(FONT, Default::default()).unwrap()];
         let mut text_layer = TextShaderPass::new(ctx, transform.matrix());

@@ -18,7 +18,7 @@ pub(crate) fn audio() -> &'static mut AudioState {
 
 pub(crate) struct AudioState {
     sender: Producer<SoundInstance>,
-    stream: Stream,
+    _stream: Stream,
 }
 
 impl AudioState {
@@ -47,6 +47,7 @@ impl AudioState {
                 move |err| {
                     log::error!("{}", err);
                 },
+                None,
             )
             .unwrap();
         stream.play().unwrap();
@@ -54,7 +55,7 @@ impl AudioState {
         unsafe {
             _STORM_AUDIO.write(AudioState {
                 sender,
-                stream,
+                _stream: stream,
             })
         };
     }

@@ -14,12 +14,6 @@ pub enum SoundError {
     InvalidFormat,
 }
 
-#[derive(Copy, Clone, Debug)]
-enum Channels {
-    Mono,
-    Stero,
-}
-
 /// Basic audio container.
 #[derive(Clone)]
 pub struct Sound {
@@ -29,9 +23,31 @@ pub struct Sound {
 }
 
 impl Sound {
-    /// Interpret a slice of bytes as a FLAC file and decodes it into a sound.
-    pub fn from_flac(bytes: &[u8]) -> Result<Sound, SoundError> {
-        crate::audio::read_flac(bytes)
+    /// Attempts to decode FLAC, Ogg Vorbis, WAV, or ALAC into a sound.
+    pub fn from_bytes(bytes: &[u8]) -> Result<Sound, SoundError> {
+        let mut audio_stream = {
+            let file = std::io::Cursor::new(bytes);
+            audrey::Reader::new(file).unwrap()
+        };
+        let description = audio_stream.description();
+        let reader = audio_stream.samples::<f32>().map(std::result::Result::unwrap);
+        let mut buffer = Vec::with_capacity(description.sample_rate() as usize);
+        match description.channel_count() {
+            1 => {
+                for x in reader {
+                    buffer.push([x, x]);
+                }
+            }
+            2 => {
+                let mut iter = reader;
+                while let Some(x) = iter.next() {
+                    let y = iter.next().unwrap() as f32;
+                    buffer.push([x, y]);
+                }
+            }
+            _ => return Err(SoundError::UnsupportedChannelCount),
+        }
+        Sound::new(description.sample_rate(), buffer)
     }
 
     /// Creates a new sound from a slice of stereo samples.

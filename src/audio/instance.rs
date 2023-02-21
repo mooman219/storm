@@ -88,12 +88,6 @@ impl SoundInstance {
     }
 }
 
-pub fn make(sound: &Sound, volume: f32, smooth: f32, paused: bool) -> (SoundControl, SoundInstance) {
-    let control = SoundControl::new(volume, smooth, paused);
-    let instance = SoundInstance::new(sound, &control);
-    (control, instance)
-}
-
 trait Perceptual {
     fn perceptual(&self) -> Self;
 }

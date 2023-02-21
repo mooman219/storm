@@ -24,13 +24,13 @@ web-sys = { version = "0.3.55", features = [
     "WebGl2RenderingContext",
     "Window",
 ]}
-wasm-bindgen = { version = "0.2" } 
-console_error_panic_hook = "0.1.6"
-cpal = { version = "0.13.4", features = ["wasm-bindgen"] }
+wasm-bindgen = { version = "0.2.58" } 
+console_error_panic_hook = "0.1"
+cpal = { version = "0.15", features = ["wasm-bindgen"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 glutin = "0.28"
-cpal = "0.13.4"
+cpal = "0.15"
 
 [dependencies]
 storm_macro = { version = "0.1.0", path = "storm_macro" }
@@ -42,11 +42,11 @@ cgmath = "0.18.0"
 log = "0.4"
 hashbrown = "0.11.2"
 fontdue = { version = "0.7.2", path = "../fontdue" }
-parking_lot = "0.12.1"
+parking_lot = "0.12"
 profiling = "1.0.5"
 
 # Image format support
 png = "0.14"
 
 # Audio format support
-claxon = "0.4.3"
+audrey = "0.3"

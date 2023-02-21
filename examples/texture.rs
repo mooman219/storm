@@ -51,7 +51,7 @@ impl App for TextureApp {
 
         let transform_uniform = Uniform::new(ctx, transform.matrix());
 
-        let source = Sound::from_flac(SOUND).unwrap();
+        let source = Sound::from_bytes(SOUND).unwrap();
         let sound = source.play(ctx, 0.3, 0.1);
 
         let sprites = [
