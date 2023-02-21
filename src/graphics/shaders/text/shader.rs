@@ -1,7 +1,6 @@
 use crate::color::R8;
 use crate::graphics::{
     shaders::text::{Text, TextSprite, TextUserData},
-    std140,
     texture_atlas::TextureAtlas,
     Buffer, Shader, ShaderDescriptor, TextureFiltering, TextureSection, Uniform,
 };
@@ -15,12 +14,11 @@ use fontdue::{
 };
 use hashbrown::HashMap;
 
-impl ShaderDescriptor<1> for TextShaderDescriptor {
+impl ShaderDescriptor for TextShaderDescriptor {
     const VERTEX_SHADER: &'static str = include_str!("vertex.glsl");
     const FRAGMENT_SHADER: &'static str = include_str!("fragment.glsl");
-    const TEXTURE_NAMES: [&'static str; 1] = ["tex"];
-    const VERTEX_UNIFORM_NAME: &'static str = "vertex";
-    type VertexUniformType = std140::mat4;
+    const TEXTURE_NAMES: &'static [&'static str] = &["tex"];
+    const UNIFORM_NAMES: &'static [&'static str] = &["vertex"];
     type VertexDescriptor = TextSprite;
 }
 
@@ -29,7 +27,7 @@ pub struct TextShaderDescriptor();
 
 /// Shader object for text. This holds no mutable state, so it's recommended to reuse this as
 /// much as possible.
-pub type TextShader = Shader<TextShaderDescriptor, 1>;
+pub type TextShader = Shader<TextShaderDescriptor>;
 
 #[derive(Debug, Copy, Clone)]
 struct CharCacheValue {
@@ -39,7 +37,7 @@ struct CharCacheValue {
 
 /// Holds the state required to cache and draw text to the screen.
 pub struct TextShaderPass {
-    uniform: Uniform<std140::mat4>,
+    uniform: Uniform,
     atlas: TextureAtlas,
     buffer: Buffer<TextSprite>,
 
@@ -77,7 +75,7 @@ impl TextShaderPass {
                 self.dirty = false;
                 self.buffer.set_data(&self.sprites);
             }
-            shader.bind(&self.uniform, [self.atlas.get()]);
+            shader.bind(&[&self.uniform], &[self.atlas.get()]);
             self.buffer.draw();
         }
     }

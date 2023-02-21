@@ -56,7 +56,7 @@ impl App for TriangleApp {
     fn on_update(&mut self, ctx: &mut Context<Self>, delta: f32) {
         ctx.clear(ClearMode::new().with_color(RGBA8::BLUE).with_depth(0.0, DepthTest::Greater));
         self.camera.update(delta);
-        self.shader.bind(self.camera.uniform(), []);
+        self.shader.bind(&[self.camera.uniform()], &[]);
         self.buffer.draw();
     }
 
@@ -141,7 +141,7 @@ pub struct Camera {
     /// Transform matix.
     transform: PerspectiveCamera,
     /// Transform uniform.
-    uniform: Uniform<std140::mat4>,
+    uniform: Uniform,
     /// Position vector.
     pos: Vector3<f32>,
     /// Unnormalized direction vector.
@@ -221,7 +221,7 @@ impl Camera {
         self.uniform.set(self.transform.matrix());
     }
 
-    pub fn uniform(&self) -> &Uniform<std140::mat4> {
+    pub fn uniform(&self) -> &Uniform {
         &self.uniform
     }
 }

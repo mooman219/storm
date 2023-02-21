@@ -16,13 +16,34 @@ mod core;
 /// ```
 pub use storm_macro::uniform;
 
+/// Because it's hard to represent `Into<Std140Struct>`, this trait exists to tell Storm how to
+/// convert the struct into a [Std140Struct]. It's automatically implemented for types marked by
+/// `#[std140::uniform]`
+pub trait IntoStd140 {
+    type Output: Std140Struct;
+
+    fn std140(self) -> Self::Output;
+}
+
+/// The identity implementation.
+impl<T> IntoStd140 for T
+where
+    T: Std140Struct,
+{
+    type Output = Self;
+
+    fn std140(self) -> Self::Output {
+        self
+    }
+}
+
 /// Marker trait for element types supported by the `#[std140::uniform]` macro. These types have
 /// specific safety, padding, and alignment requirements.
-pub unsafe trait Std140Element: Copy {}
+pub unsafe trait Std140Element: Copy + Sized {}
 
 /// Marker trait for structs supported by the `#[std140::uniform]` macro. These types have specific
 /// safety, padding, and alignment requirements.
-pub unsafe trait Std140Struct: Copy {}
+pub unsafe trait Std140Struct: Copy + Sized {}
 
 // float ========================================
 

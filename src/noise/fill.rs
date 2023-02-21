@@ -30,10 +30,7 @@ where
     inc
 }
 
-impl<Noise> FillFn<1> for Noise
-where
-    Noise: NoiseFn<1>,
-{
+impl<T: NoiseFn<1>> FillFn<1> for T {
     fn fill<const LANES: usize>(
         &self,
         [offset_x]: [f32; 1],
@@ -59,10 +56,7 @@ where
     }
 }
 
-impl<Noise> FillFn<2> for Noise
-where
-    Noise: NoiseFn<2>,
-{
+impl<T: NoiseFn<2>> FillFn<2> for T {
     fn fill<const LANES: usize>(
         &self,
         [offset_x, offset_y]: [f32; 2],
@@ -92,10 +86,7 @@ where
     }
 }
 
-impl<Noise> FillFn<3> for Noise
-where
-    Noise: NoiseFn<3>,
-{
+impl<T: NoiseFn<3>> FillFn<3> for T {
     fn fill<const LANES: usize>(
         &self,
         [offset_x, offset_y, offset_z]: [f32; 3],
@@ -129,10 +120,7 @@ where
     }
 }
 
-impl<Noise> FillFn<4> for Noise
-where
-    Noise: NoiseFn<4>,
-{
+impl<T: NoiseFn<4>> FillFn<4> for T {
     fn fill<const LANES: usize>(
         &self,
         [offset_x, offset_y, offset_z, offset_w]: [f32; 4],

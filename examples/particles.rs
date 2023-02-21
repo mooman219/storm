@@ -4,8 +4,7 @@ use storm::cgmath::*;
 use storm::color::RGBA8;
 use storm::event::*;
 use storm::graphics::{
-    shaders::sprite::*, std140, ClearMode, DepthTest, DisplayMode, Texture, TextureSection, Vsync,
-    WindowSettings,
+    shaders::sprite::*, ClearMode, DepthTest, DisplayMode, Texture, TextureSection, Vsync, WindowSettings,
 };
 use storm::graphics::{Buffer, Uniform};
 use storm::math::OrthographicCamera;
@@ -30,7 +29,7 @@ struct ParticlesApp {
     particle_buffer: Buffer<Sprite>,
     default_texture: Texture,
     transform: OrthographicCamera,
-    transform_uniform: Uniform<std140::mat4>,
+    transform_uniform: Uniform,
     sprites: Vec<Sprite>,
     particles: Vec<Particle>,
 }
@@ -46,7 +45,7 @@ impl App for ParticlesApp {
 
         let mut transform = OrthographicCamera::new(ctx.window_logical_size());
         transform.set().rotation = 0.125;
-        let transform_uniform: Uniform<std140::mat4> = Uniform::new(ctx, transform.matrix());
+        let transform_uniform = Uniform::new(ctx, transform.matrix());
 
         let mut sprites = Vec::new();
         let mut particles = Vec::new();
@@ -78,7 +77,7 @@ impl App for ParticlesApp {
         }
         self.particle_buffer.set_data(&self.sprites);
         ctx.clear(ClearMode::new().with_color(RGBA8::BLACK).with_depth(1.0, DepthTest::Less));
-        self.sprite_shader.bind(&self.transform_uniform, [&self.default_texture]);
+        self.sprite_shader.bind(&[&self.transform_uniform], &[&self.default_texture]);
         self.particle_buffer.draw();
     }
 

@@ -7,7 +7,7 @@ use storm::event::*;
 use storm::fontdue::{layout::LayoutSettings, Font};
 use storm::graphics::{
     shaders::{sprite::*, text::*},
-    std140, Buffer, ClearMode, DepthTest, DisplayMode, Texture, Uniform, Vsync, WindowSettings,
+    Buffer, ClearMode, DepthTest, DisplayMode, Texture, Uniform, Vsync, WindowSettings,
 };
 use storm::math::{OrthographicCamera, AABB2D};
 use storm::*;
@@ -38,7 +38,7 @@ struct PongApp {
     background: Buffer<Sprite>,
     paddles: Buffer<Sprite>,
     ball: Buffer<Sprite>,
-    transform_uniform: Uniform<std140::mat4>,
+    transform_uniform: Uniform,
     boop: Sound,
     text_layer: TextShaderPass,
     up: bool,
@@ -162,7 +162,7 @@ impl App for PongApp {
         self.ball.set_data(&self.ball_sprites);
         self.paddles.set_data(&self.paddle_sprites);
 
-        self.sprite_shader.bind(&self.transform_uniform, [&self.default_texture]);
+        self.sprite_shader.bind(&[&self.transform_uniform], &[&self.default_texture]);
         self.paddles.draw();
         self.background.draw();
         self.ball.draw();

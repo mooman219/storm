@@ -15,17 +15,22 @@ pub struct Constant {
 
 impl Constant {
     pub fn new(value: f32) -> Self {
-        Self { value }
+        Self {
+            value,
+        }
     }
 }
 
 impl Default for Constant {
     fn default() -> Self {
-        Self { value: 0.0 }
+        Self {
+            value: 0.0,
+        }
     }
 }
 
 impl<const DIM: usize> NoiseFn<DIM> for Constant {
+    #[inline(always)]
     fn sample<const LANES: usize>(&self, _: [Simd<f32, LANES>; DIM]) -> Simd<f32, LANES>
     where
         LaneCount<LANES>: SupportedLaneCount,

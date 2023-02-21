@@ -5,7 +5,7 @@ use storm::color::RGBA8;
 use storm::event::*;
 use storm::graphics::Buffer;
 use storm::graphics::{
-    shaders::sprite::*, std140, ClearMode, DepthTest, DisplayMode, Texture, TextureFiltering, Uniform, Vsync,
+    shaders::sprite::*, ClearMode, DepthTest, DisplayMode, Texture, TextureFiltering, Uniform, Vsync,
     WindowSettings,
 };
 use storm::math::OrthographicCamera;
@@ -32,7 +32,7 @@ struct TextureApp {
     texture_atlas: Texture,
     sprite_buffer: Buffer<Sprite>,
     transform: OrthographicCamera,
-    transform_uniform: Uniform<std140::mat4>,
+    transform_uniform: Uniform,
     sound: SoundControl,
     sprites: [Sprite; 3],
     clicking: bool,
@@ -87,7 +87,7 @@ impl App for TextureApp {
 
     fn on_update(&mut self, ctx: &mut Context<Self>, _delta: f32) {
         ctx.clear(ClearMode::new().with_color(RGBA8::BLUE).with_depth(1.0, DepthTest::Less));
-        self.sprite_shader.bind(&self.transform_uniform, [&self.texture_atlas]);
+        self.sprite_shader.bind(&[&self.transform_uniform], &[&self.texture_atlas]);
         self.sprite_buffer.draw();
     }
 

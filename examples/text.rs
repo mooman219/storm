@@ -1,4 +1,5 @@
 use core::time::Duration;
+use fontdue::layout::{HorizontalAlign, VerticalAlign};
 use storm::color::RGBA8;
 use storm::event::*;
 use storm::fontdue::{layout::LayoutSettings, Font};
@@ -51,6 +52,9 @@ impl App for TextApp {
             x: 100.0,
             y: 500.0,
             max_width: Some(500.0),
+            max_height: Some(500.0),
+            line_height: 0.5,
+            vertical_align: VerticalAlign::Middle,
             ..Default::default()
         };
 
