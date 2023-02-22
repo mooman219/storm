@@ -21,7 +21,7 @@ fn main() {
 pub struct TriangleApp {
     camera: Camera,
     buffer: IndexBuffer<TrianglePoint, u16>,
-    shader: TriangleShader,
+    shader: Shader<TriangleShader>,
 }
 
 impl App for TriangleApp {
@@ -44,7 +44,7 @@ impl App for TriangleApp {
             },
         ]);
         buffer.set_indices(&[0u16, 1u16, 2u16]);
-        let shader = TriangleShader::new(ctx);
+        let shader = Shader::new(ctx);
 
         TriangleApp {
             camera: Camera::new(ctx),

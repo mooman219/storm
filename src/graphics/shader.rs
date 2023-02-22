@@ -1,4 +1,4 @@
-use crate::graphics::{graphics, resource, Texture, Uniform, VertexDescriptor};
+use crate::graphics::{graphics, resource, Texture, Uniform};
 use crate::{App, Context};
 use alloc::{format, vec::Vec};
 use core::marker::PhantomData;
@@ -10,7 +10,6 @@ pub trait ShaderDescriptor {
     const FRAGMENT_SHADER: &'static str;
     const TEXTURE_NAMES: &'static [&'static str];
     const UNIFORM_NAMES: &'static [&'static str];
-    type VertexDescriptor: VertexDescriptor;
 }
 
 /// Represents the runtime metadata required to configure and draw with a shader.

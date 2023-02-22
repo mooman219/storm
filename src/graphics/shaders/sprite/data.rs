@@ -6,6 +6,16 @@ use crate::graphics::{
 use crate::math::AABB2D;
 use cgmath::*;
 
+impl crate::graphics::ShaderDescriptor for SpriteShader {
+    const VERTEX_SHADER: &'static str = include_str!("vertex.glsl");
+    const FRAGMENT_SHADER: &'static str = include_str!("fragment.glsl");
+    const TEXTURE_NAMES: &'static [&'static str] = &["tex"];
+    const UNIFORM_NAMES: &'static [&'static str] = &["vertex"];
+}
+
+/// Describes the SpriteShader.
+pub struct SpriteShader();
+
 /// Configuration settings for a sprite.
 #[repr(C)]
 #[derive(Debug, Copy, Clone, PartialEq)]

@@ -4,7 +4,8 @@ use storm::cgmath::*;
 use storm::color::RGBA8;
 use storm::event::*;
 use storm::graphics::{
-    shaders::sprite::*, ClearMode, DepthTest, DisplayMode, Texture, TextureSection, Vsync, WindowSettings,
+    shaders::sprite::*, ClearMode, DepthTest, DisplayMode, Shader, Texture, TextureSection, Vsync,
+    WindowSettings,
 };
 use storm::graphics::{Buffer, Uniform};
 use storm::math::OrthographicCamera;
@@ -25,7 +26,7 @@ fn main() {
 
 struct ParticlesApp {
     is_dragging: bool,
-    sprite_shader: SpriteShader,
+    sprite_shader: Shader<SpriteShader>,
     particle_buffer: Buffer<Sprite>,
     default_texture: Texture,
     transform: OrthographicCamera,
@@ -39,7 +40,7 @@ impl App for ParticlesApp {
         ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
         let is_dragging = false;
 
-        let sprite_shader = SpriteShader::new(ctx);
+        let sprite_shader = Shader::new(ctx);
         let mut particle_buffer = Buffer::new(ctx);
         let default_texture = ctx.default_texture();
 

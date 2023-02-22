@@ -1,5 +1,3 @@
 mod data;
-mod shader;
 
-pub use self::data::Sprite;
-pub use self::shader::SpriteShader;
+pub use self::data::{Sprite, SpriteShader};

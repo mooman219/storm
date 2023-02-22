@@ -7,7 +7,7 @@ use storm::event::*;
 use storm::fontdue::{layout::LayoutSettings, Font};
 use storm::graphics::{
     shaders::{sprite::*, text::*},
-    Buffer, ClearMode, DepthTest, DisplayMode, Texture, Uniform, Vsync, WindowSettings,
+    Buffer, ClearMode, DepthTest, DisplayMode, Shader, Texture, Uniform, Vsync, WindowSettings,
 };
 use storm::math::{OrthographicCamera, AABB2D};
 use storm::*;
@@ -32,8 +32,8 @@ fn main() {
 const SPEED: f32 = 250.0;
 
 struct PongApp {
-    text_shader: TextShader,
-    sprite_shader: SpriteShader,
+    text_shader: Shader<TextShader>,
+    sprite_shader: Shader<SpriteShader>,
     default_texture: Texture,
     background: Buffer<Sprite>,
     paddles: Buffer<Sprite>,
@@ -53,8 +53,8 @@ impl App for PongApp {
     fn new(ctx: &mut Context<Self>) -> Self {
         ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
-        let text_shader = TextShader::new(ctx);
-        let sprite_shader = SpriteShader::new(ctx);
+        let text_shader = Shader::new(ctx);
+        let sprite_shader = Shader::new(ctx);
         let default_texture = ctx.default_texture();
 
         let mut background = Buffer::new(ctx);

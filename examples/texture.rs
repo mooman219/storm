@@ -5,7 +5,7 @@ use storm::color::RGBA8;
 use storm::event::*;
 use storm::graphics::Buffer;
 use storm::graphics::{
-    shaders::sprite::*, ClearMode, DepthTest, DisplayMode, Texture, TextureFiltering, Uniform, Vsync,
+    shaders::sprite::*, ClearMode, DepthTest, DisplayMode, Shader, Texture, TextureFiltering, Uniform, Vsync,
     WindowSettings,
 };
 use storm::math::OrthographicCamera;
@@ -28,7 +28,7 @@ fn main() {
 }
 
 struct TextureApp {
-    sprite_shader: SpriteShader,
+    sprite_shader: Shader<SpriteShader>,
     texture_atlas: Texture,
     sprite_buffer: Buffer<Sprite>,
     transform: OrthographicCamera,
@@ -42,7 +42,7 @@ impl App for TextureApp {
     fn new(ctx: &mut Context<Self>) -> Self {
         ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
-        let sprite_shader = SpriteShader::new(ctx);
+        let sprite_shader = Shader::new(ctx);
         let texture_atlas = Texture::from_png(ctx, TEXTURE_A, TextureFiltering::none());
         let mut sprite_buffer = Buffer::new(ctx);
 
