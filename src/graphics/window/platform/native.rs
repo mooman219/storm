@@ -4,7 +4,7 @@ use glutin::ContextBuilder;
 use log::info;
 use winit::dpi::LogicalSize;
 use winit::event_loop::EventLoop;
-use winit::window::{Fullscreen, Window, WindowBuilder};
+use winit::window::{CursorGrabMode, Fullscreen, Window, WindowBuilder};
 
 pub struct OpenGLWindow {
     inner: glutin::ContextWrapper<glutin::PossiblyCurrent, Window>,
@@ -67,7 +67,12 @@ impl OpenGLWindowContract for OpenGLWindow {
     }
 
     fn set_cursor_grab(&self, grab: bool) {
-        let _ = self.inner.window().set_cursor_grab(grab);
+        let mode = if grab {
+            CursorGrabMode::Locked
+        } else {
+            CursorGrabMode::None
+        };
+        let _ = self.inner.window().set_cursor_grab(mode);
     }
 
     fn set_cursor_visible(&self, visible: bool) {
