@@ -29,7 +29,7 @@ const COLOR: RGBA8 = RGBA8::WHITE;
 struct TextApp {
     is_dragging: bool,
     transform: OrthographicCamera,
-    text_shader: Shader<TextShader>,
+    text_shader: Shader,
     text_layer: TextShaderPass,
     fonts: [Font; 1],
     layout_settings: LayoutSettings,
@@ -41,7 +41,7 @@ impl App for TextApp {
         ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
         let is_dragging = false;
         let mut transform = OrthographicCamera::new(ctx.window_logical_size());
-        let text_shader = Shader::new(ctx);
+        let text_shader = Shader::new(ctx, TEXT_SHADER);
 
         // Create a Layers to draw on.
         let mut text_layer = TextShaderPass::new(ctx, transform.matrix());

@@ -72,7 +72,7 @@ impl OpenGLWindowContract for OpenGLWindow {
         } else {
             CursorGrabMode::None
         };
-        let _ = self.inner.window().set_cursor_grab(mode);
+        let _ = self.inner.set_cursor_grab(mode);
     }
 
     fn set_cursor_visible(&self, visible: bool) {

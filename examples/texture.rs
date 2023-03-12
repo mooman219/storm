@@ -28,7 +28,7 @@ fn main() {
 }
 
 struct TextureApp {
-    sprite_shader: Shader<SpriteShader>,
+    sprite_shader: Shader,
     texture_atlas: Texture,
     sprite_buffer: Buffer<Sprite>,
     transform: OrthographicCamera,
@@ -42,7 +42,7 @@ impl App for TextureApp {
     fn new(ctx: &mut Context<Self>) -> Self {
         ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
-        let sprite_shader = Shader::new(ctx);
+        let sprite_shader = Shader::new(ctx, SPRITE_SHADER);
         let texture_atlas = Texture::from_png(ctx, TEXTURE_A, TextureFiltering::none());
         let mut sprite_buffer = Buffer::new(ctx);
 

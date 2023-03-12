@@ -32,8 +32,8 @@ fn main() {
 const SPEED: f32 = 250.0;
 
 struct PongApp {
-    text_shader: Shader<TextShader>,
-    sprite_shader: Shader<SpriteShader>,
+    text_shader: Shader,
+    sprite_shader: Shader,
     default_texture: Texture,
     background: Buffer<Sprite>,
     paddles: Buffer<Sprite>,
@@ -53,8 +53,8 @@ impl App for PongApp {
     fn new(ctx: &mut Context<Self>) -> Self {
         ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
 
-        let text_shader = Shader::new(ctx);
-        let sprite_shader = Shader::new(ctx);
+        let text_shader = Shader::new(ctx, TEXT_SHADER);
+        let sprite_shader = Shader::new(ctx, SPRITE_SHADER);
         let default_texture = ctx.default_texture();
 
         let mut background = Buffer::new(ctx);

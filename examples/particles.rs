@@ -26,7 +26,7 @@ fn main() {
 
 struct ParticlesApp {
     is_dragging: bool,
-    sprite_shader: Shader<SpriteShader>,
+    sprite_shader: Shader,
     particle_buffer: Buffer<Sprite>,
     default_texture: Texture,
     transform: OrthographicCamera,
@@ -40,7 +40,7 @@ impl App for ParticlesApp {
         ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
         let is_dragging = false;
 
-        let sprite_shader = Shader::new(ctx);
+        let sprite_shader = Shader::new(ctx, SPRITE_SHADER);
         let mut particle_buffer = Buffer::new(ctx);
         let default_texture = ctx.default_texture();
 

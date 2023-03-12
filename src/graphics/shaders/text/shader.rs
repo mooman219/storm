@@ -2,7 +2,7 @@ use crate::color::R8;
 use crate::graphics::{
     shaders::text::{Text, TextSprite, TextUserData},
     texture_atlas::TextureAtlas,
-    Buffer, TextureFiltering, TextureSection, Uniform, Shader
+    Buffer, Shader, ShaderDescription, TextureFiltering, TextureSection, Uniform,
 };
 use crate::image::Image;
 use crate::{App, Context};
@@ -14,15 +14,13 @@ use fontdue::{
 };
 use hashbrown::HashMap;
 
-impl crate::graphics::ShaderDescriptor for TextShader {
-    const VERTEX_SHADER: &'static str = include_str!("vertex.glsl");
-    const FRAGMENT_SHADER: &'static str = include_str!("fragment.glsl");
-    const TEXTURE_NAMES: &'static [&'static str] = &["tex"];
-    const UNIFORM_NAMES: &'static [&'static str] = &["vertex"];
-}
-
-/// Describes the TextShader.
-pub struct TextShader();
+/// Configuration for the text shader.
+pub const TEXT_SHADER: ShaderDescription = ShaderDescription {
+    vertex_shader: include_str!("vertex.glsl"),
+    fragment_shader: include_str!("fragment.glsl"),
+    texture_names: &["tex"],
+    uniform_names: &["vertex"],
+};
 
 #[derive(Debug, Copy, Clone)]
 struct CharCacheValue {
@@ -64,7 +62,7 @@ impl TextShaderPass {
     }
 
     /// Draws the pass to the screen.
-    pub fn draw(&mut self, shader: &Shader<TextShader>) {
+    pub fn draw(&mut self, shader: &Shader) {
         if self.sprites.len() > 0 {
             if self.dirty {
                 self.dirty = false;
