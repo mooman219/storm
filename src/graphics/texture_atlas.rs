@@ -45,7 +45,7 @@ impl TextureAtlas {
     /// added. Returns None if the image could not be fit in the atlas.
     pub fn pack<T: ColorDescriptor>(&mut self, image: &Image<T>) -> Option<TextureSection> {
         if let Some(padding) = self.padding {
-            let image = image.pad(padding);
+            let image = image.pad_uniform(padding);
             let rect = self.packer.pack(image.width(), image.height());
             if let Some(rect) = rect {
                 self.atlas.set(rect.x, rect.y, &image);

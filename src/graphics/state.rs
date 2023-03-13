@@ -1,7 +1,7 @@
 use crate::color::RGBA8;
 use crate::graphics::Texture;
 use crate::graphics::{
-    BlendFactor, Capability, ClearMode, CullFace, DepthTest, DisplayMode, OpenGL, OpenGLWindow,
+    BlendFactor, BlendMode, Capability, ClearMode, CullFace, DepthTest, DisplayMode, OpenGL, OpenGLWindow,
     OpenGLWindowContract, PixelStoreAlignment, TextureFiltering, WindowSettings,
 };
 use crate::image::Image;
@@ -62,7 +62,7 @@ impl OpenGLState {
         // }); // DEBUG
         gl.clear_color(RGBA8::BLACK);
         gl.depth_func(DepthTest::Less);
-        gl.blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
+        gl.blend_func(BlendFactor::SourceAlpha, BlendFactor::OneMinusSourceAlpha);
         gl.cull_face(CullFace::Back);
         trace!("MAX_TEXTURE_SIZE: {}", max_texture_size);
 
@@ -212,5 +212,15 @@ impl<A: App> Context<A> {
             gl.depth_func(depth_test);
         }
         gl.clear(clear_mode.mode);
+    }
+
+    /// Configures how pixels from different fragments are blended. A common setup for alpha
+    /// blending is:
+    /// ```
+    /// BlendMode::Add(BlendFactor::SourceAlpha, BlendFactor::OneMinusSourceAlpha)
+    /// ```
+    /// Which represents `source_color * source_color.a + destination_color * (1 - source_color.a)`.
+    pub fn blend_mode(&self, blend_mode: BlendMode) {
+        blend_mode.apply();
     }
 }

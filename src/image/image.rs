@@ -112,43 +112,49 @@ impl<T: ColorDescriptor> Image<T> {
 
     /// Extends all edges of this image by `thickness`. The pixel color of the padded region is
     /// clamped to the edge of the original image.
-    pub fn pad(&self, thickness: u32) -> Image<T> {
+    pub fn pad_uniform(&self, thickness: u32) -> Image<T> {
+        self.pad(thickness, thickness, thickness, thickness)
+    }
+
+    /// Extends each edge individually. The pixel color of the padded region is clamped to the edge
+    /// of the original image.
+    pub fn pad(&self, left: u32, right: u32, top: u32, bot: u32) -> Image<T> {
         let mut result = Image::from_color(
             T::default(), //
-            self.width + thickness * 2,
-            self.height + thickness * 2,
+            self.width + left + right,
+            self.height + top + bot,
         );
-        result.set_subsection(thickness, thickness, &self);
+        result.set_subsection(left, top, &self);
 
         // Top Left Corner
         let reference = self.get(0, 0);
-        for x in 0..thickness {
-            for y in 0..thickness {
+        for x in 0..left {
+            for y in 0..top {
                 result.set(x, y, reference);
             }
         }
         // Top Right Corner
         let reference = self.get(self.width - 1, 0);
-        let offset_x = self.width + thickness;
-        for x in 0..thickness {
-            for y in 0..thickness {
+        let offset_x = self.width + left;
+        for x in 0..right {
+            for y in 0..top {
                 result.set(x + offset_x, y, reference);
             }
         }
         // Bottom Left Corner
         let reference = self.get(0, self.height - 1);
-        let offset_y = self.height + thickness;
-        for x in 0..thickness {
-            for y in 0..thickness {
+        let offset_y = self.height + top;
+        for x in 0..left {
+            for y in 0..bot {
                 result.set(x, y + offset_y, reference);
             }
         }
         // Bottom Right Corner
         let reference = self.get(self.width - 1, self.height - 1);
-        let offset_x = self.width + thickness;
-        let offset_y = self.height + thickness;
-        for x in 0..thickness {
-            for y in 0..thickness {
+        let offset_x = self.width + left;
+        let offset_y = self.height + top;
+        for x in 0..right {
+            for y in 0..bot {
                 result.set(x + offset_x, y + offset_y, reference);
             }
         }
@@ -156,31 +162,31 @@ impl<T: ColorDescriptor> Image<T> {
         // Top Side
         for x in 0..self.width {
             let reference = self.get(x, 0);
-            for y in 0..thickness {
-                result.set(x + thickness, y, reference);
+            for y in 0..top {
+                result.set(x + left, y, reference);
             }
         }
         // Bottom Side
-        let offset_y = self.height + thickness;
+        let offset_y = self.height + top;
         for x in 0..self.width {
             let reference = self.get(x, self.height - 1);
-            for y in 0..thickness {
-                result.set(x + thickness, y + offset_y, reference);
+            for y in 0..bot {
+                result.set(x + left, y + offset_y, reference);
             }
         }
         // Left Side
         for y in 0..self.height {
             let reference = self.get(0, y);
-            for x in 0..thickness {
-                result.set(x, y + thickness, reference);
+            for x in 0..left {
+                result.set(x, y + top, reference);
             }
         }
         // Right Side
-        let offset_x = self.width + thickness;
+        let offset_x = self.width + left;
         for y in 0..self.height {
             let reference = self.get(self.width - 1, y);
-            for x in 0..thickness {
-                result.set(x + offset_x, y + thickness, reference);
+            for x in 0..right {
+                result.set(x + offset_x, y + top, reference);
             }
         }
 

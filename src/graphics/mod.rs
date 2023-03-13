@@ -3,6 +3,7 @@ pub mod shaders;
 /// Rust struct types that are compatible with the GLSL std140 memory layout.
 pub mod std140;
 
+mod blend;
 mod buffer;
 mod index_buffer;
 mod opengl;
@@ -15,6 +16,7 @@ mod uniform;
 mod vertex_descriptor;
 mod window;
 
+pub use self::blend::BlendMode;
 pub use self::buffer::Buffer;
 pub use self::index_buffer::IndexBuffer;
 pub use self::opengl::{ClearMode, DepthTest, DrawMode, IndiceType};

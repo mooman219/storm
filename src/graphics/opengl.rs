@@ -141,28 +141,61 @@ pub enum CullFace {
     FrontBack = glow::FRONT_AND_BACK,
 }
 
+/// Blend factors.
 #[repr(u32)]
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum BlendFactor {
+    // ConstantColor = glow::CONSTANT_COLOR,
+    // ConstantAlpha = glow::CONSTANT_ALPHA,
+    // OneMinusConstantColor = glow::ONE_MINUS_CONSTANT_COLOR,
+    // OneMinusConstantAlpha = glow::ONE_MINUS_CONSTANT_ALPHA,
+    // Source1Color = glow::SRC1_COLOR,
+    // Source1Alpha = glow::SRC1_ALPHA,
+    // OneMinusSource1Color = glow::ONE_MINUS_SRC1_COLOR,
+    // OneMinusSource1Alpha = glow::ONE_MINUS_SRC1_ALPHA,
+    // SourceAlphaSaturate = glow::SRC_ALPHA_SATURATE,
+    /// color * 0
     Zero = glow::ZERO,
+    /// color * 1
     One = glow::ONE,
-    SrcColor = glow::SRC_COLOR,
-    OneMinusSrcColor = glow::ONE_MINUS_SRC_COLOR,
-    DstColor = glow::DST_COLOR,
-    OneMinusDstColor = glow::ONE_MINUS_DST_COLOR,
-    SrcAlpha = glow::SRC_ALPHA,
-    OneMinusSrcAlpha = glow::ONE_MINUS_SRC_ALPHA,
-    DstAlpha = glow::DST_ALPHA,
-    OneMinusDstAlpha = glow::ONE_MINUS_DST_ALPHA,
-    ConstantColor = glow::CONSTANT_COLOR,
-    OneMinusConstantColor = glow::ONE_MINUS_CONSTANT_COLOR,
-    ConstantAlpha = glow::CONSTANT_ALPHA,
-    OneMinusConstantAlpha = glow::ONE_MINUS_CONSTANT_ALPHA,
-    SrcAlphaSaturate = glow::SRC_ALPHA_SATURATE,
-    Src1Color = glow::SRC1_COLOR,
-    OneMinusSrc1Color = glow::ONE_MINUS_SRC1_COLOR,
-    Src1Alpha = glow::SRC1_ALPHA,
-    OneMinusSrc1Alpha = glow::ONE_MINUS_SRC1_ALPHA,
+    /// color * SourceColor
+    SourceColor = glow::SRC_COLOR,
+    /// color * SourceAlpha
+    SourceAlpha = glow::SRC_ALPHA,
+    /// color * (1 - SourceColor)
+    OneMinusSourceColor = glow::ONE_MINUS_SRC_COLOR,
+    /// color * (1 - SourceAlpha)
+    OneMinusSourceAlpha = glow::ONE_MINUS_SRC_ALPHA,
+    /// color * DestinationColor
+    DestinationColor = glow::DST_COLOR,
+    /// color * DestinationAlpha
+    DestinationAlpha = glow::DST_ALPHA,
+    /// color * (1 - DestinationColor)
+    OneMinusDestinationColor = glow::ONE_MINUS_DST_COLOR,
+    /// color * (1 - DestinationAlpha)
+    OneMinusDestinationAlpha = glow::ONE_MINUS_DST_ALPHA,
+}
+
+/// Specifies how incoming RGBA values (source) and the RGBA in framebuffer (destination)
+/// are combined.
+#[repr(u32)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum BlendEquation {
+    /// Adds source and destination. Source and destination are multiplied
+    /// by blending parameters before addition.
+    Add = glow::FUNC_ADD,
+    /// Subtracts destination from source. Source and destination are
+    /// multiplied by blending parameters before subtraction.
+    Subtract = glow::FUNC_SUBTRACT,
+    /// Subtracts source from destination. Source and destination are
+    /// multiplied by blending parameters before subtraction.
+    ReverseSubtract = glow::FUNC_REVERSE_SUBTRACT,
+    /// Selects the minimum between the source and destination. Min does not use the source or
+    /// destination factors, only the source and destination colors.
+    Min = glow::MIN,
+    /// Selects the maximum between the source and destination. Max does not use the source or
+    /// destination factors, only the source and destination colors.
+    Max = glow::MAX,
 }
 
 #[repr(u32)]
@@ -1044,6 +1077,10 @@ impl OpenGL {
 
     pub fn blend_func(&self, src: BlendFactor, dst: BlendFactor) {
         unsafe { self.gl.blend_func(src as u32, dst as u32) };
+    }
+
+    pub fn blend_equation(&self, equation: BlendEquation) {
+        unsafe { self.gl.blend_equation(equation as u32) };
     }
 
     pub fn cull_face(&self, face: CullFace) {
