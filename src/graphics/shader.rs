@@ -4,19 +4,19 @@ use alloc::{format, vec::Vec};
 
 /// A struct to describe a shader's inputs and outputs so they can be represented without using the
 /// heap.
-pub struct ShaderDescription {
-    pub vertex_shader: &'static str,
-    pub fragment_shader: &'static str,
-    pub texture_names: &'static [&'static str],
-    pub uniform_names: &'static [&'static str],
+pub struct ShaderDescription<'a> {
+    pub vertex_shader: &'a str,
+    pub fragment_shader: &'a str,
+    pub texture_names: &'a [&'a str],
+    pub uniform_names: &'a [&'a str],
 }
 
 /// Represents the runtime metadata required to configure and draw with a shader.
 pub struct Shader {
     // This type is !Send + !Sync.
     _unsend: core::marker::PhantomData<*const ()>,
-    description: ShaderDescription,
     program: resource::Program,
+    uniform_len: usize,
     texture_locations: Vec<resource::UniformLocation>,
 }
 
@@ -46,13 +46,14 @@ impl Shader {
 
         Shader {
             _unsend: core::marker::PhantomData,
-            description,
             program,
+            uniform_len: description.uniform_names.len(),
             texture_locations,
         }
     }
 
-    /// Binds this shader for future draw calls.
+    /// Binds this shader for future draw calls. The order of uniforms and textures are as they're
+    /// defined in the `ShaderDescription` used to create this `Shader`.
     /// # Arguments
     ///
     /// * `uniform` - The uniform to use for the shader invocation.
@@ -65,7 +66,7 @@ impl Shader {
                 self.texture_locations.len()
             );
         }
-        if uniforms.len() != self.description.uniform_names.len() {
+        if uniforms.len() != self.uniform_len {
             panic!(
                 "Uniforms length ({}) must equal ShaderDescriptor::UNIFORM_NAMES length ({})",
                 textures.len(),
@@ -76,7 +77,7 @@ impl Shader {
         let gl = graphics().gl();
         gl.use_program(Some(self.program));
 
-        for i in 0..self.description.uniform_names.len() {
+        for i in 0..self.uniform_len {
             uniforms[i].bind(i as u32);
         }
 
