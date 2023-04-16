@@ -220,6 +220,7 @@ impl<A: App> Context<A> {
     /// BlendMode::Add(BlendFactor::SourceAlpha, BlendFactor::OneMinusSourceAlpha)
     /// ```
     /// Which represents `source_color * source_color.a + destination_color * (1 - source_color.a)`.
+    /// This is the default blend mode on startup.
     pub fn blend_mode(&self, blend_mode: BlendMode) {
         blend_mode.apply();
     }

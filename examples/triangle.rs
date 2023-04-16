@@ -27,6 +27,7 @@ pub struct TriangleApp {
 impl App for TriangleApp {
     fn new(ctx: &mut Context<Self>) -> Self {
         ctx.wait_periodic(Some(Duration::from_secs_f32(1.0 / 144.0)));
+        ctx.blend_mode(BlendMode::Add(BlendFactor::SourceAlpha, BlendFactor::OneMinusSourceAlpha));
         ctx.set_backface_culling(false);
         let mut buffer: IndexBuffer<TrianglePoint, u16> = IndexBuffer::new(ctx);
         buffer.set_data(&[
