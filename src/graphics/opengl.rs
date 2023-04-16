@@ -80,14 +80,28 @@ pub enum Capability {
 
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, PartialEq)]
+/// Depth Test is a per-sample processing operation performed after the Fragment Shader (and
+/// sometimes before).
+///
+/// The Fragment's output depth value may be tested against the depth of the
+/// sample being written to. If the test fails, the fragment is discarded. If the test passes, the
+/// depth buffer will be updated with the fragment's output depth.
 pub enum DepthTest {
+    /// Always passes
     Always = glow::ALWAYS,
+    /// Always fails
     Never = glow::NEVER,
+    /// Functions as `=`
     Equal = glow::EQUAL,
+    /// Functions as `!=`
     NotEqual = glow::NOTEQUAL,
+    /// Functions as `<`
     Less = glow::LESS,
+    /// Functions as `<=`
     LessEqual = glow::LEQUAL,
+    /// Functions as `>`
     Greater = glow::GREATER,
+    /// Functions as `>=`
     GreaterEqual = glow::GEQUAL,
 }
 

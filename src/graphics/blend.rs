@@ -7,7 +7,9 @@ pub struct BlendState {
     dfactor: BlendFactor,
 }
 
-/// Pixel arithmetic description for blending operations. Specifies how incoming RGBA values
+/// Pixel arithmetic description for blending operations.
+///
+/// Specifies how incoming RGBA values
 /// (source) and the RGBA in framebuffer (destination) are combined. source_color is the new pixel
 /// color and destination color is color from the destination buffer.
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
