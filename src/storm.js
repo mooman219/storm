@@ -1,6 +1,6 @@
-var asset_payloads;
+var fs_callback;
 
-export function push_asset(index, paths) {
+export function fs_load_files(index, paths) {
     let promises = paths.map(function (path) {
         return fetch(path).then(function (response) {
             if (response.status < 200 || response.status >= 300) {
@@ -17,12 +17,10 @@ export function push_asset(index, paths) {
         });
     });
     Promise.all(promises).then(function (array) {
-        (asset_payloads ||= []).push([index, array]);
+        fs_callback(index, array);
     });
 }
 
-export function pull_assets() {
-    let temp = asset_payloads;
-    asset_payloads = [];
-    return temp || [];
+export function fs_init_callback(callback) {
+    fs_callback = callback;
 }

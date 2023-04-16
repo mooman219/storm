@@ -1,1 +1,26 @@
-var asset_payloads; export function push_asset(a, b) { let c = b.map(function (a) { return fetch(a).then(function (a) { return 200 > a.status || 300 <= a.status ? a.status : a.arrayBuffer().then(function (a) { return new Uint8Array(a) }).catch(function () { return 500 }) }).catch(function () { return 500 }) }); Promise.all(c).then(function (b) { (asset_payloads ||= []).push([a, b]) }) } export function pull_assets() { let a = asset_payloads; return asset_payloads = [], a || [] }
+var fs_callback;
+
+export function fs_load_files(index, paths) {
+    let promises = paths.map(function (path) {
+        return fetch(path).then(function (response) {
+            if (response.status < 200 || response.status >= 300) {
+                return response.status;
+            } else {
+                return response.arrayBuffer().then(function (buffer) {
+                    return new Uint8Array(buffer);
+                }).catch(function (reason) {
+                    return 500;
+                });
+            }
+        }).catch(function (reason) {
+            return 500;
+        });
+    });
+    Promise.all(promises).then(function (array) {
+        fs_callback(index, array);
+    });
+}
+
+export function fs_init_callback(callback) {
+    fs_callback = callback;
+}

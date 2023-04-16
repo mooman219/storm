@@ -1,29 +1,41 @@
+use std::cell::RefCell;
+
 use crate::asset::{AssetRequest, AssetStateContract, LoaderError};
 use crate::App;
 use alloc::vec::Vec;
 use hashbrown::HashMap;
 use js_sys::{Array, Uint8Array};
 use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 
 #[wasm_bindgen(raw_module = "./storm.js")]
 extern "C" {
-    fn push_asset(index: usize, paths: Array);
-    fn pull_assets() -> Array;
+    fn fs_load_files(index: usize, paths: Array);
+    fn fs_init_callback(callback: &Closure<dyn Fn(usize, Array)>);
+}
+
+thread_local! {
+    static STORM_ASSET_FINISHED: RefCell<Vec<(usize, Array)>> = RefCell::new(Vec::new());
 }
 
 pub(crate) struct AssetState<A: App> {
     count: usize,
     pending: HashMap<usize, AssetRequest<A>>,
-    finished: Vec<AssetRequest<A>>,
 }
 
 impl<A: App> AssetStateContract<A> for AssetState<A> {
     fn init() -> Self {
+        let closure = Closure::new(|slot_key: usize, responses: Array| {
+            STORM_ASSET_FINISHED.with_borrow_mut(|finished| {
+                finished.push((slot_key, responses));
+            });
+        });
+        fs_init_callback(&closure);
+        closure.forget();
+
         AssetState {
             count: 0,
             pending: HashMap::with_capacity(16),
-            finished: Vec::with_capacity(16),
         }
     }
 
@@ -33,19 +45,16 @@ impl<A: App> AssetStateContract<A> for AssetState<A> {
             paths.push(&JsValue::from_str(&asset.relative_path));
         }
         self.pending.insert(self.count, request);
-        push_asset(self.count, paths);
+        fs_load_files(self.count, paths);
         self.count += 1;
     }
 
     fn next(&mut self) -> Option<AssetRequest<A>> {
-        if self.finished.is_empty() {
-            for tuple in pull_assets().iter() {
-                let tuple: Array = tuple.dyn_into().unwrap();
-                let slot_key = tuple.get(0).as_f64().unwrap() as usize;
+        STORM_ASSET_FINISHED.with_borrow_mut(|pending| match pending.pop() {
+            Some((slot_key, responses)) => {
                 let slot_request = self.pending.remove(&slot_key);
                 match slot_request {
                     Some(mut request) => {
-                        let responses: Array = tuple.get(1).dyn_into().unwrap();
                         for (index, response) in responses.iter().enumerate() {
                             if response.is_object() {
                                 let contents: Uint8Array = response.dyn_into().unwrap();
@@ -62,7 +71,7 @@ impl<A: App> AssetStateContract<A> for AssetState<A> {
                                 request.assets[index].result = Err(status);
                             }
                         }
-                        self.finished.push(request);
+                        return Some(request);
                     }
                     None => panic!(
                         "Got asset results from Javascript, but no pending Rust request. Key [{}]",
@@ -70,7 +79,7 @@ impl<A: App> AssetStateContract<A> for AssetState<A> {
                     ),
                 }
             }
-        }
-        self.finished.pop()
+            _ => None,
+        })
     }
 }
