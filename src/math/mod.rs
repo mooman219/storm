@@ -28,7 +28,7 @@ pub const IDENTITY_MATRIX: cgmath::Matrix4<f32> = cgmath::Matrix4::new(
     0.0, 0.0, 0.0, 1.0, //
 );
 
-/// Fast Vector2<f32> normalization.
+/// Fast `Vector2<f32>` normalization.
 pub fn fast_normalize2(vector: Vector2<f32>) -> Vector2<f32> {
     vector * (vector.x * vector.x + vector.y * vector.y).inv_sqrt()
 }

@@ -19,7 +19,7 @@ mod window;
 pub use self::blend::BlendMode;
 pub use self::buffer::Buffer;
 pub use self::index_buffer::IndexBuffer;
-pub use self::opengl::{ClearMode, DepthTest, DrawMode, IndiceType};
+pub use self::opengl::{BlendFactor, ClearMode, DepthTest, DrawMode, IndiceType};
 pub use self::shader::{Shader, ShaderDescription};
 pub use self::texture::{Texture, TextureFiltering};
 pub use self::texture_atlas::TextureAtlas;

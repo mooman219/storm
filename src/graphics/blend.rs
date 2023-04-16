@@ -15,17 +15,17 @@ pub enum BlendMode {
     /// Adds source and destination. Source and destination are multiplied
     /// by blending parameters before addition.
     ///
-    /// Example: SourceColor * BlendFactor1 + DestinationColor * BlendFactor2
+    /// Example: `SourceColor * BlendFactor1 + DestinationColor * BlendFactor2`
     Add(BlendFactor, BlendFactor),
     /// Subtracts destination from source. Source and destination are
     /// multiplied by blending parameters before subtraction.
     ///
-    /// Example: SourceColor * BlendFactor1 - DestinationColor * BlendFactor2
+    /// Example: `SourceColor * BlendFactor1 - DestinationColor * BlendFactor2`
     Subtract(BlendFactor, BlendFactor),
     /// Subtracts source from destination. Source and destination are
     /// multiplied by blending parameters before subtraction.
     ///
-    /// Example: DestinationColor * BlendFactor1 - SourceColor * BlendFactor2
+    /// Example: `DestinationColor * BlendFactor1 - SourceColor * BlendFactor2`
     ReverseSubtract(BlendFactor, BlendFactor),
     /// Selects the minimum between the source and destination. Min does not use the source or
     /// destination factors, only the source and destination colors.
