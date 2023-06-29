@@ -41,7 +41,7 @@ glow = "0.12.1"
 cgmath = "0.18.0"
 log = "0.4"
 hashbrown = "0.13.2"
-fontdue = { version = "0.7.2", path = "../fontdue" }
+fontdue = { version = "0.7.2" }
 parking_lot = "0.12"
 profiling = "1.0.7"
 
