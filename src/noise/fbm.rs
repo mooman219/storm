@@ -1,5 +1,5 @@
 use super::NoiseFn;
-use core::simd::{LaneCount, Simd, SupportedLaneCount};
+// use core::simd::{LaneCount, Simd, SupportedLaneCount};
 
 /// Noise function that outputs fBm (fractal Brownian motion) noise.
 ///

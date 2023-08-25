@@ -4,7 +4,7 @@
 
 use super::{hash, NoiseFn, Simplex};
 use core::simd::{LaneCount, Mask, Simd, SimdFloat, SimdPartialEq, SimdPartialOrd, SupportedLaneCount};
-use std::simd::StdFloat;
+use std::simd::{SimdInt, StdFloat};
 
 impl NoiseFn<4> for Simplex {
     #[inline(always)]

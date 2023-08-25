@@ -11,7 +11,14 @@ edition = "2018"
 documentation = "https://docs.rs/storm"
 homepage = "https://github.com/mooman219/storm"
 repository = "https://github.com/mooman219/storm"
-include = ["Cargo.toml", "src/", "storm_macro/", "licenses/", "README.md", "LICENSE"]
+include = [
+    "Cargo.toml",
+    "src/",
+    "storm_macro/",
+    "licenses/",
+    "README.md",
+    "LICENSE",
+]
 
 [badges]
 maintenance = { status = "experimental" }
@@ -23,8 +30,8 @@ web-sys = { version = "0.3.55", features = [
     "HtmlCanvasElement",
     "WebGl2RenderingContext",
     "Window",
-]}
-wasm-bindgen = { version = "0.2.58" } 
+] }
+wasm-bindgen = { version = "0.2.58" }
 console_error_panic_hook = "0.1"
 cpal = { version = "0.15", features = ["wasm-bindgen"] }
 
@@ -34,7 +41,7 @@ cpal = "0.15"
 
 [dependencies]
 storm_macro = { version = "0.1.0", path = "storm_macro" }
-winit = "0.27.0"
+winit = "0.27.5"
 simplelog = "0.12.1"
 instant = "0.1.12"
 glow = "0.12.1"

@@ -1,4 +1,4 @@
-#![feature(portable_simd, local_key_cell_methods)]
+#![feature(portable_simd)]
 #![allow(dead_code, non_camel_case_types, non_snake_case)]
 
 pub extern crate log;
