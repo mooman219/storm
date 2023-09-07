@@ -779,6 +779,30 @@ impl OpenGL {
         }
     }
 
+    pub fn create_framebuffer(&self) -> resource::Framebuffer {
+        unsafe { self.gl.create_framebuffer().unwrap() }
+    }
+
+    pub fn bind_framebuffer(&self, framebuffer: Option<resource::Framebuffer>) {
+        unsafe { self.gl.bind_framebuffer(glow::FRAMEBUFFER, framebuffer) }
+    }
+
+    pub fn delete_framebuffer(&self, framebuffer: resource::Framebuffer) {
+        unsafe { self.gl.delete_framebuffer(framebuffer) }
+    }
+
+    pub fn create_renderbuffer(&self) -> resource::Renderbuffer {
+        unsafe { self.gl.create_renderbuffer().unwrap() }
+    }
+
+    pub fn bind_renderbuffer(&self, renderbuffer: Option<resource::Renderbuffer>) {
+        unsafe { self.gl.bind_renderbuffer(glow::RENDERBUFFER, renderbuffer) }
+    }
+
+    pub fn delete_renderbuffer(&self, renderbuffer: resource::Renderbuffer) {
+        unsafe { self.gl.delete_renderbuffer(renderbuffer) }
+    }
+
     pub fn create_vertex_array(&self) -> resource::VertexArray {
         unsafe { self.gl.create_vertex_array().unwrap() }
     }

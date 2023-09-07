@@ -68,7 +68,14 @@ impl OpenGLWindowContract for OpenGLWindow {
 
     fn set_cursor_grab(&self, grab: bool) {
         let mode = if grab {
-            CursorGrabMode::Locked
+            #[cfg(target_os = "macos")]
+            {
+                CursorGrabMode::Locked
+            }
+            #[cfg(not(target_os = "macos"))]
+            {
+                CursorGrabMode::Confined
+            }
         } else {
             CursorGrabMode::None
         };
