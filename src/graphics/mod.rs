@@ -5,6 +5,7 @@ pub mod std140;
 
 mod blend;
 mod buffer;
+mod frame_buffer;
 mod index_buffer;
 mod opengl;
 mod shader;
