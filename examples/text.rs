@@ -53,7 +53,7 @@ impl App for TextApp {
             y: 500.0,
             max_width: Some(500.0),
             max_height: Some(500.0),
-            line_height: 0.5,
+            line_height: 1.0,
             vertical_align: VerticalAlign::Middle,
             ..Default::default()
         };

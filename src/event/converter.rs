@@ -58,7 +58,7 @@ impl EventConverter {
                             Vector2::new(physical_size.width as f32, physical_size.height as f32);
                         self.logical_size = self.physical_size / self.scale_factor;
 
-                        graphics().resize_viewport(self.physical_size, self.logical_size);
+                        graphics().resize(self.physical_size, self.logical_size);
                         app.on_window_resized(ctx, self.physical_size, self.logical_size, self.scale_factor);
                     }
                     WindowEvent::ScaleFactorChanged {
@@ -70,7 +70,7 @@ impl EventConverter {
                             Vector2::new(new_inner_size.width as f32, new_inner_size.height as f32);
                         self.logical_size = self.physical_size / self.scale_factor;
 
-                        graphics().resize_viewport(self.physical_size, self.logical_size);
+                        graphics().resize(self.physical_size, self.logical_size);
                         app.on_window_resized(ctx, self.physical_size, self.logical_size, self.scale_factor);
                     }
 

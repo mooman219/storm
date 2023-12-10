@@ -1,4 +1,3 @@
-#![feature(portable_simd)]
 #![allow(dead_code, non_camel_case_types, non_snake_case)]
 
 pub extern crate log;
@@ -24,8 +23,8 @@ pub mod graphics;
 pub mod image;
 /// Math utilities.
 pub mod math;
-/// Noise functions.
-pub mod noise;
+// WIP
+// pub mod noise;
 /// Synchronization utilities.
 pub mod sync;
 /// Time utilities.

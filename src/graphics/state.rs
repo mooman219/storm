@@ -95,7 +95,7 @@ impl OpenGLState {
     }
 
     /// Resizes the viewport.
-    pub(crate) fn resize_viewport(&mut self, physical: Vector2<f32>, logical: Vector2<f32>) {
+    pub(crate) fn resize(&mut self, physical: Vector2<f32>, logical: Vector2<f32>) {
         if self.logical_size != logical || self.physical_size != physical {
             trace!("Window resized: Physical({:?}) Logical({:?})", physical, logical);
             self.logical_size = logical;
